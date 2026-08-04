@@ -1,0 +1,208 @@
+{
+  "cutoff_date": "2026-08-03",
+  "reading_order": [
+    "DiT",
+    "Rectified Flow",
+    "Flow Matching",
+    "Stable Diffusion 3 / MM-DiT",
+    "FLUX.1 model structure and model cards",
+    "FluxSR",
+    "DreamSR",
+    "OP4KSR",
+    "FoA-SR",
+    "LucidFlux / ResFlow-Tuner",
+    "Quantization, distillation, and deployment acceleration"
+  ],
+  "papers": [
+    {
+      "key": "dit",
+      "title": "Scalable Diffusion Models with Transformers",
+      "arxiv_id": "2212.09748",
+      "category": "01_foundations",
+      "role": "theory",
+      "priority": "main",
+      "source_url": "https://arxiv.org/abs/2212.09748",
+      "pdf_url": "https://arxiv.org/pdf/2212.09748"
+    },
+    {
+      "key": "rectified_flow",
+      "title": "Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow",
+      "arxiv_id": "2209.03003",
+      "category": "01_foundations",
+      "role": "theory",
+      "priority": "main",
+      "source_url": "https://arxiv.org/abs/2209.03003",
+      "pdf_url": "https://arxiv.org/pdf/2209.03003"
+    },
+    {
+      "key": "flow_matching",
+      "title": "Flow Matching for Generative Modeling",
+      "arxiv_id": "2210.02747",
+      "category": "01_foundations",
+      "role": "theory",
+      "priority": "main",
+      "source_url": "https://arxiv.org/abs/2210.02747",
+      "pdf_url": "https://arxiv.org/pdf/2210.02747"
+    },
+    {
+      "key": "ot_cfm",
+      "title": "Improving and Generalizing Flow-Based Generative Models with Minibatch Optimal Transport",
+      "arxiv_id": "2302.00482",
+      "category": "01_foundations",
+      "role": "theory",
+      "priority": "supporting",
+      "source_url": "https://arxiv.org/abs/2302.00482",
+      "pdf_url": "https://arxiv.org/pdf/2302.00482"
+    },
+    {
+      "key": "sd3_mmdit",
+      "title": "Scaling Rectified Flow Transformers for High-Resolution Image Synthesis",
+      "arxiv_id": "2403.03206",
+      "category": "01_foundations",
+      "role": "architecture",
+      "priority": "main",
+      "source_url": "https://arxiv.org/abs/2403.03206",
+      "pdf_url": "https://arxiv.org/pdf/2403.03206"
+    },
+    {
+      "key": "flux_kontext",
+      "title": "FLUX.1 Kontext: Flow Matching for In-Context Image Generation and Editing in Latent Space",
+      "arxiv_id": "2506.15742",
+      "category": "02_flux_foundation",
+      "role": "official_report",
+      "priority": "main",
+      "source_url": "https://arxiv.org/abs/2506.15742",
+      "pdf_url": "https://arxiv.org/pdf/2506.15742"
+    },
+    {
+      "key": "fluxsr",
+      "title": "One Diffusion Step to Real-World Super-Resolution via Flow Trajectory Distillation",
+      "arxiv_id": "2502.01993",
+      "category": "03_super_resolution",
+      "role": "flux_teacher_and_backbone",
+      "priority": "main",
+      "source_url": "https://arxiv.org/abs/2502.01993",
+      "pdf_url": "https://arxiv.org/pdf/2502.01993"
+    },
+    {
+      "key": "dreamsr",
+      "title": "DreamSR: Towards Ultra-High-Resolution Image Super-Resolution via a Receptive-Field Enhanced Diffusion Transformer",
+      "arxiv_id": "2605.15682",
+      "category": "03_super_resolution",
+      "role": "flux_backbone",
+      "priority": "main",
+      "source_url": "https://arxiv.org/abs/2605.15682",
+      "pdf_url": "https://arxiv.org/pdf/2605.15682"
+    },
+    {
+      "key": "op4ksr",
+      "title": "OP4KSR: One-Step Patch-Free 4K Super-Resolution with Periodic Artifact Suppression",
+      "arxiv_id": "2605.13457",
+      "category": "03_super_resolution",
+      "role": "flux_backbone",
+      "priority": "main",
+      "source_url": "https://arxiv.org/abs/2605.13457",
+      "pdf_url": "https://arxiv.org/pdf/2605.13457"
+    },
+    {
+      "key": "foa_sr",
+      "title": "FoA-SR: Faithful or Aesthetic? Profile-Aware Preference Optimization for Real-World Image Super-Resolution",
+      "arxiv_id": "2606.10275",
+      "category": "03_super_resolution",
+      "role": "flux2_backbone",
+      "priority": "main",
+      "source_url": "https://arxiv.org/abs/2606.10275",
+      "pdf_url": "https://arxiv.org/pdf/2606.10275"
+    },
+    {
+      "key": "acquire_adapt_fluxir",
+      "title": "Acquire and then Adapt: Squeezing out Text-to-Image Model for Image Restoration",
+      "arxiv_id": "2504.15159",
+      "category": "04_image_restoration",
+      "role": "flux_data_generator_and_backbone",
+      "priority": "main",
+      "source_url": "https://arxiv.org/abs/2504.15159",
+      "pdf_url": "https://arxiv.org/pdf/2504.15159"
+    },
+    {
+      "key": "lucidflux",
+      "title": "LucidFlux: Caption-Free Photo-Realistic Image Restoration via a Large-Scale Diffusion Transformer",
+      "arxiv_id": "2509.22414",
+      "category": "04_image_restoration",
+      "role": "flux1_backbone",
+      "priority": "main",
+      "source_url": "https://arxiv.org/abs/2509.22414",
+      "pdf_url": "https://arxiv.org/pdf/2509.22414"
+    },
+    {
+      "key": "resflow_tuner",
+      "title": "Tuning Real-World Image Restoration at Inference: A Test-Time Scaling Paradigm for Flow Matching Models",
+      "arxiv_id": "2603.22027",
+      "category": "04_image_restoration",
+      "role": "flux1_dev_backbone",
+      "priority": "main",
+      "source_url": "https://arxiv.org/abs/2603.22027",
+      "pdf_url": "https://arxiv.org/pdf/2603.22027"
+    },
+    {
+      "key": "edit2restore",
+      "title": "Edit2Restore: Few-Shot Image Restoration via Parameter-Efficient Adaptation of Pre-trained Editing Models",
+      "arxiv_id": "2601.03391",
+      "category": "04_image_restoration",
+      "role": "pretrained_editing_model",
+      "priority": "candidate",
+      "source_url": "https://arxiv.org/abs/2601.03391",
+      "pdf_url": "https://arxiv.org/pdf/2601.03391"
+    },
+    {
+      "key": "bitnet_flux",
+      "title": "1.58-bit FLUX",
+      "arxiv_id": "2412.18653",
+      "category": "05_efficiency",
+      "role": "quantization",
+      "priority": "main",
+      "source_url": "https://arxiv.org/abs/2412.18653",
+      "pdf_url": "https://arxiv.org/pdf/2412.18653"
+    },
+    {
+      "key": "imax",
+      "title": "I-Max: Maximize the Resolution Potential of Pre-trained Rectified Flow Transformers with Projected Flow",
+      "arxiv_id": "2410.07536",
+      "category": "05_efficiency",
+      "role": "resolution_extension",
+      "priority": "main",
+      "source_url": "https://arxiv.org/abs/2410.07536",
+      "pdf_url": "https://arxiv.org/pdf/2410.07536"
+    },
+    {
+      "key": "chipmunk",
+      "title": "Chipmunk: Training-Free Acceleration of Diffusion Transformers with Dynamic Column-Sparse Deltas",
+      "arxiv_id": "2506.03275",
+      "category": "05_efficiency",
+      "role": "sparse_acceleration",
+      "priority": "main",
+      "source_url": "https://arxiv.org/abs/2506.03275",
+      "pdf_url": "https://arxiv.org/pdf/2506.03275"
+    },
+    {
+      "key": "hicache",
+      "title": "HiCache: A Plug-in Scaled-Hermite Upgrade for Taylor-Style Cache-then-Forecast Diffusion Acceleration",
+      "arxiv_id": "2508.16984",
+      "category": "05_efficiency",
+      "role": "feature_cache",
+      "priority": "main",
+      "source_url": "https://arxiv.org/abs/2508.16984",
+      "pdf_url": "https://arxiv.org/pdf/2508.16984"
+    },
+    {
+      "key": "mixed_resolution_latent",
+      "title": "Training-free Mixed-Resolution Latent Upsampling for Spatially Accelerated Diffusion Transformers",
+      "arxiv_id": "2507.08422",
+      "category": "05_efficiency",
+      "role": "spatial_acceleration",
+      "priority": "main",
+      "source_url": "https://arxiv.org/abs/2507.08422",
+      "pdf_url": "https://arxiv.org/pdf/2507.08422"
+    }
+  ]
+}
