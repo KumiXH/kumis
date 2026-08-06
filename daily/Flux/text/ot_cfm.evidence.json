@@ -1,0 +1,92 @@
+{
+  "file": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\01_foundations\\ot_cfm_2302.00482.pdf",
+  "page_count": 34,
+  "first_page_excerpt": "Published in Transactions on Machine Learning Research (03/2024)\nImproving and Generalizing Flow-Based Generative Models\nwith Minibatch Optimal Transport\nAlexander Tong∗ alexander.tong@mila.quebec\nMila – Québec AI Institute, Université de Montréal\nKilian Fatras∗ kilian.fatras@mila.quebec\nMila – Québec AI Institute, McGill University\nNikolay Malkin∗ nikolay.malkin@mila.quebec\nMila – Québec AI Institute, Université de Montréal\nGuillaume Huguet guillaume.huguet@mila.quebec\nMila – Québec AI Institute, Université de Montréal\nYanlei Zhang yanlei.zhang@mila.quebec\nMila – Québec AI Institute, Université de Montréal\nJarrid Rector-Brooks jarrid.rector-brooks@mila.quebec\nMila – Québec AI Institute, Université de Montréal\nGuy Wolf guy.wolf@umontreal.ca\nMila – Québec AI Institute, Université de Montréal\nCanada CIFAR AI Chair\nYoshua Bengio yoshua.bengio@mila.quebec\nMila – Québec AI Institute, Université de Montréal\nCIFAR Senior Fellow\nReviewed on OpenReview: https: // openreview. net/ forum? id= CD9Snc73AW\nAbstract\nContinuous normalizing flows (CNFs) are an attractive generative modeling technique, but\nthey have been held back by limitations in their simulation-based maximum likelihood\ntraining. We introduce the generalizedconditional flow matching(CFM) technique, a family\nof simulation-free training objectives for CNFs. CFM features a stable regression objective\nlike that used to train the stochastic flow in diffusion models but enjoys the efficient inference\nof deterministic flow models. In contrast to both diffusion models and prior CNF training\nalgorithms, CFM does not require the source distribution to be Gaussian or require evaluation\nof its density. A variant of our objective isoptimal transport CFM(OT-CFM), which creates\nsimpler flows that are more stable to train and lead to faster inference, as evaluated in our\nexperiments. Furthermore, we show that when the true OT plan is available, our OT-CFM\nmethod approximates dynamic OT. Training CNFs with CFM improves results on a variety\nof conditional and unconditional generation tasks, such as inferring single cell dynamics,\nunsupervised image translation, and Schrödinger bridge inference. The Python code is\navailable athttps://github.com/atong01/conditional-flow-matching.\n*Equal contribution\n1\narXiv:2302.00482v4  [cs.LG]  11 Mar 2024",
+  "flux_evidence": [],
+  "figure_candidates": [
+    {
+      "page": 3,
+      "caption": "Figure 1:Left: Conditional flows from FM (Lipman et al., 2023), I-CFM (§3.2.2), and OT-CFM (§3.2.3)."
+    },
+    {
+      "page": 9,
+      "caption": "Fig. 1 (bottom). Although OT-CFM uses a minibatch OT map, we find that OT-CFM requires surprisingly"
+    },
+    {
+      "page": 10,
+      "caption": "Figure 2:Left: OT-CFM trains faster, in terms of validation set error, than CFM and FM models.Right:"
+    },
+    {
+      "page": 10,
+      "caption": "Fig. 2 (left), we evaluate the performance over time of OT-CFM against CFM and FM objectives. For the"
+    },
+    {
+      "page": 10,
+      "caption": "Fig. 2 (right), we compare the quality of samples for different number of function evaluations (NFEs) across"
+    },
+    {
+      "page": 11,
+      "caption": "Figure 3:Left: Fréchet inception distance (FID) scores on CIFAR-10 for different numbers of training steps"
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 6,
+      "caption": "Table 1: Probability path definitions for existing methods which fit in the generalized conditional flow"
+    },
+    {
+      "page": 9,
+      "caption": "Table 2: Comparison of neural optimal transport methods over four distribution pairs (µ±σover five seeds)"
+    },
+    {
+      "page": 10,
+      "caption": "Table 3: Schrödinger bridge flow comparison, showing"
+    },
+    {
+      "page": 11,
+      "caption": "Table 4: Single-cell comparison"
+    },
+    {
+      "page": 12,
+      "caption": "Table 5: FID score and number of function eval-"
+    },
+    {
+      "page": 13,
+      "caption": "Table 6: MMD (in units of10−3) between target and"
+    },
+    {
+      "page": 23,
+      "caption": "Table 1 we presented a number of settings of these leading to interesting probability paths. In practice, we may"
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      2,
+      4,
+      6,
+      8,
+      9,
+      11,
+      14,
+      23,
+      31,
+      32,
+      33
+    ],
+    "super_resolution": [],
+    "efficiency": [
+      7,
+      11,
+      26
+    ],
+    "ablation": [
+      26
+    ],
+    "limitations": [
+      1,
+      13
+    ]
+  },
+  "key": "ot_cfm",
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\text\\ot_cfm.txt"
+}

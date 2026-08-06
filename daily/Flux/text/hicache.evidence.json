@@ -1,0 +1,280 @@
+{
+  "file": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\05_efficiency\\hicache_2508.16984.pdf",
+  "page_count": 27,
+  "first_page_excerpt": "Accepted at ICLR 2026\nHiCache: A Plug-in Scaled-Hermite Upgrade for Taylor-Style\nCache-then-Forecast Diffusion Acceleration\nLiang Feng1,2, Shikang Zheng1,3, Jiacheng Liu1, Yuqi Lin1, Qinming Zhou1,4, Peiliang Cai1,\nXinyu Wang1, Junjie Chen1, Chang Zou1, Yue Ma5, Linfeng Zhang1\n1 Shanghai Jiao Tong University 2 Fudan University 3 South China University of\nTechnology\n4 Tsinghua University 5 Hong Kong University of\nScience and Technology\nAbstract\nDiffusion models have achieved remarkable success in content generation but suffer from prohibitive computational\ncosts due to iterative sampling. While recent feature caching methods tend to accelerate inference through temporal\nextrapolation, these methods still suffer from severe quality loss due to the failure in modeling the complex dynamics\nof feature evolution. To solve this problem, this paper presents HiCache (Hermite Polynomial-based FeatureCache), a\ntraining-free acceleration framework that fundamentally improves feature prediction by aligning mathematical tools\nwith empirical properties. Our key insight is that feature derivative approximations in Diffusion Transformers exhibit\nmultivariate Gaussian characteristics, motivating the use of Hermite polynomials—the potentially theoretically optimal\nbasis for Gaussian-correlated processes. Besides, we introduce a dual-scaling mechanism that ensures numerical\nstability while preserving predictive accuracy, which is also effective when applied standalone to TaylorSeer. Extensive\nexperiments demonstrate HiCache’s superiority: achieving5.55× speedup on FLUX.1-dev while exceeding baseline\nquality, maintaining strong performance across text-to-image, video generation, and super-resolution tasks. Moreover,\nHiCache can be naturally added to the previous caching methods to enhance their performance,e.g.,improving ClusCa\nfrom0.9480to0.9840in terms of image rewards.Code:https://github.com/fenglang918/HiCache.\nFigure 1: Teaser of HiCache using the FLUX.1-dev model, with a6.24×FLOPs speedup.\n1 Introduction\nDiffusion Models (DMs) (Ho et al., 2020; Nichol and Dhariwal, 2021; Dhariwal and Nichol, 2021), especially when\nimplemented with the scalable Transformer architecture (DiT) (Peebles and Xie, 2023), have set a new standard for\nhigh-fidelity content generation (Chen et al., 2023; Rombach et al., 2022; Karras et al., 2022; Saharia et al., 2022; Balaji\net al., 2022). This success, however, is tempered by the substantial computational overhead inherent to the diffusion\nprocess. The iterative sampling, requiring hundreds of sequential forward passes through large models, results in high\nEmails:fenglang918@foxmail.com;zhanglinfeng@sjtu.edu.cn.\n1\narXiv:2508.16984v2  [cs.CV]  26 Jan 2026",
+  "flux_evidence": [
+    {
+      "page": 1,
+      "snippets": [
+        "experiments demonstrate HiCache’s superiority: achieving5.55× speedup on FLUX.1-dev while exceeding baseline",
+        "Figure 1: Teaser of HiCache using the FLUX.1-dev model, with a6.24×FLOPs speedup."
+      ]
+    },
+    {
+      "page": 2,
+      "snippets": [
+        "methods on FLUX.“Full trajectory”indicates the feature trajectory",
+        "from the original Flux (Esser et al., 2024) in the 14th and 28th layer. The",
+        "FLUX, demonstrating its effectiveness. Importantly, HiCache naturally serves as a drop-in replacement for Taylor-based",
+        "to-image generation with FLUX.1-dev, image-to-image generation with Inf-DiT for image super-resolution, and",
+        "instance, on FLUX.1-dev, HiCache achieves5.55× acceleration with 4.25% improvement on ImageReward over the"
+      ]
+    },
+    {
+      "page": 3,
+      "snippets": [
+        "equal-or-higher speedups with better quality: e.g., on FLUX.1-dev, 5.55× speedup with ImageReward improving"
+      ]
+    },
+    {
+      "page": 6,
+      "snippets": [
+        "Table 2:Ablation study with FLUX.1-dev.σ= 1.0means no",
+        "els: text-to-image generation with FLUX.1-dev (Esser et al., 2024), text-to-video generation withHunyuanVideo (Kong"
+      ]
+    },
+    {
+      "page": 7,
+      "snippets": [
+        "Table 3: Quantitative comparison on the text-to-image generation task with the FLUX.1-dev model. We also report",
+        "FLUX.1 [dev] - 50 steps† 17.12 1.00×3719.50 1.00×0.9872∞1.0000 0.0000",
+        "FLUX.1 [dev] - 25 steps 8.77 1.95×1859.75 2.00×0.9691 29.558 0.7327 0.3115",
+        "FLUX.1 [dev] - 20 steps 7.07 2.42×1487.80 2.62×0.9487 29.122 0.6983 0.3599",
+        "FLUX.1 [dev] - 17 steps 6.10 2.81×1264.63 3.13×0.9147 28.882 0.6767 0.3912",
+        "FLUX.1 [schnell]◦- 2 steps 1.10 15.59×148.78 25.00×0.9702 28.053 0.4720 0.6743",
+        "FLUX.1 [schnell] - 4 steps 2.20 7.79×297.56 12.50×0.9531 28.0500.4731 0.6708",
+        "HiCache+ FLUX.1 [schnell](O= 1,σ= 0.3)⋆ 1.10 15.58× 148.81 24.99× 0.9975 28.057 0.4507 0.6757"
+      ]
+    },
+    {
+      "page": 8,
+      "snippets": [
+        "framework using real feature trajectories from the FLUX model with activation interval Ninterval = 6, where derivative",
+        "framework on representative FLUX features, we observe that while both methods perform similarly at order 1, Taylor"
+      ]
+    },
+    {
+      "page": 9,
+      "snippets": [
+        "configurations (5 FLUX modules x 5 polynomial orders); Figure 8 summarizes the cumulative error ratios.",
+        "Figure 8: Cumulative error ratios (Taylor MSE / HiCache MSE) across 5 FLUX modules."
+      ]
+    },
+    {
+      "page": 20,
+      "snippets": [
+        "Text-to-Image Generation (FLUX.1-dev):We employ the FLUX.1-dev model for high-resolution text-to-image",
+        "• FLUX.1-dev experiments: NVIDIA H800 GPU"
+      ]
+    },
+    {
+      "page": 24,
+      "snippets": [
+        "discussed in the main paper. Using the non-cumulative error framework on representative FLUX features, we observe",
+        "differences on FLUX.1-dev, (ii) an adaptive per-layerσ scheme motivated by our truncation-error analysis, and (iii)",
+        "extra backbones and accelerators (Qwen-Image and Chipmunk-Flux).",
+        "Empirical Gaussianity via Energy Distance Tests on FLUX.1-dev",
+        "distance test on FLUX.1-dev features. We collect internal trajectories at six representative layers (4/10/14/20/28/42),"
+      ]
+    },
+    {
+      "page": 25,
+      "snippets": [
+        "Figure 9: Visualization example of trajectory prediction for different polynomial orders under FLUX architecture.",
+        "Table 6: Energy-distance Gaussianity tests on FLUX.1-dev finite differences (15 layer–module configurations × 5",
+        "Overall, finite-difference features on FLUX.1-dev are empirically very close to Gaussian across depth, modality, and",
+        "Adaptive Per-Layerσon FLUX.1-dev"
+      ]
+    },
+    {
+      "page": 26,
+      "snippets": [
+        "Table 7: Adaptive per-layer σ (HiCache-Adaptive) on FLUX.1-dev under interval = 7 , order = 2 (200 prompts,",
+        "We evaluate this adaptive σ on FLUX.1-dev (1024×1024, 50 steps, interval = 7, order = 2, 200 prompts) and",
+        "We next evaluate HiCache on Qwen-Image (Wu et al., 2025) to assess whether the conclusions from FLUX transfer to a",
+        "Chipmunk-Flux: Compatibility with Column-Sparse Accelerators",
+        "Finally, we examine HiCache on top of Chipmunk-Flux, a column-sparse accelerator for FLUX, to verify that HiCache is",
+        "complementary to sparse/efficient attention rather than a competing alternative. We compare three configurations on flux-",
+        "dev (1024×1024, 50 steps, 200 prompts): pure Chipmunk-Flux, Chipmunk-Flux+Taylor, and Chipmunk-Flux+HiCache",
+        "Chipmunk-Flux to Chipmunk+Taylor significantly reduces latency but degrades quality, especially in ImageReward and"
+      ]
+    },
+    {
+      "page": 27,
+      "snippets": [
+        "Table 9: Chipmunk-Flux experiments (flux-dev, 1024×1024, 50 steps, 200 prompts). All accelerated configurations use",
+        "Pure (Chipmunk-Flux) 27.73 0.931 28.22 0.434 0.677 5.8"
+      ]
+    }
+  ],
+  "figure_candidates": [
+    {
+      "page": 1,
+      "caption": "Figure 1: Teaser of HiCache using the FLUX.1-dev model, with a6.24×FLOPs speedup."
+    },
+    {
+      "page": 2,
+      "caption": "Figure 2:Trajectory prediction comparison of Taylor and HiCache"
+    },
+    {
+      "page": 2,
+      "caption": "Figure 2 visualize the features of the original diffusion models (i.e., ground-truth) and the predictive features from"
+    },
+    {
+      "page": 5,
+      "caption": "Figure 3:Method overview and basis function comparison.(a) TaylorSeer (orange) predicts features using a power"
+    },
+    {
+      "page": 6,
+      "caption": "Figure 4: Qualitative comparison on the text-to-image task across diverse prompts."
+    },
+    {
+      "page": 8,
+      "caption": "Figure 5:Detail retention and style consistency.(a) Superior detail retention. (b) Greater stability than TaylorSeer"
+    },
+    {
+      "page": 9,
+      "caption": "Figure 6: Qualitative comparison of text-to-video generation"
+    },
+    {
+      "page": 9,
+      "caption": "Figure 7: Comparison of HiCache and"
+    },
+    {
+      "page": 9,
+      "caption": "Figure 8: Cumulative error ratios (Taylor MSE / HiCache MSE) across 5 FLUX modules."
+    },
+    {
+      "page": 24,
+      "caption": "Figure 9 provides empirical evidence for the theoretical advantages of Hermite polynomials’ oscillatory properties"
+    },
+    {
+      "page": 25,
+      "caption": "Figure 9: Visualization example of trajectory prediction for different polynomial orders under FLUX architecture."
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 6,
+      "caption": "Table 1:Comparison on text-to-video genera-"
+    },
+    {
+      "page": 6,
+      "caption": "Table 2:Ablation study with FLUX.1-dev.σ= 1.0means no"
+    },
+    {
+      "page": 7,
+      "caption": "Table 3: Quantitative comparison on the text-to-image generation task with the FLUX.1-dev model. We also report"
+    },
+    {
+      "page": 7,
+      "caption": "Table 2 dissects our contributions. Without scaling (σ= 1.0 ), HiCache underperforms TaylorSeer due to numerical"
+    },
+    {
+      "page": 10,
+      "caption": "Table 4: Quantitative comparison on class-to-image generation on ImageNet with DiT-XL/2."
+    },
+    {
+      "page": 20,
+      "caption": "Table 5 presents detailed quantitative results across different acceleration intervals, comparing HiCache with"
+    },
+    {
+      "page": 21,
+      "caption": "Table 5: Performance Comparison of Different Guiders on Image Super-Resolution Task"
+    },
+    {
+      "page": 25,
+      "caption": "Table 6: Energy-distance Gaussianity tests on FLUX.1-dev finite differences (15 layer–module configurations × 5"
+    },
+    {
+      "page": 26,
+      "caption": "Table 7: Adaptive per-layer σ (HiCache-Adaptive) on FLUX.1-dev under interval = 7 , order = 2 (200 prompts,"
+    },
+    {
+      "page": 26,
+      "caption": "Table 8 summarizes the results for intervals 3/6/7/8. At interval 3 (mild acceleration) TaylorSeer and HiCache"
+    },
+    {
+      "page": 26,
+      "caption": "Table 9 reports CLIP, ImageReward, PSNR, SSIM, LPIPS, and approximate per-image latency. Moving from pure"
+    },
+    {
+      "page": 27,
+      "caption": "Table 8: Qwen-Image results (1328×1328, 50 steps, 200 prompts) comparing TaylorSeer and HiCache at different"
+    },
+    {
+      "page": 27,
+      "caption": "Table 9: Chipmunk-Flux experiments (flux-dev, 1024×1024, 50 steps, 200 prompts). All accelerated configurations use"
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      1,
+      2,
+      3,
+      5,
+      8,
+      9,
+      10,
+      12,
+      13,
+      20,
+      24,
+      25
+    ],
+    "super_resolution": [
+      1,
+      2,
+      3,
+      6,
+      7,
+      9,
+      10,
+      13,
+      17,
+      18,
+      19,
+      20,
+      21
+    ],
+    "efficiency": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      24,
+      25,
+      26,
+      27
+    ],
+    "ablation": [
+      6,
+      7
+    ],
+    "limitations": [
+      2,
+      4,
+      8,
+      24
+    ]
+  },
+  "key": "hicache",
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\text\\hicache.txt"
+}

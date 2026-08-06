@@ -1,0 +1,162 @@
+{
+  "file": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\04_image_restoration\\resflow_tuner_2603.22027.pdf",
+  "page_count": 27,
+  "first_page_excerpt": "Tuning Real-World Image Restoration at\nInference: A Test-Time Scaling Paradigm for\nFlow Matching Models\nPurui Bai1,2 , Junxian Duan1 , Pin Wang1 , Jinhua Hao2 , Ming Sun2 ,\nChao Zhou2 , and Huaibo Huang1\n1 MAIS & NLPR, Institute of Automation, Chinese Academy of Sciences, China\n2 Kuaishou Tech, China\nAbstract.Although diffusion-based real-world image restoration (Real-\nIR) has achieved remarkable progress, efficiently leveraging ultra-large-\nscale pre-trained text-to-image (T2I) models and fully exploiting their\npotential remain significant challenges. To address this issue, we propose\nResFlow-Tuner, an image restoration framework based on the state-\nof-the-art flow matching model, FLUX.1-dev, which integrates unified\nmulti-modal fusion (UMMF) with test-time scaling (TTS) to achieve un-\nprecedented restoration performance. Our approach fully leverages the\nadvantages of the Multi-Modal Diffusion Transformer (MM-DiT) archi-\ntecture by encoding multi-modal conditions into a unified sequence that\nguides the synthesis of high-quality images. Furthermore, we introduce\na training-free test-time scaling paradigm tailored for image restoration.\nDuring inference, this technique dynamically steers the denoising direc-\ntion through feedback from a reward model (RM), thereby achieving\nsignificant performance gains with controllable computational overhead.\nExtensive experiments demonstrate that our method achieves state-of-\nthe-art performance across multiple standard benchmarks. This work\nnot only validates the powerful capabilities of the flow matching model\nin low-level vision tasks but, more importantly, proposes a novel and\nefficient inference-time scaling paradigm suitable for large pre-trained\nmodels.\nKeywords:Image Restoration·Test-Time Scaling·Flow Matching\nModel\n1 Introduction\nImage restoration (IR), a vital field in computer vision, targets transforming\ndegraded low-quality (LQ) images into high-quality (HQ) counterparts. While\nIR has achieved significant advancements under predefined conditions, such\nas super-resolution [8, 36] and denoising [42] tasks, real-world IR remains a\nformidable challenge due to the diversity and complexity of degradation types.arXiv:2603.22027v1  [cs.CV]  23 Mar 2026",
+  "flux_evidence": [
+    {
+      "page": 1,
+      "snippets": [
+        "of-the-art flow matching model, FLUX.1-dev, which integrates unified"
+      ]
+    },
+    {
+      "page": 2,
+      "snippets": [
+        "tion (IR) presents unique challenges. First, the scale of models like FLUX makes"
+      ]
+    },
+    {
+      "page": 3,
+      "snippets": [
+        "the FLUX architecture. By integrating multimodal conditional guidance from"
+      ]
+    },
+    {
+      "page": 4,
+      "snippets": [
+        "Our goal is to leverage the powerful generative prior of the FLUX model for"
+      ]
+    },
+    {
+      "page": 7,
+      "snippets": [
+        "of the FLUX model and performs its search by guiding perturbations with this",
+        "stochasticity into the pre-trained, highly deterministic FLUX ODE trajectory to",
+        "(SDEs), the ODE of a flow model like FLUX defines a deterministic mapping"
+      ]
+    },
+    {
+      "page": 11,
+      "snippets": [
+        "VL [4]. By default, we use FLUX.1-dev to generate images based on given low-"
+      ]
+    },
+    {
+      "page": 13,
+      "snippets": [
+        "of trainable parameters—only 58M (0.5%) for the 12B FLUX.1 model. This"
+      ]
+    },
+    {
+      "page": 17,
+      "snippets": [
+        "original FLUX model alone for conditional restoration (without the subsequent"
+      ]
+    },
+    {
+      "page": 19,
+      "snippets": [
+        "19. Labs, B.F.: Flux.https://github.com/black-forest-labs/flux(2024)"
+      ]
+    }
+  ],
+  "figure_candidates": [
+    {
+      "page": 2,
+      "caption": "Fig.1: ResFlow-Tunerdelivers superior performance on both synthetic (the first"
+    },
+    {
+      "page": 5,
+      "caption": "Fig.2:Architecture of the proposedResFlow-Tuner. ResFlow-Tuner enhances train-"
+    },
+    {
+      "page": 8,
+      "caption": "Fig.3:Qualitative comparisons on both synthetic (the first row) and real-world (the"
+    },
+    {
+      "page": 17,
+      "caption": "Fig.4:User Study Results. (a) Average ranking of the six methods across all partici-"
+    },
+    {
+      "page": 22,
+      "caption": "Fig.5:Visual comparisons for ablation study on ResFlow-Tuner (1/2)."
+    },
+    {
+      "page": 23,
+      "caption": "Fig.6:Visual comparisons for ablation study on ResFlow-Tuner (2/2)."
+    },
+    {
+      "page": 24,
+      "caption": "Fig.7:Visual comparisons on real-world benchmarks (1/2). Please zoom in for a better"
+    },
+    {
+      "page": 25,
+      "caption": "Fig.8:Visual comparisons on real-world benchmarks (2/2). Please zoom in for a better"
+    },
+    {
+      "page": 26,
+      "caption": "Fig.9:Visual comparisons on synthetic benchmarks (1/2). Please zoom in for a better"
+    },
+    {
+      "page": 27,
+      "caption": "Fig.10:Visualcomparisonsonsyntheticbenchmarks(2/2).Pleasezoominforabetter"
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 11,
+      "caption": "Table 1:Quantitative comparison with state-of-the-art methods on synthetic bench-"
+    },
+    {
+      "page": 11,
+      "caption": "Table 2:Quantitative comparison with state-of-the-art methods on real-world bench-"
+    },
+    {
+      "page": 12,
+      "caption": "Table 3:Recognition results on the dataset of Occluded RoadText 2024 [45] (OCR"
+    },
+    {
+      "page": 12,
+      "caption": "Table 4:Ablation results on LSDIR-Val for ResFlow-Tuner."
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      9,
+      12,
+      13,
+      14,
+      17,
+      18
+    ],
+    "super_resolution": [
+      1,
+      10,
+      11,
+      18,
+      19,
+      20,
+      21
+    ],
+    "efficiency": [],
+    "ablation": [
+      12,
+      13,
+      17,
+      22,
+      23
+    ],
+    "limitations": [
+      4
+    ]
+  },
+  "key": "resflow_tuner",
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\text\\resflow_tuner.txt"
+}

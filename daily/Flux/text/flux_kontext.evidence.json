@@ -1,0 +1,212 @@
+{
+  "file": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\02_flux_foundation\\flux_kontext_2506.15742.pdf",
+  "page_count": 19,
+  "first_page_excerpt": "arXiv:2506.15742v2  [cs.GR]  24 Jun 2025\nFLUX.1 Kontext: Flow Matching for In-Context Image\nGeneration and Editing in Latent Space\nBlack Forest Labs∗\nStephen Batifol Andreas Blattmann Frederic Boesel Saksham Consul Cyril Diagne\nTim Dockhorn Jack English Zion English Patrick Esser Sumith Kulal\nKyle Lacey Yam Levi Cheng Li Dominik Lorenz Jonas Müller\nDustin Podell Robin Rombach Harry Saini Axel Sauer Luke Smith\nAbstract\nWe present evaluation results for FLUX.1 Kontext, a generative flow matching\nmodel that unifies image generation and editing. The model generates novel output\nviews by incorporating semantic context from text and image inputs. Using a simple\nsequence concatenation approach, FLUX.1 Kontext handles both local editing\nand generative in-context tasks within a single unified architecture. Compared to\ncurrent editing models that exhibit degradation in character consistency and stability\nacross multiple turns, we observe that FLUX.1 Kontext improved preservation of\nobjects and characters, leading to greater robustness in iterative workflows. The\nmodel achieves competitive performance with current state-of-the-art systems while\ndelivering significantly faster generation times, enabling interactive applications\nand rapid prototyping workflows. To validate these improvements, we introduce\nKontextBench, a comprehensive benchmark with 1026 image-prompt pairs covering\nfive task categories: local editing, global editing, character reference, style reference\nand text editing. Detailed evaluations show the superior performance of FLUX.1\nKontext in terms of both single-turn quality and multi-turn consistency, setting new\nstandards for unified image processing models.\n1 Introduction\nImages are a foundation of modern communication and form the basis for areas as diverse as social\nmedia, e-commerce, scientific visualization, entertainment, and memes. As the volume and speed\nof visual content increases, so does the demand for intuitive but faithful and accurate image editing.\nProfessional and casual users expect tools that preserve fine detail, maintain semantic coherence, and\nrespond to increasingly natural language commands. The advent of large-scale generative models\nhas changed this landscape, enabling purely text-driven image synthesis and modifications that were\npreviously impractical or impossible [11, 17, 41, 42, 40, 2, 12, 49, 21].\nTraditional image processing pipelines work by directly manipulating pixel values or by applying\ngeometric and photometric transformations under explicit user control [14, 55]. In contrast, generative\nprocessing uses deep learning models and their learned representations to synthesize content that\nseamlessly fits into the new scene. Two complementary capabilities are central to this paradigm\n• Local editing. Local, limited modifications that keep the surrounding context intact (e.g.\nchanging the color of a car while preserving the background or replacing the background\nwhile keeping the subject in the foreground). Generative inpainting systems such as\nLaMa [54], Latent Diffusion inpainting [42], RePaint [33], Stable Diffusion Inpainting vari-\nants2, and FLUX.1 Fill3 make such context-aware edits instantaneous; see also Palette [45]\nand Paint-by-Example [ 57]. Beyond inpainting, ControlNet [ 61] enables mask-guided\nbackground replacement, while DragGAN [ 37] offers interactive point-based geometric\nmanipulation.\n∗Please cite this works as \"Black Forest Labs (2025)\"\n2https://huggingface.co/runwayml/stable-diffusion-inpainting\n3https://huggingface.co/black-forest-labs/FLUX.1-Fill-dev",
+  "flux_evidence": [
+    {
+      "page": 1,
+      "snippets": [
+        "FLUX.1 Kontext: Flow Matching for In-Context Image",
+        "We present evaluation results for FLUX.1 Kontext, a generative flow matching",
+        "sequence concatenation approach, FLUX.1 Kontext handles both local editing",
+        "across multiple turns, we observe that FLUX.1 Kontext improved preservation of",
+        "and text editing. Detailed evaluations show the superior performance of FLUX.1",
+        "ants2, and FLUX.1 Fill3 make such context-aware edits instantaneous; see also Palette [45]",
+        "3https://huggingface.co/black-forest-labs/FLUX.1-Fill-dev"
+      ]
+    },
+    {
+      "page": 2,
+      "snippets": [
+        "(a) Context image generated with FLUX.1.",
+        "Figure 1: Consistent character synthesis with FLUX.1 Kontext. Generated images can be used"
+      ]
+    },
+    {
+      "page": 4,
+      "snippets": [
+        "Our Solution. We introduce FLUX.1 Kontext, a flow-based generative image processing model that",
+        "limitations. FLUX.1 Kontext is a simple flow matching model trained using only a velocity prediction",
+        "In particular, FLUX.1 Kontext offers:",
+        "• Character consistency: FLUX.1 Kontext excels at character preservation, including multi-",
+        "• Interactive speed: FLUX.1 Kontext is fast. Both text-to-image and image-to-image applica-",
+        "2 FLUX.1",
+        "FLUX.1 is a rectified flow transformer [12, 30, 32]",
+        "related models; see Section 2. Furthermore, FLUX.1"
+      ]
+    },
+    {
+      "page": 5,
+      "snippets": [
+        "Flux-V AE 0.332 ± 0.003 0.896 ± 0.004 31.1 ± 0.08",
+        "Figure 4: High-level overview of FLUX.1 Kontext, with input and context image on the left. Details",
+        "starts from a FLUX.1 text-to-image checkpoint, and we collect and curate millions of relational pairs",
+        "Token sequence construction. Images are encoded into latent tokens by the frozen FLUX auto-"
+      ]
+    },
+    {
+      "page": 6,
+      "snippets": [
+        "time. FLUX.1 Kontext [pro] is trained with the flow objective followed by LADD [48]. We obtain",
+        "FLUX.1 Kontext [dev] through guidance-distillation into a 12B diffusion transformer following the",
+        "techniques outlined in Meng et al. [34]. To optimize FLUX.1 Kontext [dev] performance on edit tasks,",
+        "FLUX.1 Kontext [dev]. We incorporate safety training measures including classifier-based filtering"
+      ]
+    },
+    {
+      "page": 7,
+      "snippets": [
+        "In this section, we evaluate FLUX.1 Kontext’s performance and demonstrate its capabilities. We",
+        "FLUX.1 Kontext against state-of-the-art text-to-image and image-to-image synthesis methods, where",
+        "world applications. We will publish this benchmark including the samples of FLUX.1 Kontext and all"
+      ]
+    },
+    {
+      "page": 8,
+      "snippets": [
+        "better). FLUX.1 Kontext achieves competitive speeds for both text-to-image and image-to-image",
+        "FLUX.1 Kontext is designed to perform both text-to-image (T2I) and image-to-image (I2I) synthesis.",
+        "We evaluate FLUX.1 Kontext [pro] and [dev]. As stated above, for [dev] we exclusively focus on",
+        "image-to-image tasks. Additionally, we introduce FLUX.1 Kontext [max], which uses more compute",
+        "difference. In our human evaluation (Figure 8), we find that FLUX.1 Kontext [max] and [pro] are",
+        "see Figure 8f. In alignment with our human evaluations, FLUX.1 Kontext outperforms all other",
+        "models. For global editing and SREF, FLUX.1 Kontext is second only to gpt-image-1, and Gen-4",
+        "Overall, FLUX.1 Kontext offers state-of-the-art character consistency, and editing capabilities, while"
+      ]
+    },
+    {
+      "page": 9,
+      "snippets": [
+        "in-context image generation tasks. FLUX.1 Kontext [pro] consistently ranks among the top performers",
+        "multiple quality dimensions. FLUX.1 Kontext models demonstrate competitive performance across",
+        "demonstrate character identity drift across edit sequences produced by FLUX.1 Kontext, Gen-4, and",
+        "between the input and images generated via successive edits, highlighting the slower drift of FLUX.1",
+        "details. Applications enabled by FLUX.1 Kontext’s reliable consistency are shown in Fig. 10 and"
+      ]
+    },
+    {
+      "page": 11,
+      "snippets": [
+        "models (top: FLUX.1 Kontext, middle: gpt-image-1, bottom: Runway Gen4). Below are face",
+        "‘FLUX & JOY’ ”",
+        "Figure 13: FLUX.1 Kontext is able to leverage visual cues like bounding boxes and edit text while"
+      ]
+    },
+    {
+      "page": 12,
+      "snippets": [
+        "FLUX.1 Kontext supports several applications beyond standard generation. Style reference (SREF),",
+        "We introduced FLUX.1 Kontext, a flow matching model that combines in-context image generation",
+        "FLUX.1 Kontext achieves state-of-the-art performance while addressing key limitations such as",
+        "prompt pairs. Our extensive evaluations reveal that FLUX.1 Kontext is comparable to proprietary",
+        "Limitations. FLUX.1 Kontext exhibits a few limitations in its current implementation. Excessive",
+        "enable infinitely fluid content creation. The release of FLUX.1 Kontext and KontextBench provides a"
+      ]
+    }
+  ],
+  "figure_candidates": [
+    {
+      "page": 2,
+      "caption": "Figure 1: Consistent character synthesis with FLUX.1 Kontext. Generated images can be used"
+    },
+    {
+      "page": 3,
+      "caption": "Figure 2: Iterative, instruction-driven editing. Starting from a reference photo (a), our model"
+    },
+    {
+      "page": 4,
+      "caption": "Figure 3: A fused DiT block equipped with"
+    },
+    {
+      "page": 5,
+      "caption": "Figure 4: High-level overview of FLUX.1 Kontext, with input and context image on the left. Details"
+    },
+    {
+      "page": 6,
+      "caption": "Figure 5: Style Reference. Given an input image, the model extracts its artistic style and applies it to"
+    },
+    {
+      "page": 7,
+      "caption": "Figure 6: Product Photography. (a) Input image showing the full outfit. (b) Extracted skirt on"
+    },
+    {
+      "page": 8,
+      "caption": "Figure 7: Median inference latency [seconds] for 1024 × 1024 generation across models (lower is"
+    },
+    {
+      "page": 8,
+      "caption": "Figure 9). Although competing models excel in certain domains, this often comes at the expense of"
+    },
+    {
+      "page": 8,
+      "caption": "Fig. 14. 6https://huggingface.co/fal/AuraFace-v1"
+    },
+    {
+      "page": 9,
+      "caption": "Figure 8: Image-to-image evaluation on KontextBench. We show evaluation results across six"
+    },
+    {
+      "page": 9,
+      "caption": "Figure 9: Text-to-image evaluation on Internal-t2i-bench. We report evaluation results across"
+    },
+    {
+      "page": 9,
+      "caption": "Fig. 11. 9"
+    },
+    {
+      "page": 10,
+      "caption": "Figure 10: Iterative, product-style editing. Starting from the reference bowl (a), our model first"
+    },
+    {
+      "page": 10,
+      "caption": "Figure 11: Sequential, facial-expression editing. Beginning with the profile reference (a), our model"
+    },
+    {
+      "page": 11,
+      "caption": "Figure 12: Iterative editing based on the same starting image with the same prompts and different"
+    },
+    {
+      "page": 11,
+      "caption": "Figure 13: FLUX.1 Kontext is able to leverage visual cues like bounding boxes and edit text while"
+    },
+    {
+      "page": 12,
+      "caption": "Figure 14: Text-to-image samples byFLUX.1 Kontext with low bakeyness, diverse styles, and accurate"
+    },
+    {
+      "page": 13,
+      "caption": "Figure 15: Editing failure cases. Top row: An example for identity degradation: While the center"
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 5,
+      "caption": "Table 1: Reconstruction quality comparison across different V AE architectures. All metrics computed"
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      1,
+      3,
+      5,
+      12,
+      17
+    ],
+    "super_resolution": [],
+    "efficiency": [
+      6,
+      7,
+      8,
+      12
+    ],
+    "ablation": [],
+    "limitations": [
+      4,
+      8,
+      12,
+      13
+    ]
+  },
+  "key": "flux_kontext",
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\text\\flux_kontext.txt"
+}

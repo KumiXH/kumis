@@ -1,0 +1,232 @@
+{
+  "file": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\05_efficiency\\chipmunk_2506.03275.pdf",
+  "page_count": 32,
+  "first_page_excerpt": "arXiv:2506.03275v1  [cs.CV]  3 Jun 2025\nChipmunk: Training-Free Acceleration of Diffusion\nTransformers with Dynamic Column-Sparse Deltas\nAustin Silveria\nUniversity of California, San Diego\nTogether AI\naustin@together.ai\nSoham V . Govande\nStanford University\ngovande@stanford.edu\nDaniel Y. Fu\nUniversity of California, San Diego\nTogether AI\ndanfu@ucsd.edu\nAbstract\nDiffusion Transformers (DiTs) have achieved state-of-the-art performance in high-\nquality image and video generation but incur substantial compute cost at inference. A\ncommon observation is that DiT latent noise vectors change slowly across inference\nsteps, which suggests that the DiT compute may be redundant across steps. In this\npaper, we aim to speed up inference by reducing this redundancy, without additional\ntraining. We first study how activations change between steps in two state-of-the-art\nopen-source DiTs. We find that just 5-25% of the values in attention and MLP\nexplain 70-90% of the change in activations across steps. This finding motivates our\napproach, Chipmunk, which uses dynamic sparsity at inference time to recompute\nonly the fastest-changing intermediate activations, while caching the rest. Dynamic\nsparsity introduces two systems challenges: (1) sparse attention and MLP operations\ntend to underutilize GPU tensor cores; and (2) computing dynamic sparsity patterns\nat runtime and caching activations both introduce overhead. To address these chal-\nlenges, Chipmunk first uses a voxel-based reordering of input tokens to introduce\ncolumn-wise sparsity. We implement column-sparse kernels utilizing efficient sparse\ngathers from global to shared GPU memory, achieving a 9.3x speedup at 93% spar-\nsity compared to highly-optimized dense baselines. Second, Chipmunk overlaps the\ncomputation of sparsity patterns and cache updates with other parts of the computa-\ntion (e.g., second layer of the MLP) to hide the extra latency. Chipmunk achieves up\nto 2.16x speedup on HunyuanVideo and 1.41x on FLUX.1-dev without compromis-\ning generation quality. Furthermore, we show that Chipmunk can be stacked on top\nof full step caching, achieving a 3.72x speedup on HunyuanVideo, a 2.67x speedup\non W AN2.1, and a 2.25x speedup on FLUX.1-dev with minimal quality impact.\n1 Introduction\nDiffusion Transformers (DiTs) have emerged as state-of-the-art (SOTA) models for generating\nhigh-quality images and videos [3, 16, 21, 22, 34, 62]. However, DiTs are increasingly constrained\nby their substantial computational requirements as sequence lengths and parameters scale up\n[44, 54]. For example, HunyuanVideo, with a 118k sequence length and 13B parameters, requires\n18 minutes to generate a 5s video on an H100 GPU [ 21]. In particular, two major redundancies\ncontribute significantly to unnecessary computation: the slow-changing latent vector (DiT model\ninput) [32, 44, 56] across generation steps, and the inherent sparsity in DiT activations [24, 27].\nPreprint. Under review.",
+  "flux_evidence": [
+    {
+      "page": 1,
+      "snippets": [
+        "to 2.16x speedup on HunyuanVideo and 1.41x on FLUX.1-dev without compromis-",
+        "on W AN2.1, and a 2.25x speedup on FLUX.1-dev with minimal quality impact."
+      ]
+    },
+    {
+      "page": 2,
+      "snippets": [
+        "DiTs (HunyuanVideo and FLUX.1-dev). We find that over 90% of the variance in cross-step attention"
+      ]
+    },
+    {
+      "page": 3,
+      "snippets": [
+        "Video and W AN2.1) and one state-of-the-art text-to-image generation model (FLUX.1-dev).",
+        "Video with minimal impact to VBench scores. On FLUX.1-dev, Chipmunk achieves 84% attention",
+        "HunyuanVideo and 1.41x on FLUX.1-dev.",
+        "on W AN2.1, and 2.25x on FLUX.1-dev."
+      ]
+    },
+    {
+      "page": 5,
+      "snippets": [
+        "FLUX.1-dev 25% 90.7% 15% 69.0%"
+      ]
+    },
+    {
+      "page": 6,
+      "snippets": [
+        "Table 3: Kernel optimizations applied to Chipmunk’s end-to-end algorithm measured on FLUX.1-dev"
+      ]
+    },
+    {
+      "page": 8,
+      "snippets": [
+        "for text-to-video generation and FLUX.1-dev for text-to-image generation, all using their default",
+        "three models, FLUX.1-dev has the smallest sequence length at 4.5k and allocates a majority of FLOPs"
+      ]
+    },
+    {
+      "page": 9,
+      "snippets": [
+        "FLUX.1-dev, T =50 (768 × 1280)",
+        "Flux 100% 1x 6.60s 0.76",
+        "FLUX.1-dev, T =50 (768 × 1280)",
+        "Flux 100% 1x 6.60s 0.66 31.07"
+      ]
+    },
+    {
+      "page": 10,
+      "snippets": [
+        "quality than TeaCache, which caches full step outputs (HunyuanVideo, rows 4-5; Flux Table 5, rows",
+        "6-7; Flux Table 6, rows 3-4). (2) Quality Held Constant. When quality is held nearly constant,",
+        "identification of sparsity patterns (HunyuanVideo, rows 2-3; WAN2.1, rows 2-3; Flux Table 5, rows",
+        "2-5; Flux Table 6, rows 2 and 4). (3) Chipmunk Speed-Quality Tradeoff. Chipmunk’s sparsity",
+        "hyperparameter can modulate the speed-quality tradeoff (W AN2.1, rows 5-6, Flux Table 6, rows 4-5)."
+      ]
+    },
+    {
+      "page": 12,
+      "snippets": [
+        "[22] B. F. Labs. Flux. https://github.com/black-forest-labs/flux, 2024."
+      ]
+    },
+    {
+      "page": 16,
+      "snippets": [
+        "added to the latent vector representation, as in the architectures of HunyuanVideo and FLUX.1-dev [11]."
+      ]
+    },
+    {
+      "page": 26,
+      "snippets": [
+        "• TeaCache: The threshold parameter is set to 0.78 for FLUX.1-dev, 0.2 for WAN2.1, and",
+        "• Chipmunk: We apply 84% attention sparsity and 70% MLP sparsity for FLUX.1-dev. For",
+        "D.4 FLUX.1-dev"
+      ]
+    },
+    {
+      "page": 27,
+      "snippets": [
+        "Figure 7: Images on 1280x768 FLUX.1-dev evaluated on different captions and prompts randomly"
+      ]
+    },
+    {
+      "page": 28,
+      "snippets": [
+        "Figure 8: Speed-quality tradeoff on 1280x768 images generated on FLUX.1-dev with 50 steps at"
+      ]
+    }
+  ],
+  "figure_candidates": [
+    {
+      "page": 2,
+      "caption": "Figure 1: Left: Chipmunk uses intermediate activation sparsity to recompute only the fastest changing"
+    },
+    {
+      "page": 4,
+      "caption": "Figure 2: Left: Chipmunk reorders tokens such that column sparse patterns route voxels (3D cubes of"
+    },
+    {
+      "page": 5,
+      "caption": "Figure 3: Left, Middle: Sparse kernel runtime scales linearly with sparsity. Column sparsity is"
+    },
+    {
+      "page": 9,
+      "caption": "Figure 4: Qualitative comparisons across videos (left) and images (right). For videos, frames are"
+    },
+    {
+      "page": 17,
+      "caption": "Figure 5: An individual-vector interpetation of the full HunyuanVideo DiT architecture. Attention"
+    },
+    {
+      "page": 18,
+      "caption": "Figure 6: Left: Both MLP and attention operations use a non-linearity to compute the scalar coefficients"
+    },
+    {
+      "page": 26,
+      "caption": "Fig. 9, we test the effect of reusing non-recomputed attention interactions from a previous step and using"
+    },
+    {
+      "page": 27,
+      "caption": "Figure 7: Images on 1280x768 FLUX.1-dev evaluated on different captions and prompts randomly"
+    },
+    {
+      "page": 28,
+      "caption": "Figure 8: Speed-quality tradeoff on 1280x768 images generated on FLUX.1-dev with 50 steps at"
+    },
+    {
+      "page": 29,
+      "caption": "Figure 9: Ablation of adding deltas (to reuse attention interactions that are not recomputed) and 1%"
+    },
+    {
+      "page": 30,
+      "caption": "Figure 10: Comparing the quality of W AN2.1 generation at 1% dynamic top-k attention interactions"
+    },
+    {
+      "page": 31,
+      "caption": "Figure 11: Qualitative video generation comparison across different methods for HunyuanVideo"
+    },
+    {
+      "page": 32,
+      "caption": "Figure 12: Qualitative video generation comparison across different methods for W AN2.1."
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 5,
+      "caption": "Table 1: R2 scores between true cross-step activation change and approximated change."
+    },
+    {
+      "page": 5,
+      "caption": "Table 2: Comparing hardware efficiency and approximation error of block sparsity vs. column sparsity."
+    },
+    {
+      "page": 6,
+      "caption": "Table 3: Kernel optimizations applied to Chipmunk’s end-to-end algorithm measured on FLUX.1-dev"
+    },
+    {
+      "page": 8,
+      "caption": "Table 4: Performance comparison of various methods across different datasets for video generation."
+    },
+    {
+      "page": 9,
+      "caption": "Table 5: Performance comparison of various methods for ImageReward for image generation."
+    },
+    {
+      "page": 9,
+      "caption": "Table 6: Performance comparison of various methods across various GenEval and CLIP. Note:"
+    },
+    {
+      "page": 20,
+      "caption": "Table 7: Memory usage comparison between naive and optimized implementations."
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      3,
+      4,
+      5,
+      12,
+      13,
+      14,
+      16,
+      17,
+      19
+    ],
+    "super_resolution": [],
+    "efficiency": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      13,
+      14,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29
+    ],
+    "ablation": [
+      29
+    ],
+    "limitations": [
+      11,
+      19
+    ]
+  },
+  "key": "chipmunk",
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\text\\chipmunk.txt"
+}

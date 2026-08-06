@@ -1,0 +1,1728 @@
+=== PAGE 1 ===
+Training-free Mixed-Resolution Latent Upsampling
+for Spatially Accelerated Diffusion Transformers
+Wongi Jeong∗1 Kyungryeol Lee∗1 Hoigi Seo1 Se Young Chun1,2†
+1Dept. of Electrical and Computer Engineering, 2INMC & IPAI
+Seoul National University, Republic of Korea
+{wg7139, kr.lee, seohoiki3215, sychun}@snu.ac.kr
+https://ignoww.github.io/RALU project
+Abstract
+Diffusion transformers (DiTs) offer excellent scalability for
+high-fidelity generation, but their computational overhead
+poses a great challenge for practical deployment. Existing
+acceleration methods primarily exploit the temporal dimen-
+sion, whereas spatial acceleration remains underexplored.
+In this work, we investigate spatial acceleration for DiTs via
+latent upsampling. We found that na¨ıve latent upsampling
+for spatial acceleration introduces artifacts, primarily due
+to aliasing in high-frequency edge regions and mismatching
+from noise-timestep discrepancies. Then, based on these
+findings and analyses, we propose a training-free spatial
+acceleration framework, dubbed Region-Adaptive Latent Up-
+sampling (RALU), to mitigate those artifacts while achiev-
+ing spatial acceleration of DiTs by our mixed-resolution
+latent upsampling. RALU achieves artifact-free, efficient
+acceleration with early upsampling only on artifact-prone
+edge regions and noise-timestep matching for different la-
+tent resolutions, leading to up to 7.0 × speedup on FLUX-
+1.dev and 3.0× on Stable Diffusion 3 with negligible quality
+degradation. Furthermore, our RALU is complementarily
+applicable to existing temporal acceleration methods and
+timestep-distilled models, leading to up to 15.9×speedup.
+1. Introduction
+Diffusion models [18, 52, 53] have emerged as a dominant
+framework for generative modeling across diverse modalities
+such as image [5, 40, 45, 47, 62], video [2, 7, 20, 21, 34] and
+audio [17, 31, 48]. Convolutional U-Net architectures [46]
+have served as the backbone of relatively small diffusion
+models. Recently, diffusion transformers (DiTs) [ 1, 8, 34,
+45] have been introduced, leveraging the scalability of trans-
+formers to achieve state-of-the-art results in visual synthesis.
+Despite the superior performance of DiTs, they suffer
+from high inference latency. This computational bottleneck
+* Authors contributed equally.†Corresponding author.
+“A dog is chasing after a ball and wagging its tail. ”
+FLUX-1.dev [1]
+(NFE = 7)
+TaylorSeer [32]
+(Temporal accel.)
+Bottleneck Sampling [ 55]
+(Spatial accel.)
+RALU (Ours)
+(Spatial accel.)
+Figure 1. Generated 1024×1024 images using acceleration meth-
+ods on FLUX-1.dev [1] for 7× speedups. While temporal acceler-
+ation methods struggle with aggressive speedups and Bottleneck
+Sampling [55] introduces artifacts, our RALU successfully acceler-
+ates while avoiding artifacts and maintaining high image quality.
+is inherent in their transformer-based architecture, whose
+complexity scales quadratically with the number of input
+tokens [36, 41]. As models scale to higher resolutions and
+process more tokens, computational cost and latency pose
+a great challenge for their deployment in real-world appli-
+cations such as real-time interactive editing or on-device
+generation [27].
+Distillation [14, 61] and post-training [37, 59, 60] have
+been explored to tackle this challenge, but they require addi-
+tional training and substantial computational cost. Training-
+free temporal acceleration has emerged as an alterna-
+tive by reducing computation across timesteps via feature
+caching [ 10, 35, 60, 66]. In contrast, spatial accelera-
+tion, which involves transitioning between resolutions for a
+quadratic reduction in computation,remains underexplored,
+particularly for training-free latent upsampling in DiT.
+Prior works on spatial upsampling, often explored within
+the tasks such as super-resolution [ 63, 65] and higher-
+1
+arXiv:2507.08422v3  [cs.CV]  25 Feb 2026
+
+=== PAGE 2 ===
+resolution synthesis [ 15, 25, 42], have focused on image
+space rather than latent space. There are only a few exist-
+ing works for upsampling on the latent space, but mostly
+require extra training, limiting their applicability to exist-
+ing generative models that were heavily trained. Pyramidal
+Flow [24] requires the unified training for its generative
+framework. Similarly, Latent-SR [23] achieves latent space
+super-resolution by proposing a learned noise addition mod-
+ule. Bottleneck Sampling [55] is a training-free framework
+for spatial acceleration, but suffers from substantial artifacts,
+as illustrated in Fig. 1 (bottom left).
+Here, we investigate latent upsampling for DiTs. While
+late latent upsampling is beneficial for spatial acceleration,
+it introduces two types of artifacts:aliasing artifactsin
+high-frequency regions andmismatching artifactsfrom a
+noise-timestep discrepancy. We found that early upsampling
+mitigates aliasing artifacts, but requires more computation in
+high latent resolution. Then, we propose Region-Adaptive
+Latent Upsampling (RALU), atraining-free,spatialaccel-
+eration approach for DiTs that efficiently and effectively
+exploits this trade-off. For RALU, we propose mixed-
+resolution latent upsampling that performs early upsam-
+pling only on artifact-prone regions and Noise and Timestep
+Matching (NT-Matching) that matches the noise distribu-
+tions before and after upsampling. As illustrated in Fig. 1,
+RALU achieves computational gains by processing latents at
+low resolution mostly, while preserving high generation qual-
+ity with significantly fewer artifacts by selectively perform-
+ing early latent upsampling with NT-Matching. Moreover,
+RALU is complementarily applicable to existing temporal
+acceleration methods and timestep-distilled models, enabling
+additional speedups with negligible degradation in quality.
+The contributions of this work are summarized as follows:
+• We investigate latent upsampling for DiTs as a means of
+spatial acceleration and explore the trade-off of upsam-
+pling between speedup and artifacts.
+• We propose a training-free spatial acceleration method,
+RALU, that effectively exploits the trade-off by our mixed-
+resolution latent upsampling with early upsampling on
+artifact-prone edge regions and our NT-Matching for dif-
+ferent latent resolutions, leading to up to 7.0 × speedup
+with negligible quality degradation.
+• We demonstrate that our RALU can be synergistically
+applicable to existing temporal acceleration methods and
+timestep-distilled models, leading to up to 15.9× speedup.
+2. Related Works
+2.1. Flow matching
+Flow matching [29] is a recent generative model that learns
+a deterministic transport map from a simple prior (e.g., stan-
+dard Gaussian noise) to a complex data distribution by inte-
+grating an ordinary differential equation (ODE). In particular,
+rectified flow [33] defines a linear interpolation path between
+the noisex 0 and the data samplex 1 by
+xt = (1−t)x 0 +tx 1, t∈[0,1],(1)
+with a constant velocity field vt = dxt
+dt =x 1 −x 0. The
+learning objective is to train a neural network that takes the
+state xt and time t as input to predict this ground-truth con-
+ditional velocity field by minimizing the difference between
+the predicted velocity and the true velocity.
+2.2. Diffusion Transformer acceleration
+DiTs are computationally expensive, especially when gen-
+erating high-resolution images, as the cost of self-attention
+grows quadratically with the number of spatial tokens. To
+mitigate these bottlenecks, recent research has proposed
+various inference-time acceleration techniques, which can
+be broadly categorized into model compression, temporal
+acceleration, and spatial acceleration methods.
+Model compression.Model compression techniques aim
+to reduce model size or computational complexity without
+retraining from scratch. Common approaches include quan-
+tization [9, 26, 51], distillation [14, 27, 61], and block prun-
+ing [13, 37, 50, 57]. In particular, block pruning methods
+skip transformer blocks that contribute less during inference,
+improving efficiency. However, they often require a healing
+strategy, as quality degradation occurs without fine-tuning.
+Temporal acceleration.Temporal acceleration aims to re-
+duce computation by skipping layers or reusing cached fea-
+tures across timesteps. Caching-based approaches have been
+extended to DiTs by storing internal activations such as block
+outputs [10, 30, 38, 66] or attention maps [60]. Other strate-
+gies move beyond reuse, instead forecasting future features
+by modeling their temporal trajectory [ 32]. Some works
+explore token-level pruning or selective execution [35], or
+introduce learnable token routers that dynamically decide
+which tokens to recompute and which to reuse [36, 59].
+Spatial acceleration.Spatial acceleration refers to reducing
+computation by dynamically transitioning between latent res-
+olutions. In DiTs, this is equivalent to adjusting the number
+of input patches (tokens). Recent studies [ 19, 24, 47, 54]
+have proposed cascaded diffusion frameworks that start from
+low-resolution and achieve high-resolution through upsam-
+pling during the denoising process. However, these frame-
+works require resource-intensive training.
+To the best of our knowledge, Bottleneck Sampling [55]
+is the only existing training-free spatially accelerated image
+generation method. It achieves acceleration through two la-
+tent resolution changes via Lanczos resampling, but does not
+seem to correct for the skewed trajectory after upsampling,
+resulting in substantial artifacts. This highlights the need for
+a spatial acceleration method that can effectively mitigate
+such artifacts due to latent upsampling.
+2
+
+=== PAGE 3 ===
+3. Challenges in Spatial Acceleration for DiTs
+Multi-resolution approaches have been popular for many
+vision tasks, leading to spatial acceleration. However, while
+latent upsampling for DiTs has a great potential for spatial
+acceleration, cutting computational cost, it has not been
+well-investigated. In this section, we argue that na¨ıve latent
+upsampling for acceleration introduces two types of artifacts
+in DiTs and describe our key findings on how each type of
+artifact can be effectively mitigated.
+3.1. Aliasing artifacts due to late upsampling
+We observe that various latent upsampling methods (e.g.,
+nearest-neighbor, bilinear, bicubic, Lanczos) for DiT-based
+generations introduce aliasing artifacts predominantly in
+high-frequency regions such as semantic edges when up-
+sampled at late timesteps. Since the low-resolution latent
+space may not have enough representation power for high-
+frequency details such as sharp boundaries, late upsampling
+often leads to visual distortions. Fig. 2a visualizes this phe-
+nomenon: while fidelity is maintained within smooth interior
+regions, aliasing artifacts appear prominently near bound-
+aries when upsampled at the mid-timestep among 18 steps.
+We found that these artifacts can be avoided by upsam-
+pling in earlier diffusion timesteps when the generated se-
+mantic structure is still coarse. To empirically validate this,
+we conducted the experiment with two-stage processes: de-
+noising diffusion in low-resolution latent space and restoring
+full-resolution in various timesteps tup. Fig. 2b illustrates
+that upsampling in the early timestep (tup ≤0.3 ) does not in-
+troduce aliasing artifacts, while late upsampling (tup ≥0.5 )
+leads to a significantly higher aliasing artifact ratio (i.e., the
+proportion of images exhibiting visible aliasing) and their
+undesirable edge energy (i.e., the average edge intensity
+quantified by a Canny edge detector).
+Remark 1.Aliasing artifacts in DiTs occur mostly in edge
+regions when upsampling latents at later timesteps, but do
+not occur when upsampling latents at earlier timesteps.
+However, na¨ıvely upsampling all latents in the early
+stages would sacrifice the computational benefits at a lower
+resolution. Due to this trade-off, mixed-resolution latent up-
+sampling is desirable, which performs early upsampling only
+on the edge-region latent and late upsampling on the rest
+of the latents for mitigating aliasing artifacts and spatially
+accelerating image generation in DiTs, respectively.
+3.2. Distribution mismatching artifacts
+Latent upsampling for flow-based generations introduces
+distribution mismatching artifacts without properly inject-
+ing noise and matching timestep distribution (i.e., how fre-
+quently timesteps are sampled during inference [64]).
+Correlated noise after upsampling.After upsampling, la-
+tent distribution deviates from the original flow trajectory.
+(a) Aliasing.
+0.2 0.4 0.6 0.8
+Upsampling Timestep
+100
+110
+120Edge Energy
+Artifact?
+No Yes
+0
+Edge Energy
+Artifact Ratio
+0.0
+0.5
+1.0
+Artifact Ratio (b) Analysis on upsampling timestep and artifact.
+Figure 2. (a) An example of aliasing artifacts generated using
+FLUX-1.dev (prompt:“A man on the tennis court is about to use
+his racket”) with 9 low-resolution steps, 2 × upsampling, and 9
+full-resolution steps. (b) Edge energy and aliasing artifact ratio
+over image vs. upsampling timestep, averaged over 100 images.
+(a) Mismatching.
+0.02 0.04 0.06 0.08
+Jensen-Shannon Divergence (JSD)
+0.6
+0.8
+1.0ImageReward ( )
+Artifact?
+No Yes
+0
+ImageReward
+Artifact Ratio
+0.0
+0.5
+1.0
+Artifact Ratio (b) Analysis on JSD and performance.
+Figure 3. (a) An example of mismatching artifacts generated using
+FLUX-1.dev (prompt:”A group of people standing on top of a
+snow covered ski slope”) with early upsampling (tup = 0.3) and
+noise injection. (b) ImageReward [ 58] score and mismatching
+artifact ratio vs. JSD, averaged over 100 images.
+Starting from an initial noise x0 ∼ N(0,I) , flow match-
+ing aims to learn a mapping to the target x1 by following
+Eq. (1) through a denoising process. Then, the conditional
+distribution of ˆxt at timesteptis:
+ˆxt|x1 ∼ N
+
+tx1,(1−t) 2I
+
+.(2)
+After upsampling, the distribution becomes:
+Up(ˆxt)|x1 ∼ N
+
+tUp(x1),(1−t) 2Σ
+
+,(3)
+where Up(·) is a upsampling function and Σ is the covari-
+ance matrix after upsampling. For any interpolation-based
+upsampler, Up(ˆxt) no longer matches the original trajec-
+tory’s distribution due to non-isotropicΣ. To enforce Up(ˆxt)
+stay in the original trajectory, correlated noise should be in-
+jected, making the upsampled covariance matrix isotropic.
+Timestep distribution matching.Noise injection alters
+noise level, which in turn skews timestep distribution. Mod-
+els can be trained for this modification [ 24, 54], but addi-
+tional massive computation is required for each model. The
+mismatch between the pretrained model’s original timestep
+3
+
+=== PAGE 4 ===
+𝟎
+Approximation
+𝑵𝟏
+H/2
+W/2
+Steps
+0 𝑵𝟏
+H
+W
+𝑵𝟐
+0
+Gen. image
+𝑵𝟐 𝑵𝟑
+Early upsamplingon ℳ,
+NT-Matching
+Late upsampling on	ℳ!,
+NT-Matching
+H
+W
+d
+Mask
+DiT input
+flatten
+flatten
+flatten
+DiT input
+DiTinput
+Canny
+Edge detect.
+Top-r
+patchesMask ℳ
+(a) Edge region latent selection
+add noise
+𝑃"#$%&"(𝑡)
+ 𝑃(𝑡)
+Minimize JSD
+analytically
+Up𝑥*&! 𝑥*'!"#
+𝝈𝟐:(1−𝑒))*𝜮 𝑰	−𝑐𝜮(1−𝑠)+,)*𝑰
+𝒉𝒌	, 	𝒄
+VAE decode
+(b) Noise and timestep matching
+      (NT-Matching)
+Mask
+(Correlated) (Uncorrelated)
+(Tweedie’s formula)
+StepsSteps
+𝑁$
+𝑁$
+Nearest-neighbor up.
+Fast
+⚡
+Slow
+🐌
+Figure 4. Overview of the proposed RALU framework. RALU consists of three different resolution processes: (1) low-resolution sampling
+for early denoising, (2) mixed-resolution sampling by upsampling edge region latents, and (3) full-resolution refinement by upsampling all
+remaining latents. (a) We select the top r fraction of patches with the strongest edge signals from the decoded image and upsample them
+early. (b) We add correlated noise to the upsampled latents and design a corresponding timestep schedule. (See Sec. 4.2 for more details).
+distribution and the modified distribution seems to cause
+oversampling certain intervals and a frequency imbalance,
+resulting in visual artifacts. Fig. 3a visualizes this: early up-
+sampling avoids aliasing, but the lack of distribution match-
+ing creates global mismatching artifacts.
+We found that these artifacts can be mitigated by align-
+ing the upsampling-induced timestep distribution with the
+original model’s. To verify this, we constructed a two-stage
+framework with fixed upsampling timestep to tup = 0.3
+(to prevent aliasing) and applied our corrective noise and
+timestep distribution (detailed in Sec. 4.2) while varying its
+parameters to induce a range of Jensen-Shannon divergence
+(JSD) values. Fig. 3b shows that as JSD decreases, mis-
+matching artifacts diminish (disappearing at JSD <0.03 )
+and the ImageReward [58] score improves(p <0.001).
+Remark 2.Mismatching artifacts in flow-based DiTs occur
+when na¨ıvely adding noise after upsampling, but can be
+mitigated by aligning the new sampling distribution with the
+original timestep distribution of the pretrained model.
+4. Region-Adaptive Latent Upsampling
+To break the fundamental trade-off between acceleration and
+artifacts identified in Sec. 3, we propose Region-Adaptive
+Latent Upsampling (RALU) approach.
+4.1. Mixed-resolution latent upsampling
+As illustrated in Fig. 4, our approach comprises mixed-
+resolution latent upsampling. The denoising process begins
+atlow-resolutionto accelerate. We reduce the latent resolu-
+tion by a factor of 2 along width and height, thereby reducing
+the number of latent tokens to only 1/4.
+Next, we perform an intermediateedge region upsam-
+plingstep to prevent aliasing artifacts, which typically occur
+in high-frequency regions as discussed in Sec. 3.1. We iden-
+tify artifact-prone regions by 1) estimating the clean latent
+x0 via Tweedie’s formula from the low-resolution stage, 2)
+decoding it with the V AE, and 3) performing Canny edge
+detection. We then select and upsample the top- r ratio of
+latent patches corresponding to these edges. The variable r
+controls the trade-off between acceleration and artifact and
+we chose it in the range of 20-30% of the whole latents,
+making the mixed-resolution latents.
+Finally, the remaining low-resolution latent tokens are
+upsampled to full-resolution to generate a complete high-
+resolution image. This final step ensures the consistency
+between the early and late upsampled regions in the final
+output by matching position embeddings. As demonstrated
+in Fig. 5, late upsampling (left) results in aliasing, while
+early upsampling (right) effectively avoids this artifact.
+4.2. Noise and timestep matching
+As discussed in Sec. 3.2, we design appropriate correlated
+noise injection and timestep distribution matching after latent
+upsampling to mitigate mismatching artifacts in DiTs.
+Noise injection.Starting from Eq. (3), at the last timestep of
+the k-th stage ek, the conditional distribution of the latent af-
+ter 2× nearest-neighbor upsampling (selected for simplicity;
+4
+
+=== PAGE 5 ===
+(B)
+(B) + (C)
+: Mismatching artifacts
+: No artifacts
+: Aliasing artifacts
+(A) + (C)
+(B) Early upsampling
+(A) Late upsampling
+(A)
+(C) NT-Matching
+Figure 5. Resolving artifacts from na¨ıve latent upsampling. Alias-
+ing artifacts are avoided by (B) early upsampling, while Mismatch-
+ing artifacts are mitigated by (C) noise and timestep matching.
+see supplementary material for details) is:
+Up(ˆxek)|x1 ∼ N
+
+ekUp(x1),(1−e k)2Σ
+
+,(4)
+where Σ has a block-diagonal structure with the 4×4 blocks
+filled with ones. As discussed in Sec. 3.2, since Σ is non-
+isotropic, proper correlated noise z∼ N(0,Σ ′) should be
+added to put it back onto the original trajectory’s distribution:
+aUp(ˆxek) +bz= ˆxsk+1 ,z∼ N(0,Σ ′)(5)
+ˆxsk+1 |x1 ∼ N
+
+sk+1Up(x1),(1−s k+1)2I
+
+.(6)
+where sk+1 is the starting timestep of stage k+ 1 and a,
+b are scalar values, and Σ′ is the covariance matrix of z.
+The parameters sk+1, a, and b are derived by matching the
+distribution in Eq. (6) under the constraint Σ′ =I−cΣ . By
+defining the composite term δk as δk ≡(1−e k)/√c, the
+rescheduling parameters can be expressed as:
+sk+1 = ek
+δk +e k
+, a= 1
+δk +e k
+,andb= δk
+δk +e k
+.(7)
+Detailed derivations are provided in the supplementary ma-
+terial. This noise injection method modifies the approach
+from the training-based method of [24]. While [24] can learn
+the noise and timestep parameters during its unified train-
+ing, ourtraining-freesetting necessitates a different solution,
+as these parameters cannot be arbitrarily determined for a
+pre-trained model. Therefore, we introduce a timestep distri-
+bution matching that is compatible with pretrained models.
+Timestep distribution matching.After noise injection
+at the timestep ek, the diffusion process resumes at sk+1,
+meaning reusing the original schedule can oversample the
+interval [sk+1, ek]. As mentioned in Sec. 3.2, this misalign-
+ment causes artifacts. Noise and Timestep Matching (NT-
+Matching) resolves these artifacts by matching the timestep
+distribution with the original scheduler, such as the non-
+uniform sampling employed by flow matching [1, 12]. Their
+probability density function (PDF) and truncated PDF are:
+fh(t) = h
+(1 + (h−1)t) 2 ,0≤t≤1,(8)
+fh,s,e(t) = fh(t)
+Fh(e)−F h(s) , s≤t≤e,(9)
+where h is a shifting parameter andFh(t) is a cumulative dis-
+tribution function (CDF) of fh(t). Our method injects noise
+at the end of each stage, which requires additional denoising
+over the overlapping interval [sk+1, ek]. Therefore, timestep
+sampling within intervals [0,1],[s 2, e1], . . . ,[sK, eK−1]
+should follow fh(t). The overall sampling distribution can
+be written as a weighted sum of truncated PDFs:
+Ptarget(t) = fhori,0,1(t) +PK−1
+k=1 (ek −s k+1)fhori,sk+1,ek(t)
+1 +PK−1
+k=1 (ek −s k+1)
+where hori is the shifting parameter of the base model and
+K= 3 is the number of stages. However, the actual sam-
+pling intervals are [0, e1],[s 2, e2], . . . ,[sK,1] . Therefore,
+the target distribution should also be adjusted accordingly.
+We use a stage-wise shifting parameterhk to control the PDF
+in each interval. Assuming we sample Nk −N k−1 timesteps
+in the k-th interval according to fhk,sk,ek(t), the modified
+timestep distributionP(t)is:
+P(t) =
+PK
+k=1(Nk −N k−1)fhk,sk,ek(t)
+NK
+.(10)
+We minimize the Jensen-Shannon divergence between the
+target distribution Ptarget(t) and the actual distribution P(t)
+via numerical search. We analytically determine c and {hk},
+and these values then dictate the noise degree, correlation,
+and full timestep schedule. Fig. 5 shows the effectiveness of
+NT-Matching: while the image with only early upsampling
+(top right) suffers from mismatching artifacts, adding NT-
+Matching (bottom right) successfully mitigates them.
+5. Experiments
+5.1. Quantitative results
+Base models and metrics.We adopt FLUX.1-dev [ 1]
+(FLUX) and Stable Diffusion 3 Medium [ 12] (SD3) as
+base models. We assessed image quality and text align-
+ment with ImageReward [58], CLIP-IQA [56], NIQE [39],
+T2I-CompBench [22] and GenEval [16]. We measured ac-
+celeration using latency and FLOPs on a single A100 GPU.
+More details are provided in the supplementary materials.
+5
+
+=== PAGE 6 ===
+Table 1. Quantitative comparisons of RALU with the baselines on (Top) FLUX.1-dev [1] (FLUX) and (Bottom) Stable Diffusion 3 [12]
+(SD3). Performance is evaluated with CLIP-IQA [ 56] and NIQE [ 39] for image quality, T2I-CompBench [ 22] and GenEval [ 16] for
+image-text alignment, and ImageReward [58] for both. The number in parentheses next to FLUX indicates the total number of inference
+steps. ↑/↓ denotes that a higher / lower metric is favorable. Speedup (Speed.) is calculated relative to the base model FLOPs (floating-point
+operations).TandSdenote the temporal and spatial acceleration, respectively. Additional computational metrics are reported in the
+supplementary material.
+Method Accel. Latency (s)↓TFLOPs↓Speed.↑ Overall Image quality Text alignment
+ImageReward↑CLIP-IQA↑NIQE↓T2I-Comp.↑GenEval↑
+FLUX (50) - 25.1 2991.0 1.00×1.095 0.707 6.75 0.634 0.698
+FLUX (10)T5.18 610.02 4.90× 0.981 0.679 6.93 0.618 0.647
+∆-DiT [10]T7.42 772.10 3.87×0.102 0.487 9.60 0.306 0.397
+ToCa [66]T15.5 601.12 4.98×-1.827 0.253 10.6 0.259 0.137
+TeaCache [30]T5.23 610.59 4.90×0.944 0.665 7.92 0.620 0.647
+TaylorSeer [32]T9.34 556.72 5.37× 0.972 0.684 6.77 0.594 0.619
+Bottleneck [55]S5.37 571.23 5.24×0.889 0.661 9.16 0.620 0.687
+RALU (Ours) S 5.04 540.47 5.53× 1.022 0.700 6.43 0.626 0.652
+FLUX (7)T3.79 431.45 6.93× 0.920 0.660 8.25 0.594 0.583
+TeaCache [30]T4.21 431.83 6.93×0.733 0.623 13.7 0.599 0.594
+TaylorSeer [32]T7.00 431.74 6.83×0.660 0.646 9.43 0.514 0.446
+Bottleneck [55]S3.78 431.52 6.93× 0.792 0.631 8.71 0.605 0.672
+RALU (Ours) S 3.75 426.01 7.02× 0.999 0.681 6.87 0.633 0.682
+Method Accel. Latency (s)↓TFLOPs↓Speed.↑ Overall Image quality Text alignment
+ImageReward↑CLIP-IQA↑NIQE↓T2I-Comp.↑GenEval↑
+SD3 (28) - 4.04 351.66 1.00×0.971 0.692 6.09 0.667 0.703
+SD3 (14)T2.14 183.30 1.92×0.888 0.667 6.06 0.651 0.628
+∆-DiT [10]T2.41 183.46 1.92×0.875 0.667 5.87 0.660 0.640
+ToCa [66]T2.62 181.51 1.94×0.885 0.663 5.72 0.655 0.653
+RAS [35]T2.07 185.14 1.90×0.706 0.574 4.85 0.649 0.583
+TaylorSeer [32]T2.40 183.48 1.92× 0.913 0.664 5.53 0.654 0.666
+Bottleneck [55]S2.14 186.21 1.89× 0.890 0.636 5.70 0.645 0.644
+RALU (Ours) S 2.04 181.09 1.94× 0.971 0.684 5.17 0.671 0.647
+SD3 (9)T1.46 123.17 2.86× 0.565 0.619 6.10 0.627 0.561
+RAS [35]T1.40 118.99 2.96×0.423 0.529 5.70 0.613 0.470
+TaylorSeer [32]T1.87 123.49 2.85×0.059 0.521 7.44 0.561 0.572
+Bottleneck [55]S1.44 127.35 2.76× 0.628 0.566 5.58 0.629 0.528
+RALU (Ours) S 1.38 116.61 3.02× 0.798 0.645 5.44 0.661 0.599
+Table 2. (Top) Quantitative results of integrating temporal acceleration methods into RALU under a 5× speedup setting on FLUX. (Bottom)
+Quantitative results of adapting RALU on timestep-distilled models (FLUX.1-schnell, SD3.5L-Turbo). Speedups are measured relative to
+FLUX.1-dev and Stable Diffusion 3.5 Large, respectively.Ddenotes the timestep-distilled model. The W value of TaylorSeer denotes the
+number of warm-up steps.
+Method Accel. TFLOPs↓Speed.↑ Overall Image quality Text alignment
+ImageReward↑CLIP-IQA↑NIQE↓T2I-Comp.↑GenEval↑
+RALU (5×) S 540.47 5.53× 1.022 0.700 6.43 0.626 0.652
++∆-DiTS+T422.56 7.08×0.827 0.619 7.65 0.560 0.555
++ ToCaS+T409.74 7.30×0.914 0.522 6.94 0.620 0.652
++ TaylorSeer (W= 3)S+T410.70 7.28×0.959 0.708 6.43 0.631 0.680
++ TaylorSeer (W= 2)S+T331.38 9.03×0.926 0.691 6.00 0.590 0.586
+FLUX.1-schnell (4) D 252.88 11.83× 1.055 0.686 7.46 0.640 0.688
++ RALUD+S187.92 15.91×0.992 0.650 6.88 0.621 0.636
+SD3.5L-Turbo (4) D 107.93 6.31× 0.840 0.670 7.20 0.596 0.744
++ RALUD+S82.23 8.28×0.789 0.628 6.77 0.607 0.696
+T2I generation performance comparison.We compare
+RALU with existing temporal acceleration methods such
+as ∆-DiT [10], ToCa [66], TeaCache [30], RAS [35], Tay-
+lorSeer [32], and the spatial acceleration method Bottleneck
+Sampling [55]. Tab. 1 presents the results on FLUX (top)
+and SD3 (bottom). Temporal acceleration methods strug-
+6
+
+=== PAGE 7 ===
+FLUX.1-devStable Diffusion 3
+5× accel.
+7× accel.
+3×accel.
+ 2× accel.
+“A clock hanging from a white wall in a kitchen.”
+“A close up of a plate of macaroni shells.”
+“A train going down the tracks that has just gone under a bridge.”
+“A woman riding a red motorcycle wearing a helmet.”
+FLUX (NFE=50) FLUX (NFE=10,7) TeaCache [30] TaylorSeer [32] Bottleneck [55] RALU (Ours)
+SD3 (NFE=28) SD3 (NFE=14,9) RAS [35] TaylorSeer [32] Bottleneck [55] RALU (Ours)
+Figure 6. Qualitative comparison of images generated by baseline methods and RALU on FLUX and SD3 under various speedups. For
+FLUX, we compare at 5× and 7× speedups; for SD3, at 2× and 3×. NFE (number of function evaluations) refers to the number of inference
+steps. Zoomed-in regions on the right highlight that RALU preserves fine-grained details and avoids artifacts more effectively than the other
+baselines, even under high speedups. More results are provided in the supplementary material. Best viewed in zoom.
+gle to deliver strong performance in both image quality and
+text alignment. The spatial acceleration baseline, Bottleneck
+Sampling, also suffers from degradation in image quality.
+In contrast, RALU achieves higher image fidelity and text
+alignment compared to other baselines.
+5.2. Qualitative results
+As shown in Fig. 6, base models with reduced inference steps
+and temporal acceleration methods tend to produce images
+with noticeable blur or artifacts. Bottleneck Sampling also
+introduces aliasing or mismatching artifacts. In contrast,
+RALU outperforms both temporal and spatial acceleration
+baselines, maintaining superior visual fidelity and semantic
+alignment with minimal artifacts.
+5.3. Integrating RALU with other accelerations
+As mentioned in Sec. 1, RALU is complementary to tempo-
+ral acceleration and can be combined. Tab. 2 (Top) presents
+the quantitative results of incorporating temporal acceler-
+ation methods (e.g., caching, forecasting) into the RALU
+framework. This integration yields additional improvements
+in speed up to 9.03×without any training.
+Furthermore, RALU is also compatible with timestep-
+distilled models. Unlike temporal acceleration, which is
+applied at inference without retraining, timestep distillation
+represents a training-based acceleration strategy that fine-
+tunes the model to operate efficiently in fewer steps. De-
+spite this difference, RALU can be seamlessly integrated
+with such distilled models to provide further inference-time
+speedups. As demonstrated in Tab. 2 (Bottom), this com-
+bination achieves up to a 15.91 × total speedup over the
+base model with only minimal degradation in generation
+quality. We also provide qualitative comparisons for these
+integrations in the supplementary material.
+Remark 3.RALU can be integrated with temporal acceler-
+ation method or timestep-distilled model to achieve further
+training-free speedup while incurring only minimal quality
+degradation.
+5.4. Artifact comparison
+Fig. 7 shows the artifact ratio according to computational
+cost (TFLOPs). Bottleneck Sampling [ 55] suffers from a
+high artifact ratio, and a na ¨ıve upsampling approach also
+results in a considerable artifact ratio. In contrast, our pro-
+posed RALU achieves a substantially lower artifact ratio
+than both baselines at similar TFLOPs for various speedup
+settings, demonstrating its superior artifact mitigation.
+7
+
+=== PAGE 8 ===
+0.5
+0.6
+0.7
+0.8
+BS naïve RALU (Ours)
+400 440 480 520 560 600
+TFLOPs
+0.0
+0.1
+0.2
+Artifact Ratio
+Figure 7. RALU has a drastically lower artifact ratio than
+Bottleneck Sampling (BS) and a na¨ıve upsampling for a
+similar TFLOPs. Trendlines represent quadratic fits.
+500 550 600
+TFLOPs
+0.95
+1.00
+1.05ImageReward
+0.05
+0.1 0.2
+0.3
+0.4
+0.5
+We seek
+top & left
+0
+(a) ImageReward vs. TFLOPs.
+500 550 600
+TFLOPs
+0.685
+0.690
+0.695CLIP-IQA
+0.05
+0.1 0.2
+0.3
+0.4
+0.5
+We seek
+top & left
+0 (b) CLIP-IQA vs. TFLOPs.
+Figure 8. Trade-off between (a) ImageReward and (b) CLIP-IQA against
+TFLOPs for different upsampling ratios (0.05–0.5). Quality generally improves
+with the upsampling ratio but peaks around 0.3.
+Table 3. Effect of NT-Matching. Results are on the FLUX 7 ×
+setting. The optimized parameters yield JSD= 0.026, while other
+parameters were adjusted to obtain higher JSDs for comparison.
+JSD ImageReward↑NIQE↓T2I-CompBench↑
+0.026 (optimized) 0.999 6.51 0.633
+0.030 0.972 6.60 0.571
+0.035 0.981 6.53 0.569
+0.040 0.966 6.80 0.565
+5.5. Edge region selection
+Image vs. latent space.For edge region selection, we apply
+a Canny edge detector in the image space. An alternative is
+to apply the Sobel operator directly in the latent space. As
+detailed in the supplementary material, we found that image-
+space detection yields more accurate edge maps and slightly
+better generative performance. We adopted the Canny detec-
+tor as the additional V AE decoder overhead is modest (2.48
+TFLOPs for FLUX and SD3).
+Fixed vs. adaptive upsampling ratio.We utilize a fixed
+top-r ratio to select edge regions but also experimented with
+a strategy that adjusts this ratio dynamically. Results in
+the supplementary material show that, for a similar average
+FLOPs, the adaptive method did not noticeably improve
+average image fidelity over the fixed ratio. Given that the
+fixed ratio ensures consistent computational costs without
+sacrificing quality, we adopted it for its stability.
+5.6. Ablation study
+Effect of early upsampling ratio.In Stage 2 of RALU,
+increasing the amount of top- r ratio of latent upsampling
+results in a more robust avoidance of aliasing artifacts. We
+define the upsampling ratio as the fraction of top- r ratio
+of latents selected for early upsampling. Fig. 8 highlights
+the impact of the upsampling ratio on the generated image
+quality. We note a trade-off where higher upsampling ratios
+improve image quality but lead to an increase in FLOPs.
+Therefore, we adopt ratios in the 0.2-0.3 range, which offers
+the best compromise between quality and efficiency.
+Effect of NT-Matching.We analyzed the effectiveness of
+NT-Matching by measuring metrics under various noise level
+and denoising timestep scenarios. As shown in Tab. 3, it is
+evident that optimizing JSD yields the best image quality and
+text alignment, highlighting the superiority of NT-Matching.
+6. Discussion
+The precise mechanism by which diffusion models handle
+simultaneous sampling or denoising across varying resolu-
+tions, particularly how self-attention weights are computed
+in a multi-resolution setup, remains an area for further inves-
+tigation. However, the observed robustness of these models
+to changes in input structure, such as the successful ap-
+plication of methods like token merging [ 3, 4, 49], where
+multiple tokens are compressed into a single token without
+major performance drops, suggests an inherent capacity for
+resolution-agnostic or adaptive representation learning.
+7. Conclusion
+In this work, we proposedRegion-Adaptive Latent Upsam-
+pling(RALU), a training-free framework to accelerate Diffu-
+sion Transformers. RALU resolves the trade-off between ac-
+celeration and aliasing artifacts in latent upsampling through
+its three-stage process: low-resolution denoising for acceler-
+ation, edge-selective upsampling to avoid aliasing, and full-
+resolution refinement. Furthermore, to prevent mismatching
+artifacts, we introduced a noise-timestep matching scheme.
+Experiments show that RALU achieves speedup with negli-
+gible quality loss and artifacts, and complements temporal
+acceleration methods for further gains, offering an effective
+solution for efficient DiT inference.
+8
+
+=== PAGE 9 ===
+8. Acknowledgements
+This work was supported in part by Institute of Informa-
+tion & communications Technology Planning & Evalua-
+tion (IITP) grant funded by the Korea government(MSIT)
+[NO.RS-2021-II211343, Artificial Intelligence Graduate
+School Program (Seoul National University)], the National
+Research Foundation of Korea(NRF) grants funded by the
+Korea government(MSIT) (Nos. RS-2025-02263628, RS-
+2022-NR067592) and Samsung Electronics MX Division.
+Also, the authors acknowledged the financial support from
+the BK21 FOUR program of the Education and Research
+Program for Future ICT Pioneers, Seoul National University.
+Appendix
+A. Details on The Derivations
+A.1. Derivation of Eq. (8)
+Starting from Eq. (4), the conditional distribution of the
+linear combination of upsampled latent Up(ˆxek) and the
+correlated noisez∼ N(0,Σ ′)is:
+(aUp(ˆxek) +bz)|x 1
+∼ N
+
+aekUp(x1), a2(1−e k)2Σ+b 2Σ′
+!
+(S1)
+where Σ′ =I−cΣ . The conditional distribution of the
+latent of next stage starting timestep Up(ˆxsk+1)is:
+Up(ˆxsk+1)|x1 ∼ N
+
+sk+1Up(x1),(1−s k+1)2Σ
+
+(S2)
+Since we want Eq. (S1) to match Eq. (S2), we can obtain
+the following equations for the mean and standard deviation,
+respectively:
+aek =s k+1,(S3)
+a2(1−e k)2Σ+b 2(I−cΣ) = (1−s k+1)2I(S4)
+From Eqs. (S3)–(S4), matching the Σ coefficient to zero
+gives
+a2(1−e k)2 =b 2c=⇒a(1−e k) =b √c.(S5)
+Comparing theIpart,
+b2 = (1−s k+1)2 =⇒b= 1−s k+1.(S6)
+Collecting Eq. (S3), Eq. (S5) and Eq. (S6) yields:
+sk+1 = ek
+(1−e k)/√c+e k
+,(S7)
+a= 1
+(1−e k)/√c+e k
+,(S8)
+b= (1−e k)/√c
+(1−e k)/√c+e k
+.(S9)
+By defining the composite termδ k as
+δk ≡(1−e k)/√c,(S10)
+Eq. (S7), Eq. (S8), Eq. (S9) can be expressed as:
+sk+1 = ek
+δk +e k
+, a= 1
+δk +e k
+,andb= δk
+δk +e k
+.
+(S11)
+Since Σ′ =I−cΣ⪰0 , 0≤c≤1/4 for 2× nearest-
+neighbor upsampling.
+Two additional facts can be observed here. 1) If ek <
+1, then sk+1 < e k. This means that adding noise to the
+upsampled latent always shifts the timestep towards the noise
+direction. 2) If ek = 1, then sk+1 = 1, a= 1 , and b= 0 .
+This implies that upsampling a fully denoised latent results
+in no subsequent stage. However, in this case, the image
+quality is reduced because there is no remaining step to refine
+the error caused by the latent upsample.
+A.2. Values determined by NT-Matching.
+{hk}, c= arg min
+{hk},c
+JSD(Ptarget(t), P(t)).(S12)
+We determine the values of {hk} and c in Sec. 4.2 by
+minimizing the Jensen-Shannon divergence (JSD) between
+Ptarget(t) (Eq. (11)) and P(t) (Eq. (12)). The resulting
+values are showed in Tab. S1.
+B. Detailed Experimental Setup
+B.1. Experiment compute resources
+We generate 1024 × 1024 images using an NVIDIA A100
+GPU for all experiments. The latency results reported in
+Tab. 1 are benchmarked on a single A100 GPU. Furthermore,
+to demonstrate that RALU is generalizable across different
+hardware architectures, we also benchmark latency on an
+NVIDIA A6000 GPU in Tab. S2. In addition, we report
+GPU memory usage.
+B.2. Baseline configurations
+B.2.1. Main experiments (Tab.1, 2)
+∆-DiT [10] ∆-DiT is a training-free inference acceleration
+framework specifically designed for the Diffusion Trans-
+formers (DiT) architecture. To address the information loss
+Table S1. Determined values of Eq. (S12).
+Model-acceleration values we choose values determined by Eq. (S12)
+N e h c
+FLUX-5× [4, 9, 15] [0.3, 0.45, 1.0] [5.12, 2.64, 2.25] 0.0177
+FLUX-7× [2, 5, 10] [0.2, 0.3, 1.0] [8.14, 2.86, 2.19] 0.0255
+SD3-2× [5, 11, 20] [0.2, 0.3, 1.0] [6.21, 2.23, 1.97] 0.0586
+SD3-3× [3, 6, 12] [0.25, 0.3, 1.0] [6.40, 2.60, 2.23] 0.0255
+9
+
+=== PAGE 10 ===
+Table S2. Computational metrics (FLOPs, GPU peak memory)
+with mixed precision FP16. FLOPs are measured using the
+torch.profiler tool. GPU peak memory is measured using
+NVIDIA A6000 GPU. We employed FlashAttention [ 11] for all
+models excluding ToCa [66].
+Method Accel. Latency (s) VRAM usage (GB)
+A100 A6000
+FLUX (50) - 25.1 49.7 32.8
+FLUX (10)T5.18 9.99 32.8
+∆-DiT [10]T7.42 10.6 45.0
+ToCa [66]T15.5 29.7 45.0
+TeaCache [30]T5.23 9.91 34.8
+TaylorSeer [32]T9.34 17.3 45.0
+Bottleneck [55]S5.37 10.3 32.8
+RALU (Ours) S5.04 9.60 32.8
+FLUX (7)T3.79 7.21 32.8
+TeaCache [30]T4.21 7.90 34.8
+TaylorSeer [32]T7.00 12.4 45.0
+Bottleneck [55]S3.78 7.21 32.8
+RALU (Ours) S3.75 7.16 32.8
+Method Accel. Latency (s) VRAM usage (GB)
+A100 A6000
+SD3 (28) - 4.04 6.77 15.5
+SD3 (14)T2.14 3.57 15.5
+∆-DiT [10]T2.41 4.04 16.7
+ToCa [66]T2.62 4.32 17.6
+RAS [35]T2.07 3.45 20.7
+TaylorSeer [32]T2.40 4.00 17.9
+Bottleneck [55]S2.41 3.57 15.5
+RALU (Ours) S2.04 3.41 15.5
+SD3 (9)T1.46 2.39 15.5
+RAS [35]T1.40 2.33 20.7
+TaylorSeer [32]T1.87 3.11 17.9
+Bottleneck [55]S1.44 2.40 15.5
+RALU (Ours) S1.38 2.24 15.5
+issues of prior U-Net-based caching, ∆-DiT introduces the
+∆-Cache mechanism, which is suitable for DiT’s isotropic
+structure. ∆-Cache selectively caches the deviation (offset)
+between feature maps instead of the feature maps themselves,
+thus preserving critical information from the previous sam-
+pling step. The core strategy is Stage-Adaptive Acceleration,
+based on the finding that DiT’s front blocks are associated
+with generating image outlines while the rear blocks handle
+details. This knowledge is aligned with the diffusion process:
+∆-Cache is applied to the rear blocks during the early sam-
+pling stages (outline-friendly), and to the front blocks during
+the later sampling stages (detail-friendly). We set N= 5 for
+FLUX 5× acceleration and N= 2 for SD3 2× acceleration,
+whereNis the interval between fully computed steps.
+ToCa [66]Token-wise feature Caching (ToCa) is a training-
+free inference-time acceleration method for Diffusion Trans-
+formers that improves efficiency through token-level feature
+caching. Unlike na¨ıve caching methods that reuse all token
+features uniformly across timesteps, ToCa selectively caches
+tokens based on their importance, which is determined by
+their influence on other tokens (via self-attention), their asso-
+ciation with conditioning signals (via cross-attention), their
+recent cache frequency, and their spatial distribution within
+the image. ToCa operates by dividing inference into cache
+periods of length N, where full computation is performed
+at the first step and cached token features are reused for the
+next N−1 steps. Within each timestep, a fraction R of the
+tokens—those deemed less important based on self-attention,
+cross-attention, cache frequency, and spatial distribution—
+are selected for caching, while the remaining tokens are
+recomputed. We set N= 5 , Ntotal = 40 , R= 90% for
+FLUX 5× acceleration and N= 3 , Ntotal = 28, R= 90%
+for SD3 2× acceleration, where Ntotal is total inference steps.
+TeaCache [30]TeaCache (Timestep Embedding Aware
+Cache) is a training-free caching approach designed to accel-
+erate diffusion models by selectively reusing intermediate
+model outputs. It addresses the inflexibility of conventional
+uniform caching by leveraging the fact that model output
+differences fluctuate non-uniformly across timesteps. The
+core idea is to predict output difference using model inputs,
+which have negligible computational cost. TeaCache uses the
+timestep-embedding modulated noisy input as the primary
+indicator for output caching, as this composite input shows
+a strong correlation with the model output difference. To
+correct a scaling bias between the estimated input difference
+and the true output difference, TeaCache employs a simple
+polynomial fitting procedure. Caching is determined dynam-
+ically using an accumulated relative L1 distance against a
+threshold (δ), enabling the skipping of redundant computa-
+tions in consecutive timesteps. We set Ntotal = 45, δ= 0.99
+for FLUX 5 × acceleration and Ntotal = 30, δ= 0.99 for
+FLUX 7× acceleration, where Ntotal is total inference steps.
+RAS [35]Region-Adaptive Sampling (RAS) is a training-
+free inference-time acceleration method for Diffusion Trans-
+formers that dynamically adjusts the sampling ratio for dif-
+ferent spatial regions. At each diffusion step, RAS identi-
+fies fast-update regions—typically semantically important
+areas—based on the model’s output noise and attention con-
+tinuity across steps. These regions are refined using the DiT
+model, while slow-update regions reuse cached noise from
+the previous step to save computation. To prevent error ac-
+cumulation in ignored regions, RAS periodically resets all
+regions through dense steps. Additionally, RAS employs
+dynamic sampling schedules (e.g., full updates in early steps
+and gradual reduction thereafter) and key-value caching in
+attention to maintain quality. RAS dynamically determines
+which spatial regions require refinement at each step by
+identifying fast-update areas based on noise deviation and at-
+tention continuity. The sampling ratio denotes the proportion
+of tokens actively updated by the DiT model in each step,
+while the remaining tokens reuse previously cached noise to
+10
+
+=== PAGE 11 ===
+reduce computation. We set the sampling ratio to 0.32 for
+SD3 2×acceleration and0.05for SD3 3×acceleration.
+TaylorSeer [32]Taylorseer introduces a new ”cache-then-
+forecast” paradigm to accelerate DiTs, overcoming the se-
+vere quality degradation of prior ”cache-then-reuse” meth-
+ods at high acceleration ratios. It is a training-free approach.
+The core idea is based on the observation that features in
+diffusion models evolve along a stable and continuous tra-
+jectory across timesteps. Taylorseer leverages Taylor series
+expansion to predict the features at future timesteps based on
+cached values from previous steps. The parameter N is the
+interval (or forced activation period) between fully computed
+steps. Furthermore, by using an order O greater than 0, the
+method uses finite difference methods to approximate the
+features’ higher-order derivatives. This enables more accu-
+rate modeling of the nonlinear feature trajectory and reduces
+cumulative prediction errors, which is especially crucial over
+large intervals (a large N). This predictive strategy allows
+the model to maintain generation quality even at extreme
+speedups. We set N= 7 , O= 1 , W= 3 for FLUX 5 ×
+acceleration, N= 11 , O= 1 , W= 3 for FLUX 7× accel-
+eration, N= 2 , O= 1 , W= 3 for SD3 2× acceleration,
+and N= 4 , O= 1 , W= 3 for SD3 3× acceleration, where
+Wis the number of fully warm-up steps.
+Bottleneck Sampling [ 55]Bottleneck Sampling is a
+training-free, inference-time acceleration method that ex-
+ploits the low-resolution priors of pre-trained diffusion mod-
+els. It adopts a three-stage high–low–high resolution strategy:
+starting with high-resolution denoising to establish semantic
+structure, performing low-resolution denoising in the inter-
+mediate steps to reduce computational cost, and restoring
+full resolution at the final stage to refine details. To en-
+sure stable denoising across stage transitions, Bottleneck
+Sampling introduces two key techniques: (1) noise reintro-
+duction, which resets the signal-to-noise ratio (SNR) at each
+resolution change to avoid inconsistencies, and (2) scheduler
+re-shifting, which adapts the denoising schedule per stage to
+align with the changed resolution and noise levels. We set
+the cumulative number of inference steps at the end of each
+stage [N1, N2, N3] = [4,16,21] for FLUX 5× acceleration,
+[3,11,15] for FLUX 7× acceleration, [6,24,31] for SD3 2×
+acceleration, and[4,16,20]for SD3 3×acceleration.
+B.2.2. Combining RALU with other accelerations (Tab.3)
+To evaluate the feasibility and performance of integrating
+RALU with various acceleration methods, we established
+several baselines.
+Our primary focus was on combining RALU with tem-
+poral acceleration methods, for which we employed ∆-DiT,
+ToCa, and TaylorSeer. The specific configurations for these
+baselines were as follows:
+•∆ -DiT: The caching interval, denoted as N, was set to
+N= 2.
+• ToCa: We configured the caching interval to N= 3 and
+the skip ratio, R (representing the percentage of frames to
+skip), toR= 90%.
+• TaylorSeer: The forced activation period was set toN= 3 ,
+and the order of the Taylor expansion,O, was set to O= 1 .
+We additionally integrated our method with timestep-
+distilled models by employing the publicly available weights
+of FLUX.1-schnell and SD3.5L-Turbo from Hugging Face.
+For both models, we set the number of function evaluations
+(NFE) to 4 and configured the cumulative number of infer-
+ence steps at the end of each stage as[N1, N2, N3] = [1,2,4]
+ande= [0.3,0.45,1.0].
+B.3. Flow-matching based Diffusion Transformers
+For the quantitative comparison, we performed experi-
+ments on two flow-matching based diffusion transformers
+(DiTs) [41]: FLUX-1.dev [1] and Stable Diffusion 3 [41].
+FLUX.1-devFLUX.1-dev is a diffusion-based text-to-image
+(T2I) synthesis model trained on large-scale data via flow
+matching, achieving state-of-the-art performance. Despite its
+high generation quality, the model combines T5-XXL [44]
+and a CLIP [ 43] text encoder, resulting in a total of 12
+billion parameters. This large model size leads to significant
+inference latency, posing serious limitations for real-world
+deployment. In this work, we apply various acceleration
+methods, including our proposed approach, to FLUX.1-dev
+and evaluate each method in terms of image quality and
+faithfulness to the input text. These evaluations demonstrate
+the effectiveness of our method.
+Stable Diffusion 3Stable Diffusion 3 (SD3) is a text-to-
+image synthesis diffusion generative model trained with a
+rectified flow objective. It conditions on three different text
+encoders—CLIP-L [ 43], CLIP-G, and T5-XXL [44]—and
+has a total of 8 billion parameters. Due to its large model
+size, SD3 also suffers from non-negligible inference latency,
+which remains one of the key challenges. In this work, we
+conduct experiments on SD3 with 2× and 3× speedups to
+evaluate the effectiveness of our proposed method. In our
+experiments, we use Stable Diffusion 3 Medium.
+B.4. Metrics
+ImageReward [58]ImageReward is presented as the first
+general-purpose text-to-image human preference reward
+model (RM), designed to effectively learn and encode human
+preferences for evaluating and improving text-to-image gen-
+eration models. Its training relies on a systematic annotation
+pipeline, including rating and ranking, which collected 137k
+expert comparisons based on real-world user prompts. Im-
+ageReward comprehensively captures human preference by
+evaluating multiple factors, including text-image alignment,
+image quality, and Harmlessness. ImageReward serves two
+key roles: as a promising automatic evaluation metric for
+11
+
+=== PAGE 12 ===
+comparing text-to-image models and individual samples, and
+as a reward function to directly optimize diffusion models
+via the Reward Feedback Learning (ReFL) algorithm. In
+our experiments, we average the ImageReward scores over
+5,000 images using MS-COCO validation set [28].
+GenEval [16]GenEval is a comprehensive benchmark de-
+signed to evaluate the alignment between generated images
+and input text prompts in text-to-image (T2I) synthesis. We
+use two-object, counting, color, and color attribution prompts
+to evaluate models. It is designed to specifically probe the
+compositional understanding of T2I models by leveraging
+existing object detection and other discriminative vision mod-
+els to verify properties. It can assess how faithfully the gener-
+ated outputs reflect the semantic content of the given textual
+descriptions. In our experiments, each prompt is sampled
+with four different random seeds.
+T2I-CompBench [ 22]T2I-CompBench is a benchmark
+specifically designed to assess the compositional under-
+standing of T2I generation models. It comprises structured
+prompts aimed at evaluating a model’s ability to accurately
+associate attributes with corresponding objects, ensuring
+correct semantic alignment in scenarios involving multiple
+objects and attributes. For evaluation, we measured perfor-
+mance on spatial, non-spatial and complex sets. By present-
+ing diverse and challenging prompts, T2I-CompBench offers
+a rigorous evaluation framework for diagnosing issues such
+as semantic neglect that are prevalent in T2I models. For
+quantitative evaluation, each prompt is sampled with four
+different random seeds.
+CLIP-IQA [56]The CLIP-IQA metric leverages the pre-
+trained vision-language model CLIP to assess both quality
+and abstract perception of images without task-specific train-
+ing. By using a novel antonym prompt pairing strategy
+(e.g., “Good photo.” vs. “Bad photo.”) and removing po-
+sitional embeddings to accommodate variable input sizes,
+CLIP-IQA computes the perceptual similarity between im-
+ages and descriptive prompts. This enables it to evaluate
+traditional quality attributes like sharpness and brightness
+as well as abstract attributes such as aesthetic or emotional
+tone. Extensive evaluations on standard IQA benchmarks
+and user studies suggest that CLIP-IQA achieves competitive
+correlation with human perception compared to established
+no-reference and learning-based methods, while maintaining
+generality and flexibility. We utilize CLIP-IQA provided
+by PyIQA 1 with the default prompt setting. We average
+the CLIP-IQA scores over 5,000 generated images using
+MS-COCO validation set [28].
+NIQE [39]The Natural Image Quality Evaluator (NIQE)
+is a no-reference image quality assessment (IQA) metric
+that operates without any training on human opinion scores
+1https://github.com/chaofengc/IQA-PyTorch
+or exposure to distorted images. It is a completely blind,
+opinion-unaware, and distortion-unaware model that mea-
+sures deviations from statistical regularities observed in nat-
+ural images. NIQE extracts perceptually relevant natural
+scene statistics (NSS) features from local image patches and
+fits them to a multivariate Gaussian (MVG) model built from
+a corpus of pristine images. The image quality is then quan-
+tified as the distance between the MVG model of the test
+image and that of natural images. Unlike many existing no
+reference IQA models that are limited to distortion types
+seen during training, NIQE is general-purpose and performs
+competitively with state-of-the-art methods, while requiring
+no supervised learning and maintaining low computational
+complexity. We utilize NIQE provided by PyIQA 1 with the
+default prompt setting. We average the NIQE scores over
+5,000 images using MS-COCO validation set [28].
+C. Additional Experiments
+C.1. Additional ablation studies
+Effect of edge detection method.To mitigate aliasing ar-
+tifacts, we adopt an early upsampling strategy focused on
+artifact-prone edge regions. In this process, we initially ap-
+proximate the clean latent ( ˆx0) using Tweedie’s formula,
+which is then decoded by the V AE to apply Canny edge
+detection in the image space. A natural question arises:Is
+VAE decoding strictly necessary?
+Detecting edges directly in the latent space without V AE
+decoding is inherently inaccurate. High-frequency content
+in the latent space does not consistently correspond to high-
+frequency edges in the image space, given the implicit and
+compressed nature of the information. However, an alter-
+native approach is to utilize a gradient kernel to measure
+the steepness of change (gradient) between adjacent latent
+patches and then hypothesize that regions exhibiting a large
+magnitude of change constitute the edge regions.
+Tab. S3 compares FLOPs and performance metrics of dif-
+ferent edge detection methods. The gradient kernel method
+is marginally more efficient in terms of FLOPs as it avoids
+the V AE decode step. Nevertheless, we observe that the
+V AE decoding followed by Canny edge detection yields bet-
+ter performance across overall metrics. Despite the slightly
+higher computational overhead, this method adds a minimal
+amount of computation (i.e., 2.48 TFLOPs), accounting for
+less than 1% of the total FLOPs. Therefore, we adopt the
+V AE decoding and Canny edge detection approach for its
+higher accuracy in identifying edge regions.
+Adaptive upsampling ratio.We select fixed upsampling ra-
+tio top-r, where r= 0.2 for FLUX-5×, FLUX-7×, SD3-3×
+settings and r= 0.3 for SD3-2× setting. However, recog-
+nizing that the proportion of edge patches can vary across
+images, we also experimented with an adaptive selection
+12
+
+=== PAGE 13 ===
+Table S3. Comparison of different edge detection methods on FLUX.1-dev.
+Edge detection methods TFLOPs↓ImageReward↑CLIP-IQA↑NIQE↓T2I-Comp.↑GenEval↑
+gradient kernel (5×) 537.990.996 0.694 6.770.627 0.675
+V AE decode− →Canny(5×) 540.471.022 0.700 6.430.626 0.652
+gradient kernel (7×) 423.530.9790.6856.980.6330.662
+V AE decode− →Canny(7×) 426.010.9990.6816.87 0.633 0.682
+Table S4. Comparison of method to determine early upsampling patches on FLUX.1-dev. FLOPs are reported as Mean±Std.
+Early upsampling ratio TFLOPs↓ImageReward↑CLIP-IQA↑NIQE↓T2I-Comp.↑GenEval↑
+Adaptive ratio (5×) 550.92±22.911.015 0.691 6.560.630 0.668
+Fixed r=0.2(5×) 540.47±0.001.022 0.700 6.430.626 0.652
+Adaptive ratio (7×) 435.14±12.360.986 0.6776.81 0.6340.674
+Fixed r=0.2(7×) 426.01±0.000.999 0.6816.87 0.6330.682
+Table S5. Comparison of different upsampling methods on FLUX.1-
+dev, two-stage upsampling framework. We denote the best perfor-
+mance inboldand second-best performance with underline .
+Upsampling methods ImageReward↑CLIP-IQA↑
+Bilinear 0.9883 0.7045
+Bicubic 0.9754 0.7032
+Lanczos 0.98480.7077
+Nearest-neighbor (Ours) 0.99160.7056
+strategy based on a fixed edge-strength threshold, rather than
+a fixed top-r ratio, to determine if this improved image qual-
+ity. The results in Tab. S4 show that this adaptive approach
+did not yield improvements in image fidelity although this
+method introduces computational instability (i.e., high vari-
+ance in FLOPs) with a slightly higher average computational
+cost. Given that the fixed-ratio method ensures consistent,
+predictable computational costs and delivers superior or com-
+parable generation quality, we adopted it for its stability and
+more favorable performance-efficiency trade-off.
+Effect of upsampling method.We employed nearest-
+neighbor upsampling for feature upsampling. This choice is
+motivated by the inherent risks associated with conventional
+image-space interpolation methods when operating in the
+latent space, where feature correlations are highly complex.
+We conducted comparisons with various upsampling
+methods. Specifically, NT-Matching involves injecting cor-
+related noise, necessitate calculating the exact covariance
+matrix for the noise. However, this calculation introduces
+prohibitive computational overhead, rendering it unsuitable
+for DiT acceleration. Consequently, for a fair comparison
+in this context, we focused on matching the Signal-to-Noise
+Ratio (SNR). Tab. S5 shows that employing nearest-neighbor
+upsampling yields better performance than other upsamplers.
+Furthermore, the nearest-neighbor approach simplifies the
+“A bright, sunlit room with a few pieces of modern furniture. ”
+“Three colorful macaroons stacked neatly on a bright plate. ”
+r= 0.1 r= 0.2 r= 0.3
+Figure S1. Visualization of detected edge regions under different
+top-r ratios. The patches identified by the Canny edge detector
+are highlighted with blue squares. We observe that at r= 0.3 ,
+the detector effectively captures the majority of structural edges,
+while also including some non-edge regions. This visualization is
+conducted under the FLUX-5×acceleration setting.
+computation of the covariance matrix, which ultimately led
+to our choice of this upsampling method.
+C.2. Visualization of edge detection
+As discussed in Tab. S3, applying Canny edge detection after
+V AE decoding effectively identifies the edge regions. To
+better understand which areas are actually detected as edge
+regions, we visualize the detection results in Fig. S1. The
+figure illustrates the detected edge regions under different
+early upsampling ratiosr.
+13
+
+=== PAGE 14 ===
+C.3. Integrating RALU with temporal acceleration
+Fig. S2 presents qualitative comparisons obtained by inte-
+grating RALU with several temporal acceleration methods.
+Although the overall speedup increases from 5.53 × to as
+high as 9.03 ×, the image quality remains well preserved,
+and no noticeable artifacts are introduced.
+C.4. Integrating RALU with timestep-distilled
+models
+Fig. S3 presents qualitative comparisons obtained by inte-
+grating RALU with the timestep-distilled models FLUX.1-
+schnell and SD3.5L-Turbo. Both models operate with an
+NFE of 4 in combination with RALU, using [N1, N2, N3] =
+[1,2,4] for each. The results show that, even when achieving
+up to a 15.91× speedup through this integration, the image
+quality remains largely unaffected and no noticeable artifacts
+are introduced.
+C.5. Additional Qualitative Results
+Additional qualitative results are presented in Fig. S4- S9
+following the technical appendices. All experimental config-
+urations are provided in the main paper and its appendices.
+We prepared additional qualitative results following Fig. 6.
+C.6. Uncurated Qualitative Results
+To demonstrate that our model consistently maintains high
+generation quality without cherry-picking, we present uncu-
+rated qualitative results under 5× and 7× speedup on FLUX.
+We randomly sampled 96 prompts from the CC12M [ 6]
+dataset and generated corresponding images. The results are
+shown in Fig. S10- S13.
+D. Limitations
+While region-adaptive early upsampling is broadly applica-
+ble to diffusion transformers (DiTs), the Noise-Timestep
+Matching (NT-Matching) component is tailored specifi-
+cally for flow-matching–based architectures. Moreover, our
+method is evaluated only on DiTs; its applicability to other
+generative backbones, such as diffusion U-Net, remains un-
+verified. Consequently, the generality of NT-Matching be-
+yond flow-matching DiTs has yet to be established.
+E. Broader Impact
+RALU enables faster and more resource-efficient generation
+of high-quality images using diffusion transformers, which
+has the potential to make such models more accessible for
+real-world or on-device applications. This could democra-
+tize creative tools for broader user groups while reducing
+environmental costs associated with large-scale inference.
+However, this efficiency gain may also facilitate misuse,
+such as faster generation of harmful or misleading content.
+Additionally, the selective focus on visually salient regions
+(e.g., edges) may implicitly encode or reinforce dataset bi-
+ases, especially in underrepresented object structures. Care
+must be taken to evaluate fairness and misuse risks, and we
+encourage future work to explore responsible deployment
+strategies alongside technical improvements.
+14
+
+=== PAGE 15 ===
+Accel. method RALU (Ours) + Δ-DiT + ToCa +TaylorSeer
+(𝑊=3)
+“A close up of
+several zebras
+grazing in a field.”
++TaylorSeer
+(𝑊=2)
+Speedup 5.53	× 7.08 × 7.30 × 7.28	× 9.03 ×
+“A picture of a man
+that is posing for a
+picture.”
+“A couple of people
+with snowboards in
+the snow”
+“Eating a donut
+makes for a quick
+and easy breakfast.”
+“A bird floating on
+top of a body of
+water.”
+Figure S2. Qualitative comparison of RALU integrated with different temporal acceleration methods.
+15
+
+=== PAGE 16 ===
+Accel. method FLUX.1-schnell + RALU SD3.5L-Turbo
+“A giraffe that is
+laying on the
+ground.”
+Speedups 11.83	× 15.91 × 6.31 × 8.28	×
+“A person wearing
+orange pants
+standing on a
+bench.”
+“A black cat
+standing inside of a
+piece of luggage.”
+“A grey cat bitting
+into a frosted
+donuts.”
+“A steam train
+coming through
+town with houses in
+the back.”
++ RALU
+“Abearwalking
+through a field next
+to a forest.”
+“Two small young
+girls hold hands as
+they look into a
+bedroom.”
+“A large calico cat
+resting on a pillow.”
+“A man wearing a
+blue tank top holds
+out his arm toward
+a hovering Frisbee
+on a beach near a
+lake.”
+“A lady with green
+hair and red boots
+sitting in the grass
+near a horse.”
+Figure S3. Qualitative comparison of timestep-distilled models integrated with RALU.
+16
+
+=== PAGE 17 ===
+FLUX (NFE=50)
+ FLUX (NFE=10, 7)
+ TaylorSeer
+ Bottleneck
+ RALU (Ours)
+“Man standing in front of the ocean in a wet suit with a surf board.”
+“A boy laying on the beach behind a man flying a kite.”
+“A mother sheep feeding her baby on a lush green field.”
+“A sink and a show with a cream tile and red painted wall.”
+“Red stuffed bears are pinned to a cardboard tree.”
+“A breakfast has an omeletteand a toasted muffin.”
+Stable Diffusion 3
+4×accel.4×accel.4×accel.7×accel.7×accel.7×accel.
+FLUX.1-dev
+Figure S4. Qualitative comparison of images generated by baseline methods and RALU on FLUX. Best viewed in zoom.
+17
+
+=== PAGE 18 ===
+FLUX (NFE=50)
+ FLUX (NFE=10)
+ TaylorSeer
+ Bottleneck
+ RALU (Ours)
+“Some colorful fresh fruit and veggies cleverly arranged.”
+“A manholding a tooth brush up to his face.”
+“Hot dogs with ketchup and plain chips.”
+“Two computer monitors are turned on on a computer desk.”
+“A white refrigerator freezer sitting on ahard wood floor.”
+“Young babysleepingininnocent white drapes around him.”
+Figure S5. Qualitative comparison of images generated by baseline methods and RALU on FLUX for 5× speedups. Best viewed in zoom.
+18
+
+=== PAGE 19 ===
+FLUX (NFE=50)
+ FLUX (NFE=7)
+ TaylorSeer
+ Bottleneck
+ RALU (Ours)
+“The electronic light has many tiny green dots.”
+“A young woman on a beach flying a kite”
+“A man on a tennis court with his tennis racket poised to hit the ball.”
+“A kitchen with oak cabinetryand white appliances”
+“Two giraffes on the grass in a fenced area.”
+“A bunch of yellow bananas sitting on top of a counter.”
+Figure S6. Qualitative comparison of images generated by baseline methods and RALU on FLUX for 7× speedups. Best viewed in zoom.
+19
+
+=== PAGE 20 ===
+SD3 (NFE=28)
+ SD3 (NFE=14, 9)
+ RAS
+ Bottleneck
+ RALU (Ours)
+“A person up in the air, upside down while outside.”
+“Two small dogs sleeping on a persons bed.”
+“A motorcycle is parked in the gravel alongside a street.”
+“A brown dog on a bed looking towards a bright window.”
+“A display case of different types of doughnuts in it.”
+“A train is next to a city by the mountains.”
+Stable Diffusion 3
+2×accel.2×accel.2×accel.3×accel.3×accel.3×accel.
+Figure S7. Qualitative comparison of images generated by baseline methods and RALU on SD3. Best viewed in zoom.
+20
+
+=== PAGE 21 ===
+SD3 (NFE=28)
+ SD3 (NFE=14)
+ RAS
+ Bottleneck
+ RALU (Ours)
+"A man holding a camera up over his left shoulder."
+"A white horse drawing a carriage through a street."
+"A clock that is perched on clothing to make it look like a head."
+"Man standing in front of the ocean in a wet suit with a surf board."
+"An airplane close to the ground with its landing gear dropped"
+"A long train travels past some trees along the railroad tracks”
+Figure S8. Qualitative comparison of images generated by baseline methods and RALU on SD3 for 2×speedups. Best viewed in zoom.
+21
+
+=== PAGE 22 ===
+SD3 (NFE=28)
+ SD3 (NFE=9)
+ RAS
+ Bottleneck
+ RALU (Ours)
+"A living room furnished with light-colored furnishings is pictured."
+"a red train parked in front of a train station."
+"A living room is furnished with old furniture."
+"A green cake that is shaped to be a train"
+"A photo of a dining venue outside complete with tables, chairs and umbrellas."
+"A white cow standing in front of a pink building."
+Figure S9. Qualitative comparison of images generated by baseline methods and RALU on SD3 for 3×speedups. Best viewed in zoom.
+22
+
+=== PAGE 23 ===
+Figure S10. 48 uncurated images generated by RALU on FLUX, 5×speedup.
+23
+
+=== PAGE 24 ===
+Figure S11. 48 uncurated images generated by RALU on FLUX, 5×speedup.
+24
+
+=== PAGE 25 ===
+Figure S12. 48 uncurated images generated by RALU on FLUX, 7×speedup.
+25
+
+=== PAGE 26 ===
+Figure S13. 48 uncurated images generated by RALU on FLUX, 7×speedup.
+26
+
+=== PAGE 27 ===
+References
+[1] Black Forest Labs. FLUX. https://github.com/
+black-forest-labs/flux, 2024. 1, 5, 6, 11
+[2] Andreas Blattmann, Robin Rombach, Huan Ling, Tim Dock-
+horn, Seung Wook Kim, Sanja Fidler, and Karsten Kreis.
+Align your latents: High-resolution video synthesis with la-
+tent diffusion models.CVPR, 2023. 1
+[3] Daniel Bolya and Judy Hoffman. Token merging for fast
+stable diffusion.CVPR, 2023. 8
+[4] Daniel Bolya, Cheng-Yang Fu, Xiaoliang Dai, Peizhao Zhang,
+Christoph Feichtenhofer, and Judy Hoffman. Token merging:
+Your vit but faster.ICLR, 2023. 8
+[5] Huiwen Chang, Han Zhang, Jarred Barber, Aaron Maschinot,
+Jose Lezama, Lu Jiang, Ming-Hsuan Yang, Kevin Patrick
+Murphy, William T Freeman, Michael Rubinstein, et al. Muse:
+Text-to-image generation via masked generative transformers.
+ICML, 2023. 1
+[6] Soravit Changpinyo, Piyush Sharma, Nan Ding, and Radu
+Soricut. Conceptual 12m: Pushing web-scale image-text pre-
+training to recognize long-tail visual concepts.CVPR, pages
+3558–3568, 2021. 14
+[7] Haoxin Chen, Yong Zhang, Xiaodong Cun, Menghan Xia,
+Xintao Wang, Chao Weng, and Ying Shan. Videocrafter2:
+Overcoming data limitations for high-quality video diffusion
+models.CVPR, 2024. 1
+[8] Junsong Chen, Chongjian Ge, Enze Xie, Yue Wu, Lewei Yao,
+Xiaozhe Ren, Zhongdao Wang, Ping Luo, Huchuan Lu, and
+Zhenguo Li. Pixart- σ: Weak-to-strong training of diffusion
+transformer for 4k text-to-image generation.ECCV, 2024. 1
+[9] Lei Chen, Yuan Meng, Chen Tang, Xinzhu Ma, Jingyan Jiang,
+Xin Wang, Zhi Wang, and Wenwu Zhu. Q-dit: Accurate
+post-training quantization for diffusion transformers.CVPR,
+2025. 2
+[10] Pengtao Chen, Mingzhu Shen, Peng Ye, Jianjian Cao,
+Chongjun Tu, Christos-Savvas Bouganis, Yiren Zhao, and
+Tao Chen. delta-dit: A training-free acceleration method
+tailored for diffusion transformers.arXiv:2406.01125, 2024.
+1, 2, 6, 9, 10
+[11] Tri Dao, Dan Fu, Stefano Ermon, Atri Rudra, and Christopher
+R´e. Flashattention: Fast and memory-efficient exact attention
+with io-awareness.NeurIPS, 2022. 10
+[12] Patrick Esser, Sumith Kulal, Andreas Blattmann, Rahim En-
+tezari, Jonas M¨uller, Harry Saini, Yam Levi, Dominik Lorenz,
+Axel Sauer, Frederic Boesel, et al. Scaling rectified flow trans-
+formers for high-resolution image synthesis.ICML, 2024. 5,
+6
+[13] Gongfan Fang, Kunjun Li, Xinyin Ma, and Xinchao Wang.
+Tinyfusion: Diffusion transformers learned shallow.CVPR,
+2025. 2
+[14] Weilun Feng, Chuanguang Yang, Zhulin An, Libo Huang,
+Boyu Diao, Fei Wang, and Yongjun Xu. Relational diffusion
+distillation for efficient image generation. 2024. 1, 2
+[15] Peng Gao, Le Zhuo, Dongyang Liu, Ruoyi Du, Xu Luo,
+Longtian Qiu, Yuhang Zhang, Rongjie Huang, Shijie Geng,
+Renrui Zhang, et al. Lumina-t2x: Scalable flow-based large
+diffusion transformer for flexible resolution generation.ICLR,
+2025. 2
+[16] Dhruba Ghosh, Hannaneh Hajishirzi, and Ludwig Schmidt.
+Geneval: An object-focused framework for evaluating text-to-
+image alignment.NeurIPS, 2023. 5, 6, 12
+[17] Zhifang Guo, Jianguo Mao, Rui Tao, Long Yan, Kazushige
+Ouchi, Hong Liu, and Xiangdong Wang. Audio generation
+with multiple conditional diffusion model.AAAI, 2024. 1
+[18] Jonathan Ho, Ajay Jain, and Pieter Abbeel. Denoising diffu-
+sion probabilistic models.NeurIPS, 2020. 1
+[19] Jonathan Ho, Chitwan Saharia, William Chan, David J Fleet,
+Mohammad Norouzi, and Tim Salimans. Cascaded diffusion
+models for high fidelity image generation.JMLR, 23(47):
+1–33, 2022. 2
+[20] Jonathan Ho, Tim Salimans, Alexey Gritsenko, William Chan,
+Mohammad Norouzi, and David J Fleet. Video diffusion
+models.NeurIPS, 2022. 1
+[21] Wenyi Hong, Ming Ding, Wendi Zheng, Xinghan Liu, and
+Jie Tang. Cogvideo: Large-scale pretraining for text-to-video
+generation via transformers.ICLR, 2023. 1
+[22] Kaiyi Huang, Kaiyue Sun, Enze Xie, Zhenguo Li, and Xihui
+Liu. T2i-compbench: A comprehensive benchmark for open-
+world compositional text-to-image generation.NeurIPS, 2023.
+5, 6, 12
+[23] Jinho Jeong, Sangmin Han, Jinwoo Kim, and Seon Joo Kim.
+Latent space super-resolution for higher-resolution image
+generation with diffusion models.CVPR, 2025. 2
+[24] Yang Jin, Zhicheng Sun, Ningyuan Li, Kun Xu, Hao Jiang,
+Nan Zhuang, Quzhe Huang, Yang Song, Yadong Mu, and
+Zhouchen Lin. Pyramidal flow matching for efficient video
+generative modeling.ICLR, 2025. 2, 3, 5
+[25] Gwanghyun Kim, Hayeon Kim, Hoigi Seo, Dong Un Kang,
+and Se Young Chun. Beyondscene: Higher-resolution human-
+centric scene generation with pretrained diffusion.ECCV,
+2024. 2
+[26] Muyang Li, Yujun Lin, Zhekai Zhang, Tianle Cai, Xiuyu
+Li, Junxian Guo, Enze Xie, Chenlin Meng, Jun-Yan Zhu,
+and Song Han. Svdqunat: Absorbing outliers by low-rank
+components for 4-bit diffusion models.ICLR, 2025. 2
+[27] Yanyu Li, Huan Wang, Qing Jin, Ju Hu, Pavlo Chemerys, Yun
+Fu, Yanzhi Wang, Sergey Tulyakov, and Jian Ren. Snapfusion:
+Text-to-image diffusion model on mobile devices within two
+seconds.NeurIPS, 2023. 1, 2
+[28] Tsung-Yi Lin, Michael Maire, Serge Belongie, James Hays,
+Pietro Perona, Deva Ramanan, Piotr Doll´ar, and C Lawrence
+Zitnick. Microsoft coco: Common objects in context.ECCV,
+2014. 12
+[29] Yaron Lipman, Ricky TQ Chen, Heli Ben-Hamu, Maximilian
+Nickel, and Matt Le. Flow matching for generative modeling.
+ICLR, 2023. 2
+[30] Feng Liu, Shiwei Zhang, Xiaofeng Wang, Yujie Wei, Haonan
+Qiu, Yuzhong Zhao, Yingya Zhang, Qixiang Ye, and Fang
+Wan. Timestep embedding tells: It’s time to cache for video
+diffusion model.CVPR, 2025. 2, 6, 7, 10
+[31] Haohe Liu, Zehua Chen, Yi Yuan, Xinhao Mei, Xubo Liu,
+Danilo Mandic, Wenwu Wang, and Mark D Plumbley. Audi-
+oldm: Text-to-audio generation with latent diffusion models.
+ICML, 2023. 1
+27
+
+=== PAGE 28 ===
+[32] Jiacheng Liu, Chang Zou, Yuanhuiyi Lyu, Junjie Chen, and
+Linfeng Zhang. From reusing to forecasting: Accelerating
+diffusion models with taylorseers.ICCV, 2025. 1, 2, 6, 7, 10,
+11
+[33] Xingchao Liu, Chengyue Gong, and Qiang Liu. Flow straight
+and fast: Learning to generate and transfer data with rectified
+flow.ICLR, 2022. 2
+[34] Yixin Liu, Kai Zhang, Yuan Li, Zhiling Yan, Chujie Gao,
+Ruoxi Chen, Zhengqing Yuan, Yue Huang, Hanchi Sun, Jian-
+feng Gao, et al. Sora: A review on background, technology,
+limitations, and opportunities of large vision models.arXiv
+preprint arXiv:2402.17177, 2024. 1
+[35] Ziming Liu, Yifan Yang, Chengruidong Zhang, Yiqi
+Zhang, Lili Qiu, Yang You, and Yuqing Yang. Region-
+adaptive sampling for diffusion transformers.arXiv preprint
+arXiv:2502.10389, 2025. 1, 2, 6, 7, 10
+[36] Jinming Lou, Wenyang Luo, Yufan Liu, Bing Li, Xinmiao
+Ding, Weiming Hu, Jiajiong Cao, Yuming Li, and Chenguang
+Ma. Token caching for diffusion transformer acceleration.
+arXiv preprint arXiv:2409.18523, 2024. 1, 2
+[37] Xinyin Ma, Gongfan Fang, Michael Bi Mi, and Xinchao
+Wang. Learning-to-cache: Accelerating diffusion transformer
+via layer caching.NeurIPS, 2024. 1, 2
+[38] Xinyin Ma, Gongfan Fang, and Xinchao Wang. Deepcache:
+Accelerating diffusion models for free.CVPR, 2024. 2
+[39] Anish Mittal, Rajiv Soundararajan, and Alan C Bovik. Mak-
+ing a “completely blind” image quality analyzer.IEEE Signal
+processing letters, 20(3):209–212, 2012. 5, 6, 12
+[40] Alex Nichol, Prafulla Dhariwal, Aditya Ramesh, Pranav
+Shyam, Pamela Mishkin, Bob McGrew, Ilya Sutskever, and
+Mark Chen. Glide: Towards photorealistic image generation
+and editing with text-guided diffusion models.ICML, 2022.
+1
+[41] William Peebles and Saining Xie. Scalable diffusion models
+with transformers.CVPR, 2023. 1, 11
+[42] Dustin Podell, Zion English, Kyle Lacey, Andreas Blattmann,
+Tim Dockhorn, Jonas M¨uller, Joe Penna, and Robin Rombach.
+Sdxl: Improving latent diffusion models for high-resolution
+image synthesis.ICLR, 2024. 2
+[43] Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya
+Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sastry,
+Amanda Askell, Pamela Mishkin, Jack Clark, et al. Learning
+transferable visual models from natural language supervision.
+ICML, 2021. 11
+[44] Colin Raffel, Noam Shazeer, Adam Roberts, Katherine Lee,
+Sharan Narang, Michael Matena, Yanqi Zhou, Wei Li, and
+Peter J Liu. Exploring the limits of transfer learning with a
+unified text-to-text transformer.JMLR, 21(140):1–67, 2020.
+11
+[45] Robin Rombach, Andreas Blattmann, Dominik Lorenz,
+Patrick Esser, and Bj ¨orn Ommer. High-resolution image
+synthesis with latent diffusion models.CVPR, 2022. 1
+[46] Olaf Ronneberger, Philipp Fischer, and Thomas Brox. U-net:
+Convolutional networks for biomedical image segmentation.
+MICCAI, 2015. 1
+[47] Chitwan Saharia, William Chan, Saurabh Saxena, Lala Li,
+Jay Whang, Emily L Denton, Kamyar Ghasemipour, Raphael
+Gontijo Lopes, Burcu Karagol Ayan, Tim Salimans, et al. Pho-
+torealistic text-to-image diffusion models with deep language
+understanding.NeurIPS, 2022. 1, 2
+[48] Flavio Schneider, Ojasv Kamal, Zhijing Jin, and Bernhard
+Sch¨olkopf. Mo ˆusai: Efficient text-to-music diffusion models.
+2024. 1
+[49] Hoigi Seo, Junseo Bang, Haechang Lee, Joohoon Lee,
+Byung Hyun Lee, and Se Young Chun. Geometrical proper-
+ties of text token embeddings for strong semantic binding in
+text-to-image generation.arXiv preprint arXiv:2503.23011,
+2025. 8
+[50] Hoigi Seo, Wongi Jeong, Jae-sun Seo, and Se Young Chun.
+Skrr: Skip and re-use text encoder layers for memory efficient
+text-to-image generation.ICML, 2025. 2
+[51] Yuzhang Shang, Zhihang Yuan, Bin Xie, Bingzhe Wu, and
+Yan Yan. Post-training quantization on diffusion models.
+CVPR, 2023. 2
+[52] Jascha Sohl-Dickstein, Eric Weiss, Niru Maheswaranathan,
+and Surya Ganguli. Deep unsupervised learning using
+nonequilibrium thermodynamics.ICML, 2015. 1
+[53] Jiaming Song, Chenlin Meng, and Stefano Ermon. Denoising
+diffusion implicit models.ICLR, 2021. 1
+[54] Jiayan Teng, Wendi Zheng, Ming Ding, Wenyi Hong, Jianqiao
+Wangni, Zhuoyi Yang, and Jie Tang. Relay diffusion: Unify-
+ing diffusion process across resolutions for image synthesis.
+ICLR, 2024. 2, 3
+[55] Ye Tian, Xin Xia, Yuxi Ren, Shanchuan Lin, Xing Wang, Xue-
+feng Xiao, Yunhai Tong, Ling Yang, and Bin Cui. Training-
+free diffusion acceleration with bottleneck sampling.arXiv
+preprint arXiv:2503.18940, 2025. 1, 2, 6, 7, 10, 11
+[56] Jianyi Wang, Kelvin CK Chan, and Chen Change Loy. Ex-
+ploring clip for assessing the look and feel of images, 2023.
+5, 6, 12
+[57] Enze Xie, Junsong Chen, Yuyang Zhao, Jincheng Yu, Ligeng
+Zhu, Yujun Lin, Zhekai Zhang, Muyang Li, Junyu Chen, Han
+Cai, et al. Sana 1.5: Efficient scaling of training-time and
+inference-time compute in linear diffusion transformer.arXiv
+preprint arXiv:2501.18427, 2025. 2
+[58] Jiazheng Xu, Xiao Liu, Yuchen Wu, Yuxuan Tong, Qinkai
+Li, Ming Ding, Jie Tang, and Yuxiao Dong. Imagereward:
+Learning and evaluating human preferences for text-to-image
+generation.NeurIPS, 2023. 3, 4, 5, 6, 11
+[59] Haoran You, Connelly Barnes, Yuqian Zhou, Yan Kang, Zhen-
+bang Du, Wei Zhou, Lingzhi Zhang, Yotam Nitzan, Xiaoyang
+Liu, Zhe Lin, et al. Layer-and timestep-adaptive differentiable
+token compression ratios for efficient diffusion transformers.
+CVPR, 2025. 1, 2
+[60] Zhihang Yuan, Hanling Zhang, Lu Pu, Xuefei Ning, Lin-
+feng Zhang, Tianchen Zhao, Shengen Yan, Guohao Dai, and
+Yu Wang. Ditfastattn: Attention compression for diffusion
+transformer models.NeurIPS, 2024. 1, 2
+[61] Linfeng Zhang and Kaisheng Ma. Accelerating diffusion mod-
+els with one-to-many knowledge distillation.arXiv preprint
+arXiv:2410.04191, 2024. 1, 2
+[62] Lvmin Zhang, Anyi Rao, and Maneesh Agrawala. Adding
+conditional control to text-to-image diffusion models.ICCV,
+2023. 1
+28
+
+=== PAGE 29 ===
+[63] Qingping Zheng, Ling Zheng, Yuanfan Guo, Ying Li, Song-
+cen Xu, Jiankang Deng, and Hang Xu. Self-adaptive reality-
+guided diffusion for artifact-free super-resolution.CVPR,
+2024. 1
+[64] Tianyi Zheng, Peng-Tao Jiang, Ben Wan, Hao Zhang, Jinwei
+Chen, Jia Wang, and Bo Li. Beta-tuned timestep diffusion
+model.ECCV, 2024. 3
+[65] Shangchen Zhou, Peiqing Yang, Jianyi Wang, Yihang Luo,
+and Chen Change Loy. Upscale-a-video: Temporal-consistent
+diffusion model for real-world video super-resolution.CVPR,
+2024. 1
+[66] Chang Zou, Xuyang Liu, Ting Liu, Siteng Huang, and Lin-
+feng Zhang. Accelerating diffusion transformers with token-
+wise feature caching.ICLR, 2025. 1, 2, 6, 10
+29

@@ -1,0 +1,211 @@
+{
+  "file": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\05_efficiency\\imax_2410.07536.pdf",
+  "page_count": 18,
+  "first_page_excerpt": "Technical Report\nI-M AX: M AXIMIZE THE RESOLUTION POTENTIAL\nOF PRE-TRAINED RECTIFIED FLOW TRANSFORMERS\nWITH PROJECTED FLOW\nRuoyi Du1,2, Dongyang Liu 2,3, Le Zhuo 2, Qi Qin 2, Hongsheng Li 3, Zhanyu Ma 1∗, Peng Gao 2∗\n1Beijing University of Posts and Telecommunications\n2Shanghai Artificial Intelligence Laboratory\n3The Chinese University of Hong Kong\nhttps://github.com/PRIS-CV/I-Max\nABSTRACT\nRectified Flow Transformers (RFTs) offer superior training and inference effi-\nciency, making them likely the most viable direction for scaling up diffusion mod-\nels. However, progress in generation resolution has been relatively slow due to\ndata quality and training costs. Tuning-free resolution extrapolation presents an\nalternative, but current methods often reduce generative stability, limiting practi-\ncal application. In this paper, we review existing resolution extrapolation methods\nand introduce the I-Max framework to maximize the resolution potential of Text-\nto-Image RFTs. I-Max features: (i) a novel Projected Flow strategy for stable ex-\ntrapolation and (ii) an advanced inference toolkit for generalizing model knowl-\nedge to higher resolutions. Experiments with Lumina-Next-2K and Flux.1-dev\ndemonstrate I-Max’s ability to enhance stability in resolution extrapolation and\nshow that it can bring image detail emergence and artifact correction, confirming\nthe practical value of tuning-free resolution extrapolation.\n1 I NTRODUCTION\nOver the past few years, diffusion model Sohl-Dickstein et al. (2015) has made significant break-\nthroughs across various dimensions, including diffusion process Ho et al. (2020); Song et al.\n(2020a;b); Liu et al. (2022); Lipman et al. (2022), model design Ho et al. (2022); Rombach et al.\n(2022); Teng et al. (2023), network architecture Peebles & Xie (2023), etc, and yielding numerous\npractical applications. Building on the accumulated experience from these explorations, rectified\nflow transformers (RFTs) Ma et al. (2024a) have now been recognized as a potential future direction\nfor scaling up diffusion models, leading to the development of successful open-source text-to-image\nmodels like Stable Diffusion 3 Esser et al. (2024), Lumina-T2X Gao et al. (2024), and Flux Black\nForest Labs (2024). Although these models have achieved significant improvements in various as-\npects like generation quality, aesthetics, and text-image alignment, their native generative resolution\nhas remained limited to the 10242-20482 range. This restricts the direct application of AI-generated\nvisual content in scenarios with high-quality demand.\nHowever, directly training high-resolution generative models is currently less practical, considering\nthe high data quality requirements and the exponential increase in training costs associated with\nultra-high-resolution generation. In fact, training a low-resolution diffusion model already requires\ndozens of days on hundreds of GPUs Podell et al. (2023). Therefore, some existing works achieve\na balance by supervised fine-tuning – improving the model’s generative resolution via tuning on a\ncertain amount of high-resolution samples Cheng et al. (2024); Chen et al. (2024); Ren et al. (2024).\nWhile another line of research focuses on directly hacking the model’s inference stage to achieve\ntuning-free resolution extrapolation – this allows for high-resolution generation almost as a “free\nlunch”, but it also significantly decreases the model’s generative stability. In this paper, based on\npre-trained text-to-image RFTs, we discover that rectified flow not only facilitates efficient infer-\nence but also offers inherent advantages in resolution extrapolation. Combined with the empirical\n∗Corresponding Authors\n1\narXiv:2410.07536v2  [cs.CV]  15 Oct 2024",
+  "flux_evidence": [
+    {
+      "page": 1,
+      "snippets": [
+        "edge to higher resolutions. Experiments with Lumina-Next-2K and Flux.1-dev",
+        "models like Stable Diffusion 3 Esser et al. (2024), Lumina-T2X Gao et al. (2024), and Flux Black"
+      ]
+    },
+    {
+      "page": 2,
+      "snippets": [
+        "Lumina-Next-2K Flux.1-dev",
+        "Figure 1: Landscape images crafted by Lumina-Next-2K and Flux.1-dev equipped with I-Max."
+      ]
+    },
+    {
+      "page": 3,
+      "snippets": [
+        "Figure 2: Extrapolation of 1K →4K on Flux.1-dev enhances the generated result with richer local",
+        "also validate I-Max on Flux.1-dev Black Forest Labs (2024), where it achieve stable 4K image gener-"
+      ]
+    },
+    {
+      "page": 4,
+      "snippets": [
+        "in Fig. 2, even though Flux.1-dev can generate ultra-high-quality images, conducting resolution"
+      ]
+    },
+    {
+      "page": 5,
+      "snippets": [
+        "ter settings need to reference the base model’s native resolution. However, Flux.1-dev is a multi-"
+      ]
+    },
+    {
+      "page": 6,
+      "snippets": [
+        "we take b′ = b · s for Lumina-Next-2K and b′ = 2.5 · b · s for Flux.1-dev.",
+        "keep the time-shifting operation and sets∗ = s for Lumina-Next-2K and s∗ = 1.5 · s for Flux.1-dev.",
+        "both Lumina-Next-2K and Flux.1-dev.",
+        "considering that Flux.1-dev applies the same (0, 0, 0) position index to all text tokens, to prevent out-",
+        "plication. We only adopt this strategy for Flux.1-dev since Lumina-Next-2K utilizes cross-attention",
+        "In this paper, we use a self-trained Lumina-Next-2K model and the open-source Flux.1-dev Black",
+        "800K self-collected high-quality data of the 20482 resolution. Flux.1-dev, on the other hand, is a"
+      ]
+    },
+    {
+      "page": 7,
+      "snippets": [
+        "components of I-Max on Flux.1-dev across the 1K→4K resolution range.",
+        "In Fig. 4, we present the results of sequential ablation across the 1K→4K resolution range on Flux.1-",
+        "lapse. Even for resolutions like 20482, which the Flux.1-dev model claims to handle, leveraging"
+      ]
+    },
+    {
+      "page": 8,
+      "snippets": [
+        "domly generate 300 images at the 4096 × 4096 resolution using Lumina-Next-2K and Flux.1-dev"
+      ]
+    },
+    {
+      "page": 10,
+      "snippets": [
+        "that the 2-step and 4-step results are obtained using the Flux.1-schnell model, while the other results",
+        "were produced using the Flux.1-dev model. We report the inference time of the denoising process,",
+        "structured Lumina-Next-2K and the MMDiT-structured Flux.1-dev exhibit different collapse modes.",
+        "Moreover, while they both have the capability to generate at 2K resolution, Flux.1-dev is trained to"
+      ]
+    },
+    {
+      "page": 11,
+      "snippets": [
+        "Black Forest Labs. Flux.1: An advanced generative ai model. https://flux1.io/, 2024."
+      ]
+    },
+    {
+      "page": 15,
+      "snippets": [
+        "Here, we provide the results of sequential ablation on Lumina-Next-2K. Unlike Flux.1-dev, which"
+      ]
+    },
+    {
+      "page": 16,
+      "snippets": [
+        "Flux.1-dev ESRGAN I-Max"
+      ]
+    },
+    {
+      "page": 17,
+      "snippets": [
+        "A.4 I-M AX ENHANCES FLUX .1- DEV ’S 2K I MAGE GENERATION",
+        "Flux.1-dev Flux.1-dev + I-Max Flux.1-dev Flux.1-dev + I-Max",
+        "Figure 14: Comparison between Flux.1-dev and Flux.1-dev with I-Max at 20482 resolution.",
+        "Although Flux.1-dev claims to generate images from 2562 to 20482 resolutions, its optimal perfor-",
+        "can provide consistent benefits for Flux.1-dev, such as improved global structure and local details,"
+      ]
+    }
+  ],
+  "figure_candidates": [
+    {
+      "page": 2,
+      "caption": "Figure 1: Landscape images crafted by Lumina-Next-2K and Flux.1-dev equipped with I-Max."
+    },
+    {
+      "page": 3,
+      "caption": "Figure 2: Extrapolation of 1K →4K on Flux.1-dev enhances the generated result with richer local"
+    },
+    {
+      "page": 4,
+      "caption": "Figure 3: Illustration of Projected Flow Mechanism:(a) In the low-dimensional space of native res-"
+    },
+    {
+      "page": 7,
+      "caption": "Figure 4: Sequential ablation of I-Max. We illustrate the effect of sequentially removing different"
+    },
+    {
+      "page": 7,
+      "caption": "Figure 5: Single ablation results"
+    },
+    {
+      "page": 7,
+      "caption": "Figure 6: Performance gains at"
+    },
+    {
+      "page": 7,
+      "caption": "Figure 7: Comparison of low-"
+    },
+    {
+      "page": 8,
+      "caption": "Figure 8: Illustration of results obtained by different low-resolution guidance approaches."
+    },
+    {
+      "page": 9,
+      "caption": "Figure 9: (a) Illustration of velocity loss values across different resolutions over the denoising pro-"
+    },
+    {
+      "page": 10,
+      "caption": "Figure 10: Illustration of I-Max results and inference costs at different inference step numbers."
+    },
+    {
+      "page": 14,
+      "caption": "Figure 11: Illustration of GPT-4o preference evaluation."
+    },
+    {
+      "page": 14,
+      "caption": "Fig. 11, we present a use case of such an evaluation. During practical implementation, we found"
+    },
+    {
+      "page": 15,
+      "caption": "Figure 12: Sequential ablation of I-Max. We illustrate the effect of sequentially removing different"
+    },
+    {
+      "page": 16,
+      "caption": "Figure 13: Comparison with super-resolution method ESRGAN."
+    },
+    {
+      "page": 17,
+      "caption": "Figure 14: Comparison between Flux.1-dev and Flux.1-dev with I-Max at 20482 resolution."
+    },
+    {
+      "page": 18,
+      "caption": "Figure 15: Generation results with various resolutions and aspect-ratios."
+    }
+  ],
+  "table_candidates": [],
+  "keyword_pages": {
+    "architecture": [
+      1,
+      2,
+      3,
+      6,
+      7,
+      10,
+      15,
+      16
+    ],
+    "super_resolution": [
+      1,
+      2,
+      3,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      13,
+      15,
+      16,
+      17,
+      18
+    ],
+    "efficiency": [
+      10,
+      12
+    ],
+    "ablation": [
+      7,
+      8,
+      10,
+      15
+    ],
+    "limitations": []
+  },
+  "key": "imax",
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\text\\imax.txt"
+}

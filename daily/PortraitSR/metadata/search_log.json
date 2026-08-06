@@ -1,0 +1,50 @@
+{
+  "searched_at": "2026-08-06",
+  "database": "OpenAlex",
+  "endpoint": "https://api.openalex.org/works",
+  "date_filter": "2022-01-01 to 2026-08-06",
+  "queries": [
+    {
+      "query": "blind face restoration",
+      "results": 100
+    },
+    {
+      "query": "face super resolution",
+      "results": 100
+    },
+    {
+      "query": "face hallucination diffusion",
+      "results": 100
+    },
+    {
+      "query": "portrait image restoration",
+      "results": 100
+    },
+    {
+      "query": "portrait super resolution",
+      "results": 100
+    },
+    {
+      "query": "identity preserving face restoration",
+      "results": 100
+    },
+    {
+      "query": "reference based face restoration",
+      "results": 100
+    },
+    {
+      "query": "personalized face restoration",
+      "results": 100
+    },
+    {
+      "query": "video face restoration",
+      "results": 100
+    },
+    {
+      "query": "face detail restoration diffusion transformer",
+      "results": 100
+    }
+  ],
+  "raw_result_count": 1000,
+  "deduplicated_count": 815
+}

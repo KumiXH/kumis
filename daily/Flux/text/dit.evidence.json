@@ -1,0 +1,201 @@
+{
+  "file": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\01_foundations\\dit_2212.09748.pdf",
+  "page_count": 25,
+  "first_page_excerpt": "Scalable Diffusion Models with Transformers\nWilliam Peebles*\nUC Berkeley\nSaining Xie\nNew York University\nFigure 1. Diffusion models with transformer backbones achieve state-of-the-art image quality. We show selected samples from two\nof our class-conditional DiT-XL/2 models trained on ImageNet at 512×512 and 256×256 resolution, respectively.\nAbstract\nWe explore a new class of diffusion models based on the\ntransformer architecture. We train latent diffusion models\nof images, replacing the commonly-used U-Net backbone\nwith a transformer that operates on latent patches. We an-\nalyze the scalability of our Diffusion Transformers (DiTs)\nthrough the lens of forward pass complexity as measured by\nGﬂops. We ﬁnd that DiTs with higher Gﬂops—through in-\ncreased transformer depth/width or increased number of in-\nput tokens—consistently have lower FID. In addition to pos-\nsessing good scalability properties, our largest DiT-XL/2\nmodels outperform all prior diffusion models on the class-\nconditional ImageNet 512×512 and 256×256 benchmarks,\nachieving a state-of-the-art FID of 2.27 on the latter.\n1. Introduction\nMachine learning is experiencing a renaissance powered\nby transformers. Over the past ﬁve years, neural architec-\ntures for natural language processing [8, 42], vision [10]\nand several other domains have largely been subsumed by\ntransformers [60]. Many classes of image-level genera-\ntive models remain holdouts to the trend, though—while\ntransformers see widespread use in autoregressive mod-\nels [3,6,43,47], they have seen less adoption in other gener-\native modeling frameworks. For example, diffusion models\nhave been at the forefront of recent advances in image-level\ngenerative models [9,46]; yet, they all adopt a convolutional\nU-Net architecture as the de-facto choice of backbone.\n* Work done during an internship at Meta AI, FAIR Team.\nCode and project page available here.\n1\narXiv:2212.09748v2  [cs.CV]  2 Mar 2023",
+  "flux_evidence": [],
+  "figure_candidates": [
+    {
+      "page": 1,
+      "caption": "Figure 1. Diffusion models with transformer backbones achieve state-of-the-art image quality. We show selected samples from two"
+    },
+    {
+      "page": 2,
+      "caption": "Figure 2. ImageNet generation with Diffusion Transformers (DiTs). Bubble area indicates the ﬂops of the diffusion model. Left:"
+    },
+    {
+      "page": 3,
+      "caption": "Figure 3. The Diffusion Transformer (DiT) architecture. Left: We train conditional latent DiT models. The input latent is decomposed"
+    },
+    {
+      "page": 4,
+      "caption": "Figure 4. Input speciﬁcations for DiT. Given patch size p× p,"
+    },
+    {
+      "page": 5,
+      "caption": "Figure 5. Comparing different conditioning strategies. adaLN-"
+    },
+    {
+      "page": 6,
+      "caption": "Figure 6. Scaling the DiT model improves FID at all stages of training. We show FID-50K over training iterations for 12 of our DiT"
+    },
+    {
+      "page": 6,
+      "caption": "Figure 5 shows the results. The adaLN-Zero block yields"
+    },
+    {
+      "page": 7,
+      "caption": "Figure 7. Increasing transformer forward pass Gﬂops increases sample quality. Best viewed zoomed-in. We sample from all 12 of"
+    },
+    {
+      "page": 8,
+      "caption": "Figure 8. Transformer Gﬂops are strongly correlated with FID."
+    },
+    {
+      "page": 8,
+      "caption": "Figure 6 (top) demonstrates how FID changes as model"
+    },
+    {
+      "page": 8,
+      "caption": "Figure 9. Larger DiT models use large compute more efﬁ-"
+    },
+    {
+      "page": 8,
+      "caption": "Figure 9, we plot FID as a function of total training compute"
+    },
+    {
+      "page": 9,
+      "caption": "Figure 10. Scaling-up sampling compute does not compensate"
+    },
+    {
+      "page": 12,
+      "caption": "Figure 11. Additional selected samples from our 512×512 and 256×256 resolution DiT-XL/2 models.We use a classiﬁer-free guidance"
+    },
+    {
+      "page": 14,
+      "caption": "Figure 12. DiT scaling behavior on several generative modeling metrics.Left: We plot model performance as a function of total training"
+    },
+    {
+      "page": 15,
+      "caption": "Figure 13. Training loss curves for all DiT models. We plot the loss over training for all DiT models (the sum of the noise prediction"
+    },
+    {
+      "page": 16,
+      "caption": "Figure 14. Uncurated 512× 512 DiT-XL/2 samples."
+    },
+    {
+      "page": 16,
+      "caption": "Figure 15. Uncurated 512× 512 DiT-XL/2 samples."
+    },
+    {
+      "page": 17,
+      "caption": "Figure 16. Uncurated 512× 512 DiT-XL/2 samples."
+    },
+    {
+      "page": 17,
+      "caption": "Figure 17. Uncurated 512× 512 DiT-XL/2 samples."
+    },
+    {
+      "page": 18,
+      "caption": "Figure 18. Uncurated 512× 512 DiT-XL/2 samples."
+    },
+    {
+      "page": 18,
+      "caption": "Figure 19. Uncurated 512× 512 DiT-XL/2 samples."
+    },
+    {
+      "page": 19,
+      "caption": "Figure 20. Uncurated 512× 512 DiT-XL/2 samples."
+    },
+    {
+      "page": 19,
+      "caption": "Figure 21. Uncurated 512× 512 DiT-XL/2 samples."
+    },
+    {
+      "page": 20,
+      "caption": "Figure 22. Uncurated 512× 512 DiT-XL/2 samples."
+    },
+    {
+      "page": 20,
+      "caption": "Figure 23. Uncurated 512× 512 DiT-XL/2 samples."
+    },
+    {
+      "page": 21,
+      "caption": "Figure 24. Uncurated 512× 512 DiT-XL/2 samples."
+    },
+    {
+      "page": 21,
+      "caption": "Figure 25. Uncurated 512× 512 DiT-XL/2 samples."
+    },
+    {
+      "page": 22,
+      "caption": "Figure 26. Uncurated 256× 256 DiT-XL/2 samples."
+    },
+    {
+      "page": 22,
+      "caption": "Figure 27. Uncurated 256× 256 DiT-XL/2 samples."
+    },
+    {
+      "page": 23,
+      "caption": "Figure 28. Uncurated 256× 256 DiT-XL/2 samples."
+    },
+    {
+      "page": 23,
+      "caption": "Figure 29. Uncurated 256× 256 DiT-XL/2 samples."
+    },
+    {
+      "page": 24,
+      "caption": "Figure 30. Uncurated 256× 256 DiT-XL/2 samples."
+    },
+    {
+      "page": 24,
+      "caption": "Figure 31. Uncurated 256× 256 DiT-XL/2 samples."
+    },
+    {
+      "page": 25,
+      "caption": "Figure 32. Uncurated 256× 256 DiT-XL/2 samples."
+    },
+    {
+      "page": 25,
+      "caption": "Figure 33. Uncurated 256× 256 DiT-XL/2 samples."
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 5,
+      "caption": "Table 1. Details of DiT models. We follow ViT [10] model con-"
+    },
+    {
+      "page": 5,
+      "caption": "Table 1 gives details of the conﬁgs."
+    },
+    {
+      "page": 9,
+      "caption": "Table 2. Benchmarking class-conditional image generation on"
+    },
+    {
+      "page": 9,
+      "caption": "Table 3. Benchmarking class-conditional image generation on"
+    },
+    {
+      "page": 13,
+      "caption": "Table 4. Details of all DiT models. We report detailed information about every DiT model in our paper. Note that FID-50K here is"
+    },
+    {
+      "page": 13,
+      "caption": "Table 5. Decoder ablation. We tested different pre-trained V AE"
+    },
+    {
+      "page": 13,
+      "caption": "Table 6. Gﬂop counts for baseline diffusion models that use U-"
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      8,
+      10
+    ],
+    "super_resolution": [],
+    "efficiency": [],
+    "ablation": [
+      13
+    ],
+    "limitations": []
+  },
+  "key": "dit",
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\text\\dit.txt"
+}

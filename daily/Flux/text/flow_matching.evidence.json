@@ -1,0 +1,139 @@
+{
+  "file": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\01_foundations\\flow_matching_2210.02747.pdf",
+  "page_count": 28,
+  "first_page_excerpt": "Preprint\nFLOW MATCHING FOR GENERATIVE MODELING\nYaron Lipman1,2 Ricky T. Q. Chen1 Heli Ben-Hamu2 Maximilian Nickel1 Matt Le1\n1Meta AI (FAIR) 2Weizmann Institute of Science\nABSTRACT\nWe introduce a new paradigm for generative modeling built on Continuous\nNormalizing Flows (CNFs), allowing us to train CNFs at unprecedented scale.\nSpeciﬁcally, we present the notion of Flow Matching (FM), a simulation-free\napproach for training CNFs based on regressing vector ﬁelds of ﬁxed conditional\nprobability paths. Flow Matching is compatible with a general family of Gaussian\nprobability paths for transforming between noise and data samples—which\nsubsumes existing diffusion paths as speciﬁc instances. Interestingly, we ﬁnd\nthat employing FM with diffusion paths results in a more robust and stable\nalternative for training diffusion models. Furthermore, Flow Matching opens\nthe door to training CNFs with other, non-diffusion probability paths. An\ninstance of particular interest is using Optimal Transport (OT) displacement\ninterpolation to deﬁne the conditional probability paths. These paths are more\nefﬁcient than diffusion paths, provide faster training and sampling, and result in\nbetter generalization. Training CNFs using Flow Matching on ImageNet leads\nto consistently better performance than alternative diffusion-based methods in\nterms of both likelihood and sample quality, and allows fast and reliable sample\ngeneration using off-the-shelf numerical ODE solvers.\n1 I NTRODUCTION\nDeep generative models are a class of deep learning algorithms aimed at estimating and sampling\nfrom an unknown data distribution. The recent inﬂux of amazing advances in generative modeling,\ne.g., for image generation Ramesh et al. (2022); Rombach et al. (2022), is mostly facilitated by\nthe scalable and relatively stable training of diffusion-based models Ho et al. (2020); Song et al.\n(2020b). However, the restriction to simple diffusion processes leads to a rather conﬁned space of\nsampling probability paths, resulting in very long training times and the need to adopt specialized\nmethods (e.g., Song et al. (2020a); Zhang & Chen (2022)) for efﬁcient sampling.\nIn this work we consider the general and deterministic framework of Continuous Normalizing\nFlows (CNFs; Chen et al. (2018)). CNFs are capable of modeling arbitrary probability path\nFigure 1: Unconditional ImageNet-128 sam-\nples of a CNF trained using Flow Matching\nwith Optimal Transport probability paths.\nand are in particular known to encompass the prob-\nability paths modeled by diffusion processes (Song\net al., 2021). However, aside from diffusion that\ncan be trained efﬁciently via, e.g., denoising score\nmatching (Vincent, 2011), no scalable CNF train-\ning algorithms are known. Indeed, maximum like-\nlihood training ( e.g., Grathwohl et al. (2018)) re-\nquire expensive numerical ODE simulations, while\nexisting simulation-free methods either involve in-\ntractable integrals (Rozen et al., 2021) or biased gra-\ndients (Ben-Hamu et al., 2022).\nThe goal of this work is to propose Flow Matching\n(FM), an efﬁcient simulation-free approach to train-\ning CNF models, allowing the adoption of general\nprobability paths to supervise CNF training. Impor-\ntantly, FM breaks the barriers for scalable CNF train-\ning beyond diffusion, and sidesteps the need to rea-\nson about diffusion processes to directly work with\nprobability paths.\n1\narXiv:2210.02747v2  [cs.LG]  8 Feb 2023",
+  "flux_evidence": [],
+  "figure_candidates": [
+    {
+      "page": 1,
+      "caption": "Figure 1: Unconditional ImageNet-128 sam-"
+    },
+    {
+      "page": 6,
+      "caption": "Figure 2: Compared to the diffusion path’s conditional score function, the OT path’s conditional"
+    },
+    {
+      "page": 6,
+      "caption": "Figure 3: Diffusion and OT"
+    },
+    {
+      "page": 6,
+      "caption": "Figure 2 compares the diffusion conditional score function (the re-"
+    },
+    {
+      "page": 7,
+      "caption": "Figure 4: (left) Trajectories of CNFs trained with different objectives on 2D checkerboard data. The"
+    },
+    {
+      "page": 8,
+      "caption": "Figure 6: Sample paths from the same initial noise with models trained on ImageNet 64 ×64. The"
+    },
+    {
+      "page": 8,
+      "caption": "Figure 5: Image quality during"
+    },
+    {
+      "page": 8,
+      "caption": "Figure 5 shows FID curves during training of Flow Matching"
+    },
+    {
+      "page": 9,
+      "caption": "Figure 7: Flow Matching, especially when using OT paths, allows us to use fewer evaluations for"
+    },
+    {
+      "page": 19,
+      "caption": "Figure 8: VP Diffusion path’s conditional vector ﬁeld. Compare to Figure 2."
+    },
+    {
+      "page": 19,
+      "caption": "Figure 9: Trajectories of CNFs trained with ScoreFlow (Song et al., 2021) and DDPM (Ho et al.,"
+    },
+    {
+      "page": 19,
+      "caption": "Figure 4. E I MPLEMENTATION DETAILS"
+    },
+    {
+      "page": 21,
+      "caption": "Figure 10: Function evaluations for sampling during training, for models trained on CIFAR-10 using"
+    },
+    {
+      "page": 22,
+      "caption": "Figure 11: Non-curated unconditional ImageNet-32 generated images of a CNF trained with FM-"
+    },
+    {
+      "page": 23,
+      "caption": "Figure 12: Non-curated unconditional ImageNet-64 generated images of a CNF trained with FM-"
+    },
+    {
+      "page": 24,
+      "caption": "Figure 13: Non-curated unconditional ImageNet-128 generated images of a CNF trained with FM-"
+    },
+    {
+      "page": 25,
+      "caption": "Figure 14: Conditional generation 64×64→256×256. Flow Matching OT upsampled images from"
+    },
+    {
+      "page": 26,
+      "caption": "Figure 15: Conditional generation 64×64→256×256. Flow Matching OT upsampled images from"
+    },
+    {
+      "page": 27,
+      "caption": "Figure 16: Generated samples from the same initial noise, but with varying number of function"
+    },
+    {
+      "page": 28,
+      "caption": "Figure 17: Generated samples from the same initial noise, but with varying number of function"
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 8,
+      "caption": "Table 1: Likelihood (BPD), quality of generated samples (FID), and evaluation time (NFE) for the"
+    },
+    {
+      "page": 9,
+      "caption": "Table 2: Image super-resolution on the"
+    },
+    {
+      "page": 20,
+      "caption": "Table 3: Hyper-parameters used for training each model"
+    },
+    {
+      "page": 20,
+      "caption": "Table 3). The polynomial decay learning rate schedule includes a warm-up phase for a speciﬁed"
+    },
+    {
+      "page": 21,
+      "caption": "Table 4: Negative log-likelihood (in bits per dimension) on the test set with different values of K"
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      1,
+      6,
+      7,
+      8,
+      9,
+      19,
+      20
+    ],
+    "super_resolution": [
+      9,
+      12
+    ],
+    "efficiency": [
+      8,
+      10,
+      20,
+      21
+    ],
+    "ablation": [
+      8,
+      9,
+      21
+    ],
+    "limitations": []
+  },
+  "key": "flow_matching",
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\text\\flow_matching.txt"
+}

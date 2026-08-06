@@ -1,0 +1,1071 @@
+=== PAGE 1 ===
+OP4KSR: One-Step Patch-Free 4K
+Super-Resolution with Periodic Artifact
+Suppression
+Chengyan Deng1, Pengbin Yu2, Zhentao Chen2, Wei Shen2, Kai Zhang3, Meng
+Li2, Lunxi Yuan2, Xue Zhou1, and Li Yu1⋆
+1 School of Automation Engineering, University of Electronic Science and Technology
+of China
+2 OPPO AI Center, OPPO Inc.
+3 School of Intelligence Science and Technology, Nanjing University
+dengchengyan@std.uestc.edu.cn, lyu@uestc.edu.cn
+Abstract. Diffusion-based real-world image super-resolution (Real-ISR)
+has achieved remarkable perceptual quality; however, directly super-
+resolving images to 4K remains limited by extreme memory consumption.
+Consequently, prior methods adopt patch-based inference, sacrificing
+global context and introducing semantic confusion, spatial inconsistency,
+and severe latency. We propose OP4KSR, a one-step patch-free 4K SR ap-
+proach built upon the powerful Flux backbone. By leveraging the extreme-
+compression F16 VAE, OP4KSR makes 4K SR inference tractable under
+practical GPU budgets, preserving global spatial-semantic coherence
+while enabling highly efficient inference. However, adapting this one-step
+architecture intrinsically triggers severe periodic artifacts. We trace this
+to a RoPE base frequency allocation mismatch and intra-token spatial am-
+biguity, both exacerbated by the lack of iterative refinement. To suppress
+these artifacts, we couple RoPE base frequency rescaling (RFR) with
+an autocorrelation-based periodicity loss (LAP). Furthermore, we curate
+a dedicated training dataset alongside three benchmarks (one synthetic
+and two real-world) to advance 4K SR research. Extensive experiments
+demonstrate that OP4KSR achieves competitive perceptual quality with
+efficient inference, generating a4096×4096output in only 5.75 seconds on
+a single NVIDIA H20 GPU. Code, models, and datasets will be released
+upon paper acceptance.
+Keywords:Image Super-Resolution·One-Step 4K·Periodic Artifact
+Suppression·Flux
+1 Introduction
+Single Image Super-Resolution (SISR) aims to recover original high-resolution
+(HR) images from degraded low-resolution (LR) images. Early approaches,
+⋆ Corresponding author.
+arXiv:2605.13457v1  [cs.CV]  13 May 2026
+
+=== PAGE 2 ===
+2 C. Deng et al.
+LR image
+SR model
+SR patch
+LR patchLR image after patching
+Semantic Confusion
+(a) Semantic Confusion
+Caption/
+Tag Model
+An elephant and her
+son... / [elephant,
+stand, walk, zoo ...]
+Unet/DiT
+LR image after patching
+(b) Spatial Inconsistency
+Process each patch in isolation
+Smooth Smooth
+SmoothSharpen
+SR model
+Unet/DiT
+SR model
+Unet/DiT
+Fig. 1:Illustration of key limitations in patch-based 4K super-resolution. (a) Semantic
+confusion caused by prompt-dominated inference on local patches. (b) Spatial inconsis-
+tency arising from processing patches independently.
+such as CNN-based [10,14,29,35], Transformer-based [28,34,70,75], Mamba-
+based [12,20,25,37], and GAN-based methods [24,46,50,69] have made significant
+progress in SISR by leveraging local information, capturing long-range dependen-
+cies, modeling with global linear complexity, and utilizing adversarial learning.
+However, they still struggle to effectively generate complex texture details from
+severely degraded LR inputs.
+Recently, diffusion-based SR [16,40,61,62,76] has gained prominence for its
+superior data distribution modeling. Although leveraging Text-to-Image (T2I)
+priors yields remarkable perceptual quality compared to early train-from-scratch
+methods [60,65], the heavy computational burden of iterative sampling has shifted
+recent focus toward accelerating the process to few- or even one-step inference.
+T able 1:Semantic consistency and
+spatial consistency support across
+different methods.
+Method Semantic
+Consistency
+Spatial
+Consistency
+ResShift [65]✓×
+SUPIR [63]× ×
+DreamClear [2]× ×
+SinSR [47]✓×
+AddSR [42]× ×
+OSEDiff [51]× ×
+OMGSR [53]✓×
+OP4KSR✓ ✓
+Driven by the rapid advancement of mo-
+bile devices and high-definition displays, the
+demand for 4K ultra-high-resolution images
+has surged. However, existing SR models utiliz-
+ing T2I priors are primarily optimized for fixed,
+low-resolution domains (e.g., super-resolving
+images from128 × 128 → 512 × 512). Directly
+extrapolating these models to generate 4K im-
+ages leads to severe generalization degradation
+and catastrophic memory bottlenecks. To cir-
+cumvent this, current solutions widely adopt
+patch-based inference: partitioning the input,
+processing patches independently, and fusing the outputs. While computationally
+feasible, this spatial truncation introduces three critical flaws in 4K SR:(i)
+Semantic confusion.Isolated patches lacking global structural constraints are
+easily dominated by strong text priors, causing generative models to hallucinate
+mismatched semantics (e.g., injecting elephant textures into a background wall)
+(Fig. 1(a)).(ii) Spatial inconsistency.Independent patch processing applies
+conflicting restoration strengths across continuous regions—aggressively sharpen-
+ing one patch while over-smoothing an adjacent one—which yields abrupt visual
+transitions (Fig. 1(b)). As further evidenced in Table 1, these two issues persist
+across existing SR methods.(iii) Computational inefficiency.Iterative patch
+processing incurs severe latency; specifically, super-resolving a1024× 1024input
+to4096×4096using SUPIR [63] takes∼1600s on a single NVIDIA H20 GPU.
+
+=== PAGE 3 ===
+OP4KSR 3
+(a) water surface (b) ground (c) lawn (d) face
+Fig. 2:Visual examples of periodic artifacts. These artifacts typically manifest in large,
+flat, and texturally homogeneous regions. We illustrate four representative scenes prone
+to such artifacts: (a) water surface, (b) ground, (c) lawn, and (d) face.
+To overcome these limitations, we proposeOP4KSR, aone-step,patch-
+free framework for4K SRbased on the Flux framework. First, we adopt an
+extreme-compression (F16) VAE to alleviate memory bottlenecks, unlocking
+global receptive fields for direct 4K SR. Second, we incorporate the mid-timestep
+strategy [53] to align latent features, enabling one-step SR. As illustrated in
+Fig. 3, the framework empowers OP4KSR to achieve a nearly10× speedup over
+one-step methods at 4K resolution while achieving competitive results.
+Ours (OP4KSR)
+OSEDiff
+OMGSR
+AddSR
+SUPIR
+DreamClear
+SinSR
+ResShift
+Better
+Fig. 3:Performance and runtime compar-
+ison of diffusion-based SR methods on
+the 4KSR-RealSquare benchmark (1024×
+1024 → 4096 × 4096). OP4KSR achieves
+competitive reconstruction quality with sig-
+nificantly reduced inference time.
+However, adapting the multi-step
+pre-trained Flux framework to the one-
+step paradigm intrinsically triggers se-
+vere periodic artifacts (Fig. 2), which
+significantly degrade homogeneous ar-
+eas like water surfaces and faces. We
+trace this flaw to two inherent causes:
+inter-token spatial indistinguishability
+arising from RoPE phase collapse, and
+intra-token spatial information loss
+during unpacking, both exacerbated
+by the lack of iterative refinement. To-
+gether, these compounding biases di-
+rectly manifest as grid-like periodic
+artifacts. To resolve this, we introduce
+RoPE base frequency rescaling in the
+latent domain to compress ambiguous
+similarity zones and restore local struc-
+tural sensitivity. In the pixel domain,
+a novel autocorrelation-based periodicity loss (LAP) locally constrains spatial
+autocorrelations, forcing the network to explicitly eliminate sub-grid periodic-
+ities rather than merely blurring them. Finally, we curate a high-quality 4K
+SR training dataset alongside three standardized benchmarks. In summary, our
+contributions are as follows:
+–We propose OP4KSR, to the best of our knowledge, the first one-step, patch-
+free framework for real-world 4K SR.
+
+=== PAGE 4 ===
+4 C. Deng et al.
+–We analyze the underlying causes of severe periodic artifacts in one-step Flux
+SR, and couple RoPE base frequency rescaling with a tailored autocorrelation-
+based periodicity loss to effectively mitigate these visual distortions.
+–We construct a dedicated training set and three benchmarks (one synthetic,
+two real-world), effectively filling the critical gap in training resources and
+real-world benchmarks for 4K SR.
+–ExtensiveexperimentsdemonstratethatOP4KSRachieveshighlycompetitive
+perceptual quality and the fastest inference speed among representative
+generative SR approaches.
+2 Related Works
+Multi-step Diffusion-based Methods.Recently, benefiting from the strong
+generative priors encapsulated in large-scale pre-trained T2I models [8,38,68]
+(e.g., Stable Diffusion [4] and Flux [23]), diffusion models have demonstrated
+immense potential in SR [9,17,32,58]. DiffBIR [31] employs a compact network
+to reconstruct LR images, subsequently applying ControlNet [73] to guide the
+generation process. PASD [56] integrates pixel-level and semantic information
+via a pixel-aware cross-attention mechanism. SeeSR [52] introduces a dedicated
+module to extract semantic information from images. LucidFlux [18] utilizes
+a semantic alignment module to further extract fine-grained semantic details
+from images. However, these methods rely on multi-step inference, resulting in
+computational overhead that limits their deployment in real-world applications.
+One-step Diffusion-based Methods.One-step diffusion-based SR meth-
+ods [5,7,15,54,64] have attracted increasing attention due to their significant
+practical potential. Specifically, SinSR [47] effectively accelerates the ResShift [65]
+model through consistency-preserving distillation; OSEDiff [51] introduces Varia-
+tional Score Distillation (VSD) [48] and directly takes the LR image as input,
+successfully compressing the multi-step denoising process into efficient one-step
+generation; AddSR [42] integrates Adversarial Diffusion Distillation (ADD) with
+the ControlNet architecture, simultaneously enabling efficient four-step and one-
+step inference models. Furthermore, PiSASR [41] designs dual LoRA modules to
+optimize pixel-level and semantic-level objectives, thereby effectively balancing
+image fidelity and perceptual quality; OMGSR [53] bridges the gap between real
+image inputs and the pre-trained noise latent distribution by devising a universal
+intermediate timestep training scheme and a latent space refinement loss.
+4K Image Super-Resolution.Early research on image SR focused on de-
+terministic degradations (e.g., bicubic downsampling). Due to the simplicity
+of these degradations, the resulting models remained compact, making early
+exploration of 4K SR feasible. For instance, RT4KSR [66] accelerates inference
+by downsampling deep features while preserving high-frequency details via a
+parallel branch. LRSRN [19] introduces reparameterized convolutions to enhance
+quality without extra overhead. CASR [59] combines cascaded upsampling with
+knowledge distillation for ultra-fast 4K inference. Although these lightweight
+CNN-based methods achieve real-time 4K SR, they are inadequate for complex
+
+=== PAGE 5 ===
+OP4KSR 5
+Pack
+Unpack
+Decoder
+Encoder
+DiT
+Encoder
+Pack
+Forward Process
+noise
+midt
+vae
+MSE LPIPS Wav++
+ADV
+Partition
+(a) Mitigating RoPE Phase Collapse in Attention Mechanism
+HRˆx
+HRx
+LRx
+Partition
+MSE
+SUM
+AP
+(b) Autocorrelation-Based
+Periodicity Loss
+Calculate Patch-wise autocorrelation
+Calculate Patch-wise autocorrelation
+HRˆ( , )q
+iAx 
+
+8 16 24 32 40
+Period Artifact Spike
+
+8 16 24 32 40
+HR( , )q
+iAx 
+align
+Discriminator
+1mk +
+
+1
+ˆ
+mk +
+Tˆ mq
+2D-RoPE
+T
+mq
+T
+11
+ˆˆ T
+m m m mq k q k++ 
+11
+ˆˆTT
+m m m mq k q k++ 
+1mk +
+1
+ˆ
+mk +
+Tˆ mq 2D-RoPE
+T
+mq
+Phase Collapse Positional Phase Preserved
+Fig. 4:Overall architecture of OP4KSR. To suppress periodic artifacts, we introduce
+two components: (a) RoPE Base Frequency Rescaling (RFR), which lowers the RoPE
+base frequency θ to resolve inter-token ambiguity and restore fine-grained structural
+sensitivity; (b) Autocorrelation-based Periodicity Loss (LAP), which partitions images
+into Q = 4quadrants for independent autocorrelation computation to penalize periodic
+patterns.Detailedformulationsof Lvae[53], LMSE, LLPIPS, LW av,and LADV areprovided
+in the Supplementary Material.
+real-world scenarios. Meanwhile, most real-world SR approaches [11,45,71,77] are
+trained at low resolutions and still rely on region-wise inference when scaling to
+4K, thereby inheriting the semantic and spatial limitations discussed in Section 1.
+3 Method
+3.1 One-Step 4K Super-Resolution Framework
+To achieve patch-free, one-step 4K inference, OP4KSR builds upon UltraFlux [57],
+utilizing its highly compressed F16 VAE encoder E to bypass standard F8
+constraints. Under the Flow Matching [33] framework, the intermediate latentzt
+linearly interpolates between pure noiseϵand the HR latentzHR =E(HR):
+zt =tz HR + (1−t)ϵ. (1)
+Adapting the pre-trained T2I framework for SR requires aligning the LR latent
+zLR = E(LR)to an appropriate point on this flow. Naively injectingzLR at
+the initial timestep creates a severe distribution gap, as the model expects pure
+noise rather than structured image content, disrupting its learned generative
+prior [26]. To this end, we adopt the latent alignment strategy from OMGSR [53].
+Specifically, we anchorzLR at an optimal mid-timestep (tmid = 0.3) to minimize
+the initial distribution gap, and further employ a latent alignment lossLvae to
+explicitly constrain the intermediate latentzt to matchzLR. This straightforward
+alignment seamlessly bridges the feature spaces, endowing OP4KSR with one-step
+SR capabilities. However, applying such one-step truncation to Flux-based 4K
+SR will introduce periodic artifacts. To resolve this, we introduce a periodic
+artifact suppression strategy: a tailored RoPE base frequency rescaling (RFR) as
+shown in Fig. 4(a) and an autocorrelation-based periodicity lossLAP as shown
+in Fig. 4(b). The overall architecture of OP4KSR is detailed in Fig. 4.
+
+=== PAGE 6 ===
+6 C. Deng et al.
+(a) Phase Collapse of Adjacent Tokens (b) Visualization of Inter-token Ambiguity
+Fig. 5:Impact of RoPE base frequency θ on spatial perception. (a) Phase collapse
+of adjacent tokens: Under the defaultθ = 10 ,000, the relative phase difference∆ϕi
+rapidly collapses below5◦, leaving only 8/28 dimensions effective for local positioning.
+In contrast, our proposed θ = 100extends the strong signal bandwidth to 15/28
+dimensions. (b) Visualization of inter-token ambiguity: The default setting produces an
+extensive high-cosine-similarity region (red zone around the center query +), rendering
+adjacent tokens positionally indistinguishable. Our adjustment resolves this ambiguity
+and restores local distinguishability.
+3.2 Overcoming Periodic Artifacts in One-Step Flux SR
+The Emergence of Periodic Artifacts.Although integrating the UltraFlux
+prior enables highly efficient SR, we observe that the model’s raw predictions
+suffer from catastrophic, grid-like artifacts with a precise fundamental period
+of 32 pixels—a spatial scale exactly matching one latent token (i.e., the16×
+VAE compression compounded by2× 2token packing). These artifacts predomi-
+nantly emerge in large, homogeneous regions or areas exhibiting highly repetitive
+textures as shown in Fig. 2 (e.g., human faces, lawns, lake surfaces, and walls).
+We identify that this severe visual degradation stems from the convergence of
+two macroscopic shifts: (i) a drastic objective mismatch between T2I generation
+and SR, and (ii) the aggressive step reduction in one-step inference. First, re-
+garding the objective mismatch, pre-trained T2I models operate from pure noise,
+necessitating a strong focus on capturing long-range dependencies to synthesize
+overall structural contours. In contrast, the SR paradigm utilizes the LR image
+as a structural starting point, completely shifting the primary objective toward
+acquiring high-frequency local details. Second, regarding the inference efficiency,
+adapting UltraFlux for a single forward pass fundamentally strips away the
+multi-step iterative process, which typically acts as a crucial error-correction
+buffer. Without this buffer, the model fails to smooth out local token boundaries,
+causing latent spatial misalignments to manifest directly as visible grid artifacts.
+Diagnosing the Origins of Periodic Artifacts.We attribute the observed
+32-pixel grid artifacts to the interplay between the RoPE mechanism and the
+packed DiT architecture, which manifests at two distinct spatial granularities:
+(i) RoPE Phase Collapse Leaves Adjacent Tokens Indistinguishable.
+Originally introduced for 1D sequences in Large Language Models (LLMs),
+Rotary Positional Embedding (RoPE) is adapted into a 2D formulation in T2I
+models using a high base frequency (conventionallyθ = 10000) to prioritize
+the aforementioned long-range dependencies. Directly transferring this global-
+centric configuration to the detail-oriented SR task introduces a severe frequency
+
+=== PAGE 7 ===
+OP4KSR 7
+mismatch. Mathematically, following this 2D RoPE formulation, the rotation
+angle difference∆ϕ i between spatially adjacent tokens is defined as:
+∆ϕi =θ − 2i
+d , i∈
+
+0,1, . . . , d
+2 −1
+
+, (2)
+where d is the per-axis feature dimension,θ is the base frequency, andi represents
+the complex channel pair index. Under the32× compression (16× VAE and
+2×pack), the latent spatial dimension for a 4096×4096 image shrinks to128× 128.
+Fundamentally, RoPE encodes positional information by applying a 2D rota-
+tion to feature pairs. For adjacent tokens (spatial distance∆m = 1), their spatial
+distinguishability is strictly governed by the relative rotation matrixR∆m=1(∆ϕi).
+However, with the defaultθ = 10000, the rotation angles∆ϕi for the vast major-
+ity of feature dimensions become pathologically small (∆ϕi < 5◦) as shown in
+Fig. 5(a). Consequently, the rotational terms of the matrix critically approximate
+cos(∆ϕi) ≈ 1and sin(∆ϕi) ≈ 0. Especially under BF16 precision, these minute
+rotational variations may be further attenuated numerically, makingR∆m=1 ef-
+fectively close to the identity matrixI. Therefore, when calculating the attention
+score between a RoPE-encoded queryˆqm and an adjacent RoPE-encoded key
+ˆkm+1, their inner product collapses fromˆq⊤
+m ˆkm+1 =q ⊤
+mR∆m=1km+1 directly to
+the unencoded base productq⊤
+mkm+1, completely dropping the positional phase
+shift. Without positional differentiation, attention scores across adjacent tokens
+converge to nearly identical values, producing the extensive high-similarity region
+in Fig. 5(b). This leaves the network fundamentally unable to resolve local spatial
+relationships. Further details are provided in the Supplementary Material.
+Unpacked
+Unpacked PCA
+After DiT Before DiT
+a1
+a1,b1,c1,d1 share the same token-level position
+a1
+c1 d1
+Introduce Channel
+Incoherence
+…
+seq
+LDX 
+Unpacking operation for adjacent tokens
+3
+PCA
+HWX 
+4
+Unpacked
+DHW
+X
+
+
+DiT
+Output
+Period Artifacts
+Caused by DiT Module
+b1
+c1 d1
+a2 b2a2
+c2 d2
+b2a2
+c2 d2
+b1
+b1
+b2
+a1
+a2
+c2
+d2
+c1
+d1
+Fig. 6:Illustrationofintra-tokenblindness.Left:The
+Unpack operation rearranges channel-wise sub-pixel
+features (a1, b1, c1, d1) into a2× 2spatial grid. Right:
+PCA visualization reveals periodic grid artifacts in
+XUnpacked after DiT, in contrast to the artifact-free
+latents before DiT. This confirms that the periodic
+artifacts originate from the DiT module.
+(ii) Unpacking Chan-
+nels Lacking Spatial In-
+formation Results in Peri-
+odic Artifacts.Compound-
+ing the inter-token blindness
+caused by the RoPE collapse
+is a secondary geometric col-
+lapse within the latent token
+itself. As illustrated in Fig. 6,
+inside the DiT, the features
+correspondingtoa2 ×2spatial
+patch (sub-pixelsa1, b1, c1, d1)
+reside entirely within the chan-
+nel dimension of a single latent
+token. Because the standard
+DiT architecture injects positional encoding strictly at the token level, these
+sub-pixel features are forced to share the exact same position throughout the
+transformer layers. While these features are separated into distinct channels,
+channel dimensions inherently lack spatial semantics. Consequently, the network
+cannot differentiate their internal geometry (e.g., distinguishing the top-lefta1
+from the bottom-right d1). This critical vulnerability ultimately materializes
+during the Unpack step: as the network deterministically unfolds these position-
+
+=== PAGE 8 ===
+8 C. Deng et al.
+ally agnostic channels back into a spatial grid, it intrinsically introduces severe
+structural misalignments.
+Crucially, whether this intra-token incoherence manifests as macroscopic peri-
+odic artifacts depends entirely on the local image content. In flat, homogeneous
+regions, unencoded adjacent features are inherently similar. Since the phase col-
+lapse (R∆m → I, analyzed in(i)) prevents RoPE from breaking this symmetry,
+the network is forced to aggregate indistinguishable tokens into uniform latent
+clumps (i.e., a1 ≈a 2, b1 ≈b 2). Consequently, the structurally biased pattern
+(a1, b1, c1, d1) produced by theUnpack operation is mechanically repeated across
+adjacent regions, deterministically magnifying into catastrophic periodic grid
+artifacts. Conversely, in high-frequency regions, adjacent base features inherently
+possess substantial variance. Even without effective positional encoding, this nat-
+ural discrepancy organically breaks the structural symmetry (a1 ̸= a2), disrupting
+the repetitive tiling process and explaining why these artifacts predominantly
+afflict smooth areas.
+This mechanism is directly corroborated by our PCA visualization in Fig. 6:
+while the latent features before the DiT remain structurally smooth, theXUnpacked
+latents after the DiT exhibit thea1, b1, c1, d1 periodic grid. This confirms that
+the fatal synergy between token-level PE sharing and theUnpacked operation is
+the direct structural origin of the periodic artifacts upon VAE decoding.
+Periodic Artifact Suppression Strategy.To address the RoPE phase collapse
+and the spatial information loss in unpacking channels, we propose a synergistic
+strategy operating in both the latent and pixel domains:
+(i) RoPE Base Frequency Rescaling.To resolve the inter-token ambigu-
+ity identified in our prior analysis, we propose RoPE base frequency rescaling
+(RFR), which significantly reduces the base frequencyθ from10000to100. As
+quantitatively demonstrated in Fig. 5(a), this adjustment decreases the decay rate
+of the rotation angle differences∆ϕi. By aligning the frequency spectrum with
+the compact latent resolution, RFR extends the effective bandwidth of strong
+positional signals (∆ϕi > 5◦) from 8 to 15 channel dimensions. The effectiveness
+of this rescaling is visually confirmed in Fig. 5(b): the ambiguous high-similarity
+zone produced by the default setting is substantially compressed. While a large
+base frequency θ blurs the distinction between adjacent tokens, essentially ren-
+dering the positional injection ineffective, ourθ = 100configuration explicitly
+restores the model’s ability to discriminate fine-grained spatial relations among
+neighboring tokens, effectively breaking the latent spatial ambiguity.
+(ii) Autocorrelation-based Periodicity Loss.To compensate for the
+intra-token spatial ambiguity intrinsic to one-step generation, we introduce
+an autocorrelation-based periodicity loss (LAP) to explicitly suppress the 32-
+pixel grid artifacts (Fig. 4(b)). As previously observed, these artifacts primarily
+affect localized smooth regions. A global autocorrelation computation [21] would
+inevitably dilute these concentrated periodic signals with the natural frequencies
+of artifact-free areas. To prevent this spatial averaging effect and accurately
+isolate the anomalies, we partition both the predicted HR imageˆxHR and its
+ground-truth xHR into Q = 4distinct quadrants, computing the unbiased 2D
+
+=== PAGE 9 ===
+OP4KSR 9
+spatial autocorrelation A(x, ∆)independently for each block x at spatial lag
+∆. Furthermore, to avoid naive artifact blurring and localized over-smoothing,
+it is insufficient to penalize solely the fundamental 32-pixel peak. Instead, we
+constrain the autocorrelation alignment over a comprehensive set of evenly spaced
+spatial lags: K = {8, 16, 24, 32, 40}. By matching the autocorrelation responses
+across these multiple intervals, we compel the network to faithfully reproduce the
+intrinsic spatial correlation properties of the ground truth, rather than merely
+suppressing the anomalies. The final objective minimizes the Mean Squared Error
+(MSE) between the evaluated autocorrelation responsesA(ˆx, ∆)and A(x, ∆)
+across all partitioned blocks and targeted lags:
+LAP = 1
+2QC|K|
+QX
+q=1
+CX
+c=1
+X
+∆∈K
+X
+i∈{h,v}
+
+Aq
+i,c(ˆxHR, ∆)−A q
+i,c(xHR, ∆)
+2
+, (3)
+where C denotes the image channels,i∈ {h,v} indicates the horizontal and
+vertical spatial axes, andxHR is explicitly detached from the computation graph.
+The specific details ofLAP are provided in the Supplementary Material.
+3.3 4K Dataset Construction
+1. Data Collection
+Online Image
+Repositories
+Professional-
+grade cameras
+2. Preliminary Filtering
+3. Degradation &
+Aesthetic Assessment
+4. Multimodal
+Perception Assessment
+Sharpness
+Edge Density
+Detail Richness
+Content
+Complexity
+Aesthetic
+Assessment
+Blur
+Estimation
+Noise
+Estimation
+Determine if the
+picture is sufficiently
+sharp and has dense
+textures Score the
+image sharpness from
+0 to 1 based on ……
+Multimodal
+Perception
+Score
+Fig. 7:Data curation pipeline for the
+4KSR-Train dataset. Raw images are
+collected at scale and processed through
+a three-stage filtering pipeline: (1) Pre-
+liminary Filtering, (2) Degradation &
+Aesthetic Assessment, and (3) Multi-
+modal Quality Assessment.
+Existing SR datasets (e.g., DIV2K [1],
+LSDIR [27] and Flickr2K [30]) are lim-
+ited in resolution, while publicly available
+high-fidelity 4K resources remain scarce.
+This scarcity severely hinders the develop-
+ment and accurate evaluation of ultra-high-
+resolution models. To effectively fill this
+critical gap in both training resources and
+real-world evaluation benchmarks, we cu-
+rate a dedicated 4K SR suite (summarized
+in Table 2), comprising a training dataset,
+4KSR-Train, alongside three comprehen-
+sive evaluation benchmarks: the synthetic
+benchmark 4KSR-Syn and two real-world
+benchmarks, 4KSR-RealSquare and 4KSR-
+RealVary.
+4KSR-Train Dataset.We initially cu-
+rateacorpusof ∼1.1Mhigh-qualityimages
+from the internet and real-world photog-
+raphy. To ensure high fidelity and texture
+richness, we design a rigorous three-stage filtering pipeline (depicted in Fig. 7):
+(i) Preliminary Filtering:We apply multiple complementary filters to
+ensure basic visual quality and complexity. First, we employ Laplacian variance
+and the Sobel operator to eliminate blurred and overly flat images. Next, to
+guarantee detail richness and content complexity, we compute Gray-Level Co-
+occurrence Matrix (GLCM) metrics (capturing contrast and correlation) and
+
+=== PAGE 10 ===
+10 C. Deng et al.
+T able 2: Overview of the proposed 4KSR dataset suite.
+Dataset Role Source Resolution Count GT Characteristics
+4KSR-TrainTrain Hybrid Mixed (<4K) 34,379✓High-fidelity, Texture-rich
+4KSR-SynTest Synthetic Max edge 1024 82✓Strict 4K, Full-reference4KSR-RealSquareTest Real-world1024×102492×Isotropic, Authentic noise4KSR-RealVaryTest Real-world Max edge 1024 81×Varied Aspect Ratios
+Shannon entropy. Only the top 50% of images based on aggregated GLCM scores
+and entropy are retained.
+(ii) Degradation & Aesthetic Assessment:To guarantee both technical
+fidelity and perceptual realism, we employ a dual-criterion filtering strategy. First,
+we adapt DEResNet [36] to quantify degradation levels, discarding samples with
+excessive blur and noise artifacts. Second, to align with human visual preferences,
+we utilize the LAION Aesthetic Predictor [39] to evaluate visual composition and
+color harmony.
+(iii) Multimodal Quality Assessment:Finally, we leverage Qwen3-VL [3]
+to conduct a comprehensive evaluation encompassing texture richness and clarity.
+This step ensures the retention of samples exhibiting high semantic integrity and
+superior perceptual fidelity.
+Evaluation Benchmarks.We constructed three benchmarks to comprehensively
+evaluate 4K SR performance.
+(i) Synthetic Benchmark (4KSR-Syn):We reserved 82 diverse images
+from the source pool (strictly excluded from training) and cropped such that the
+maximum side length of each HR image is 4096. The corresponding LR inputs
+were generated using a recalibrated Real-ESRGAN [46] pipeline tailored for 4K.
+(ii) Real-World Benchmarks (4KSR-Real):To assess robustness against
+authentic degradations, we collected two unpaired real-world datasets:4KSR-
+RealSquare(92 isotropic1024 × 1024images) and4KSR-RealVary(81 images
+with diverse aspect ratios). Details are provided in the Supplementary Material.
+4 Experimental Results
+4.1 Experimental settings
+Training Datasets and Benchmarks.We train our OP4KSR on our pro-
+posed 4KSR-Train dataset. For evaluation, alongside our rigorously constructed
+4KSR suite (4KSR-Syn, 4KSR-RealSquare, and 4KSR-RealVary), we incorporate
+the public dataset DIV4K-50 [78] to assess synthetic generalization. For fair
+comparison, its LR inputs are generated using our training degradation pipeline.
+Evaluation metrics.We evaluate all methods using full-reference and no-
+reference image quality metrics. For full-reference assessment, we employ PSNR
+and SSIM [49] computed on the Y channel in YCbCr space to evaluate reconstruc-
+tion fidelity, alongside LPIPS [74], DISTS [13], and TOPIQ-FR [6] to measure
+perceptual similarity. The no-reference metrics include NIQE [72], MANIQA [55],
+MUSIQ [22], CLIPIQA [44], TOPIQ-NR [6], TOPIQ-IAA [6], and NIMA [43],
+which estimate perceptual quality without references. Unlike traditional fidelity
+
+=== PAGE 11 ===
+OP4KSR 11
+T able 3:Quantitative comparison on synthetic benchmarks (4KSR-Syn and DIV4K-50).
+The best and second-best results are highlighted inboldand underline.
+Datasets Metrics Diffusion-based multi-step methods Diffusion-based one-step methods
+ResShift SUPIR DreamClear SinSR AddSR OSEDiff OMGSROP4KSR
+T2I Prior – SDXL PixArt-α– SD 2-base SD 2.1-base Flux.1 UltraFlux
+4KSR-Syn
+PSNR↑27.7026.31 24.32 27.06 26.45 25.79 24.62 24.31
+SSIM↑0.74590.6884 0.6580 0.6990 0.7342 0.7200 0.6218 0.6830
+LPIPS↓0.4028 0.3571 0.3781 0.4208 0.3523 0.3478 0.45150.3297
+DISTS↓0.2055 0.1533 0.1617 0.1933 0.1858 0.1678 0.19350.1496
+TOPIQ_FR↑0.4311 0.4445 0.4059 0.4459 0.4007 0.4472 0.39580.4507
+NIQE↓5.82 3.12 2.845.57 4.78 3.77 5.38 4.80
+MANIQA↑0.3475 0.3840 0.4103 0.3734 0.40500.45870.3508 0.3931
+MUSIQ↑42.13 52.52 51.70 45.26 48.62 55.10 49.2056.51
+CLIPIQA↑0.5275 0.5776 0.5994 0.5925 0.57180.65780.5238 0.6135
+TOPIQ_NR↑0.4238 0.5034 0.5025 0.4694 0.51020.58030.4104 0.5159
+TOPIQ_IAA↑4.19 4.33 4.31 4.28 4.204.434.16 4.37
+NIMA↑4.41 4.51 4.51 4.48 4.28 4.62 4.524.68
+DIV4K-50
+PSNR↑26.2124.73 23.33 25.33 24.85 24.72 23.80 23.09
+SSIM↑0.63040.5694 0.5554 0.5692 0.6191 0.6090 0.5292 0.5616
+LPIPS↓0.5506 0.4640 0.4744 0.5523 0.5193 0.4769 0.53890.4461
+DISTS↓0.2562 0.1924 0.2057 0.2324 0.2420 0.2161 0.23290.1843
+TOPIQ_FR↑0.3982 0.4131 0.3747 0.4159 0.3575 0.4096 0.38290.4263
+NIQE↓6.62 3.14 2.886.20 4.64 3.93 5.54 5.04
+MANIQA↑0.2643 0.3228 0.3648 0.3051 0.3740 0.40560.3077 0.3361
+MUSIQ↑33.36 46.81 47.46 38.03 47.71 50.11 42.6852.24
+CLIPIQA↑0.4345 0.5145 0.5379 0.5039 0.52670.60440.4630 0.5409
+TOPIQ_NR↑0.3464 0.4593 0.5321 0.4233 0.49870.54010.3724 0.4703
+TOPIQ_IAA↑4.11 4.44 4.32 4.27 4.44 4.574.14 4.29
+NIMA↑4.25 4.51 4.35 4.35 4.47 4.48 4.404.55
+LR patch DreamClear SUPIR SinSR
+AddSR OSEDiff OMGSR OP4KSR (ours)LR from 4KSR-Syn
+LR patch DreamClear SUPIR SinSR
+AddSR OSEDiff OMGSR OP4KSR (ours)LR from DIV4K-50
+Fig. 8:Qualitative comparisons of different methods on twosynthetic datasets.
+and statistical metrics (e.g., PSNR and NIQE), deep-feature-based metrics (e.g.,
+CLIPIQA and LPIPS) are inherently resolution-sensitive. Thus, we adopt a
+patch-based evaluation strategy, as detailed in the Supplementary Material.
+Implementation Details.Following [51,53], we freeze the VAE decoder and
+exclusively fine-tune the VAE encoder and the DiT backbone using LoRA,
+
+=== PAGE 12 ===
+12 C. Deng et al.
+T able 4:Quantitative comparison on real-world benchmarks (4KSR-RealSquare and
+4KSR-RealVary). The best and second-best are highlighted inboldand underline.
+Datasets Metrics Diffusion-based multi-step methods Diffusion-based one-step methods
+ResShift SUPIR DreamClear SinSR AddSR OSEDiff OMGSROP4KSR
+T2I Prior – SDXL PixArt-α– SD 2-base SD 2.1-base Flux.1 UltraFlux
+4KSR-
+RealSquare
+NIQE↓6.26 3.20 3.165.85 4.92 3.89 5.31 4.93
+MANIQA↑0.2864 0.3313 0.3460 0.3213 0.3732 0.42130.3296 0.3489
+MUSIQ↑39.86 48.95 46.83 42.20 49.35 54.12 49.1155.24
+CLIPIQA↑0.4337 0.4770 0.5027 0.5130 0.5058 0.5630 0.51980.5820
+TOPIQ_NR↑0.3729 0.4501 0.4858 0.4121 0.48790.53220.4029 0.5034
+TOPIQ_IAA↑4.04 4.05 3.93 4.13 4.08 4.06 3.974.15
+NIMA↑4.28 4.24 4.24 4.29 4.17 4.42 4.404.47
+4KSR-
+RealV ary
+NIQE↓6.27 3.38 3.275.90 4.83 3.74 5.24 4.92
+MANIQA↑0.3095 0.3253 0.3669 0.3438 0.3859 0.43240.3379 0.3617
+MUSIQ↑42.92 49.14 49.46 45.43 51.26 56.02 51.1957.13
+CLIPIQA↑0.4660 0.4581 0.5040 0.5485 0.5176 0.5679 0.51910.5831
+TOPIQ_NR↑0.4094 0.4432 0.4799 0.44160.52340.5223 0.4139 0.5068
+TOPIQ_IAA↑4.154.06 3.96 4.13 4.12 4.13 4.004.20
+NIMA↑4.36 4.20 4.28 4.35 4.21 4.39 4.41 4.46
+LR patch DreamClear SUPIR SinSR
+AddSR OSEDiff OMGSR OP4KSR (ours)LR from 4KSR-RealSquare
+LR patch DreamClear SUPIR SinSR
+AddSR OSEDiff OMGSR OP4KSR (ours)LR from 4KSR-RealVary
+Fig. 9:Qualitative comparisons of different methods on tworeal-world datasets.
+with the LoRA rank set to 64 for both. To reduce the computational overhead
+associated with text feature extraction, we adopt fixed text prompts within the
+S3Diff pipeline [67]. During the training phase, we utilize the AdamW optimizer
+with a learning rate of2.5 × 10−5. The experiments are conducted on 8 H20
+GPUs with an effective batch size of 16. The entire training process spans 2,000
+iterations and takes approximately 2 days.
+4.2 Comparison with the state of the art
+Compared methods.We compare our proposed OP4KSR with several repre-
+sentative approaches, including diffusion-based multi-step methods (ResShift [65],
+
+=== PAGE 13 ===
+OP4KSR 13
+T able 5:Comparison of inference time and memory usage across different methods.
+Diffusion-based full-step methods Diffusion-based one-step methods
+Metrics ResShift SUPIR DreamClear SinSR AddSR OSEDiff OMGSROP4KSRT2I Prior – SDXL PixArt-α– SD 2-base SD 2.1-base Flux.1 UltraFlux
+Inference time (s)↓108.8 1643.7 1006.5 59.6110.1 61.77 91.335.75Memory usage (G)↓36.81 53.26 64.1325.8837.71 46.53 64.10 32.88
+T able 6:Ablation study of RFR andLAP
+Method PSNR↑LPIPS↓MANIQA↑MUSIQ↑CLIPIQA↑TOPIQ_IAA↑
+Base 25.32 0.29760.3691 52.94 0.5601 4.1580Basew/RFR 24.64 0.3244 0.3908 54.73 0.5869 4.3313Basew/LAP 24.85 0.3150 0.3780 55.12 0.5920 4.2450Basew/RFR&LAP(Ours)24.31 0.32970.3935 56.51 0.6135 4.3747
+SUPIR[63],andDreamClear[2])anddiffusion-basedone-stepmethods(SinSR[47],
+AddSR [42], OSEDiff [51] ,and OMGSR [53]). Specifically, we evaluate the 15-step
+version of ResShift and the Flux-based variant of OMGSR.
+Quantitative Comparisons.On the synthetic datasets reported in Table 3,
+our method achieves the best perceptual fidelity, obtaining the lowest LPIPS and
+DISTS as well as the highest TOPIQ-FR among all compared approaches. In
+addition, OP4KSR delivers competitive aesthetic quality with leading MUSIQ and
+NIMA scores, indicating its superior capability in generating visually pleasing and
+authentic details. Results on the real-world datasets in Table 4 further validate
+its robustness. OP4KSR achieves highly competitive performance in no-reference
+evaluations, delivering strong perceptual quality over other methods.
+Qualitative Comparisons.Fig. 8 presents the visual comparisons on the syn-
+thetic datasets. For the example from the 4KSR-Syn dataset, we observe that
+certain methods relying on online text extraction and patch-based inference
+suffer from limited receptive fields. This restriction leads to severe semantic
+misinterpretations during the SR process, such as erroneously synthesizing street-
+lamps as leaf textures. Additionally, the results generated by OSEDiff exhibit
+distinct color inconsistencies and stitching artifacts at the patch fusion boundaries.
+Meanwhile, OMGSR, a Flux-based one-step SR method, suffers from noticeable
+periodic artifacts. The example from the DIV4K dataset further substantiates
+the significant advantages of our approach in suppressing global artifacts and
+preventing semantic confusion. Fig. 9 illustrates the visual comparisons under
+real-world degradation scenarios. As demonstrated, when dealing with complex
+real-world images, our method stands out as the only model capable of accurately
+reconstructing regular tile structures and sharp text edges.
+Evaluation of efficiency.Inference efficiency is evaluated on an NVIDIA H20
+GPU with1024 × 1024inputs and4096 × 4096outputs. As shown in Table 5,
+OP4KSR requires only 5.75s per image, approximately16× faster than Flux-
+based one-step diffusion method OMGSR. Compared to multi-step SUPIR, which
+requires 1643.7s per image, our method is approximately280 × faster while
+maintaining competitive memory usage of 32.88G.
+
+=== PAGE 14 ===
+14 C. Deng et al.
+LAPw/ RFRBase +
+w/ RFRBase
+Base
+(a) LR (ours)(b) (c) (d)
+Fig. 10:Ablation study of the proposed artifact suppression mechanism in frequency
+and spatial domains. Blue boxes show the 2D FFT spectra of the full super-resolved
+images, while yellow boxes highlight local spatial details corresponding to the red box
+in (a). We compare: (a) the LR input, (b) baseline, (c) baseline + RFR, and (d) our
+full method (RFR +LAP).
+4.3 Ablation
+Ablation for Periodic Artifact Suppression Strategy.Table 6 verifies
+the effectiveness of our periodic artifact suppression strategy. Although the
+Base model achieves high PSNR, it suffers from severe periodic artifacts and
+limited perceptual quality. IntroducingLAP effectively suppresses grid anomalies,
+while RFR enhances structural fidelity by alleviating phase collapse. As they
+address complementary bottlenecks, their combination yields the best perceptual
+performance, confirming the necessity of both components.
+To further validates the effectiveness of our proposed artifact suppression
+mechanism, we conduct a 2D FFT and spatial analysis in Fig. 10. As shown in
+Fig. 10(b), the baseline spectrum exhibits anomalous, grid-like high-frequency
+spikes, corresponding to the conspicuous woven-like periodic artifacts in the
+spatial domain. With RoPE base frequency rescaling (Fig. 10(c)), this abnormal
+energy concentration is partially diluted, yet the underlying periodic structures
+remain. Finally, synergizing RFR with our autocorrelatio-based periodicity loss
+(Fig. 10(d)) successfully suppresses these anomalous spikes. The spectrum is
+restored to a smooth distribution, and spatial grid artifacts are suppressed.
+5 Conclusion
+This paper introduces OP4KSR, a patch-free one-step method for 4K super-
+resolution. Equipped with an F16 high-compression VAE, our method achieves
+exceptionally fast inference speeds and facilitates direct 4K outputs. To tackle
+the inherent periodic artifacts, we explicitly rectify the base frequency of 2D-
+RoPE and introduce a novel autocorrelation-based periodicity loss, resulting in
+substantial artifact suppression. Additionally, to propel the development of the
+4K super-resolution task, we curate the 4KSR-Train dataset and establish three
+
+=== PAGE 15 ===
+OP4KSR 15
+benchmarks, effectively addressing the current scarcity of dedicated training
+datasets and real-world benchmarks in the 4K super-resolution field.
+6 Limitation
+Despite the competitive performance achieved by OP4KSR, our method still
+exhibits limitations in recovering fine details. For future work, we plan to introduce
+a high-frequency compensation mechanism to mitigate the physical truncation
+caused by the extreme compression ratio, thereby further enhancing the model’s
+ability to reconstruct complex textures.
+
+=== PAGE 16 ===
+16 C. Deng et al.
+References
+1. Agustsson, E., Timofte, R.: Ntire 2017 challenge on single image super-resolution:
+Dataset and study. In: Proceedings of the IEEE conference on computer vision and
+pattern recognition workshops. pp. 126–135 (2017)
+2. Ai, Y., Zhou, X., Huang, H., Han, X., Chen, Z., You, Q., Yang, H.: Dreamclear: High-
+capacity real-world image restoration with privacy-safe dataset curation. Advances
+in Neural Information Processing Systems37, 55443–55469 (2024)
+3. Bai, S., Cai, Y., Chen, R., Chen, K., Chen, X., Cheng, Z., Deng, L., Ding, W.,
+Gao, C., Ge, C., et al.: Qwen3-vl technical report. arXiv preprint arXiv:2511.21631
+(2025)
+4. Blattmann, A., Dockhorn, T., Kulal, S., Mendelevitch, D., Kilian, M., Lorenz, D.,
+Levi, Y., English, Z., Voleti, V., Letts, A., et al.: Stable video diffusion: Scaling
+latent video diffusion models to large datasets. arXiv preprint arXiv:2311.15127
+(2023)
+5. Chen, B., Li, G., Wu, R., Zhang, X., Chen, J., Zhang, J., Zhang, L.: Adversarial
+diffusion compression for real-world image super-resolution. In: Proceedings of the
+IEEE/CVF conference on computer vision and pattern recognition. pp. 28208–28220
+(2025)
+6. Chen, C., Mo, J., Hou, J., Wu, H., Liao, L., Sun, W., Yan, Q., Lin, W.: Topiq:
+A top-down approach from semantics to distortions for image quality assessment.
+IEEE Transactions on Image Processing33, 2404–2418 (2024)
+7. Chen, H., Chen, J., Pan, J., Dong, J.: Bridging fidelity-reality with controllable
+one-step diffusion for image super-resolution. arXiv preprint arXiv:2512.14061
+(2025)
+8. Chen, J., Ge, C., Xie, E., Wu, Y., Yao, L., Ren, X., Wang, Z., Luo, P., Lu, H., Li,
+Z.: Pixart-σ: Weak-to-strong training of diffusion transformer for 4k text-to-image
+generation. In: European Conference on Computer Vision. pp. 74–91. Springer
+(2024)
+9. Chen, J., Pan, J., Dong, J.: Faithdiff: Unleashing diffusion priors for faithful image
+super-resolution. In: Proceedings of the Computer Vision and Pattern Recognition
+Conference. pp. 28188–28197 (2025)
+10. Dai, T., Cai, J., Zhang, Y., Xia, S.T., Zhang, L.: Second-order attention network
+for single image super-resolution. In: Proceedings of the IEEE/CVF conference on
+computer vision and pattern recognition. pp. 11065–11074 (2019)
+11. Deng, C., Chen, Z., Yu, L., Zhang, K., Zhou, X., Zhang, W.: Joint geometric
+and trajectory consistency learning for one-step real-world super-resolution. arXiv
+preprint arXiv:2602.24240 (2026)
+12. Deng, C., Zhang, K., Yang, L., Zhang, W., Yu, L.: Ihmambasr: An importance-
+guided hierarchical mamba with dynamic prompt for single image super-resolution.
+Pattern Recognition175, 113057 (2026)
+13. Ding, K., Ma, K., Wang, S., Simoncelli, E.P.: Image quality assessment: Unifying
+structure and texture similarity. IEEE transactions on pattern analysis and machine
+intelligence44(5), 2567–2581 (2020)
+14. Dong, C., Loy, C.C., He, K., Tang, X.: Image super-resolution using deep convolu-
+tional networks. IEEE transactions on pattern analysis and machine intelligence
+38(2), 295–307 (2015)
+15. Dong, L., Fan, Q., Guo, Y., Wang, Z., Zhang, Q., Chen, J., Luo, Y., Zou, C.: Tsd-sr:
+One-step diffusion with target score distillation for real-world image super-resolution.
+In: Proceedings of the Computer Vision and Pattern Recognition Conference. pp.
+23174–23184 (2025)
+
+=== PAGE 17 ===
+OP4KSR 17
+16. Dong, L., Fan, Q., Yu, Y., Zhang, Q., Chen, J., Luo, Y., Zou, C.: Tinysr: Pruning
+diffusion for real-world image super-resolution. arXiv preprint arXiv:2508.17434
+(2025)
+17. Duan, Z.P., Zhang, J., Jin, X., Zhang, Z., Xiong, Z., Zou, D., Ren, J.S., Guo, C.,
+Li, C.: Dit4sr: Taming diffusion transformer for real-world image super-resolution.
+In: Proceedings of the IEEE/CVF International Conference on Computer Vision.
+pp. 18948–18958 (2025)
+18. Fei, S., Ye, T., Wang, L., Zhu, L.: Lucidflux: Caption-free universal image restoration
+via a large-scale diffusion transformer. arXiv preprint arXiv:2509.22414 (2025)
+19. Gankhuyag, G., Yoon, K., Park, J., Son, H.S., Min, K.: Lightweight real-time
+image super-resolution network for 4k images. In: Proceedings of the IEEE/CVF
+conference on computer vision and pattern recognition. pp. 1746–1755 (2023)
+20. Guo, H., Li, J., Dai, T., Ouyang, Z., Ren, X., Xia, S.T.: Mambair: A simple baseline
+for image restoration with state-space model. In: European conference on computer
+vision. pp. 222–241. Springer (2024)
+21. Jähne, B.: Digital image processing. Springer (2005)
+22. Ke, J., Wang, Q., Wang, Y., Milanfar, P., Yang, F.: Musiq: Multi-scale image
+quality transformer. In: Proceedings of the IEEE/CVF international conference on
+computer vision. pp. 5148–5157 (2021)
+23. Labs, B.F.: Flux.https://github.com/black-forest-labs/flux(2023)
+24. Ledig, C., Theis, L., Huszár, F., Caballero, J., Cunningham, A., Acosta, A., Aitken,
+A., Tejani, A., Totz, J., Wang, Z., et al.: Photo-realistic single image super-resolution
+using a generative adversarial network. In: Proceedings of the IEEE conference on
+computer vision and pattern recognition. pp. 4681–4690 (2017)
+25. Li, B., Zhao, H., Wang, W., Hu, P., Gou, Y., Peng, X.: Mair: A locality-and
+continuity-preserving mamba for image restoration. In: Proceedings of the Computer
+Vision and Pattern Recognition Conference. pp. 7491–7501 (2025)
+26. Li, J., Cao, J., Guo, Y., Li, W., Zhang, Y.: One diffusion step to real-world super-
+resolution via flow trajectory distillation. arXiv preprint arXiv:2502.01993 (2025)
+27. Li, Y., Zhang, K., Liang, J., Cao, J., Liu, C., Gong, R., Zhang, Y., Tang, H.,
+Liu, Y., Demandolx, D., et al.: Lsdir: A large scale dataset for image restoration.
+In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern
+Recognition. pp. 1775–1787 (2023)
+28. Liang, J., Cao, J., Sun, G., Zhang, K., Van Gool, L., Timofte, R.: Swinir: Image
+restoration using swin transformer. In: Proceedings of the IEEE/CVF international
+conference on computer vision. pp. 1833–1844 (2021)
+29. Lim, B., Son, S., Kim, H., Nah, S., Mu Lee, K.: Enhanced deep residual networks for
+single image super-resolution. In: Proceedings of the IEEE conference on computer
+vision and pattern recognition workshops. pp. 136–144 (2017)
+30. Lim, B., Son, S., Kim, H., Nah, S., Mu Lee, K.: Enhanced deep residual networks for
+single image super-resolution. In: Proceedings of the IEEE conference on computer
+vision and pattern recognition workshops. pp. 136–144 (2017)
+31. Lin, X., He, J., Chen, Z., Lyu, Z., Dai, B., Yu, F., Qiao, Y., Ouyang, W., Dong,
+C.: Diffbir: Toward blind image restoration with generative diffusion prior. In:
+European conference on computer vision. pp. 430–448. Springer (2024)
+32. Lin, X., Yu, F., Hu, J., You, Z., Shi, W., Ren, J.S., Gu, J., Dong, C.: Harnessing
+diffusion-yielded score priors for image restoration. ACM Transactions on Graphics
+(TOG)44(6), 1–21 (2025)
+33. Lipman, Y., Chen, R.T., Ben-Hamu, H., Nickel, M., Le, M.: Flow matching for
+generative modeling. arXiv preprint arXiv:2210.02747 (2022)
+
+=== PAGE 18 ===
+18 C. Deng et al.
+34. Long, W., Zhou, X., Zhang, L., Gu, S.: Progressive focused transformer for sin-
+gle image super-resolution. In: Proceedings of the Computer Vision and Pattern
+Recognition Conference. pp. 2279–2288 (2025)
+35. Mei, Y., Fan, Y., Zhou, Y.: Image super-resolution with non-local sparse attention.
+In: Proceedings of the IEEE/CVF conference on computer vision and pattern
+recognition. pp. 3517–3526 (2021)
+36. Mou, C., Wu, Y., Wang, X., Dong, C., Zhang, J., Shan, Y.: Metric learning based
+interactive modulation for real-world super-resolution. In: European conference on
+computer vision. pp. 723–740. Springer (2022)
+37. Peng, L., Di, X., Feng, Z., Li, W., Pei, R., Wang, Y., Fu, X., Cao, Y., Zha, Z.J.:
+Directing mamba to complex textures: An efficient texture-aware state space model
+for image restoration. arXiv preprint arXiv:2501.16583 (2025)
+38. Podell, D., English, Z., Lacey, K., Blattmann, A., Dockhorn, T., Müller, J., Penna,
+J., Rombach, R.: Sdxl: Improving latent diffusion models for high-resolution image
+synthesis. arXiv preprint arXiv:2307.01952 (2023)
+39. Schuhmann, C., Beaumont, R., Vencu, R., Gordon, C., Wightman, R., Cherti,
+M., Coombes, T., Katta, A., Mullis, C., Wortsman, M., et al.: Laion-5b: An open
+large-scale dataset for training next generation image-text models. Advances in
+neural information processing systems35, 25278–25294 (2022)
+40. Sun, H., Jiang, L., Li, F., Pei, R., Wang, Z., Guo, Y., Xu, J., Chen, H., Han, J.,
+Song, F., et al.: Pocketsr: The super-resolution expert in your pocket mobiles. arXiv
+preprint arXiv:2510.03012 (2025)
+41. Sun, L., Wu, R., Ma, Z., Liu, S., Yi, Q., Zhang, L.: Pixel-level and semantic-level
+adjustable super-resolution: A dual-lora approach. In: Proceedings of the Computer
+Vision and Pattern Recognition Conference. pp. 2333–2343 (2025)
+42. Tai, Y., Xie, R., Zhao, C., Zhang, K., Zhang, Z., Zhou, J., Yang, J.: Addsr: Acceler-
+ating diffusion-based blind super-resolution with adversarial diffusion distillation.
+Pattern Recognition p. 113012 (2026)
+43. Talebi, H., Milanfar, P.: Nima: Neural image assessment. IEEE transactions on
+image processing27(8), 3998–4011 (2018)
+44. Wang, J., Chan, K.C., Loy, C.C.: Exploring clip for assessing the look and feel of
+images. In: Proceedings of the AAAI Conference on Artificial Intelligence. vol. 37,
+pp. 2555–2563 (2023)
+45. Wang, J., Yue, Z., Zhou, S., Chan, K.C., Loy, C.C.: Exploiting diffusion prior
+for real-world image super-resolution. International Journal of Computer Vision
+132(12), 5929–5949 (2024)
+46. Wang, X., Xie, L., Dong, C., Shan, Y.: Real-esrgan: Training real-world blind super-
+resolution with pure synthetic data. In: Proceedings of the IEEE/CVF international
+conference on computer vision. pp. 1905–1914 (2021)
+47. Wang, Y., Yang, W., Chen, X., Wang, Y., Guo, L., Chau, L.P., Liu, Z., Qiao,
+Y., Kot, A.C., Wen, B.: Sinsr: diffusion-based image super-resolution in a single
+step. In: Proceedings of the IEEE/CVF conference on computer vision and pattern
+recognition. pp. 25796–25805 (2024)
+48. Wang, Z., Lu, C., Wang, Y., Bao, F., Li, C., Su, H., Zhu, J.: Prolificdreamer:
+High-fidelity and diverse text-to-3d generation with variational score distillation.
+Advances in neural information processing systems36, 8406–8441 (2023)
+49. Wang, Z., Bovik, A.C., Sheikh, H.R., Simoncelli, E.P.: Image quality assessment:
+from error visibility to structural similarity. IEEE transactions on image processing
+13(4), 600–612 (2004)
+
+=== PAGE 19 ===
+OP4KSR 19
+50. Wei, Y., Gu, S., Li, Y., Timofte, R., Jin, L., Song, H.: Unsupervised real-world
+image super resolution via domain-distance aware training. In: Proceedings of the
+IEEE/CVF conference on computer vision and pattern recognition. pp. 13385–13394
+(2021)
+51. Wu, R., Sun, L., Ma, Z., Zhang, L.: One-step effective diffusion network for real-
+world image super-resolution. Advances in Neural Information Processing Systems
+37, 92529–92553 (2024)
+52. Wu, R., Yang, T., Sun, L., Zhang, Z., Li, S., Zhang, L.: Seesr: Towards semantics-
+aware real-world image super-resolution. In: Proceedings of the IEEE/CVF confer-
+ence on computer vision and pattern recognition. pp. 25456–25467 (2024)
+53. Wu, Z., Sun, Z., Zhou, T., Fu, B., Cong, J., Dong, Y., Zhang, H., Tang, X., Chen,
+M., Wei, X.: Omgsr: You only need one mid-timestep guidance for real-world image
+super-resolution. arXiv preprint arXiv:2508.08227 (2025)
+54. Wu, Z., Zheng, S., Jiang, P.T., Yuan, X.: Realism control one-step diffusion for
+real-world image super-resolution. arXiv preprint arXiv:2509.10122 (2025)
+55. Yang, S., Wu, T., Shi, S., Lao, S., Gong, Y., Cao, M., Wang, J., Yang, Y.: Maniqa:
+Multi-dimension attention network for no-reference image quality assessment. In:
+Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recog-
+nition. pp. 1191–1200 (2022)
+56. Yang,T.,Wu,R.,Ren,P.,Xie,X.,Zhang,L.:Pixel-awarestablediffusionforrealistic
+image super-resolution and personalized stylization. In: European conference on
+computer vision. pp. 74–91. Springer (2024)
+57. Ye, T., Fei, S., Zhu, L.: Ultraflux: Data-model co-design for high-quality na-
+tive 4k text-to-image generation across diverse aspect ratios. arXiv preprint
+arXiv:2511.18050 (2025)
+58. Yi, Q., Li, S., Wu, R., Sun, L., Wu, Y., Zhang, L.: Fine-structure preserved real-world
+image super-resolution via transfer vae training. In: Proceedings of the IEEE/CVF
+international conference on computer vision. pp. 12415–12426 (2025)
+59. Yoon, K., Gankhuyag, G., Park, J., Son, H., Min, K.: Casr: Efficient cascade network
+structure with channel aligned method for 4k real-time single image super-resolution.
+In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern
+Recognition. pp. 7911–7920 (2024)
+60. You, W., Zhang, M., Zhang, L., Zhou, X., Shi, K., Gu, S.: Consistency trajectory
+matching for one-step generative super-resolution. arXiv preprint arXiv:2503.20349
+(2025)
+61. Yu, D., Min, W., Jin, X., Jiang, Q., Jin, Y., Jiang, S.: Diverse and high-quality
+food image generation from only food names. ACM Trans. Multimedia Comput.
+Commun. Appl.21(5) (May 2025)
+62. Yu, D., Min, W., Jin, X., Jiang, Q., Yao, S., Jiang, S.: Food3d: Text-driven
+customizable 3d food generation with gaussian splatting. IEEE Transactions on
+Image Processing34, 7290–7304 (2025)
+63. Yu, F., Gu, J., Li, Z., Hu, J., Kong, X., Wang, X., He, J., Qiao, Y., Dong, C.: Scaling
+up to excellence: Practicing model scaling for photo-realistic image restoration in
+the wild. In: Proceedings of the IEEE/CVF conference on computer vision and
+pattern recognition. pp. 25669–25680 (2024)
+64. Yue, Z., Liao, K., Loy, C.C.: Arbitrary-steps image super-resolution via diffu-
+sion inversion. In: Proceedings of the Computer Vision and Pattern Recognition
+Conference. pp. 23153–23163 (2025)
+65. Yue, Z., Wang, J., Loy, C.C.: Resshift: Efficient diffusion model for image super-
+resolution by residual shifting. Advances in Neural Information Processing Systems
+36, 13294–13307 (2023)
+
+=== PAGE 20 ===
+20 C. Deng et al.
+66. Zamfir, E., Conde, M.V., Timofte, R.: Towards real-time 4k image super-resolution.
+In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern
+Recognition. pp. 1522–1532 (2023)
+67. Zhang, A., Yue, Z., Pei, R., Ren, W., Cao, X.: Degradation-guided one-step image
+super-resolution with diffusion priors. arXiv preprint arXiv:2409.17058 (2024)
+68. Zhang,J.,Huang,Q.,Liu,J.,Guo,X.,Huang,D.:Diffusion-4k:Ultra-high-resolution
+image synthesis with latent diffusion models. In: Proceedings of the Computer Vision
+and Pattern Recognition Conference. pp. 23464–23473 (2025)
+69. Zhang, K., Liang, J., Van Gool, L., Timofte, R.: Designing a practical degradation
+model for deep blind image super-resolution. In: Proceedings of the IEEE/CVF
+international conference on computer vision. pp. 4791–4800 (2021)
+70. Zhang, L., Li, Y., Zhou, X., Zhao, X., Gu, S.: Transcending the limit of local
+window: Advanced super-resolution transformer with adaptive token dictionary.
+In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern
+Recognition. pp. 2856–2865 (2024)
+71. Zhang, L., You, W., Shi, K., Gu, S.: Uncertainty-guided perturbation for image
+super-resolution diffusion model. In: Proceedings of the Computer Vision and
+Pattern Recognition Conference. pp. 17980–17989 (2025)
+72. Zhang, L., Zhang, L., Bovik, A.C.: A feature-enriched completely blind image
+quality evaluator. IEEE Transactions on Image Processing24(8), 2579–2591 (2015)
+73. Zhang, L., Rao, A., Agrawala, M.: Adding conditional control to text-to-image
+diffusion models. In: Proceedings of the IEEE/CVF international conference on
+computer vision. pp. 3836–3847 (2023)
+74. Zhang, R., Isola, P., Efros, A.A., Shechtman, E., Wang, O.: The unreasonable
+effectiveness of deep features as a perceptual metric. In: Proceedings of the IEEE
+conference on computer vision and pattern recognition. pp. 586–595 (2018)
+75. Zhou, Y., Li, Z., Guo, C.L., Bai, S., Cheng, M.M., Hou, Q.: Srformer: Permuted
+self-attention for single image super-resolution. In: Proceedings of the IEEE/CVF
+International Conference on Computer Vision. pp. 12780–12791 (2023)
+76. Zhu,L.,Li,J.,Qin,H.,Li,W.,Zhang,Y.,Guo,Y.,Yang,X.:Passionsr:Post-training
+quantization with adaptive scale in one-step diffusion based image super-resolution.
+In: Proceedings of the Computer Vision and Pattern Recognition Conference. pp.
+12778–12788 (2025)
+77. Zhu, Y., Wang, R., Lu, S., Li, J., Yan, H., Zhang, K.: Oftsr: One-step flow for
+image super-resolution with tunable fidelity-realism trade-offs. arXiv preprint
+arXiv:2412.09465 (2024)
+78. Zuo, Y., Zheng, Q., Wu, M., Jiang, X., Li, R., Wang, J., Zhang, Y., Mai, G., Wang,
+L.V., Zou, J., et al.: 4kagent: agentic any image to 4k super-resolution. arXiv
+preprint arXiv:2507.07105 (2025)

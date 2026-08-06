@@ -1,0 +1,1327 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/0LlndrZeM2YZj0s5+KXAU4wl66s</id>
+  <title>arXiv Query: search_query=ti:"blind face restoration"&amp;id_list=&amp;start=0&amp;max_results=150</title>
+  <updated>2026-08-06T07:21:23Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=ti:%22blind+face+restoration%22&amp;start=0&amp;max_results=150&amp;id_list=" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>150</opensearch:itemsPerPage>
+  <opensearch:totalResults>46</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/2603.29423v1</id>
+    <title>A2BFR: Attribute-Aware Blind Face Restoration</title>
+    <updated>2026-03-31T08:29:04Z</updated>
+    <link href="https://arxiv.org/abs/2603.29423v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2603.29423v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind face restoration (BFR) aims to recover high-quality facial images from degraded inputs, yet its inherently ill-posed nature leads to ambiguous and uncontrollable solutions. Recent diffusion-based BFR methods improve perceptual quality but remain uncontrollable, whereas text-guided face editing enables attribute manipulation without reliable restoration. To address these issues, we propose A$^2$BFR, an attribute-aware blind face restoration framework that unifies high-fidelity reconstruction with prompt-controllable generation. Built upon a Diffusion Transformer backbone with unified image-text cross-modal attention, A$^2$BFR jointly conditions the denoising trajectory on both degraded inputs and textual prompts. To inject semantic priors, we introduce attribute-aware learning, which supervises denoising latents using facial attribute embeddings extracted by an attribute-aware encoder. To further enhance prompt controllability, we introduce semantic dual-training, which leverages the pairwise attribute variations in our newly curated AttrFace-90K dataset to enforce attribute discrimination while preserving fidelity. Extensive experiments demonstrate that A$^2$BFR achieves state-of-the-art performance in both restoration fidelity and instruction adherence, outperforming diffusion-based BFR baselines by -0.0467 LPIPS and +52.58% attribute accuracy, while enabling fine-grained, prompt-controllable restoration even under severe degradations.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-03-31T08:29:04Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Chenxin Zhu</name>
+    </author>
+    <author>
+      <name>Yushun Fang</name>
+    </author>
+    <author>
+      <name>Lu Liu</name>
+    </author>
+    <author>
+      <name>Shibo Yin</name>
+    </author>
+    <author>
+      <name>Xiaohong Liu</name>
+    </author>
+    <author>
+      <name>Xiaoyun Zhang</name>
+    </author>
+    <author>
+      <name>Qiang Hu</name>
+    </author>
+    <author>
+      <name>Guangtao Zhai</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/1804.04829v2</id>
+    <title>Learning Warped Guidance for Blind Face Restoration</title>
+    <updated>2018-04-16T05:24:47Z</updated>
+    <link href="https://arxiv.org/abs/1804.04829v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/1804.04829v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>This paper studies the problem of blind face restoration from an unconstrained blurry, noisy, low-resolution, or compressed image (i.e., degraded observation). For better recovery of fine facial details, we modify the problem setting by taking both the degraded observation and a high-quality guided image of the same identity as input to our guided face restoration network (GFRNet). However, the degraded observation and guided image generally are different in pose, illumination and expression, thereby making plain CNNs (e.g., U-Net) fail to recover fine and identity-aware facial details. To tackle this issue, our GFRNet model includes both a warping subnetwork (WarpNet) and a reconstruction subnetwork (RecNet). The WarpNet is introduced to predict flow field for warping the guided image to correct pose and expression (i.e., warped guidance), while the RecNet takes the degraded observation and warped guidance as input to produce the restoration result. Due to that the ground-truth flow field is unavailable, landmark loss together with total variation regularization are incorporated to guide the learning of WarpNet. Furthermore, to make the model applicable to blind restoration, our GFRNet is trained on the synthetic data with versatile settings on blur kernel, noise level, downsampling scale factor, and JPEG quality factor. Experiments show that our GFRNet not only performs favorably against the state-of-the-art image and face restoration methods, but also generates visually photo-realistic results on real degraded facial images.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2018-04-13T08:22:09Z</published>
+    <arxiv:comment>25 pages, 14 figures and 1 table</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Xiaoming Li</name>
+    </author>
+    <author>
+      <name>Ming Liu</name>
+    </author>
+    <author>
+      <name>Yuting Ye</name>
+    </author>
+    <author>
+      <name>Wangmeng Zuo</name>
+    </author>
+    <author>
+      <name>Liang Lin</name>
+    </author>
+    <author>
+      <name>Ruigang Yang</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2207.09790v1</id>
+    <title>FaceFormer: Scale-aware Blind Face Restoration with Transformers</title>
+    <updated>2022-07-20T10:08:34Z</updated>
+    <link href="https://arxiv.org/abs/2207.09790v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2207.09790v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind face restoration usually encounters with diverse scale face inputs, especially in the real world. However, most of the current works support specific scale faces, which limits its application ability in real-world scenarios. In this work, we propose a novel scale-aware blind face restoration framework, named FaceFormer, which formulates facial feature restoration as scale-aware transformation. The proposed Facial Feature Up-sampling (FFUP) module dynamically generates upsampling filters based on the original scale-factor priors, which facilitate our network to adapt to arbitrary face scales. Moreover, we further propose the facial feature embedding (FFE) module which leverages transformer to hierarchically extract diversity and robustness of facial latent. Thus, our FaceFormer achieves fidelity and robustness restored faces, which possess realistic and symmetrical details of facial components. Extensive experiments demonstrate that our proposed method trained with synthetic dataset generalizes better to a natural low quality images than current state-of-the-arts.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-07-20T10:08:34Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Aijin Li</name>
+    </author>
+    <author>
+      <name>Gen Li</name>
+    </author>
+    <author>
+      <name>Lei Sun</name>
+    </author>
+    <author>
+      <name>Xintao Wang</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2212.06512v4</id>
+    <title>DifFace: Blind Face Restoration with Diffused Error Contraction</title>
+    <updated>2024-07-20T13:04:32Z</updated>
+    <link href="https://arxiv.org/abs/2212.06512v4" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2212.06512v4" rel="related" type="application/pdf" title="pdf"/>
+    <summary>While deep learning-based methods for blind face restoration have achieved unprecedented success, they still suffer from two major limitations. First, most of them deteriorate when facing complex degradations out of their training data. Second, these methods require multiple constraints, e.g., fidelity, perceptual, and adversarial losses, which require laborious hyper-parameter tuning to stabilize and balance their influences. In this work, we propose a novel method named DifFace that is capable of coping with unseen and complex degradations more gracefully without complicated loss designs. The key of our method is to establish a posterior distribution from the observed low-quality (LQ) image to its high-quality (HQ) counterpart. In particular, we design a transition distribution from the LQ image to the intermediate state of a pre-trained diffusion model and then gradually transmit from this intermediate state to the HQ target by recursively applying a pre-trained diffusion model. The transition distribution only relies on a restoration backbone that is trained with $L_2$ loss on some synthetic data, which favorably avoids the cumbersome training process in existing methods. Moreover, the transition distribution can contract the error of the restoration backbone and thus makes our method more robust to unknown degradations. Comprehensive experiments show that DifFace is superior to current state-of-the-art methods, especially in cases with severe degradations. Code and model are available at https://github.com/zsyOAOA/DifFace.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-12-13T11:52:33Z</published>
+    <arxiv:comment>Accepted by TPAMI@2024. Project: https://github.com/zsyOAOA/DifFace</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Zongsheng Yue</name>
+    </author>
+    <author>
+      <name>Chen Change Loy</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2501.05177v2</id>
+    <title>FaceMe: Robust Blind Face Restoration with Personal Identification</title>
+    <updated>2025-01-10T15:44:28Z</updated>
+    <link href="https://arxiv.org/abs/2501.05177v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2501.05177v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind face restoration is a highly ill-posed problem due to the lack of necessary context. Although existing methods produce high-quality outputs, they often fail to faithfully preserve the individual's identity. In this paper, we propose a personalized face restoration method, FaceMe, based on a diffusion model. Given a single or a few reference images, we use an identity encoder to extract identity-related features, which serve as prompts to guide the diffusion model in restoring high-quality and identity-consistent facial images. By simply combining identity-related features, we effectively minimize the impact of identity-irrelevant features during training and support any number of reference image inputs during inference. Additionally, thanks to the robustness of the identity encoder, synthesized images can be used as reference images during training, and identity changing during inference does not require fine-tuning the model. We also propose a pipeline for constructing a reference image training pool that simulates the poses and expressions that may appear in real-world scenarios. Experimental results demonstrate that our FaceMe can restore high-quality facial images while maintaining identity consistency, achieving excellent performance and robustness.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-01-09T11:52:54Z</published>
+    <arxiv:comment>To appear at AAAI 2025</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Siyu Liu</name>
+    </author>
+    <author>
+      <name>Zheng-Peng Duan</name>
+    </author>
+    <author>
+      <name>Jia OuYang</name>
+    </author>
+    <author>
+      <name>Jiayi Fu</name>
+    </author>
+    <author>
+      <name>Hyunhee Park</name>
+    </author>
+    <author>
+      <name>Zikun Liu</name>
+    </author>
+    <author>
+      <name>Chun-Le Guo</name>
+    </author>
+    <author>
+      <name>Chongyi Li</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2210.08160v1</id>
+    <title>Learning Dual Memory Dictionaries for Blind Face Restoration</title>
+    <updated>2022-10-15T01:55:41Z</updated>
+    <link href="https://arxiv.org/abs/2210.08160v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2210.08160v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>To improve the performance of blind face restoration, recent works mainly treat the two aspects, i.e., generic and specific restoration, separately. In particular, generic restoration attempts to restore the results through general facial structure prior, while on the one hand, cannot generalize to real-world degraded observations due to the limited capability of direct CNNs' mappings in learning blind restoration, and on the other hand, fails to exploit the identity-specific details. On the contrary, specific restoration aims to incorporate the identity features from the reference of the same identity, in which the requirement of proper reference severely limits the application scenarios. Generally, it is a challenging and intractable task to improve the photo-realistic performance of blind restoration and adaptively handle the generic and specific restoration scenarios with a single unified model. Instead of implicitly learning the mapping from a low-quality image to its high-quality counterpart, this paper suggests a DMDNet by explicitly memorizing the generic and specific features through dual dictionaries. First, the generic dictionary learns the general facial priors from high-quality images of any identity, while the specific dictionary stores the identity-belonging features for each person individually. Second, to handle the degraded input with or without specific reference, dictionary transform module is suggested to read the relevant details from the dual dictionaries which are subsequently fused into the input features. Finally, multi-scale dictionaries are leveraged to benefit the coarse-to-fine restoration. Moreover, a new high-quality dataset, termed CelebRef-HQ, is constructed to promote the exploration of specific face restoration in the high-resolution space.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-10-15T01:55:41Z</published>
+    <arxiv:comment>IEEE TPAMI 2022. Code and dataset: https://github.com/csxmli2016/DMDNet</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Xiaoming Li</name>
+    </author>
+    <author>
+      <name>Shiguang Zhang</name>
+    </author>
+    <author>
+      <name>Shangchen Zhou</name>
+    </author>
+    <author>
+      <name>Lei Zhang</name>
+    </author>
+    <author>
+      <name>Wangmeng Zuo</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2305.04517v2</id>
+    <title>DiffBFR: Bootstrapping Diffusion Model Towards Blind Face Restoration</title>
+    <updated>2023-08-08T15:50:11Z</updated>
+    <link href="https://arxiv.org/abs/2305.04517v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2305.04517v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind face restoration (BFR) is important while challenging. Prior works prefer to exploit GAN-based frameworks to tackle this task due to the balance of quality and efficiency. However, these methods suffer from poor stability and adaptability to long-tail distribution, failing to simultaneously retain source identity and restore detail. We propose DiffBFR to introduce Diffusion Probabilistic Model (DPM) for BFR to tackle the above problem, given its superiority over GAN in aspects of avoiding training collapse and generating long-tail distribution. DiffBFR utilizes a two-step design, that first restores identity information from low-quality images and then enhances texture details according to the distribution of real faces. This design is implemented with two key components: 1) Identity Restoration Module (IRM) for preserving the face details in results. Instead of denoising from pure Gaussian random distribution with LQ images as the condition during the reverse process, we propose a novel truncated sampling method which starts from LQ images with part noise added. We theoretically prove that this change shrinks the evidence lower bound of DPM and then restores more original details. With theoretical proof, two cascade conditional DPMs with different input sizes are introduced to strengthen this sampling effect and reduce training difficulty in the high-resolution image generated directly. 2) Texture Enhancement Module (TEM) for polishing the texture of the image. Here an unconditional DPM, a LQ-free model, is introduced to further force the restorations to appear realistic. We theoretically proved that this unconditional DPM trained on pure HQ images contributes to justifying the correct distribution of inference images output from IRM in pixel-level space. Truncated sampling with fractional time step is utilized to polish pixel-level textures while preserving identity information.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-05-08T07:22:37Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Xinmin Qiu</name>
+    </author>
+    <author>
+      <name>Congying Han</name>
+    </author>
+    <author>
+      <name>Zicheng Zhang</name>
+    </author>
+    <author>
+      <name>Bonan Li</name>
+    </author>
+    <author>
+      <name>Tiande Guo</name>
+    </author>
+    <author>
+      <name>Xuecheng Nie</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2509.23339v2</id>
+    <title>Enhancing Blind Face Restoration through Online Reinforcement Learning</title>
+    <updated>2025-12-19T15:48:12Z</updated>
+    <link href="https://arxiv.org/abs/2509.23339v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2509.23339v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind Face Restoration (BFR) encounters inherent challenges in exploring its large solution space, leading to common artifacts like missing details and identity ambiguity in the restored images. To tackle these challenges, we propose a Likelihood-Regularized Policy Optimization (LRPO) framework, the first to apply online reinforcement learning (RL) to the BFR task. LRPO leverages rewards from sampled candidates to refine the policy network, increasing the likelihood of high-quality outputs while improving restoration performance on low-quality inputs. However, directly applying RL to BFR creates incompatibility issues, producing restoration results that deviate significantly from the ground truth. To balance perceptual quality and fidelity, we propose three key strategies: 1) a composite reward function tailored for face restoration assessment, 2) ground-truth guided likelihood regularization, and 3) noise-level advantage assignment. Extensive experiments demonstrate that our proposed LRPO significantly improves the face restoration quality over baseline methods and achieves state-of-the-art performance.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-09-27T14:42:29Z</published>
+    <arxiv:comment>8 figures, 4 tables</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Bin Wu</name>
+    </author>
+    <author>
+      <name>Yahui Liu</name>
+    </author>
+    <author>
+      <name>Chi Zhang</name>
+    </author>
+    <author>
+      <name>Yao Zhao</name>
+    </author>
+    <author>
+      <name>Wei Wang</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2410.04618v3</id>
+    <title>Towards Unsupervised Blind Face Restoration using Diffusion Prior</title>
+    <updated>2024-11-24T20:46:34Z</updated>
+    <link href="https://arxiv.org/abs/2410.04618v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2410.04618v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind face restoration methods have shown remarkable performance, particularly when trained on large-scale synthetic datasets with supervised learning. These datasets are often generated by simulating low-quality face images with a handcrafted image degradation pipeline. The models trained on such synthetic degradations, however, cannot deal with inputs of unseen degradations. In this paper, we address this issue by using only a set of input images, with unknown degradations and without ground truth targets, to fine-tune a restoration model that learns to map them to clean and contextually consistent outputs. We utilize a pre-trained diffusion model as a generative prior through which we generate high quality images from the natural image distribution while maintaining the input image content through consistency constraints. These generated images are then used as pseudo targets to fine-tune a pre-trained restoration model. Unlike many recent approaches that employ diffusion models at test time, we only do so during training and thus maintain an efficient inference-time performance. Extensive experiments show that the proposed approach can consistently improve the perceptual quality of pre-trained blind face restoration models while maintaining great consistency with the input contents. Our best model also achieves the state-of-the-art results on both synthetic and real-world datasets.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-10-06T20:38:14Z</published>
+    <arxiv:comment>WACV 2025. Project page: https://dt-bfr.github.io/</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Tianshu Kuai</name>
+    </author>
+    <author>
+      <name>Sina Honari</name>
+    </author>
+    <author>
+      <name>Igor Gilitschenski</name>
+    </author>
+    <author>
+      <name>Alex Levinshtein</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2409.00991v2</id>
+    <title>3D Priors-Guided Diffusion for Blind Face Restoration</title>
+    <updated>2024-09-12T07:10:41Z</updated>
+    <link href="https://arxiv.org/abs/2409.00991v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2409.00991v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind face restoration endeavors to restore a clear face image from a degraded counterpart. Recent approaches employing Generative Adversarial Networks (GANs) as priors have demonstrated remarkable success in this field. However, these methods encounter challenges in achieving a balance between realism and fidelity, particularly in complex degradation scenarios. To inherit the exceptional realism generative ability of the diffusion model and also constrained by the identity-aware fidelity, we propose a novel diffusion-based framework by embedding the 3D facial priors as structure and identity constraints into a denoising diffusion process. Specifically, in order to obtain more accurate 3D prior representations, the 3D facial image is reconstructed by a 3D Morphable Model (3DMM) using an initial restored face image that has been processed by a pretrained restoration network. A customized multi-level feature extraction method is employed to exploit both structural and identity information of 3D facial images, which are then mapped into the noise estimation process. In order to enhance the fusion of identity information into the noise estimation, we propose a Time-Aware Fusion Block (TAFB). This module offers a more efficient and adaptive fusion of weights for denoising, considering the dynamic nature of the denoising process in the diffusion model, which involves initial structure refinement followed by texture detail enhancement. Extensive experiments demonstrate that our network performs favorably against state-of-the-art algorithms on synthetic and real-world datasets for blind face restoration. The Code is released on our project page at https://github.com/838143396/3Diffusion.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-09-02T07:13:32Z</published>
+    <arxiv:comment>This paper was accepted by ACM MM 2024, and the project page is accessible at: https://github.com/838143396/3Diffusion</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Xiaobin Lu</name>
+    </author>
+    <author>
+      <name>Xiaobin Hu</name>
+    </author>
+    <author>
+      <name>Jun Luo</name>
+    </author>
+    <author>
+      <name>Ben Zhu</name>
+    </author>
+    <author>
+      <name>Yaping Ruan</name>
+    </author>
+    <author>
+      <name>Wenqi Ren</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2009.08709v2</id>
+    <title>Progressive Semantic-Aware Style Transformation for Blind Face Restoration</title>
+    <updated>2021-03-21T09:35:05Z</updated>
+    <link href="https://arxiv.org/abs/2009.08709v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2009.08709v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Face restoration is important in face image processing, and has been widely studied in recent years. However, previous works often fail to generate plausible high quality (HQ) results for real-world low quality (LQ) face images. In this paper, we propose a new progressive semantic-aware style transformation framework, named PSFR-GAN, for face restoration. Specifically, instead of using an encoder-decoder framework as previous methods, we formulate the restoration of LQ face images as a multi-scale progressive restoration procedure through semantic-aware style transformation. Given a pair of LQ face image and its corresponding parsing map, we first generate a multi-scale pyramid of the inputs, and then progressively modulate different scale features from coarse-to-fine in a semantic-aware style transfer way. Compared with previous networks, the proposed PSFR-GAN makes full use of the semantic (parsing maps) and pixel (LQ images) space information from different scales of input pairs. In addition, we further introduce a semantic aware style loss which calculates the feature style loss for each semantic region individually to improve the details of face textures. Finally, we pretrain a face parsing network which can generate decent parsing maps from real-world LQ face images. Experiment results show that our model trained with synthetic data can not only produce more realistic high-resolution results for synthetic LQ inputs and but also generalize better to natural LQ face images compared with state-of-the-art methods. Codes are available at https://github.com/chaofengc/PSFRGAN.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2020-09-18T09:27:33Z</published>
+    <arxiv:comment>Accepted to CVPR2021, https://github.com/chaofengc/PSFRGAN</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Chaofeng Chen</name>
+    </author>
+    <author>
+      <name>Xiaoming Li</name>
+    </author>
+    <author>
+      <name>Lingbo Yang</name>
+    </author>
+    <author>
+      <name>Xianhui Lin</name>
+    </author>
+    <author>
+      <name>Lei Zhang</name>
+    </author>
+    <author>
+      <name>Kwan-Yee K. Wong</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2501.15443v1</id>
+    <title>InfoBFR: Real-World Blind Face Restoration via Information Bottleneck</title>
+    <updated>2025-01-26T08:11:52Z</updated>
+    <link href="https://arxiv.org/abs/2501.15443v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2501.15443v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind face restoration (BFR) is a highly challenging problem due to the uncertainty of data degradation patterns. Current BFR methods have realized certain restored productions but with inherent neural degradations that limit real-world generalization in complicated scenarios. In this paper, we propose a plug-and-play framework InfoBFR to tackle neural degradations, e.g., prior bias, topological distortion, textural distortion, and artifact residues, which achieves high-generalization face restoration in diverse wild and heterogeneous scenes. Specifically, based on the results from pre-trained BFR models, InfoBFR considers information compression using manifold information bottleneck (MIB) and information compensation with efficient diffusion LoRA to conduct information optimization. InfoBFR effectively synthesizes high-fidelity faces without attribute and identity distortions. Comprehensive experimental results demonstrate the superiority of InfoBFR over state-of-the-art GAN-based and diffusion-based BFR methods, with around 70ms consumption, 16M trainable parameters, and nearly 85% BFR-boosting. It is promising that InfoBFR will be the first plug-and-play restorer universally employed by diverse BFR models to conquer neural degradations.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-01-26T08:11:52Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Nan Gao</name>
+    </author>
+    <author>
+      <name>Jia Li</name>
+    </author>
+    <author>
+      <name>Huaibo Huang</name>
+    </author>
+    <author>
+      <name>Ke Shang</name>
+    </author>
+    <author>
+      <name>Ran He</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2505.17910v1</id>
+    <title>DiffusionReward: Enhancing Blind Face Restoration through Reward Feedback Learning</title>
+    <updated>2025-05-23T13:53:23Z</updated>
+    <link href="https://arxiv.org/abs/2505.17910v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2505.17910v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Reward Feedback Learning (ReFL) has recently shown great potential in aligning model outputs with human preferences across various generative tasks. In this work, we introduce a ReFL framework, named DiffusionReward, to the Blind Face Restoration task for the first time. DiffusionReward effectively overcomes the limitations of diffusion-based methods, which often fail to generate realistic facial details and exhibit poor identity consistency. The core of our framework is the Face Reward Model (FRM), which is trained using carefully annotated data. It provides feedback signals that play a pivotal role in steering the optimization process of the restoration network. In particular, our ReFL framework incorporates a gradient flow into the denoising process of off-the-shelf face restoration methods to guide the update of model parameters. The guiding gradient is collaboratively determined by three aspects: (i) the FRM to ensure the perceptual quality of the restored faces; (ii) a regularization term that functions as a safeguard to preserve generative diversity; and (iii) a structural consistency constraint to maintain facial fidelity. Furthermore, the FRM undergoes dynamic optimization throughout the process. It not only ensures that the restoration network stays precisely aligned with the real face manifold, but also effectively prevents reward hacking. Experiments on synthetic and wild datasets demonstrate that our method outperforms state-of-the-art methods, significantly improving identity consistency and facial details. The source codes, data, and models are available at: https://github.com/01NeuralNinja/DiffusionReward.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-05-23T13:53:23Z</published>
+    <arxiv:comment>22 pages, 13 figures, 5 tables</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Bin Wu</name>
+    </author>
+    <author>
+      <name>Wei Wang</name>
+    </author>
+    <author>
+      <name>Yahui Liu</name>
+    </author>
+    <author>
+      <name>Zixiang Li</name>
+    </author>
+    <author>
+      <name>Yao Zhao</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2206.03697v1</id>
+    <title>Blind Face Restoration: Benchmark Datasets and a Baseline Model</title>
+    <updated>2022-06-08T06:34:24Z</updated>
+    <link href="https://arxiv.org/abs/2206.03697v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2206.03697v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind Face Restoration (BFR) aims to construct a high-quality (HQ) face image from its corresponding low-quality (LQ) input. Recently, many BFR methods have been proposed and they have achieved remarkable success. However, these methods are trained or evaluated on privately synthesized datasets, which makes it infeasible for the subsequent approaches to fairly compare with them. To address this problem, we first synthesize two blind face restoration benchmark datasets called EDFace-Celeb-1M (BFR128) and EDFace-Celeb-150K (BFR512). State-of-the-art methods are benchmarked on them under five settings including blur, noise, low resolution, JPEG compression artifacts, and the combination of them (full degradation). To make the comparison more comprehensive, five widely-used quantitative metrics and two task-driven metrics including Average Face Landmark Distance (AFLD) and Average Face ID Cosine Similarity (AFICS) are applied. Furthermore, we develop an effective baseline model called Swin Transformer U-Net (STUNet). The STUNet with U-net architecture applies an attention mechanism and a shifted windowing scheme to capture long-range pixel interactions and focus more on significant features while still being trained efficiently. Experimental results show that the proposed baseline method performs favourably against the SOTA methods on various BFR tasks.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-06-08T06:34:24Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Puyang Zhang</name>
+    </author>
+    <author>
+      <name>Kaihao Zhang</name>
+    </author>
+    <author>
+      <name>Wenhan Luo</name>
+    </author>
+    <author>
+      <name>Changsheng Li</name>
+    </author>
+    <author>
+      <name>Guoren Wang</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2206.11253v2</id>
+    <title>Towards Robust Blind Face Restoration with Codebook Lookup Transformer</title>
+    <updated>2022-11-01T03:19:29Z</updated>
+    <link href="https://arxiv.org/abs/2206.11253v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2206.11253v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind face restoration is a highly ill-posed problem that often requires auxiliary guidance to 1) improve the mapping from degraded inputs to desired outputs, or 2) complement high-quality details lost in the inputs. In this paper, we demonstrate that a learned discrete codebook prior in a small proxy space largely reduces the uncertainty and ambiguity of restoration mapping by casting blind face restoration as a code prediction task, while providing rich visual atoms for generating high-quality faces. Under this paradigm, we propose a Transformer-based prediction network, named CodeFormer, to model the global composition and context of the low-quality faces for code prediction, enabling the discovery of natural faces that closely approximate the target faces even when the inputs are severely degraded. To enhance the adaptiveness for different degradation, we also propose a controllable feature transformation module that allows a flexible trade-off between fidelity and quality. Thanks to the expressive codebook prior and global modeling, CodeFormer outperforms the state of the arts in both quality and fidelity, showing superior robustness to degradation. Extensive experimental results on synthetic and real-world datasets verify the effectiveness of our method.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-06-22T17:58:01Z</published>
+    <arxiv:comment>Accepted by NeurIPS 2022. Code: https://github.com/sczhou/CodeFormer</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Shangchen Zhou</name>
+    </author>
+    <author>
+      <name>Kelvin C. K. Chan</name>
+    </author>
+    <author>
+      <name>Chongyi Li</name>
+    </author>
+    <author>
+      <name>Chen Change Loy</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2308.07967v1</id>
+    <title>Boosting Cross-Quality Face Verification using Blind Face Restoration</title>
+    <updated>2023-08-15T18:05:19Z</updated>
+    <link href="https://arxiv.org/abs/2308.07967v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2308.07967v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>In recent years, various Blind Face Restoration (BFR) techniques were developed. These techniques transform low quality faces suffering from multiple degradations to more realistic and natural face images with high perceptual quality. However, it is crucial for the task of face verification to not only enhance the perceptual quality of the low quality images but also to improve the biometric-utility face quality metrics. Furthermore, preserving the valuable identity information is of great importance. In this paper, we investigate the impact of applying three state-of-the-art blind face restoration techniques namely, GFP-GAN, GPEN and SGPN on the performance of face verification system under very challenging environment characterized by very low quality images. Extensive experimental results on the recently proposed cross-quality LFW database using three state-of-the-art deep face recognition models demonstrate the effectiveness of GFP-GAN in boosting significantly the face verification accuracy.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-08-15T18:05:19Z</published>
+    <arxiv:comment>paper accepted at BIOSIG 2023 conference</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Messaoud Bengherabi</name>
+    </author>
+    <author>
+      <name>Douaa Laib</name>
+    </author>
+    <author>
+      <name>Fella Souhila Lasnami</name>
+    </author>
+    <author>
+      <name>Ryma Boussaha</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2010.05508v1</id>
+    <title>Implicit Subspace Prior Learning for Dual-Blind Face Restoration</title>
+    <updated>2020-10-12T08:04:24Z</updated>
+    <link href="https://arxiv.org/abs/2010.05508v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2010.05508v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Face restoration is an inherently ill-posed problem, where additional prior constraints are typically considered crucial for mitigating such pathology. However, real-world image prior are often hard to simulate with precise mathematical models, which inevitably limits the performance and generalization ability of existing prior-regularized restoration methods. In this paper, we study the problem of face restoration under a more practical ``dual blind'' setting, i.e., without prior assumptions or hand-crafted regularization terms on the degradation profile or image contents.
+  To this end, a novel implicit subspace prior learning (ISPL) framework is proposed as a generic solution to dual-blind face restoration, with two key elements: 1) an implicit formulation to circumvent the ill-defined restoration mapping and 2) a subspace prior decomposition and fusion mechanism to dynamically handle inputs at varying degradation levels with consistent high-quality restoration results.
+  Experimental results demonstrate significant perception-distortion improvement of ISPL against existing state-of-the-art methods for a variety of restoration subtasks, including a 3.69db PSNR and 45.8% FID gain against ESRGAN, the 2018 NTIRE SR challenge winner. Overall, we prove that it is possible to capture and utilize prior knowledge without explicitly formulating it, which will help inspire new research paradigms towards low-level vision tasks.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2020-10-12T08:04:24Z</published>
+    <arxiv:comment>TPAMI submission</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Lingbo Yang</name>
+    </author>
+    <author>
+      <name>Pan Wang</name>
+    </author>
+    <author>
+      <name>Zhanning Gao</name>
+    </author>
+    <author>
+      <name>Shanshe Wang</name>
+    </author>
+    <author>
+      <name>Peiran Ren</name>
+    </author>
+    <author>
+      <name>Siwei Ma</name>
+    </author>
+    <author>
+      <name>Wen Gao</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2008.00418v1</id>
+    <title>Blind Face Restoration via Deep Multi-scale Component Dictionaries</title>
+    <updated>2020-08-02T07:02:07Z</updated>
+    <link href="https://arxiv.org/abs/2008.00418v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2008.00418v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Recent reference-based face restoration methods have received considerable attention due to their great capability in recovering high-frequency details on real low-quality images. However, most of these methods require a high-quality reference image of the same identity, making them only applicable in limited scenes. To address this issue, this paper suggests a deep face dictionary network (termed as DFDNet) to guide the restoration process of degraded observations. To begin with, we use K-means to generate deep dictionaries for perceptually significant face components (\ie, left/right eyes, nose and mouth) from high-quality images. Next, with the degraded input, we match and select the most similar component features from their corresponding dictionaries and transfer the high-quality details to the input via the proposed dictionary feature transfer (DFT) block. In particular, component AdaIN is leveraged to eliminate the style diversity between the input and dictionary features (\eg, illumination), and a confidence score is proposed to adaptively fuse the dictionary feature to the input. Finally, multi-scale dictionaries are adopted in a progressive manner to enable the coarse-to-fine restoration. Experiments show that our proposed method can achieve plausible performance in both quantitative and qualitative evaluation, and more importantly, can generate realistic and promising results on real degraded images without requiring an identity-belonging reference. The source code and models are available at \url{https://github.com/csxmli2016/DFDNet}.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2020-08-02T07:02:07Z</published>
+    <arxiv:comment>In ECCV 2020. Code is available at: https://github.com/csxmli2016/DFDNet</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Xiaoming Li</name>
+    </author>
+    <author>
+      <name>Chaofeng Chen</name>
+    </author>
+    <author>
+      <name>Shangchen Zhou</name>
+    </author>
+    <author>
+      <name>Xianhui Lin</name>
+    </author>
+    <author>
+      <name>Wangmeng Zuo</name>
+    </author>
+    <author>
+      <name>Lei Zhang</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2511.14213v1</id>
+    <title>Measurement-Constrained Sampling for Text-Prompted Blind Face Restoration</title>
+    <updated>2025-11-18T07:44:54Z</updated>
+    <link href="https://arxiv.org/abs/2511.14213v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2511.14213v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind face restoration (BFR) may correspond to multiple plausible high-quality (HQ) reconstructions under extremely low-quality (LQ) inputs. However, existing methods typically produce deterministic results, struggling to capture this one-to-many nature. In this paper, we propose a Measurement-Constrained Sampling (MCS) approach that enables diverse LQ face reconstructions conditioned on different textual prompts. Specifically, we formulate BFR as a measurement-constrained generative task by constructing an inverse problem through controlled degradations of coarse restorations, which allows posterior-guided sampling within text-to-image diffusion. Measurement constraints include both Forward Measurement, which ensures results align with input structures, and Reverse Measurement, which produces projection spaces, ensuring that the solution can align with various prompts. Experiments show that our MCS can generate prompt-aligned results and outperforms existing BFR methods. Codes will be released after acceptance.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-11-18T07:44:54Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Wenjie Li</name>
+    </author>
+    <author>
+      <name>Yulun Zhang</name>
+    </author>
+    <author>
+      <name>Guangwei Gao</name>
+    </author>
+    <author>
+      <name>Heng Guo</name>
+    </author>
+    <author>
+      <name>Zhanyu Ma</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2508.08556v1</id>
+    <title>Unlocking the Potential of Diffusion Priors in Blind Face Restoration</title>
+    <updated>2025-08-12T01:50:55Z</updated>
+    <link href="https://arxiv.org/abs/2508.08556v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2508.08556v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Although diffusion prior is rising as a powerful solution for blind face restoration (BFR), the inherent gap between the vanilla diffusion model and BFR settings hinders its seamless adaptation. The gap mainly stems from the discrepancy between 1) high-quality (HQ) and low-quality (LQ) images and 2) synthesized and real-world images. The vanilla diffusion model is trained on images with no or less degradations, whereas BFR handles moderately to severely degraded images. Additionally, LQ images used for training are synthesized by a naive degradation model with limited degradation patterns, which fails to simulate complex and unknown degradations in real-world scenarios. In this work, we use a unified network FLIPNET that switches between two modes to resolve specific gaps. In Restoration mode, the model gradually integrates BFR-oriented features and face embeddings from LQ images to achieve authentic and faithful face restoration. In Degradation mode, the model synthesizes real-world like degraded images based on the knowledge learned from real-world degradation datasets. Extensive evaluations on benchmark datasets show that our model 1) outperforms previous diffusion prior based BFR methods in terms of authenticity and fidelity, and 2) outperforms the naive degradation model in modeling the real-world degradations.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-08-12T01:50:55Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Yunqi Miao</name>
+    </author>
+    <author>
+      <name>Zhiyu Qu</name>
+    </author>
+    <author>
+      <name>Mingqi Gao</name>
+    </author>
+    <author>
+      <name>Changrui Chen</name>
+    </author>
+    <author>
+      <name>Jifei Song</name>
+    </author>
+    <author>
+      <name>Jungong Han</name>
+    </author>
+    <author>
+      <name>Jiankang Deng</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2402.18811v1</id>
+    <title>BFRFormer: Transformer-based generator for Real-World Blind Face Restoration</title>
+    <updated>2024-02-29T02:31:54Z</updated>
+    <link href="https://arxiv.org/abs/2402.18811v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2402.18811v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind face restoration is a challenging task due to the unknown and complex degradation. Although face prior-based methods and reference-based methods have recently demonstrated high-quality results, the restored images tend to contain over-smoothed results and lose identity-preserved details when the degradation is severe. It is observed that this is attributed to short-range dependencies, the intrinsic limitation of convolutional neural networks. To model long-range dependencies, we propose a Transformer-based blind face restoration method, named BFRFormer, to reconstruct images with more identity-preserved details in an end-to-end manner. In BFRFormer, to remove blocking artifacts, the wavelet discriminator and aggregated attention module are developed, and spectral normalization and balanced consistency regulation are adaptively applied to address the training instability and over-fitting problem, respectively. Extensive experiments show that our method outperforms state-of-the-art methods on a synthetic dataset and four real-world datasets. The source code, Casia-Test dataset, and pre-trained models are released at https://github.com/s8Znk/BFRFormer.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-02-29T02:31:54Z</published>
+    <arxiv:comment>Accepted by ICASSP 2024</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Guojing Ge</name>
+    </author>
+    <author>
+      <name>Qi Song</name>
+    </author>
+    <author>
+      <name>Guibo Zhu</name>
+    </author>
+    <author>
+      <name>Yuting Zhang</name>
+    </author>
+    <author>
+      <name>Jinglu Chen</name>
+    </author>
+    <author>
+      <name>Miao Xin</name>
+    </author>
+    <author>
+      <name>Ming Tang</name>
+    </author>
+    <author>
+      <name>Jinqiao Wang</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2101.04061v2</id>
+    <title>Towards Real-World Blind Face Restoration with Generative Facial Prior</title>
+    <updated>2021-06-11T02:29:27Z</updated>
+    <link href="https://arxiv.org/abs/2101.04061v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2101.04061v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind face restoration usually relies on facial priors, such as facial geometry prior or reference prior, to restore realistic and faithful details. However, very low-quality inputs cannot offer accurate geometric prior while high-quality references are inaccessible, limiting the applicability in real-world scenarios. In this work, we propose GFP-GAN that leverages rich and diverse priors encapsulated in a pretrained face GAN for blind face restoration. This Generative Facial Prior (GFP) is incorporated into the face restoration process via novel channel-split spatial feature transform layers, which allow our method to achieve a good balance of realness and fidelity. Thanks to the powerful generative facial prior and delicate designs, our GFP-GAN could jointly restore facial details and enhance colors with just a single forward pass, while GAN inversion methods require expensive image-specific optimization at inference. Extensive experiments show that our method achieves superior performance to prior art on both synthetic and real-world datasets.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2021-01-11T17:54:38Z</published>
+    <arxiv:comment>CVPR 2021. Codes: https://github.com/TencentARC/GFPGAN</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Xintao Wang</name>
+    </author>
+    <author>
+      <name>Yu Li</name>
+    </author>
+    <author>
+      <name>Honglun Zhang</name>
+    </author>
+    <author>
+      <name>Ying Shan</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2303.06885v3</id>
+    <title>DR2: Diffusion-based Robust Degradation Remover for Blind Face Restoration</title>
+    <updated>2023-03-20T02:22:09Z</updated>
+    <link href="https://arxiv.org/abs/2303.06885v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2303.06885v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind face restoration usually synthesizes degraded low-quality data with a pre-defined degradation model for training, while more complex cases could happen in the real world. This gap between the assumed and actual degradation hurts the restoration performance where artifacts are often observed in the output. However, it is expensive and infeasible to include every type of degradation to cover real-world cases in the training data. To tackle this robustness issue, we propose Diffusion-based Robust Degradation Remover (DR2) to first transform the degraded image to a coarse but degradation-invariant prediction, then employ an enhancement module to restore the coarse prediction to a high-quality image. By leveraging a well-performing denoising diffusion probabilistic model, our DR2 diffuses input images to a noisy status where various types of degradation give way to Gaussian noise, and then captures semantic information through iterative denoising steps. As a result, DR2 is robust against common degradation (e.g. blur, resize, noise and compression) and compatible with different designs of enhancement modules. Experiments in various settings show that our framework outperforms state-of-the-art methods on heavily degraded synthetic and real-world datasets.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-03-13T06:05:18Z</published>
+    <arxiv:comment>Accepted to CVPR 2023</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Zhixin Wang</name>
+    </author>
+    <author>
+      <name>Xiaoyun Zhang</name>
+    </author>
+    <author>
+      <name>Ziying Zhang</name>
+    </author>
+    <author>
+      <name>Huangjie Zheng</name>
+    </author>
+    <author>
+      <name>Mingyuan Zhou</name>
+    </author>
+    <author>
+      <name>Ya Zhang</name>
+    </author>
+    <author>
+      <name>Yanfeng Wang</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2503.20537v1</id>
+    <title>TD-BFR: Truncated Diffusion Model for Efficient Blind Face Restoration</title>
+    <updated>2025-03-26T13:35:43Z</updated>
+    <link href="https://arxiv.org/abs/2503.20537v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2503.20537v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Diffusion-based methodologies have shown significant potential in blind face restoration (BFR), leveraging their robust generative capabilities. However, they are often criticized for two significant problems: 1) slow training and inference speed, and 2) inadequate recovery of fine-grained facial details. To address these problems, we propose a novel Truncated Diffusion model for efficient Blind Face Restoration (TD-BFR), a three-stage paradigm tailored for the progressive resolution of degraded images. Specifically, TD-BFR utilizes an innovative truncated sampling method, starting from low-quality (LQ) images at low resolution to enhance sampling speed, and then introduces an adaptive degradation removal module to handle unknown degradations and connect the generation processes across different resolutions. Additionally, we further adapt the priors of pre-trained diffusion models to recover rich facial details. Our method efficiently restores high-quality images in a coarse-to-fine manner and experimental results demonstrate that TD-BFR is, on average, \textbf{4.75$\times$} faster than current state-of-the-art diffusion-based BFR methods while maintaining competitive quality.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-03-26T13:35:43Z</published>
+    <arxiv:comment>Accepted by ICME 2025</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Ziying Zhang</name>
+    </author>
+    <author>
+      <name>Xiang Gao</name>
+    </author>
+    <author>
+      <name>Zhixin Wang</name>
+    </author>
+    <author>
+      <name>Qiang hu</name>
+    </author>
+    <author>
+      <name>Xiaoyun Zhang</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2312.15736v2</id>
+    <title>Towards Real-World Blind Face Restoration with Generative Diffusion Prior</title>
+    <updated>2024-03-18T12:23:48Z</updated>
+    <link href="https://arxiv.org/abs/2312.15736v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2312.15736v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind face restoration is an important task in computer vision and has gained significant attention due to its wide-range applications. Previous works mainly exploit facial priors to restore face images and have demonstrated high-quality results. However, generating faithful facial details remains a challenging problem due to the limited prior knowledge obtained from finite data. In this work, we delve into the potential of leveraging the pretrained Stable Diffusion for blind face restoration. We propose BFRffusion which is thoughtfully designed to effectively extract features from low-quality face images and could restore realistic and faithful facial details with the generative prior of the pretrained Stable Diffusion. In addition, we build a privacy-preserving face dataset called PFHQ with balanced attributes like race, gender, and age. This dataset can serve as a viable alternative for training blind face restoration networks, effectively addressing privacy and bias concerns usually associated with the real face datasets. Through an extensive series of experiments, we demonstrate that our BFRffusion achieves state-of-the-art performance on both synthetic and real-world public testing datasets for blind face restoration and our PFHQ dataset is an available resource for training blind face restoration networks. The codes, pretrained models, and dataset are released at https://github.com/chenxx89/BFRffusion.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-12-25T14:16:24Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Xiaoxu Chen</name>
+    </author>
+    <author>
+      <name>Jingfan Tan</name>
+    </author>
+    <author>
+      <name>Tao Wang</name>
+    </author>
+    <author>
+      <name>Kaihao Zhang</name>
+    </author>
+    <author>
+      <name>Wenhan Luo</name>
+    </author>
+    <author>
+      <name>Xiaochun Cao</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2206.13962v2</id>
+    <title>Multi-Prior Learning via Neural Architecture Search for Blind Face Restoration</title>
+    <updated>2023-12-08T10:25:36Z</updated>
+    <link href="https://arxiv.org/abs/2206.13962v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2206.13962v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind Face Restoration (BFR) aims to recover high-quality face images from low-quality ones and usually resorts to facial priors for improving restoration performance. However, current methods still suffer from two major difficulties: 1) how to derive a powerful network architecture without extensive hand tuning; 2) how to capture complementary information from multiple facial priors in one network to improve restoration performance. To this end, we propose a Face Restoration Searching Network (FRSNet) to adaptively search the suitable feature extraction architecture within our specified search space, which can directly contribute to the restoration quality. On the basis of FRSNet, we further design our Multiple Facial Prior Searching Network (MFPSNet) with a multi-prior learning scheme. MFPSNet optimally extracts information from diverse facial priors and fuses the information into image features, ensuring that both external guidance and internal features are reserved. In this way, MFPSNet takes full advantage of semantic-level (parsing maps), geometric-level (facial heatmaps), reference-level (facial dictionaries) and pixel-level (degraded images) information and thus generates faithful and realistic images. Quantitative and qualitative experiments show that MFPSNet performs favorably on both synthetic and real-world datasets against the state-of-the-art BFR methods. The codes are publicly available at: https://github.com/YYJ1anG/MFPSNet.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-06-28T12:29:53Z</published>
+    <arxiv:comment>We found some problems with the article and need to withdrawal it</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Yanjiang Yu</name>
+    </author>
+    <author>
+      <name>Puyang Zhang</name>
+    </author>
+    <author>
+      <name>Kaihao Zhang</name>
+    </author>
+    <author>
+      <name>Wenhan Luo</name>
+    </author>
+    <author>
+      <name>Changsheng Li</name>
+    </author>
+    <author>
+      <name>Ye Yuan</name>
+    </author>
+    <author>
+      <name>Guoren Wang</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2403.10098v1</id>
+    <title>DiffMAC: Diffusion Manifold Hallucination Correction for High Generalization Blind Face Restoration</title>
+    <updated>2024-03-15T08:44:15Z</updated>
+    <link href="https://arxiv.org/abs/2403.10098v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2403.10098v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind face restoration (BFR) is a highly challenging problem due to the uncertainty of degradation patterns. Current methods have low generalization across photorealistic and heterogeneous domains. In this paper, we propose a Diffusion-Information-Diffusion (DID) framework to tackle diffusion manifold hallucination correction (DiffMAC), which achieves high-generalization face restoration in diverse degraded scenes and heterogeneous domains. Specifically, the first diffusion stage aligns the restored face with spatial feature embedding of the low-quality face based on AdaIN, which synthesizes degradation-removal results but with uncontrollable artifacts for some hard cases. Based on Stage I, Stage II considers information compression using manifold information bottleneck (MIB) and finetunes the first diffusion model to improve facial fidelity. DiffMAC effectively fights against blind degradation patterns and synthesizes high-quality faces with attribute and identity consistencies. Experimental results demonstrate the superiority of DiffMAC over state-of-the-art methods, with a high degree of generalization in real-world and heterogeneous settings. The source code and models will be public.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-03-15T08:44:15Z</published>
+    <arxiv:comment>15 pages, 12 figures</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Nan Gao</name>
+    </author>
+    <author>
+      <name>Jia Li</name>
+    </author>
+    <author>
+      <name>Huaibo Huang</name>
+    </author>
+    <author>
+      <name>Zhi Zeng</name>
+    </author>
+    <author>
+      <name>Ke Shang</name>
+    </author>
+    <author>
+      <name>Shuwu Zhang</name>
+    </author>
+    <author>
+      <name>Ran He</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2411.10508v1</id>
+    <title>DR-BFR: Degradation Representation with Diffusion Models for Blind Face Restoration</title>
+    <updated>2024-11-15T15:24:42Z</updated>
+    <link href="https://arxiv.org/abs/2411.10508v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2411.10508v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind face restoration (BFR) is fundamentally challenged by the extensive range of degradation types and degrees that impact model generalization. Recent advancements in diffusion models have made considerable progress in this field. Nevertheless, a critical limitation is their lack of awareness of specific degradation, leading to potential issues such as unnatural details and inaccurate textures. In this paper, we equip diffusion models with the capability to decouple various degradation as a degradation prompt from low-quality (LQ) face images via unsupervised contrastive learning with reconstruction loss, and demonstrate that this capability significantly improves performance, particularly in terms of the naturalness of the restored images. Our novel restoration scheme, named DR-BFR, guides the denoising of Latent Diffusion Models (LDM) by incorporating Degradation Representation (DR) and content features from LQ images. DR-BFR comprises two modules: 1) Degradation Representation Module (DRM): This module extracts degradation representation with content-irrelevant features from LQ faces and estimates a reasonable distribution in the degradation space through contrastive learning and a specially designed LQ reconstruction. 2) Latent Diffusion Restoration Module (LDRM): This module perceives both degradation features and content features in the latent space, enabling the restoration of high-quality images from LQ inputs. Our experiments demonstrate that the proposed DR-BFR significantly outperforms state-of-the-art methods quantitatively and qualitatively across various datasets. The DR effectively distinguishes between various degradations in blind face inverse problems and provides a reasonably powerful prompt to LDM.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-11-15T15:24:42Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Xinmin Qiu</name>
+    </author>
+    <author>
+      <name>Bonan Li</name>
+    </author>
+    <author>
+      <name>Zicheng Zhang</name>
+    </author>
+    <author>
+      <name>Congying Han</name>
+    </author>
+    <author>
+      <name>Tiande Guo</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2412.21042v1</id>
+    <title>Visual Style Prompt Learning Using Diffusion Models for Blind Face Restoration</title>
+    <updated>2024-12-30T16:05:40Z</updated>
+    <link href="https://arxiv.org/abs/2412.21042v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2412.21042v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind face restoration aims to recover high-quality facial images from various unidentified sources of degradation, posing significant challenges due to the minimal information retrievable from the degraded images. Prior knowledge-based methods, leveraging geometric priors and facial features, have led to advancements in face restoration but often fall short of capturing fine details. To address this, we introduce a visual style prompt learning framework that utilizes diffusion probabilistic models to explicitly generate visual prompts within the latent space of pre-trained generative models. These prompts are designed to guide the restoration process. To fully utilize the visual prompts and enhance the extraction of informative and rich patterns, we introduce a style-modulated aggregation transformation layer. Extensive experiments and applications demonstrate the superiority of our method in achieving high-quality blind face restoration. The source code is available at \href{https://github.com/LonglongaaaGo/VSPBFR}{https://github.com/LonglongaaaGo/VSPBFR}.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.MM" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-12-30T16:05:40Z</published>
+    <arxiv:comment>Published at Pattern Recognition; 13 pages, 11 figures</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <arxiv:journal_ref>Pattern Recognition, 2024, 111312, ISSN 0031-3203</arxiv:journal_ref>
+    <author>
+      <name>Wanglong Lu</name>
+    </author>
+    <author>
+      <name>Jikai Wang</name>
+    </author>
+    <author>
+      <name>Tao Wang</name>
+    </author>
+    <author>
+      <name>Kaihao Zhang</name>
+    </author>
+    <author>
+      <name>Xianta Jiang</name>
+    </author>
+    <author>
+      <name>Hanli Zhao</name>
+    </author>
+    <arxiv:doi>10.1016/j.patcog.2024.111312</arxiv:doi>
+    <link rel="related" href="https://doi.org/10.1016/j.patcog.2024.111312" title="doi"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2608.03923v1</id>
+    <title>GeoMAR: Unleashing Geometrically Aligned Features for Masked Autoregressive Blind Face Restoration</title>
+    <updated>2026-08-04T16:55:49Z</updated>
+    <link href="https://arxiv.org/abs/2608.03923v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2608.03923v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Codebook-based blind face restoration (BFR) often suffers from ambiguous conditioning features and a fragile prediction mechanism under severe degradation. To address these challenges, we propose GeoMAR, a framework designed to unleash geometrically aligned features with masked autoregressive (MAR) refinement for robust face restoration. For feature conditioning, we introduce a dual-input extraction pipeline to extract component-based geometric descriptions with explicit, spatially faithful anchors. These textual priors are integrated with low-quality (LQ) features via an Aligned Geometric Priors Injector, which employs a KV-Q exchange strategy to generate geometrically aligned features. For prediction mechanism, we reformulate the one-step mapping into a multi-step MAR process. This coarse-to-fine generation progressively refines complex facial regions based on increasingly reliable context. Experiments on one synthetic and three real-world benchmarks demonstrate that GeoMAR achieves highly competitive perceptual quality and coherent visual structures compared with existing methods. The code is available at https://github.com/BRL-SYSU/GeoMAR.git.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-08-04T16:55:49Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Lu Gan</name>
+    </author>
+    <author>
+      <name>Hanyu Yan</name>
+    </author>
+    <author>
+      <name>Chaofeng Chen</name>
+    </author>
+    <author>
+      <name>Junqi Hu</name>
+    </author>
+    <author>
+      <name>Dan Zeng</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2201.06374v3</id>
+    <title>RestoreFormer: High-Quality Blind Face Restoration from Undegraded Key-Value Pairs</title>
+    <updated>2022-06-25T07:15:48Z</updated>
+    <link href="https://arxiv.org/abs/2201.06374v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2201.06374v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind face restoration is to recover a high-quality face image from unknown degradations. As face image contains abundant contextual information, we propose a method, RestoreFormer, which explores fully-spatial attentions to model contextual information and surpasses existing works that use local operators. RestoreFormer has several benefits compared to prior arts. First, unlike the conventional multi-head self-attention in previous Vision Transformers (ViTs), RestoreFormer incorporates a multi-head cross-attention layer to learn fully-spatial interactions between corrupted queries and high-quality key-value pairs. Second, the key-value pairs in ResotreFormer are sampled from a reconstruction-oriented high-quality dictionary, whose elements are rich in high-quality facial features specifically aimed for face reconstruction, leading to superior restoration results. Third, RestoreFormer outperforms advanced state-of-the-art methods on one synthetic dataset and three real-world datasets, as well as produces images with better visual quality.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-01-17T12:21:55Z</published>
+    <arxiv:comment>Accepted by CVPR 2022</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Zhouxia Wang</name>
+    </author>
+    <author>
+      <name>Jiawei Zhang</name>
+    </author>
+    <author>
+      <name>Runjian Chen</name>
+    </author>
+    <author>
+      <name>Wenping Wang</name>
+    </author>
+    <author>
+      <name>Ping Luo</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2308.10196v2</id>
+    <title>Blind Face Restoration for Under-Display Camera via Dictionary Guided Transformer</title>
+    <updated>2023-12-01T17:49:37Z</updated>
+    <link href="https://arxiv.org/abs/2308.10196v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2308.10196v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>By hiding the front-facing camera below the display panel, Under-Display Camera (UDC) provides users with a full-screen experience. However, due to the characteristics of the display, images taken by UDC suffer from significant quality degradation. Methods have been proposed to tackle UDC image restoration and advances have been achieved. There are still no specialized methods and datasets for restoring UDC face images, which may be the most common problem in the UDC scene. To this end, considering color filtering, brightness attenuation, and diffraction in the imaging process of UDC, we propose a two-stage network UDC Degradation Model Network named UDC-DMNet to synthesize UDC images by modeling the processes of UDC imaging. Then we use UDC-DMNet and high-quality face images from FFHQ and CelebA-Test to create UDC face training datasets FFHQ-P/T and testing datasets CelebA-Test-P/T for UDC face restoration. We propose a novel dictionary-guided transformer network named DGFormer. Introducing the facial component dictionary and the characteristics of the UDC image in the restoration makes DGFormer capable of addressing blind face restoration in UDC scenarios. Experiments show that our DGFormer and UDC-DMNet achieve state-of-the-art performance.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="eess.IV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-08-20T08:02:23Z</published>
+    <arxiv:comment>To appear in IEEE TCSVT</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Jingfan Tan</name>
+    </author>
+    <author>
+      <name>Xiaoxu Chen</name>
+    </author>
+    <author>
+      <name>Tao Wang</name>
+    </author>
+    <author>
+      <name>Kaihao Zhang</name>
+    </author>
+    <author>
+      <name>Wenhan Luo</name>
+    </author>
+    <author>
+      <name>Xiaocun Cao</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2105.06070v1</id>
+    <title>GAN Prior Embedded Network for Blind Face Restoration in the Wild</title>
+    <updated>2021-05-13T04:14:00Z</updated>
+    <link href="https://arxiv.org/abs/2105.06070v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2105.06070v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind face restoration (BFR) from severely degraded face images in the wild is a very challenging problem. Due to the high illness of the problem and the complex unknown degradation, directly training a deep neural network (DNN) usually cannot lead to acceptable results. Existing generative adversarial network (GAN) based methods can produce better results but tend to generate over-smoothed restorations. In this work, we propose a new method by first learning a GAN for high-quality face image generation and embedding it into a U-shaped DNN as a prior decoder, then fine-tuning the GAN prior embedded DNN with a set of synthesized low-quality face images. The GAN blocks are designed to ensure that the latent code and noise input to the GAN can be respectively generated from the deep and shallow features of the DNN, controlling the global face structure, local face details and background of the reconstructed image. The proposed GAN prior embedded network (GPEN) is easy-to-implement, and it can generate visually photo-realistic results. Our experiments demonstrated that the proposed GPEN achieves significantly superior results to state-of-the-art BFR methods both quantitatively and qualitatively, especially for the restoration of severely degraded face images in the wild. The source code and models can be found at https://github.com/yangxy/GPEN.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2021-05-13T04:14:00Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Tao Yang</name>
+      <arxiv:affiliation>DAMO Academy, Alibaba Group</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Peiran Ren</name>
+      <arxiv:affiliation>DAMO Academy, Alibaba Group</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Xuansong Xie</name>
+      <arxiv:affiliation>DAMO Academy, Alibaba Group</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Lei Zhang</name>
+      <arxiv:affiliation>DAMO Academy, Alibaba Group</arxiv:affiliation>
+      <arxiv:affiliation>Department of Computing, The Hong Kong Polytechnic University</arxiv:affiliation>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2503.09294v1</id>
+    <title>IQPFR: An Image Quality Prior for Blind Face Restoration and Beyond</title>
+    <updated>2025-03-12T11:39:51Z</updated>
+    <link href="https://arxiv.org/abs/2503.09294v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2503.09294v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind Face Restoration (BFR) addresses the challenge of reconstructing degraded low-quality (LQ) facial images into high-quality (HQ) outputs. Conventional approaches predominantly rely on learning feature representations from ground-truth (GT) data; however, inherent imperfections in GT datasets constrain restoration performance to the mean quality level of the training data, rather than attaining maximally attainable visual quality. To overcome this limitation, we propose a novel framework that incorporates an Image Quality Prior (IQP) derived from No-Reference Image Quality Assessment (NR-IQA) models to guide the restoration process toward optimal HQ reconstructions. Our methodology synergizes this IQP with a learned codebook prior through two critical innovations: (1) During codebook learning, we devise a dual-branch codebook architecture that disentangles feature extraction into universal structural components and HQ-specific attributes, ensuring comprehensive representation of both common and high-quality facial characteristics. (2) In the codebook lookup stage, we implement a quality-conditioned Transformer-based framework. NR-IQA-derived quality scores act as dynamic conditioning signals to steer restoration toward the highest feasible quality standard. This score-conditioned paradigm enables plug-and-play enhancement of existing BFR architectures without modifying the original structure. We also formulate a discrete representation-based quality optimization strategy that circumvents over-optimization artifacts prevalent in continuous latent space approaches. Extensive experiments demonstrate that our method outperforms state-of-the-art techniques across multiple benchmarks. Besides, our quality-conditioned framework demonstrates consistent performance improvements when integrated with prior BFR models. The code will be released.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-03-12T11:39:51Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Peng Hu</name>
+    </author>
+    <author>
+      <name>Chunming He</name>
+    </author>
+    <author>
+      <name>Lei Xu</name>
+    </author>
+    <author>
+      <name>Jingduo Tian</name>
+    </author>
+    <author>
+      <name>Sina Farsiu</name>
+    </author>
+    <author>
+      <name>Yulun Zhang</name>
+    </author>
+    <author>
+      <name>Pei Liu</name>
+    </author>
+    <author>
+      <name>Xiu Li</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2205.06803v3</id>
+    <title>VQFR: Blind Face Restoration with Vector-Quantized Dictionary and Parallel Decoder</title>
+    <updated>2022-07-27T07:48:29Z</updated>
+    <link href="https://arxiv.org/abs/2205.06803v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2205.06803v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Although generative facial prior and geometric prior have recently demonstrated high-quality results for blind face restoration, producing fine-grained facial details faithful to inputs remains a challenging problem. Motivated by the classical dictionary-based methods and the recent vector quantization (VQ) technique, we propose a VQ-based face restoration method - VQFR. VQFR takes advantage of high-quality low-level feature banks extracted from high-quality faces and can thus help recover realistic facial details. However, the simple application of the VQ codebook cannot achieve good results with faithful details and identity preservation. Therefore, we further introduce two special network designs. 1). We first investigate the compression patch size in the VQ codebook and find that the VQ codebook designed with a proper compression patch size is crucial to balance the quality and fidelity. 2). To further fuse low-level features from inputs while not "contaminating" the realistic details generated from the VQ codebook, we proposed a parallel decoder consisting of a texture decoder and a main decoder. Those two decoders then interact with a texture warping module with deformable convolution. Equipped with the VQ codebook as a facial detail dictionary and the parallel decoder design, the proposed VQFR can largely enhance the restored quality of facial details while keeping the fidelity to previous methods.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-05-13T17:54:40Z</published>
+    <arxiv:comment>Accepted to ECCV 2022 (Oral). Project webpage is available at https://ycgu.site/projects/vqfr</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Yuchao Gu</name>
+    </author>
+    <author>
+      <name>Xintao Wang</name>
+    </author>
+    <author>
+      <name>Liangbin Xie</name>
+    </author>
+    <author>
+      <name>Chao Dong</name>
+    </author>
+    <author>
+      <name>Gen Li</name>
+    </author>
+    <author>
+      <name>Ying Shan</name>
+    </author>
+    <author>
+      <name>Ming-Ming Cheng</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2601.19506v4</id>
+    <title>Bridging Information Asymmetry: A Hierarchical Framework for Deterministic Blind Face Restoration</title>
+    <updated>2026-06-30T07:23:59Z</updated>
+    <link href="https://arxiv.org/abs/2601.19506v4" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2601.19506v4" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind face restoration remains a persistent challenge due to the inherent ill-posedness of reconstructing holistic structures from severely constrained observations. Current generative paradigms, while capable of synthesizing realistic facial details, remain limited by the under-constrained nature of blind restoration, where severely degraded inputs can be mapped to plausible yet identity-inconsistent outputs. To address this issue, we present Pref-Restore, a hierarchical framework for deterministic BFR. Our design is organized around three complementary principles: (1) Semantic Information Augmentation, where an auto-regressive semantic branch converts image and text cues into structured tokens that provide a stable high-level anchor; (2) Texture-level Fidelity Alignment, where the diffusion generator is trained under this anchor to recover identity-relevant details; and (3) Fidelity-constrained Preference Optimization, where a face-aware reward refines the diffusion trajectory while controlling the quality-fidelity trade-off. Extensive experiments on synthetic and real-world benchmarks show that Pref-Restore achieves state-of-the-art performance, with stronger identity-sensitive fidelity and lower restoration uncertainty across repeated sampling. Systematic ablations further attribute these gains to the proposed hierarchical design, showing the necessity of staged training, the robustness of the text pathway under deployment-faithful conditions, and the benefit of fidelity-constrained preference optimization.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-01-27T11:50:31Z</published>
+    <arxiv:comment>Accepted by TPAMI2026</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Zhengjian Yao</name>
+    </author>
+    <author>
+      <name>Jiakui Hu</name>
+    </author>
+    <author>
+      <name>Kaiwen Li</name>
+    </author>
+    <author>
+      <name>Hangzhou He</name>
+    </author>
+    <author>
+      <name>Xinliang Zhang</name>
+    </author>
+    <author>
+      <name>Shuang Zeng</name>
+    </author>
+    <author>
+      <name>Lei Zhu</name>
+    </author>
+    <author>
+      <name>Yanye Lu</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2510.04410v1</id>
+    <title>CodeFormer++: Blind Face Restoration Using Deformable Registration and Deep Metric Learning</title>
+    <updated>2025-10-06T00:53:50Z</updated>
+    <link href="https://arxiv.org/abs/2510.04410v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2510.04410v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind face restoration (BFR) has attracted increasing attention with the rise of generative methods. Most existing approaches integrate generative priors into the restoration pro- cess, aiming to jointly address facial detail generation and identity preservation. However, these methods often suffer from a trade-off between visual quality and identity fidelity, leading to either identity distortion or suboptimal degradation removal. In this paper, we present CodeFormer++, a novel framework that maximizes the utility of generative priors for high-quality face restoration while preserving identity. We decompose BFR into three sub-tasks: (i) identity- preserving face restoration, (ii) high-quality face generation, and (iii) dynamic fusion of identity features with realistic texture details. Our method makes three key contributions: (1) a learning-based deformable face registration module that semantically aligns generated and restored faces; (2) a texture guided restoration network to dynamically extract and transfer the texture of generated face to boost the quality of identity-preserving restored face; and (3) the integration of deep metric learning for BFR with the generation of informative positive and hard negative samples to better fuse identity- preserving and generative features. Extensive experiments on real-world and synthetic datasets demonstrate that, the pro- posed CodeFormer++ achieves superior performance in terms of both visual fidelity and identity consistency.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-10-06T00:53:50Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Venkata Bharath Reddy Reddem</name>
+    </author>
+    <author>
+      <name>Akshay P Sarashetti</name>
+    </author>
+    <author>
+      <name>Ranjith Merugu</name>
+    </author>
+    <author>
+      <name>Amit Satish Unde</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2308.07228v1</id>
+    <title>RestoreFormer++: Towards Real-World Blind Face Restoration from Undegraded Key-Value Pairs</title>
+    <updated>2023-08-14T16:04:53Z</updated>
+    <link href="https://arxiv.org/abs/2308.07228v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2308.07228v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind face restoration aims at recovering high-quality face images from those with unknown degradations. Current algorithms mainly introduce priors to complement high-quality details and achieve impressive progress. However, most of these algorithms ignore abundant contextual information in the face and its interplay with the priors, leading to sub-optimal performance. Moreover, they pay less attention to the gap between the synthetic and real-world scenarios, limiting the robustness and generalization to real-world applications. In this work, we propose RestoreFormer++, which on the one hand introduces fully-spatial attention mechanisms to model the contextual information and the interplay with the priors, and on the other hand, explores an extending degrading model to help generate more realistic degraded face images to alleviate the synthetic-to-real-world gap. Compared with current algorithms, RestoreFormer++ has several crucial benefits. First, instead of using a multi-head self-attention mechanism like the traditional visual transformer, we introduce multi-head cross-attention over multi-scale features to fully explore spatial interactions between corrupted information and high-quality priors. In this way, it can facilitate RestoreFormer++ to restore face images with higher realness and fidelity. Second, in contrast to the recognition-oriented dictionary, we learn a reconstruction-oriented dictionary as priors, which contains more diverse high-quality facial details and better accords with the restoration target. Third, we introduce an extending degrading model that contains more realistic degraded scenarios for training data synthesizing, and thus helps to enhance the robustness and generalization of our RestoreFormer++ model. Extensive experiments show that RestoreFormer++ outperforms state-of-the-art algorithms on both synthetic and real-world datasets.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-08-14T16:04:53Z</published>
+    <arxiv:comment>Submitted to TPAMI. An extension of RestoreFormer</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Zhouxia Wang</name>
+    </author>
+    <author>
+      <name>Jiawei Zhang</name>
+    </author>
+    <author>
+      <name>Tianshui Chen</name>
+    </author>
+    <author>
+      <name>Wenping Wang</name>
+    </author>
+    <author>
+      <name>Ping Luo</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2410.09864v2</id>
+    <title>AuthFace: Towards Authentic Blind Face Restoration with Face-oriented Generative Diffusion Prior</title>
+    <updated>2026-03-06T12:00:54Z</updated>
+    <link href="https://arxiv.org/abs/2410.09864v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2410.09864v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind face restoration (BFR) is a fundamental and challenging problem in computer vision. To faithfully restore high-quality (HQ) photos from poor-quality ones, recent research endeavors predominantly rely on facial image priors from the powerful pretrained text-to-image (T2I) diffusion models. However, such priors often lead to the incorrect generation of non-facial features and insufficient facial details, thus rendering them less practical for real-world applications. In this paper, we propose a novel framework, namely AuthFace that achieves highly authentic face restoration results by exploring a face-oriented generative diffusion prior. To learn such a prior, we first collect a dataset of 1.5K high-quality images, with resolutions exceeding 8K, captured by professional photographers. Based on the dataset, we then introduce a novel face-oriented restoration-tuning pipeline that fine-tunes a pretrained T2I model. Identifying key criteria of quality-first and photography-guided annotation, we involve the retouching and reviewing process under the guidance of photographers for high-quality images that show rich facial features. The photography-guided annotation system fully explores the potential of these high-quality photographic images. In this way, the potent natural image priors from pretrained T2I diffusion models can be subtly harnessed, specifically enhancing their capability in facial detail restoration. Moreover, to minimize artifacts in critical facial areas, such as eyes and mouth, we propose a time-aware latent facial feature loss to learn the authentic face restoration process. Extensive experiments on the synthetic and real-world BFR datasets demonstrate the superiority of our approach.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-10-13T14:56:13Z</published>
+    <arxiv:comment>ACM MM 25, Codes and datasets are available at https://github.com/EthanLiang99/AuthFace</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Guoqiang Liang</name>
+    </author>
+    <author>
+      <name>Qingnan Fan</name>
+    </author>
+    <author>
+      <name>Bingtao Fu</name>
+    </author>
+    <author>
+      <name>Jinwei Chen</name>
+    </author>
+    <author>
+      <name>Hong Gu</name>
+    </author>
+    <author>
+      <name>Lin Wang</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2505.23462v1</id>
+    <title>LAFR: Efficient Diffusion-based Blind Face Restoration via Latent Codebook Alignment Adapter</title>
+    <updated>2025-05-29T14:11:16Z</updated>
+    <link href="https://arxiv.org/abs/2505.23462v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2505.23462v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind face restoration from low-quality (LQ) images is a challenging task that requires not only high-fidelity image reconstruction but also the preservation of facial identity. While diffusion models like Stable Diffusion have shown promise in generating high-quality (HQ) images, their VAE modules are typically trained only on HQ data, resulting in semantic misalignment when encoding LQ inputs. This mismatch significantly weakens the effectiveness of LQ conditions during the denoising process. Existing approaches often tackle this issue by retraining the VAE encoder, which is computationally expensive and memory-intensive. To address this limitation efficiently, we propose LAFR (Latent Alignment for Face Restoration), a novel codebook-based latent space adapter that aligns the latent distribution of LQ images with that of HQ counterparts, enabling semantically consistent diffusion sampling without altering the original VAE. To further enhance identity preservation, we introduce a multi-level restoration loss that combines constraints from identity embeddings and facial structural priors. Additionally, by leveraging the inherent structural regularity of facial images, we show that lightweight finetuning of diffusion prior on just 0.9% of FFHQ dataset is sufficient to achieve results comparable to state-of-the-art methods, reduce training time by 70%. Extensive experiments on both synthetic and real-world face restoration benchmarks demonstrate the effectiveness and efficiency of LAFR, achieving high-quality, identity-preserving face reconstruction from severely degraded inputs.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-05-29T14:11:16Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Runyi Li</name>
+    </author>
+    <author>
+      <name>Bin Chen</name>
+    </author>
+    <author>
+      <name>Jian Zhang</name>
+    </author>
+    <author>
+      <name>Radu Timofte</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2401.06978v1</id>
+    <title>ENTED: Enhanced Neural Texture Extraction and Distribution for Reference-based Blind Face Restoration</title>
+    <updated>2024-01-13T04:54:59Z</updated>
+    <link href="https://arxiv.org/abs/2401.06978v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2401.06978v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>We present ENTED, a new framework for blind face restoration that aims to restore high-quality and realistic portrait images. Our method involves repairing a single degraded input image using a high-quality reference image. We utilize a texture extraction and distribution framework to transfer high-quality texture features between the degraded input and reference image. However, the StyleGAN-like architecture in our framework requires high-quality latent codes to generate realistic images. The latent code extracted from the degraded input image often contains corrupted features, making it difficult to align the semantic information from the input with the high-quality textures from the reference. To overcome this challenge, we employ two special techniques. The first technique, inspired by vector quantization, replaces corrupted semantic features with high-quality code words. The second technique generates style codes that carry photorealistic texture information from a more informative latent space developed using the high-quality features in the reference image's manifold. Extensive experiments conducted on synthetic and real-world datasets demonstrate that our method produces results with more realistic contextual details and outperforms state-of-the-art methods. A thorough ablation study confirms the effectiveness of each proposed module.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-01-13T04:54:59Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Yuen-Fui Lau</name>
+    </author>
+    <author>
+      <name>Tianjia Zhang</name>
+    </author>
+    <author>
+      <name>Zhefan Rao</name>
+    </author>
+    <author>
+      <name>Qifeng Chen</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2507.07464v4</id>
+    <title>Degradation-Agnostic Statistical Facial Feature Transformation for Blind Face Restoration in Adverse Weather Conditions</title>
+    <updated>2026-01-25T05:44:24Z</updated>
+    <link href="https://arxiv.org/abs/2507.07464v4" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2507.07464v4" rel="related" type="application/pdf" title="pdf"/>
+    <summary>With the increasing deployment of intelligent CCTV systems in outdoor environments, there is a growing demand for face recognition systems optimized for challenging weather conditions. Adverse weather significantly degrades image quality, which in turn reduces recognition accuracy. Although recent face image restoration (FIR) models based on generative adversarial networks (GANs) and diffusion models have shown progress, their performance remains limited due to the lack of dedicated modules that explicitly address weather-induced degradations. This leads to distorted facial textures and structures. To address these limitations, we propose a novel GAN-based blind FIR framework that integrates two key components: local Statistical Facial Feature Transformation (SFFT) and Degradation-Agnostic Feature Embedding (DAFE). The local SFFT module enhances facial structure and color fidelity by aligning the local statistical distributions of low-quality (LQ) facial regions with those of high-quality (HQ) counterparts. Complementarily, the DAFE module enables robust statistical facial feature extraction under adverse weather conditions by aligning LQ and HQ encoder representations, thereby making the restoration process adaptive to severe weather-induced degradations. Experimental results demonstrate that the proposed degradation-agnostic SFFT model outperforms existing state-of-the-art FIR methods based on GAN and diffusion models, particularly in suppressing texture distortions and accurately reconstructing facial structures. Furthermore, both the SFFT and DAFE modules are empirically validated in enhancing structural fidelity and perceptual quality in face restoration under challenging weather scenarios.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-07-10T06:31:26Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Chang-Hwan Son</name>
+    </author>
+    <author>
+      <name>Cheol-Hwan Kim</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2402.06106v1</id>
+    <title>CLR-Face: Conditional Latent Refinement for Blind Face Restoration Using Score-Based Diffusion Models</title>
+    <updated>2024-02-08T23:51:49Z</updated>
+    <link href="https://arxiv.org/abs/2402.06106v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2402.06106v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Recent generative-prior-based methods have shown promising blind face restoration performance. They usually project the degraded images to the latent space and then decode high-quality faces either by single-stage latent optimization or directly from the encoding. Generating fine-grained facial details faithful to inputs remains a challenging problem. Most existing methods produce either overly smooth outputs or alter the identity as they attempt to balance between generation and reconstruction. This may be attributed to the typical trade-off between quality and resolution in the latent space. If the latent space is highly compressed, the decoded output is more robust to degradations but shows worse fidelity. On the other hand, a more flexible latent space can capture intricate facial details better, but is extremely difficult to optimize for highly degraded faces using existing techniques. To address these issues, we introduce a diffusion-based-prior inside a VQGAN architecture that focuses on learning the distribution over uncorrupted latent embeddings. With such knowledge, we iteratively recover the clean embedding conditioning on the degraded counterpart. Furthermore, to ensure the reverse diffusion trajectory does not deviate from the underlying identity, we train a separate Identity Recovery Network and use its output to constrain the reverse diffusion process. Specifically, using a learnable latent mask, we add gradients from a face-recognition network to a subset of latent features that correlates with the finer identity-related details in the pixel space, leaving the other features untouched. Disentanglement between perception and fidelity in the latent space allows us to achieve the best of both worlds. We perform extensive evaluations on multiple real and synthetic datasets to validate the superiority of our approach.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-02-08T23:51:49Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Maitreya Suin</name>
+    </author>
+    <author>
+      <name>Rama Chellappa</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2606.06850v1</id>
+    <title>CFRNet: Cycle-Consistent Fixed-Point Training for Real-Time Blind Face Restoration on Consumer Embedded NPUs</title>
+    <updated>2026-06-05T02:48:16Z</updated>
+    <link href="https://arxiv.org/abs/2606.06850v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2606.06850v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind face restoration on consumer devices has to balance image quality against speed and memory. Strong methods such as GFPGAN and CodeFormer give good perceptual quality, but they rely on large pretrained generative priors and on operators such as attention, codebook lookup, and style modulation that are hard to compile and quantize on the small neural processing units (NPUs) used in consumer hardware. Small convolutional restorers run fast enough, but they tend to over-smooth and to leave artifacts around the eyes, nose, and mouth. We present CFRNet, a 2.0,M-parameter ResNet-style restorer for on-device use at $256\times256$, the common face-crop size on consumer NPUs. The main idea is Cycle-Consistent Fixed-Point Training (CCFP). Instead of training the network for one pass and then running it several times by hand, we train it to act as a fixed-point operator, so that applying it again to a restored face does not change the face. CCFP uses three training losses, namely progressive multi-cycle supervision, an idempotence loss, and a re-degradation cycle loss, and it adds no cost at inference. To compare fairly under our deployment limits, we retrain all baselines from scratch at the same $256\times256$ resolution. On a 300-image test set, CFRNet reaches the best perceptual score (LPIPS 0.250 at three cycles, which is 31% lower than one cycle) and also the best PSNR and SSIM at two cycles. It runs in about 23,ms per cycle in INT8 on a HiSilicon Hi3402 NPU, while the same baselines cannot be compiled to that chip. The cycle count $k$ acts as a simple quality knob that needs no retraining: PSNR is best at $k\!=\!2$ and LPIPS keeps improving up to $k\!=\!3$. We further show that the same idea works with a plain CNN that is even easier to deploy, and we run the model in real time on an in-car driver-monitoring board.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-06-05T02:48:16Z</published>
+    <arxiv:comment>12 pages.Code and project page will be released</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Fuchen Li</name>
+    </author>
+    <author>
+      <name>Xinyang Wang</name>
+    </author>
+    <author>
+      <name>Yahui Zhang</name>
+    </author>
+    <author>
+      <name>Yuhan Chen</name>
+    </author>
+    <author>
+      <name>Jiahong Guo</name>
+    </author>
+    <author>
+      <name>Zhuohan Qin</name>
+    </author>
+    <author>
+      <name>Wenbo Ma</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2502.02215v2</id>
+    <title>InterLCM: Low-Quality Images as Intermediate States of Latent Consistency Models for Effective Blind Face Restoration</title>
+    <updated>2025-03-21T18:51:58Z</updated>
+    <link href="https://arxiv.org/abs/2502.02215v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2502.02215v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Diffusion priors have been used for blind face restoration (BFR) by fine-tuning diffusion models (DMs) on restoration datasets to recover low-quality images. However, the naive application of DMs presents several key limitations. (i) The diffusion prior has inferior semantic consistency (e.g., ID, structure and color.), increasing the difficulty of optimizing the BFR model; (ii) reliance on hundreds of denoising iterations, preventing the effective cooperation with perceptual losses, which is crucial for faithful restoration. Observing that the latent consistency model (LCM) learns consistency noise-to-data mappings on the ODE-trajectory and therefore shows more semantic consistency in the subject identity, structural information and color preservation, we propose InterLCM to leverage the LCM for its superior semantic consistency and efficiency to counter the above issues. Treating low-quality images as the intermediate state of LCM, InterLCM achieves a balance between fidelity and quality by starting from earlier LCM steps. LCM also allows the integration of perceptual loss during training, leading to improved restoration quality, particularly in real-world scenarios. To mitigate structural and semantic uncertainties, InterLCM incorporates a Visual Module to extract visual features and a Spatial Encoder to capture spatial details, enhancing the fidelity of restored images. Extensive experiments demonstrate that InterLCM outperforms existing approaches in both synthetic and real-world datasets while also achieving faster inference speed.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-02-04T10:51:20Z</published>
+    <arxiv:comment>Accepted at ICLR2025</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Senmao Li</name>
+    </author>
+    <author>
+      <name>Kai Wang</name>
+    </author>
+    <author>
+      <name>Joost van de Weijer</name>
+    </author>
+    <author>
+      <name>Fahad Shahbaz Khan</name>
+    </author>
+    <author>
+      <name>Chun-Le Guo</name>
+    </author>
+    <author>
+      <name>Shiqi Yang</name>
+    </author>
+    <author>
+      <name>Yaxing Wang</name>
+    </author>
+    <author>
+      <name>Jian Yang</name>
+    </author>
+    <author>
+      <name>Ming-Ming Cheng</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2507.13797v2</id>
+    <title>DynFaceRestore: Balancing Fidelity and Quality in Diffusion-Guided Blind Face Restoration with Dynamic Blur-Level Mapping and Guidance</title>
+    <updated>2025-09-20T07:03:35Z</updated>
+    <link href="https://arxiv.org/abs/2507.13797v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2507.13797v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind Face Restoration aims to recover high-fidelity, detail-rich facial images from unknown degraded inputs, presenting significant challenges in preserving both identity and detail. Pre-trained diffusion models have been increasingly used as image priors to generate fine details. Still, existing methods often use fixed diffusion sampling timesteps and a global guidance scale, assuming uniform degradation. This limitation and potentially imperfect degradation kernel estimation frequently lead to under- or over-diffusion, resulting in an imbalance between fidelity and quality. We propose DynFaceRestore, a novel blind face restoration approach that learns to map any blindly degraded input to Gaussian blurry images. By leveraging these blurry images and their respective Gaussian kernels, we dynamically select the starting timesteps for each blurry image and apply closed-form guidance during the diffusion sampling process to maintain fidelity. Additionally, we introduce a dynamic guidance scaling adjuster that modulates the guidance strength across local regions, enhancing detail generation in complex areas while preserving structural fidelity in contours. This strategy effectively balances the trade-off between fidelity and quality. DynFaceRestore achieves state-of-the-art performance in both quantitative and qualitative evaluations, demonstrating robustness and effectiveness in blind face restoration. Project page at https://nycu-acm.github.io/DynFaceRestore/</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-07-18T10:16:08Z</published>
+    <arxiv:comment>Accepted by ICCV 2025</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Huu-Phu Do</name>
+    </author>
+    <author>
+      <name>Yu-Wei Chen</name>
+    </author>
+    <author>
+      <name>Yi-Cheng Liao</name>
+    </author>
+    <author>
+      <name>Chi-Wei Hsiao</name>
+    </author>
+    <author>
+      <name>Han-Yang Wang</name>
+    </author>
+    <author>
+      <name>Wei-Chen Chiu</name>
+    </author>
+    <author>
+      <name>Ching-Chun Huang</name>
+    </author>
+  </entry>
+</feed>

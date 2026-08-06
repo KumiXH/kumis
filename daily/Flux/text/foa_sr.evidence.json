@@ -1,0 +1,207 @@
+{
+  "file": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\03_super_resolution\\foa_sr_2606.10275.pdf",
+  "page_count": 17,
+  "first_page_excerpt": "FoA-SR: Faithful or Aesthetic? Profile-Aware\nPreference Optimization for Real-World Image\nSuper-Resolution\nAmjad Mahdi Alqarni\nDepartment of Computer Science\nUniversity of Kentucky\nLexington, KY , USA\namjad.alqarni@uky.edu\nPeizhong Ju\nDepartment of Computer Science\nUniversity of Kentucky\nLexington, KY , USA\npeizhong.ju@uky.edu\nAbstract\nReal-world image super-resolution (SR) is often designed with a single restoration\nobjective, despite the current capacity of generative models to produce multiple\nhigh-quality reconstructions for the same input. In this paper, we argue that the\nbest restoration strategy is subject to the specific restoration profile: a Faithful\nrestoration prioritizes reference consistency, structure preservation, and halluci-\nnation suppression, whereas an Aesthetic restoration prioritizes visually pleasing\nand natural-looking details. We proposeFoA-SR, a novel preference optimization\napproach to real-world SR based on profiles. To achieve this goal, FoA-SR starts\nwith our supervised FLUX.2-based SR adapter (Flux2SR) trained with LR latent\nconditioning, flow matching, and image-space reconstruction losses for paired LR-\nto-HR image super-resolution. Following the development of the shared supervised\nsuper-resolution adapter, FoA-SR generates a shared stochastic candidate pool for\neach input image and ranks the same candidates using profile-specific Faithful and\nAesthetic rewards to mine winner–loser pairs. These pairs are used to fine-tune\nseparate LoRA adapters while keeping the base model frozen. Experiments on\nRealSR and DIV2K show that FoA-SR can steer the same SR adapter towards\ndistinct restoration objectives: a Faithful adapter improves reference-consistent\nmetrics while an Aesthetic adapter boosts metrics that measure perceptual quality\nwithout reference. Our candidate-pool analysis shows that Faithful and Aesthetic\nrewards frequently select different winners, and a Hybrid-LoRA ablation shows\nthat collapsing both profiles into one reward yields an implicit compromise rather\nthan explicit profile control.\n1 Introduction\nReal-world image super-resolution (Real-ISR) [ 8, 37, 17, 36, 6, 15, 34, 10] aims to recover a\nhigh-resolution image from a degraded low-resolution observation. The problem is inherently ill-\nposed: many high-resolution images can explain the same low-resolution input, especially under\nunknown blur, noise, compression, and downsampling [5, 33, 26, 4]. Recent generative image models\nhave improved the visual realism of restoration systems by synthesizing plausible high-frequency\ndetails [24, 32, 18, 29, 21, 28, 9]. However, this generative capability also exposes a key ambiguity:\nfor the same low-resolution input, there may be multiple plausible restorations, and the preferred one\ndepends on the intended restoration behavior rather than on a single universal notion of quality [4, 30].\nMost SR pipelines still optimize and evaluate models as if one output should be best for all criteria.\nThis assumption is limiting because perceptual quality and distortion fidelity can conflict [ 4]. A\nPreprint.\narXiv:2606.10275v1  [cs.CV]  9 Jun 2026",
+  "flux_evidence": [
+    {
+      "page": 1,
+      "snippets": [
+        "with our supervised FLUX.2-based SR adapter (Flux2SR) trained with LR latent"
+      ]
+    },
+    {
+      "page": 2,
+      "snippets": [
+        "This distinction is especially important for large generative backbones. FLUX.2-dev is a 32B open-",
+        "knowledge, FoA-SR is among the first few works to explore FLUX.2-based rectified-flow backbones",
+        "optimization on top of a full 32B FLUX.2-dev paired LR-to-HR SR adapter. In this work, we build a",
+        "supervised FLUX.2-dev-based SR adapter, which we callFlux2SR, by conditioning the transformer",
+        "the shared supervised FLUX.2 SR adapter (Flux2SR), FoA-SR samples multiple stochastic candidates"
+      ]
+    },
+    {
+      "page": 3,
+      "snippets": [
+        "• We introduceFlux2SR, a full FLUX.2-dev paired real-world image super-resolution adapter"
+      ]
+    },
+    {
+      "page": 4,
+      "snippets": [
+        "Figure 2: Overview of the proposed FoA-SR framework. Stage 1 adapts FLUX.2-dev into a shared",
+        "FoA-SR consists of two stages. First, we adapt FLUX.2-dev into a paired real-world super-resolution",
+        "3.1 Flux2SR: Adapting FLUX.2-dev for paired super-resolution",
+        "FLUX.2-dev is a large rectified-flow image generation backbone, but it is not directly a paired",
+        "that conditions the FLUX.2 transformer on the low-resolution image while using the high-resolution",
+        "image as the restoration target. Given an LR-HR pair(x, y⋆), we encode both images into the FLUX.2",
+        "We fine-tune only LoRA parameters in the FLUX.2 transformer [11] and keep the V AE, text encoder,"
+      ]
+    },
+    {
+      "page": 6,
+      "snippets": [
+        "diffusion and flow-based generative models [22, 30]. Because FLUX.2 is a flow-matching model,",
+        "as FLUX.2 V AE latents for efficient flow-matching training.",
+        "SD2, C-FLUX, and DP2O-FLUX [30]. Our internal variants include the shared supervised baseline"
+      ]
+    },
+    {
+      "page": 7,
+      "snippets": [
+        "Dataset Metric OSEDiff C-SD2 DP 2O-SD2 C-FLUX DP 2O-FLUX Flux2SR FoA-Faithful FoA-Aesthetic",
+        "Implementation details.All Flux2SR-based models are built on FLUX.2-dev. For Flux2SR, we",
+        "ized from the same Flux2SR checkpoint. We fine-tune only LoRA parameters and keep the FLUX.2"
+      ]
+    },
+    {
+      "page": 9,
+      "snippets": [
+        "per LR input as a compute-efficient setting for FLUX.2-based candidate generation and multi-metric",
+        "super-resolution. FoA-SR adapts FLUX.2-dev into a paired SR baseline, Flux2SR, and then mines"
+      ]
+    },
+    {
+      "page": 10,
+      "snippets": [
+        "[2] Black Forest Labs. FLUX.2: Next generation image generation. https://bfl.ai/models/",
+        "flux-2, 2025. Accessed: 2026-05-01.",
+        "[3] Black Forest Labs. FLUX.2-dev model card. https://huggingface.co/",
+        "black-forest-labs/FLUX.2-dev, 2026. Accessed: 2026-05-01.",
+        "[12] Hugging Face. Diffusers welcomes FLUX.2. https://huggingface.co/blog/flux-2,"
+      ]
+    },
+    {
+      "page": 13,
+      "snippets": [
+        "Flux2SR training.Flux2SR is trained by fine-tuning LoRA parameters on top of FLUX.2-dev while keeping",
+        "frozen reference model. We fine-tune only LoRA parameters and keep the FLUX.2 backbone frozen. Preference"
+      ]
+    },
+    {
+      "page": 15,
+      "snippets": [
+        "We also ablate which FLUX.2 transformer modules receive LoRA adapters. We compare three target"
+      ]
+    }
+  ],
+  "figure_candidates": [
+    {
+      "page": 2,
+      "caption": "Figure 1: Qualitative illustration of profile-dependent restoration. Given the same LR input, FoA-"
+    },
+    {
+      "page": 4,
+      "caption": "Figure 2: Overview of the proposed FoA-SR framework. Stage 1 adapts FLUX.2-dev into a shared"
+    },
+    {
+      "page": 8,
+      "caption": "Figure 3: Qualitative comparison on a text-containing RealSR example. FoA-SR-Faithful emphasizes"
+    },
+    {
+      "page": 14,
+      "caption": "Figure 4: Example stochastic candidate pool generated by the shared Flux2SR baseline for the same"
+    },
+    {
+      "page": 15,
+      "caption": "Figure 5 and Figure 6 show additional qualitative comparisons on RealSR and DIV2K-Val."
+    },
+    {
+      "page": 16,
+      "caption": "Figure 5: Additional qualitative examples on RealSR comparing Flux2SR, FoA-SR-Faithful, FoA-"
+    },
+    {
+      "page": 17,
+      "caption": "Figure 6: Additional qualitative examples on DIV2K-Val comparing Flux2SR, FoA-SR-Faithful,"
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 7,
+      "caption": "Table 1: Performance comparison of different Real-ISR methods on RealSR and DIV2K-Val. Metric"
+    },
+    {
+      "page": 8,
+      "caption": "Table 2: Hybrid reward ablation on RealSR. FoA-SR-Hybrid is trained with the averaged reward"
+    },
+    {
+      "page": 9,
+      "caption": "Table 3: Effect of candidate pool size on profile mining over 500 LR inputs. Faithful and Aesthetic"
+    },
+    {
+      "page": 13,
+      "caption": "Table 4: Compute resources used in FoA-SR experiments."
+    },
+    {
+      "page": 14,
+      "caption": "Table 5: Detailed profile-disagreement statistics at the training candidate pool sizeM= 4."
+    },
+    {
+      "page": 14,
+      "caption": "Table 6: Detailed candidate-pool-size analysis over 500 LR inputs. We report mean and standard"
+    },
+    {
+      "page": 14,
+      "caption": "Table 7 compares supervised Flux2SR training objectives on RealSR. FM+Pix obtains the strongest distortion-"
+    },
+    {
+      "page": 15,
+      "caption": "Table 7: Supervised Flux2SR objective ablation on RealSR. All variants use rank-64 LoRA, 50K"
+    },
+    {
+      "page": 15,
+      "caption": "Table 8: Ablation of LoRA target modules for supervised Flux2SR training on RealSR. All variants"
+    },
+    {
+      "page": 15,
+      "caption": "Table 9 reports additional held-out RealSR metrics for the Hybrid reward ablation."
+    },
+    {
+      "page": 15,
+      "caption": "Table 9: Extended RealSR metrics for the Hybrid reward ablation. These metrics provide an additional"
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      1,
+      2,
+      3,
+      4,
+      6,
+      9,
+      10
+    ],
+    "super_resolution": [
+      1,
+      2,
+      3,
+      4,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      15,
+      17
+    ],
+    "efficiency": [
+      6,
+      13
+    ],
+    "ablation": [
+      1,
+      6,
+      8,
+      9,
+      14,
+      15
+    ],
+    "limitations": [
+      9,
+      14
+    ]
+  },
+  "key": "foa_sr",
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\text\\foa_sr.txt"
+}

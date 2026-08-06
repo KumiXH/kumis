@@ -1,0 +1,731 @@
+=== PAGE 1 ===
+FoA-SR: Faithful or Aesthetic? Profile-Aware
+Preference Optimization for Real-World Image
+Super-Resolution
+Amjad Mahdi Alqarni
+Department of Computer Science
+University of Kentucky
+Lexington, KY , USA
+amjad.alqarni@uky.edu
+Peizhong Ju
+Department of Computer Science
+University of Kentucky
+Lexington, KY , USA
+peizhong.ju@uky.edu
+Abstract
+Real-world image super-resolution (SR) is often designed with a single restoration
+objective, despite the current capacity of generative models to produce multiple
+high-quality reconstructions for the same input. In this paper, we argue that the
+best restoration strategy is subject to the specific restoration profile: a Faithful
+restoration prioritizes reference consistency, structure preservation, and halluci-
+nation suppression, whereas an Aesthetic restoration prioritizes visually pleasing
+and natural-looking details. We proposeFoA-SR, a novel preference optimization
+approach to real-world SR based on profiles. To achieve this goal, FoA-SR starts
+with our supervised FLUX.2-based SR adapter (Flux2SR) trained with LR latent
+conditioning, flow matching, and image-space reconstruction losses for paired LR-
+to-HR image super-resolution. Following the development of the shared supervised
+super-resolution adapter, FoA-SR generates a shared stochastic candidate pool for
+each input image and ranks the same candidates using profile-specific Faithful and
+Aesthetic rewards to mine winner–loser pairs. These pairs are used to fine-tune
+separate LoRA adapters while keeping the base model frozen. Experiments on
+RealSR and DIV2K show that FoA-SR can steer the same SR adapter towards
+distinct restoration objectives: a Faithful adapter improves reference-consistent
+metrics while an Aesthetic adapter boosts metrics that measure perceptual quality
+without reference. Our candidate-pool analysis shows that Faithful and Aesthetic
+rewards frequently select different winners, and a Hybrid-LoRA ablation shows
+that collapsing both profiles into one reward yields an implicit compromise rather
+than explicit profile control.
+1 Introduction
+Real-world image super-resolution (Real-ISR) [ 8, 37, 17, 36, 6, 15, 34, 10] aims to recover a
+high-resolution image from a degraded low-resolution observation. The problem is inherently ill-
+posed: many high-resolution images can explain the same low-resolution input, especially under
+unknown blur, noise, compression, and downsampling [5, 33, 26, 4]. Recent generative image models
+have improved the visual realism of restoration systems by synthesizing plausible high-frequency
+details [24, 32, 18, 29, 21, 28, 9]. However, this generative capability also exposes a key ambiguity:
+for the same low-resolution input, there may be multiple plausible restorations, and the preferred one
+depends on the intended restoration behavior rather than on a single universal notion of quality [4, 30].
+Most SR pipelines still optimize and evaluate models as if one output should be best for all criteria.
+This assumption is limiting because perceptual quality and distortion fidelity can conflict [ 4]. A
+Preprint.
+arXiv:2606.10275v1  [cs.CV]  9 Jun 2026
+
+=== PAGE 2 ===
+LR image
+GT image FoA-SR-Faithful output FoA-SR- Aesthetic output
+Figure 1: Qualitative illustration of profile-dependent restoration. Given the same LR input, FoA-
+SR-Faithful emphasizes reference consistency and reduced hallucination, while FoA-SR-Aesthetic
+emphasizes visually pleasing textures and natural-looking details.
+restoration that is visually rich and natural-looking may introduce hallucinated details or alter fine
+structures, while a conservative restoration may better preserve the reference structure but appear
+less sharp or less aesthetically pleasing [30]. We therefore distinguish between two complementary
+restoration profiles. AFaithfulrestoration prioritizes reference consistency, structure preservation,
+and reduced hallucination. AnAestheticrestoration prioritizes visually pleasing details and no-
+reference perceptual quality. These profiles are not merely two names for different metrics; they can
+induce different rankings over the same set of candidate SR outputs.
+This distinction is especially important for large generative backbones. FLUX.2-dev is a 32B open-
+weight rectified-flow transformer for image generation and editing, rather than a paired LR-to-HR
+super-resolution model [2, 3]. Adapting such a model to Real-ISR requires more than applying
+a generic image-to-image script: the low-resolution image must be represented as a conditioning
+signal, the high-resolution image must define the restoration target, and the sampling path must
+remain tied to the LR input rather than starting from unconstrained pure noise. To the best of our
+knowledge, FoA-SR is among the first few works to explore FLUX.2-based rectified-flow backbones
+for real-world image super-resolution [25], and the first to study Faithful-versus-Aesthetic preference
+optimization on top of a full 32B FLUX.2-dev paired LR-to-HR SR adapter. In this work, we build a
+supervised FLUX.2-dev-based SR adapter, which we callFlux2SR, by conditioning the transformer
+on packed LR latents and training LoRA parameters with a flow-matching objective toward HR
+latents, together with SR-specific image-space reconstruction losses. Flux2SR provides the shared
+SR baseline from which different restoration preferences can be studied.
+However, supervised SR training still produces a single compromise model. Recent preference-
+optimization methods show that stochastic generative outputs can be ranked and converted into
+preference pairs for post-training alignment [ 20, 22, 30]. Yet aligning to a single perceptual or
+hybrid reward can obscure conflicting restoration intents: Faithful restoration favors identity, text,
+and structural preservation, while Aesthetic restoration favors visually pleasing enhancement. Instead
+of collapsing these objectives into one scalar reward, FoA-SR makes the restoration profile explicit.
+We proposeFoA-SR, a profile-aware preference optimization framework for Real-ISR. Starting from
+the shared supervised FLUX.2 SR adapter (Flux2SR), FoA-SR samples multiple stochastic candidates
+for each low-resolution input. The same candidate pool is then scored using profile-specific automatic
+rewards. The Faithful reward emphasizes full-reference consistency metrics, while the Aesthetic
+reward emphasizes no-reference perceptual quality metrics. For each profile, FoA-SR constructs
+winner–loser preference pairs and fine-tunes a profile-specific LoRA adapter. Because both profiles
+2
+
+=== PAGE 3 ===
+start from the same SR baseline and the same candidate pool, the resulting behavior is driven by the
+preference profile rather than by different data or model initialization.
+Experiments on RealSR and DIV2K show that FoA-SR steers the same Flux2SR baseline toward
+distinct restoration behaviors. The Faithful adapter improves reference-oriented reconstruction,
+whereas the Aesthetic adapter improves no-reference perceptual quality while sacrificing strict
+fidelity. This specialization supports our central claim that Real-ISR preference is profile-dependent
+and should be exposed rather than collapsed into a single objective. On a 500-image mining set,
+Faithful and Aesthetic rewards select different winners for 78.4% of inputs, showing that the two
+profiles induce genuinely different preferences over the same stochastic candidate pool.
+Our contributions are summarized as follows:
+• We introduceFlux2SR, a full FLUX.2-dev paired real-world image super-resolution adapter
+using LR latent conditioning, flow-matching LoRA training, and SR-specific reconstruction
+losses.
+• We formulate Real-ISR as aprofile-aware preference optimizationproblem, where Faith-
+ful and Aesthetic restoration represent distinct user intents rather than a single universal
+objective.
+• We proposeFoA-SR, which mines profile-specific winner–loser pairs from a shared stochas-
+tic candidate pool using automatic Faithful and Aesthetic rewards, without human preference
+labels.
+• We show profile specialization on RealSR and DIV2K, and provide profile-disagreement
+and Hybrid-LoRA analyses demonstrating that collapsing both profiles into one reward
+hides useful controllability.
+2 Related Work
+Real-world image super-resolution.Single-image super-resolution has evolved from distortion-
+oriented reconstruction models to perceptual and real-world restoration systems. Early CNN- and
+Transformer-based SR methods optimize reconstruction accuracy under simplified degradations [8,
+37, 17, 36, 6, 15, 34, 10]. However, real-world degradations are unknown and often include blur,
+noise, compression, and sensor artifacts. Blind and real-world SR methods such as BSRGAN and
+Real-ESRGAN address this by designing more practical degradation pipelines and perceptual training
+objectives [33, 26]. These methods improve realism but still generally produce a single restoration
+behavior for each model.
+Generative priors for real-world SR.Recent work has introduced diffusion and large text-to-
+image priors into real-world SR, enabling models to synthesize more realistic high-frequency details.
+StableSR, PASD, DiffBIR, SeeSR, and CCSR exploit generative priors for blind or semantics-aware
+restoration [24, 32, 18, 29, 21]. OSEDiff and TSD-SR further improve efficiency by distilling
+diffusion-based restoration into fewer sampling steps [28, 9]. These methods demonstrate the power
+of generative backbones, but they typically aim to produce one preferred output per model. In contrast,
+FoA-SR treats the desired restoration behavior as profile-dependent and explicitly separates Faithful
+and Aesthetic outputs.
+Preference optimization for generative models.Preference optimization has become an effective
+alternative to reward-model-based alignment. Direct Preference Optimization (DPO) directly opti-
+mizes a policy from preference pairs without training a separate reward model [20], and Diff-DPO
+extends this idea to diffusion models [22]. Closest to our work, DP 2O-SR exploits stochastic SR
+outputs, ranks them using IQA-based rewards, constructs preference pairs, and performs post-training
+preference optimization for Real-ISR [ 30]. However, DP 2O-SR combines full-reference and no-
+reference signals into a single perceptual or hybrid reward. FoA-SR takes a different view: reference
+consistency and no-reference perceptual quality correspond to different restoration intents. Rather
+than merging them into one reward, FoA-SR preserves them as Faithful and Aesthetic profiles and
+learns separate adapters for each.
+Profile-dependent restoration quality.The conflict between distortion fidelity and perceptual
+quality is closely related to the perception–distortion trade-off [4]. A model that maximizes perceptual
+3
+
+=== PAGE 4 ===
+Figure 2: Overview of the proposed FoA-SR framework. Stage 1 adapts FLUX.2-dev into a shared
+supervised SR baseline, Flux2SR, using LR-HR paired supervision. Stage 2 uses the same Flux2SR
+model to generate a shared stochastic candidate pool for each LR input. The same candidates are
+ranked separately by Faithful and Aesthetic rewards to mine profile-specific winner–loser pairs.
+FoA-SR then fine-tunes separate LoRA adapters for the two profiles. At inference time, the user
+selects either the Faithful or Aesthetic adapter, exposing the restoration trade-off as a controllable
+choice rather than collapsing it into a single output.
+realism may not preserve the reference exactly, while a model optimized for distortion metrics may
+produce conservative or less visually appealing outputs. FoA-SR operationalizes this trade-off as
+a profile-aware preference optimization problem. Instead of treating the trade-off as a single fixed
+balance, it exposes the restoration intent as an explicit choice between Faithful and Aesthetic adapters.
+3 Method
+FoA-SR consists of two stages. First, we adapt FLUX.2-dev into a paired real-world super-resolution
+model, which we callFlux2SR. Second, we use Flux2SR as a shared stochastic reference model to
+construct profile-specific preference pairs and fine-tune separate Faithful and Aesthetic adapters. The
+key difference from single-reward preference alignment is that FoA-SR does not collapse restoration
+quality into one universal objective; instead, it preserves Faithful and Aesthetic restoration as separate
+preference profiles. Figure 2 illustrates the overall FoA-SR pipeline.
+3.1 Flux2SR: Adapting FLUX.2-dev for paired super-resolution
+FLUX.2-dev is a large rectified-flow image generation backbone, but it is not directly a paired
+LR-to-HR super-resolution model [2, 3, 12]. We therefore buildFlux2SR, a supervised SR adapter
+that conditions the FLUX.2 transformer on the low-resolution image while using the high-resolution
+image as the restoration target. Given an LR-HR pair(x, y⋆), we encode both images into the FLUX.2
+latent space. The LR latent is packed as a conditioning image sequence, while the HR latent defines
+the flow-matching target.
+We fine-tune only LoRA parameters in the FLUX.2 transformer [11] and keep the V AE, text encoder,
+and base transformer weights frozen. The supervised SR objective combines latent flow matching
+with image-space reconstruction losses:
+LSR =L FM +λ pixLcharb +λ lpipsLLPIPS.(1)
+4
+
+=== PAGE 5 ===
+Here, LFM trains the LR-conditioned flow trajectory toward the HR latent, while the Charbonnier and
+LPIPS losses encourage image-space reconstruction quality. Flux2SR serves as the shared supervised
+baseline and frozen reference model for subsequent preference optimization.
+3.2 Profile-Specific Reward Design and Preference Mining
+Given an LR inputx, the shared Flux2SR baseline generates a stochastic candidate set
+Y(x) ={y 1, . . . , yM },(2)
+by varying the random seed. Following recent preference-based Real-ISR work, we exploit these
+stochastic SR candidates as a source of preference supervision [ 30]. FoA-SR mines preference
+pairs from this same candidate pool under two restoration profiles:Faithful, which favors reference
+consistency and reduced hallucination, andAesthetic, which favors visually pleasing no-reference
+perceptual quality.
+To score candidates, we first direction-align and normalize each image-quality metric within the
+candidate set. For a metric m, let sm
+i denote the direction-aligned score of candidate yi, where higher
+values always indicate better quality. We compute
+¯sm
+i = sm
+i −min j sm
+j
+maxj sm
+j −min j sm
+j +ϵ ,(3)
+where ϵ is a small constant for numerical stability. For lower-is-better metrics such as LPIPS, DISTS,
+and NIQE, we reverse the metric direction before normalization.
+The Faithful reward combines full-reference metrics, including PSNR, SSIM [27], LPIPS [35], and
+DISTS [7]:
+RF(yi) =0.30 ¯sPSNR
+i + 0.30 ¯sSSIM
+i
++ 0.20 ¯sLPIPS
+i + 0.20 ¯sDISTS
+i .
+(4)
+The Aesthetic reward combines no-reference metrics, including CLIPIQA [ 23], MUSIQ [ 14],
+MANIQA [31], and NIQE [19]:
+RA(yi) =0.25 ¯sCLIPIQA
+i + 0.25 ¯sMUSIQ
+i
++ 0.25 ¯sMANIQA
+i + 0.25 ¯sNIQE
+i .
+(5)
+For each profile p∈ {F,A} , we select the highest-scoring candidate as the winner and the lowest-
+scoring candidate as the loser:
+yp
+w = arg max
+yi∈Y(x)
+Rp(yi), y p
+l = arg min
+yi∈Y(x)
+Rp(yi).(6)
+The reward gap
+∆p =R p(yp
+w)−R p(yp
+l )(7)
+is used as a confidence score, and low-gap pairs are filtered out during preference-data construction.
+This procedure yields two profile-specific preference datasets, one for Faithful restoration and one
+for Aesthetic restoration. Importantly, both datasets are mined from the same Flux2SR candidate
+pool. Therefore, when the two profiles select different winners for the same input, the disagreement
+reflects a restoration-profile preference rather than a difference in data, sampling source, or model
+initialization. Unlike a hybrid reward that averages reference and no-reference criteria into a single
+scalar objective, FoA-SR preserves the two rankings and uses them to learn specialized restoration
+adapters.
+Mining versus evaluation.The within-pool normalization in Eq. (3) is used only for candidate
+ranking and preference-pair mining within the same LR input. It is not used when comparing final
+models. All final model comparisons in Table 1 are reported using raw, non-normalized evaluation
+metrics on the test sets. In addition to the metrics used to construct the Faithful and Aesthetic
+rewards, we report non-optimized perceptual metrics, including TOPIQ-FR, AFINE-FR, CLIPIQA+,
+TOPIQ-NR, AFINE-NR, NIMA, and TOPIQ-IAA. These metrics provide an additional check that
+the learned profiles generalize beyond the direct reward metrics used for preference mining.
+5
+
+=== PAGE 6 ===
+3.3 Preference Optimization for Faithful and Aesthetic Adapters
+For each profile p, we initialize a trainable LoRA adapter πθp from Flux2SR and use the original
+Flux2SR adapter as the frozen reference policyπref. We then optimize πθp using the mined preference
+pairs(x, y p
+w, yp
+l ).
+We optimize the profile-specific adapters with a DPO-style objective [20], following its adaptation to
+diffusion and flow-based generative models [22, 30]. Because FLUX.2 is a flow-matching model,
+we use the flow-matching reconstruction loss as a negative log-likelihood surrogate. Let ℓθp(y|x)
+denote the flow-matching loss of policy πθp when reconstructing candidate y under LR condition x,
+and let ℓref(y|x) denote the corresponding loss under the frozen reference model. We define the
+preference margins
+Aθp =ℓ θp(yp
+l |x)−ℓ θp(yp
+w |x), A ref =ℓ ref(yp
+l |x)−ℓ ref(yp
+w |x).(8)
+The profile-specific preference loss is
+Lp
+pref =−E (x,yp
+w,yp
+l )
+
+logσ
+
+β
+
+Aθp −A ref
+
+,(9)
+where β controls the strength of preference optimization. This objective encourages the profile-
+specific adapter to assign lower flow-matching loss to the winner than to the loser, relative to the
+frozen Flux2SR reference.
+After optimization, FoA-SR yields two adapters:FoA-SR-Faithful, which is aligned with reference-
+consistent restoration, andFoA-SR-Aesthetic, which is aligned with no-reference perceptual quality.
+At inference time, the user selects the adapter corresponding to the desired restoration profile.
+4 Experiments
+4.1 Experimental Settings
+Training and testing datasets.Following the training setup commonly used in recent Real-ISR
+work, we train Flux2SR using the LSDIR dataset [16] and the first 10K face images from FFHQ [13].
+We synthesize paired LR-HR training data using the Real-ESRGAN degradation pipeline [26]. This
+produces realistic low-quality inputs with diverse blur, noise, compression, and downsampling
+artifacts, paired with their corresponding high-quality targets. Each training sample is further cached
+as FLUX.2 V AE latents for efficient flow-matching training.
+For profile-specific preference optimization, we randomly sample 500 LR-HR pairs from the training
+data as a pilot mining set. Starting from the shared Flux2SR baseline, we generate M= 4 stochastic
+SR candidates for each LR input by varying the random seed. The same candidate pool is scored by
+the Faithful and Aesthetic rewards, producing two profile-specific winner–loser preference datasets
+used to train the FoA-SR-Faithful and FoA-SR-Aesthetic adapters. We analyze the effect of different
+candidate pool sizes in Section 4.3, with detailed statistics in Appendix B.
+For evaluation, we report results on RealSR [5] and DIV2K-Val [1]. For DIV2K-Val, we follow the
+common synthetic Real-ISR evaluation protocol by randomly cropping 100 HR images and degrading
+them using the Real-ESRGAN degradation pipeline. RealSR provides real-world LR-HR pairs, while
+DIV2K-Val provides a controlled synthetic benchmark with known HR references. All methods are
+evaluated on the same LR inputs and HR references using the same metric implementation.
+Compared Methods.We evaluate FoA-SR against Real-ISR baselines and our Flux2SR-based
+variants under the same evaluation protocol. External baselines include OSEDiff [28], C-SD2, DP2O-
+SD2, C-FLUX, and DP2O-FLUX [30]. Our internal variants include the shared supervised baseline
+Flux2SR,FoA-SR-Faithful, andFoA-SR-Aesthetic. We useFoA-SR-Hybridonly for ablation
+analysis with the averaged rewardR H = 0.5RF + 0.5RA.
+Evaluation metrics.First, we report training-aligned full-reference metrics used by the Faithful
+reward: PSNR, SSIM [ 27], LPIPS [ 35], and DISTS [ 7]. Second, we report training-aligned no-
+reference metrics used by the Aesthetic reward: CLIPIQA [ 23], NIQE [ 19], MUSIQ [ 14], and
+MANIQA [31]. Third, we report non-optimized full-reference perceptual metrics that are not used
+for preference mining, including TOPIQ-FR and AFINE-FR. Finally, we report non-optimized
+no-reference and aesthetic metrics, including CLIPIQA+, TOPIQ-NR, AFINE-NR, NIMA, and
+TOPIQ-IAA. All final model comparisons are reported using raw, non-normalized metric values.
+6
+
+=== PAGE 7 ===
+Table 1: Performance comparison of different Real-ISR methods on RealSR and DIV2K-Val. Metric
+types are categorized into training-aligned FR metrics (blue), training-aligned NR metrics (green),
+non-optimized FR perceptual metrics (purple), non-optimized NR metrics (orange). Red bold values
+indicate better performance between the baseline Flux2SR and our variants FoA-SR-Faithful and
+FoA-SR-Aesthetic. Arrows indicate whether higher (↑) or lower (↓) values are better.
+Dataset Metric OSEDiff C-SD2 DP 2O-SD2 C-FLUX DP 2O-FLUX Flux2SR FoA-Faithful FoA-Aesthetic
+RealSR
+PSNR↑ 25.1511 22.8531 21.9559 24.5010 24.5504 22.7195 24.8633 20.9118
+SSIM↑ 0.7341 0.6026 0.6212 0.6807 0.6785 0.6733 0.7327 0.5695
+LPIPS↓ 0.2920 0.4247 0.3810 0.3328 0.3253 0.2793 0.2502 0.4038
+DISTS↓ 0.2128 0.2694 0.2589 0.2225 0.2276 0.2191 0.2046 0.2743
+CLIPIQA↑ 0.6688 0.7068 0.7519 0.6312 0.7127 0.6154 0.5535 0.7170
+NIQE↓ 5.6359 6.7806 5.8413 5.0952 4.6720 4.9360 5.1734 5.0522
+MUSIQ↑ 69.0897 68.7853 72.3349 69.7476 72.5801 69.5302 66.6408 73.0874
+MANIQA↑ 0.6335 0.6538 0.6996 0.6673 0.6892 0.6667 0.6252 0.7270
+TOPIQ-FR↑ 0.5059 0.4469 0.4436 0.4869 0.4932 0.4769 0.5146 0.4118
+AFINE-FR↓ -0.7171 -0.6284 -0.3500 -0.6041 -0.6467 -0.7410 -0.9138 -0.4605
+CLIPIQA+↑ 0.6963 0.6860 0.7589 0.6772 0.7408 0.6792 0.6380 0.7579
+TOPIQ-NR↑ 0.6249 0.6553 0.7365 0.6528 0.7345 0.6258 0.5847 0.7408
+AFINE-NR↓ -1.0488 -0.9824 -1.1185 -1.0823 -1.0659 -1.0478 -0.9974 -1.0772
+NIMA↑ 4.8939 4.9534 5.1149 4.9310 5.0096 4.8029 4.6323 5.1457
+RealSR
+TOPIQ-IAA↑ 4.7536 4.8699 4.9881 4.7115 4.9006 4.6670 4.5808 5.0062
+DIV2K-Val
+PSNR↑ 20.2656 19.3126 18.2443 19.2213 19.3625 18.6927 19.6302 17.5904
+SSIM↑ 0.4851 0.4166 0.3879 0.4350 0.4391 0.4386 0.4758 0.3762
+LPIPS↓ 0.3852 0.4472 0.4462 0.4174 0.3955 0.4024 0.4061 0.4216
+DISTS↓ 0.2392 0.2669 0.2605 0.2324 0.2306 0.2279 0.2306 0.2506
+CLIPIQA↑ 0.6572 0.7340 0.7812 0.6792 0.7593 0.5673 0.5074 0.7367
+NIQE↓ 4.1857 5.4295 4.7417 4.1298 4.1416 4.5140 4.8010 4.2739
+MUSIQ↑ 67.4412 68.7474 73.4377 69.1386 73.2998 68.1995 64.9050 73.9127
+MANIQA↑ 0.6031 0.6537 0.7122 0.6611 0.6998 0.6589 0.6098 0.7385
+TOPIQ-FR↑ 0.3685 0.3466 0.3539 0.3609 0.3709 0.3575 0.3556 0.3356
+AFINE-FR↓ -0.4953 -0.3917 -0.4740 -0.5211 -0.5845 -0.6603 -0.5858 -0.5924
+CLIPIQA+↑ 0.6852 0.6972 0.7720 0.7125 0.7783 0.6855 0.6518 0.7867
+TOPIQ-NR↑ 0.6075 0.6546 0.7346 0.6756 0.7545 0.5864 0.5446 0.7600
+AFINE-NR↓ -0.8597 -0.9168 -1.0908 -1.0520 -1.1076 -0.9522 -0.8939 -1.0534
+NIMA↑ 4.9651 5.2102 5.4259 5.1806 5.3697 4.8478 4.6236 5.3094
+DIV2K-Val
+TOPIQ-IAA↑ 4.8434 5.0965 5.2542 4.9838 5.2233 4.6482 4.5429 5.1901
+Implementation details.All Flux2SR-based models are built on FLUX.2-dev. For Flux2SR, we
+freeze the V AE, text encoder, and base transformer weights, and fine-tune only LoRA parameters in the
+transformer. Unless otherwise stated, Flux2SR is trained with LoRA rank 64, AdamW optimization,
+learning rate 1×10 −4, weight decay 1×10 −4, and a constant-with-warmup learning-rate schedule.
+For profile-specific preference optimization, both FoA-SR-Faithful and FoA-SR-Aesthetic are initial-
+ized from the same Flux2SR checkpoint. We fine-tune only LoRA parameters and keep the FLUX.2
+backbone frozen. Preference training uses mined winner–loser latent pairs, learning rate 2×10 −5,
+LoRA rank 64, and DPO preference strength β= 1000 . The 500-image mining set is used only
+for preference-pair construction and analysis of the candidate pool size; it is not used as a separate
+evaluation benchmark. For fair evaluation, all methods are evaluated on the same LR inputs and HR
+references using the same metric implementation. Additional training hyperparameters, compute
+resources, and evaluation protocol details are provided in Appendix A.
+4.2 Main Results and Profile Specialization
+Quantitative comparison.Table 1 reports the main quantitative comparison on RealSR and
+DIV2K-Val under the same evaluation protocol. External baselines provide reference points for
+current Real-ISR performance, while the red-bold internal comparison isolates the effect of profile-
+specific preference optimization from the same Flux2SR starting point.
+Across both datasets, FoA-SR-Faithful improves distortion-oriented reference metrics, especially
+PSNR and SSIM. On RealSR, it also improves perceptual reference metrics such as LPIPS, DISTS,
+TOPIQ-FR, and AFINE-FR. In contrast, FoA-SR-Aesthetic improves learned no-reference and
+aesthetic metrics, including CLIPIQA, MUSIQ, MANIQA, CLIPIQA+, TOPIQ-NR, NIMA, and
+TOPIQ-IAA, while sacrificing strict reference fidelity. These results show that FoA-SR does not
+7
+
+=== PAGE 8 ===
+Figure 3: Qualitative comparison on a text-containing RealSR example. FoA-SR-Faithful emphasizes
+reference-consistent restoration, while FoA-SR-Aesthetic emphasizes sharper and more visually
+enhanced details.
+Table 2: Hybrid reward ablation on RealSR. FoA-SR-Hybrid is trained with the averaged reward
+RH = 0.5RF + 0.5RA. It improves several no-reference metrics but does not match the reference-
+consistency gains of FoA-SR-Faithful, supporting profile-specific optimization.
+Method PSNR↑SSIM↑LPIPS↓DISTS↓CLIPIQA↑NIQE↓MUSIQ↑MANIQA↑FID↓
+Flux2SR 22.7195 0.6733 0.2793 0.2191 0.6154 4.9360 69.5302 0.6667 110.0081
+FoA-SR-Faithful24.8633 0.7327 0.2502 0.20460.5535 5.1734 66.6408 0.6252107.1397
+FoA-SR-Aesthetic 20.9118 0.5695 0.4038 0.27430.71705.052273.0874 0.7270123.7668
+FoA-SR-Hybrid 22.6407 0.6539 0.3252 0.2522 0.71204.590972.6504 0.7026 121.1101
+optimize a single universal quality score; instead, it steers the same Flux2SR baseline toward distinct
+restoration profiles.
+Compared with single-output Real-ISR baselines such as DP2O-SR and OSEDiff, FoA-SR provides
+a complementary capability: it exposes restoration intent as an explicit choice between Faithful
+and Aesthetic adapters rather than committing to one fixed balance between fidelity and perceptual
+enhancement.
+Qualitative comparison.Figure 3 shows a qualitative comparison on a text-containing RealSR
+example. FoA-SR-Faithful preserves the text structure more conservatively and avoids strong
+distortions, while FoA-SR-Aesthetic produces a sharper and more visually enhanced appearance but
+may introduce stronger local changes. Additional qualitative comparisons on RealSR and DIV2K-Val
+are shown in Appendix D.
+4.3 Analysis and Ablations
+Hybrid reward ablation.To test whether Faithful and Aesthetic restoration can be replaced by
+a single scalar objective, we train an additional FoA-SR-Hybrid adapter using the same Flux2SR
+initialization, candidate pool, and preference optimization setup. The only difference is that winner–
+loser pairs are mined using a hybrid reward:
+RH(yi) = 0.5RF (yi) + 0.5RA(yi).
+As shown in Table 2, FoA-SR-Hybrid improves several no-reference metrics, including CLIPIQA,
+NIQE, MUSIQ, and MANIQA, but it does not recover the strong reference-consistency gains
+achieved by FoA-SR-Faithful. This supports our central design choice: averaging Faithful and
+Aesthetic rewards into a single scalar objective produces an implicit compromise, whereas FoA-SR
+exposes the two endpoints as selectable restoration profiles. Extended held-out metrics for the Hybrid
+adapter are reported in Appendix C.3.
+8
+
+=== PAGE 9 ===
+Table 3: Effect of candidate pool size on profile mining over 500 LR inputs. Faithful and Aesthetic
+rewards frequently select different winners, and reward gaps are already strong at M= 4 , supporting
+its use as a compute-efficient mining setting.
+Pool sizeMFaithful gap↑Aesthetic gap↑Winner disagreement↑SpearmanR F /RA
+2 0.5628 0.5700 55.2% -0.1690
+4 0.6517 0.7097 78.4% -0.0312
+6 0.6749 0.7216 85.4% -0.0429
+8 0.6741 0.7300 90.8% -0.0380
+Do Faithful and Aesthetic profiles disagree?We next ask whether the two profiles actually
+induce different preferences over the same stochastic candidate pool. At the training setting used
+for preference optimization (M= 4 ), Faithful and Aesthetic rewards select different winners for
+78.4% of the 500 LR inputs. The mean Spearman correlation between the two reward rankings is
+close to zero (−0.0312), indicating that the two profiles do not simply rank candidates in the same
+order. Moreover, each profile assigns a substantial advantage to its own selected winner: the Faithful
+winner exceeds the Aesthetic winner by 0.3338 under RF , while the Aesthetic winner exceeds the
+Faithful winner by 0.3411 underRA. These results provide direct evidence that Faithful and Aesthetic
+restoration are genuinely different selection criteria rather than two names for the same automatic
+preference. Additional disagreement statistics are provided in Appendix B.
+Effect of candidate pool size.Our main preference-training experiments use M= 4 candidates
+per LR input as a compute-efficient setting for FLUX.2-based candidate generation and multi-metric
+IQA scoring. To assess the sensitivity of profile mining to the number of stochastic candidates, we
+extend the same 500-image mining set up to M= 8 and recompute profile-mining statistics for
+M∈ {2,4,6,8} without retraining the adapters. As shown in Table 3, the Faithful and Aesthetic
+reward gaps are already strong at M= 4 , while larger candidate pools mainly increase winner
+disagreement. Appendix B reports the corresponding standard deviations and detailed M= 4
+disagreement statistics.
+Choice of the shared Flux2SR baseline.We use the FM+Charbonnier+LPIPS Flux2SR checkpoint
+as the shared starting point for all profile-specific adapters. This design isolates the effect of the
+preference profile: FoA-SR-Faithful, FoA-SR-Aesthetic, and FoA-SR-Hybrid all start from the
+same supervised checkpoint and are trained from candidate pools generated by the same model. In
+preliminary supervised runs, purely reconstruction-oriented baselines improved distortion metrics but
+tended to produce conservative or overly smooth outputs. The FM+Charbonnier+LPIPS Flux2SR
+baseline provides a more balanced starting point for studying both Faithful and Aesthetic preference
+optimization. Supervised objective and LoRA target-module ablations supporting this choice are
+provided in Appendix C.
+5 Conclusion and Limitations
+We introduced FoA-SR, a profile-aware preference optimization framework for real-world image
+super-resolution. FoA-SR adapts FLUX.2-dev into a paired SR baseline, Flux2SR, and then mines
+profile-specific preference pairs from the same stochastic candidate pool to train separate Faithful and
+Aesthetic LoRA adapters. Experiments on RealSR and DIV2K-Val show that FoA-SR steers the same
+baseline toward distinct restoration behaviors: Faithful improves reference-oriented metrics, while
+Aesthetic improves learned no-reference and aesthetic metrics. Our profile-disagreement analysis
+and Hybrid-LoRA ablation further show that collapsing both profiles into a single averaged reward
+can hide useful controllability. These results suggest that Real-ISR should not be treated as a single
+universal restoration objective, but as a profile-dependent restoration problem.
+Limitations.FoA-SR relies on automatic IQA metrics rather than direct human preference an-
+notations, which may not fully capture subjective visual preference. A profile-conditioned human
+study would provide stronger validation. FoA-SR also considers only two discrete profiles, Faithful
+and Aesthetic, rather than a continuous user-controlled trade-off. In addition, preference mining
+is performed offline and requires generating and scoring multiple candidates per LR input; more
+efficient online or semi-online mining could reduce this cost. Finally, the Aesthetic adapter may
+9
+
+=== PAGE 10 ===
+introduce local changes or hallucinated details, making the Faithful adapter more appropriate for
+identity-, text-, document-, or science-sensitive applications.
+References
+[1] Eirikur Agustsson and Radu Timofte. Ntire 2017 challenge on single image super-resolution:
+Dataset and study. InCVPR Workshops, 2017.
+[2] Black Forest Labs. FLUX.2: Next generation image generation. https://bfl.ai/models/
+flux-2, 2025. Accessed: 2026-05-01.
+[3] Black Forest Labs. FLUX.2-dev model card. https://huggingface.co/
+black-forest-labs/FLUX.2-dev, 2026. Accessed: 2026-05-01.
+[4] Yochai Blau and Tomer Michaeli. The perception-distortion tradeoff. InProceedings of the
+IEEE Conference on Computer Vision and Pattern Recognition, pages 6228–6237, 2018.
+[5] Jianrui Cai, Hui Zeng, Hongwei Yong, Zisheng Cao, and Lei Zhang. Toward real-world single
+image super-resolution: A new benchmark and a new model. InProceedings of the IEEE/CVF
+International Conference on Computer Vision, pages 3086–3095, 2019.
+[6] Xiangyu Chen, Xintao Wang, Jiantao Zhou, Yu Qiao, and Chao Dong. Activating more pixels in
+image super-resolution transformer. InProceedings of the IEEE/CVF conference on computer
+vision and pattern recognition, pages 22367–22377, 2023.
+[7] Keyan Ding, Kede Ma, Shiqi Wang, and Eero P. Simoncelli. Image quality assessment:
+Unifying structure and texture similarity. InIEEE Transactions on Pattern Analysis and
+Machine Intelligence, 2020.
+[8] Chao Dong, Chen Change Loy, Kaiming He, and Xiaoou Tang. Learning a deep convolutional
+network for image super-resolution. InEuropean Conference on Computer Vision, 2014. URL
+https://api.semanticscholar.org/CorpusID:18874645.
+[9] Linwei Dong, Qingnan Fan, Yihong Guo, Zhonghao Wang, Qi Zhang, Jinwei Chen, Yawei Luo,
+and Changqing Zou. Tsd-sr: One-step diffusion with target score distillation for real-world
+image super-resolution, 2025. URLhttps://arxiv.org/abs/2411.18263.
+[10] Hang Guo, Jinmin Li, Tao Dai, Zhihao Ouyang, Xudong Ren, and Shu-Tao Xia. Mambair:
+A simple baseline for image restoration with state-space model. InEuropean conference on
+computer vision, pages 222–241. Springer, 2024.
+[11] Edward J. Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean Wang,
+Lu Wang, and Weizhu Chen. Lora: Low-rank adaptation of large language models. In
+International Conference on Learning Representations, 2022.
+[12] Hugging Face. Diffusers welcomes FLUX.2. https://huggingface.co/blog/flux-2,
+2025. Accessed: 2026-05-01.
+[13] Tero Karras, Samuli Laine, and Timo Aila. A style-based generator architecture for generative
+adversarial networks. InCVPR, 2019.
+[14] Junjie Ke, Qifei Wang, Yilin Wang, Peyman Milanfar, and Feng Yang. Musiq: Multi-scale
+image quality transformer. InProceedings of the IEEE/CVF International Conference on
+Computer Vision, pages 5148–5157, 2021.
+[15] Yawei Li, Yuchen Fan, Xiaoyu Xiang, Denis Demandolx, Rakesh Ranjan, Radu Timofte, and
+Luc Van Gool. Efficient and explicit modelling of image hierarchies for image restoration. In
+Proceedings of the IEEE/CVF conference on computer vision and pattern recognition, pages
+18278–18289, 2023.
+[16] Yawei Li et al. Lsdir: A large scale dataset for image restoration.arXiv preprint, 2023.
+10
+
+=== PAGE 11 ===
+[17] Jingyun Liang, Jiezhang Cao, Guolei Sun, Kai Zhang, Luc Van Gool, and Radu Timofte. Swinir:
+Image restoration using swin transformer. InProceedings of the IEEE/CVF International
+Conference on Computer Vision (ICCV) Workshops, pages 1833–1844, October 2021.
+[18] Xinqi Lin, Jingwen He, Ziyan Chen, Zhaoyang Lyu, Bo Dai, Fanghua Yu, Yu Qiao, Wanli
+Ouyang, and Chao Dong. Diffbir: Toward blind image restoration with generative diffusion
+prior. InEuropean Conference on Computer Vision, pages 430–448. Springer, 2024.
+[19] Anish Mittal, Rajiv Soundararajan, and Alan C. Bovik. Making a completely blind image
+quality analyzer.IEEE Signal Processing Letters, 20(3):209–212, 2013.
+[20] Rafael Rafailov, Archit Sharma, Eric Mitchell, Christopher D. Manning, Stefano Ermon, and
+Chelsea Finn. Direct preference optimization: Your language model is secretly a reward model.
+InAdvances in Neural Information Processing Systems, 2023.
+[21] Lingchen Sun, Rongyuan Wu, Zhengqiang Zhang, Hongwei Yong, and Lei Zhang. Improv-
+ing the stability of diffusion models for content consistent super-resolution.arXiv preprint
+arXiv:2401.00877, 2024.
+[22] Bram Wallace, Meihua Dang, Rafael Rafailov, Linqi Zhou, Aaron Lou, Senthil Purushwalkam,
+Stefano Ermon, Caiming Xiong, Shafiq Joty, and Nikhil Naik. Diffusion model alignment using
+direct preference optimization. InProceedings of the IEEE/CVF Conference on Computer
+Vision and Pattern Recognition, pages 8228–8238, 2024.
+[23] Jianyi Wang, Kelvin C. K. Chan, and Chen Change Loy. Exploring clip for assessing the look
+and feel of images. InProceedings of the AAAI Conference on Artificial Intelligence, volume 37,
+pages 2555–2563, 2023.
+[24] Jianyi Wang, Zongsheng Yue, Shangchen Zhou, Kelvin C. K. Chan, and Chen Change Loy. Ex-
+ploiting diffusion prior for real-world image super-resolution.arXiv preprint arXiv:2305.07015,
+2023.
+[25] Jingkai Wang, Yixin Tang, Jue Gong, Jiatong Li, Shu Li, Libo Liu, Jianliang Lan, Yutong
+Liu, and Yulun Zhang. Spectral and trajectory regularization for diffusion transformer super-
+resolution.arXiv preprint arXiv:2603.06275, 2026.
+[26] Xintao Wang, Liangbin Xie, Chao Dong, and Ying Shan. Real-esrgan: Training real-world
+blind super-resolution with pure synthetic data. InProceedings of the IEEE/CVF International
+Conference on Computer Vision Workshops, pages 1905–1914, 2021.
+[27] Zhou Wang, Alan C. Bovik, Hamid R. Sheikh, and Eero P. Simoncelli. Image quality assessment:
+From error visibility to structural similarity. InIEEE Transactions on Image Processing,
+volume 13, pages 600–612, 2004.
+[28] Rongyuan Wu, Lingchen Sun, Zhiyuan Ma, and Lei Zhang. One-step effective diffusion network
+for real-world image super-resolution. InAdvances in Neural Information Processing Systems,
+volume 37, pages 92529–92553, 2024.
+[29] Rongyuan Wu, Tao Yang, Lingchen Sun, Zhengqiang Zhang, Shuai Li, and Lei Zhang. Seesr:
+Towards semantics-aware real-world image super-resolution. InProceedings of the IEEE/CVF
+Conference on Computer Vision and Pattern Recognition, pages 25456–25467, 2024.
+[30] Rongyuan Wu, Lingchen Sun, Zhengqiang Zhang, Shihao Wang, Tianhe Wu, Qiaosi Yi, Shuai
+Li, and Lei Zhang. Dp2o-sr: Direct perceptual preference optimization for real-world image
+super-resolution.arXiv preprint arXiv:2510.18851, 2025.
+[31] Sidi Yang, Tianhe Wu, Shuwei Shi, Shanshan Lao, Yuan Gong, Mingdeng Cao, Jiahao Wang,
+and Yujiu Yang. Maniqa: Multi-dimension attention network for no-reference image quality
+assessment. InProceedings of the IEEE/CVF Conference on Computer Vision and Pattern
+Recognition Workshops, pages 1191–1200, 2022.
+[32] Tao Yang, Peiran Ren, Xuansong Xie, and Lei Zhang. Pixel-aware stable diffusion for realistic
+image super-resolution and personalized stylization.arXiv preprint arXiv:2308.14469, 2023.
+11
+
+=== PAGE 12 ===
+[33] Kai Zhang, Jingyun Liang, Luc Van Gool, and Radu Timofte. Designing a practical degradation
+model for deep blind image super-resolution. InProceedings of the IEEE/CVF International
+Conference on Computer Vision, pages 4791–4800, 2021.
+[34] Leheng Zhang, Yawei Li, Xingyu Zhou, Xiaorui Zhao, and Shuhang Gu. Transcending the limit
+of local window: Advanced super-resolution transformer with adaptive token dictionary. In
+Proceedings of the IEEE/CVF conference on computer vision and pattern recognition, pages
+2856–2865, 2024.
+[35] Richard Zhang, Phillip Isola, Alexei A. Efros, Eli Shechtman, and Oliver Wang. The unrea-
+sonable effectiveness of deep features as a perceptual metric. InProceedings of the IEEE
+Conference on Computer Vision and Pattern Recognition, pages 586–595, 2018.
+[36] Xindong Zhang, Hui Zeng, Shi Guo, and Lei Zhang. Efficient long-range attention network for
+image super-resolution, 2022. URLhttps://arxiv.org/abs/2203.06697.
+[37] Yulun Zhang, Kunpeng Li, Kai Li, Lichen Wang, Bineng Zhong, and Yun Fu. Image super-
+resolution using very deep residual channel attention networks. InECCV, 2018.
+12
+
+=== PAGE 13 ===
+A Additional Implementation Details
+We provide additional details about the Flux2SR supervised training setup, the FoA-SR preference optimization
+procedure, compute resources, and existing assets used in the experiments.
+Flux2SR training.Flux2SR is trained by fine-tuning LoRA parameters on top of FLUX.2-dev while keeping
+the base transformer, V AE, and text encoder frozen. Unless otherwise stated, we use rank-64 LoRA, bf16
+precision, AdamW optimization, learning rate 1×10 −4, weight decay 1×10 −4, a constant-with-warmup
+learning-rate schedule with 200 warmup steps, batch size 1, gradient accumulation 1, and 50K training steps.
+During sampling, we use 16 sampling steps, guidance 1.0, initial sigma 1.0, sample sigma 1.0, and a cached
+prompt embedding.
+Supervised reconstruction losses.The final Flux2SR baseline is trained with latent flow matching and
+image-space reconstruction losses:
+LSR =L FM +λ pixLcharb +λ lpipsLLPIPS.
+We set λpix = 1.0 , use Charbonnier pixel loss, and set λlpips = 1.0 . The LPIPS term is linearly warmed up
+from 0 to its full weight between training steps 2000 and 6000. Pixel reconstruction is active from the beginning
+of training.
+Preference optimization.For FoA-SR-Faithful, FoA-SR-Aesthetic, and FoA-SR-Hybrid, we initialize
+the trainable LoRA adapter from the same Flux2SR checkpoint and use the original Flux2SR adapter as the
+frozen reference model. We fine-tune only LoRA parameters and keep the FLUX.2 backbone frozen. Preference
+optimization uses rank-64 LoRA, learning rate 2×10 −5, DPO preference strength β= 1000 , batch size 1,
+gradient accumulation 8, bf16 precision, and 500 optimization steps.
+Evaluation protocol.All Flux2SR-based methods are evaluated with 16 sampling steps, guidance 1.0,
+sample sigma 1.0, and the same metric implementation. Final model comparisons use raw, non-normalized
+metric values. The within-pool normalization used for reward-based candidate mining is not used for test-set
+evaluation.
+Compute resources.All model training, candidate generation, and preference optimization experiments
+were run on a single NVIDIA H200 GPU.
+Table 4: Compute resources used in FoA-SR experiments.
+Component Configuration Approx. time
+Flux2SR supervised training rank 64, 50K steps, bf16 13h 04m
+Candidate generation,M= 4500 inputs, 4 seeds, 16 steps∼5h
+Additional candidates forM= 8analysis 500 inputs, extra 4 seeds, 16 steps∼5h
+Faithful preference training 500 steps, rank 64∼4h
+Aesthetic preference training 500 steps, rank 64∼4h
+Hybrid preference training 500 steps, rank 64∼4h
+IQA evaluation fixed outputs, same metric code runtime only
+B Additional Candidate Mining Details
+For each LR input in the 500-image mining set, we generate multiple stochastic candidates from the same
+Flux2SR baseline by varying only the random seed. The same candidate pool is used to compute Faithful,
+Aesthetic, and Hybrid rewards. This design ensures that profile disagreement reflects different restoration
+preferences rather than differences in data, model initialization, or sampling source.
+Profile-disagreement statistics.Table 5 reports detailed disagreement statistics at the training candidate
+pool size M= 4 . Faithful and Aesthetic rewards select different winners for 78.4% of inputs, and their rank
+correlation is close to zero, indicating that the two profiles induce different rankings over the same candidate
+pool.
+Effect of candidate pool size.To assess whether the training pool size M= 4 provides a sufficient
+preference-mining signal, we extend the same 500-image mining set up to M= 8 candidates and recompute
+mining statistics for nested pool sizes M∈ {2,4,6,8} , without retraining any adapter. As shown in Table 6,
+M= 4 already provides strong reward gaps and substantial profile disagreement, while increasing the pool size
+mainly strengthens the same disagreement signal at additional generation and scoring cost.
+13
+
+=== PAGE 14 ===
+Table 5: Detailed profile-disagreement statistics at the training candidate pool sizeM= 4.
+Statistic Value
+Number of LR inputs 500
+Candidates per input 4
+Winner disagreement rate 78.4%
+Mean SpearmanR F , RA -0.0312
+Mean Faithful reward gap 0.6517
+Mean Aesthetic reward gap 0.7097
+MeanR F (yF
+w)−R F (yA
+w)0.3338
+MeanR A(yA
+w)−R A(yF
+w)0.3411
+Table 6: Detailed candidate-pool-size analysis over 500 LR inputs. We report mean and standard
+deviation of reward gaps.
+MFaithful gap Aesthetic gap Winner disagreement SpearmanR F , RA
+20.5628±0.3506 0.5700±0.368355.2% -0.1690
+40.6517±0.2215 0.7097±0.197878.4% -0.0312
+60.6749±0.1848 0.7216±0.159885.4% -0.0429
+80.6741±0.1616 0.7300±0.142190.8% -0.0380
+Stochastic candidate examples.Figure 4 shows a stochastic candidate pool generated by the shared
+Flux2SR baseline for the same LR input. The candidates differ only by random seed, illustrating that the same
+baseline can produce multiple plausible restorations.
+Figure 4: Example stochastic candidate pool generated by the shared Flux2SR baseline for the same
+LR input. The candidates are produced by changing only the random seed. Faithful and Aesthetic
+rewards may select different winners from the same pool, motivating profile-specific preference
+mining.
+C Extended Quantitative Results
+We report additional quantitative results that are not included in the main paper due to space limitations. These
+include supervised Flux2SR ablations, LoRA target-module ablations, and extended metrics for the Hybrid
+reward ablation.
+C.1 Supervised Flux2SR Objective Ablation
+Table 7 compares supervised Flux2SR training objectives on RealSR. FM+Pix obtains the strongest distortion-
+oriented metrics among the supervised variants, but its learned no-reference metrics are lower. FM+Pix+LPIPS
+provides a more balanced starting point by improving MUSIQ, MANIQA, and NIQE relative to FM+Pix while
+retaining reasonable reference fidelity.
+We therefore use FM+Pix+LPIPS as the shared Flux2SR baseline for studying both Faithful and Aesthetic
+preference optimization.
+14
+
+=== PAGE 15 ===
+Table 7: Supervised Flux2SR objective ablation on RealSR. All variants use rank-64 LoRA, 50K
+training steps, the Attn+Add-LoRA target set, and the same 16-step inference setting.
+Objective PSNR↑SSIM↑LPIPS↓DISTS↓CLIPIQA↑NIQE↓MUSIQ↑MANIQA↑FID↓
+FM only 22.5933 0.6895 0.2914 0.2182 0.6612 5.4024 67.3828 0.6519 106.4577
+FM + Pix 24.1125 0.7329 0.2605 0.2009 0.5892 5.5422 65.2518 0.6216 108.5328
+FM + Pix + LPIPS 22.7195 0.6733 0.2793 0.2191 0.6154 4.9360 69.5302 0.6667 110.0081
+C.2 LoRA Target-Module Ablation
+We also ablate which FLUX.2 transformer modules receive LoRA adapters. We compare three target
+sets. Attn-LoRA applies LoRA to the default attention projection modules. Attn+Add-LoRA further adds
+LoRA to the additional conditioning projections (add_q_proj, add_k_proj, add_v_proj, and to_add_out).
+Attn+FFN-LoRA instead extends Attn-LoRA with feed-forward modules (ff.linear_in, ff.linear_out,
+ff_context.linear_in, andff_context.linear_out).
+Table 8: Ablation of LoRA target modules for supervised Flux2SR training on RealSR. All variants
+use FM-only training, rank-64 LoRA, 50K steps, and the same 16-step inference setting.
+LoRA target set PSNR↑SSIM↑LPIPS↓DISTS↓CLIPIQA↑NIQE↓MUSIQ↑MANIQA↑FID↓
+Attn-LoRA 22.1328 0.6766 0.2957 0.2213 0.6319 5.4714 66.1344 0.6419 106.1353
+Attn+Add-LoRA 22.5933 0.6895 0.2914 0.2182 0.6612 5.4024 67.3828 0.6519 106.4577
+Attn+FFN-LoRA 21.8387 0.6751 0.3097 0.2310 0.6910 5.4688 69.4892 0.6676 115.5775
+Attn+FFN-LoRA improves several learned no-reference metrics, such as CLIPIQA, MUSIQ, and MANIQA, but
+degrades reference-oriented metrics and FID. Attn+Add-LoRA provides a stronger balance between distortion-
+oriented reconstruction and learned perceptual quality. We therefore adopt Attn+Add-LoRA as the default
+target-module set for Flux2SR and the profile-specific adapters.
+C.3 Extended Hybrid Reward Metrics
+Table 9 reports additional held-out RealSR metrics for the Hybrid reward ablation.
+Table 9: Extended RealSR metrics for the Hybrid reward ablation. These metrics provide an additional
+view of how the Hybrid adapter behaves relative to Faithful and Aesthetic endpoints.
+Method TOPIQ-FR↑AFINE-FR↓CLIPIQA+↑TOPIQ-NR↑AFINE-NR↓NIMA↑TOPIQ-IAA↑FID↓
+Flux2SR 0.4769 -0.7410 0.6792 0.6258 -1.0478 4.8029 4.6670 110.0081FoA-SR-Faithful 0.5146 -0.9138 0.6380 0.5847 -0.9974 4.6323 4.5808 107.1397FoA-SR-Aesthetic 0.4118 -0.4605 0.7579 0.7408 -1.0772 5.1457 5.0062 123.7668FoA-SR-Hybrid 0.4467 -0.6020 0.7399 0.7332 -1.1005 5.0373 4.9520 121.1101
+FoA-SR-Hybrid improves many held-out no-reference and aesthetic metrics over Flux2SR, but it does not match
+FoA-SR-Faithful on held-out reference metrics such as TOPIQ-FR and AFINE-FR, nor does it consistently reach
+FoA-SR-Aesthetic on the strongest aesthetic metrics. This supports the interpretation that a single averaged
+reward yields a compromise behavior rather than explicit profile control.
+D Additional Qualitative Results
+Figure 5 and Figure 6 show additional qualitative comparisons on RealSR and DIV2K-Val.
+15
+
+=== PAGE 16 ===
+Figure 5: Additional qualitative examples on RealSR comparing Flux2SR, FoA-SR-Faithful, FoA-
+SR-Aesthetic, and other Real-ISR methods. Zoom in for visual details.
+16
+
+=== PAGE 17 ===
+Figure 6: Additional qualitative examples on DIV2K-Val comparing Flux2SR, FoA-SR-Faithful,
+FoA-SR-Aesthetic, and other Real-ISR methods. Zoom in for visual details.
+17

@@ -1,0 +1,139 @@
+{
+  "file": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\05_efficiency\\bitnet_flux_2412.18653.pdf",
+  "page_count": 8,
+  "first_page_excerpt": "1.58-bit FLUX\nChenglin Yang1, Celong Liu1, Xueqing Deng1, Dongwon Kim2,\nXing Mei1, Xiaohui Shen1, Liang-Chieh Chen1\n1ByteDance 2POSTECH\nhttps://chenglin-yang.github.io/1.58bit.flux.github.io/\nFLUX1.58-bit FLUXFLUX1.58-bit FLUX\nA cat made of sea water walking in a library.\nA dragon made of fire is spiraling in the sky above the city.\nA bird behind a rabbit.\nA man is holding a soldering iron and repairing a broken electronic device.\nThe makeup artist is creating a dramatic look for a fashion show.\nA television on the top of a bird.\nFigure 1. Visual comparisons between FLUX and 1.58-bit FLUX.1.58-bit FLUX demonstrates comparable generation quality to FLUX\nwhile employing 1.58-bit quantization, where 99.5% of the 11.9B parameters in the vision transformer are constrained to the values +1,\n-1, or 0. For consistency, all images in each comparison are generated using the same latent noise input. 1.58-bit FLUX utilizes a custom\n1.58-bit kernel. Additional visual comparisons are provided in Fig. 3 and Fig. 4.\n1\narXiv:2412.18653v1  [cs.CV]  24 Dec 2024",
+  "flux_evidence": [
+    {
+      "page": 1,
+      "snippets": [
+        "1.58-bit FLUX",
+        "https://chenglin-yang.github.io/1.58bit.flux.github.io/",
+        "FLUX1.58-bit FLUXFLUX1.58-bit FLUX",
+        "Figure 1. Visual comparisons between FLUX and 1.58-bit FLUX.1.58-bit FLUX demonstrates comparable generation quality to FLUX",
+        "-1, or 0. For consistency, all images in each comparison are generated using the same latent noise input. 1.58-bit FLUX utilizes a custom"
+      ]
+    },
+    {
+      "page": 2,
+      "snippets": [
+        "Figure 2. Efficiency measurements on the vision transformer component of FLUX and 1.58-bit FLUX.The measurements are based",
+        "on generating a single image with 50 inference steps. (a) 1.58-bit FLUX reduces checkpoint storage by 7.7× compared to FLUX. (b)",
+        "1.58-bit FLUX achieves a 5.1× reduction in inference memory usage across various GPU types. The x-axis labels, m-nG, represent GPU",
+        "We present 1.58-bit FLUX, the first successful approach",
+        "model, FLUX.1-dev, using 1.58-bit weights ( i.e., values in",
+        "solely on self-supervision from the FLUX.1-dev model. Ad-",
+        "of 1.58-bit FLUX in maintaining generation quality while",
+        "v6.1 [41], Ideogram v2 [26], PlayGround V3 [36], FLUX"
+      ]
+    },
+    {
+      "page": 3,
+      "snippets": [
+        "FLUX 0.5876 0.7529 0.5056 0.6299 0.2791 0.4014 0.6131 0.7807 0.7380",
+        "1.58-bit FLUX (w/o kernel) 0.5806 0.7358 0.4900 0.6151 0.2781 0.4037 0.6089 0.7807 0.7327",
+        "1.58-bit FLUX 0.5812 0.7390 0.4910 0.6162 0.2757 0.4049 0.6137 0.7793 0.7300",
+        "Table 1. Evaluations on T2I CompBench. 1.58-bit FLUX (w/o kernel) indicates no efficient kernel is applied.",
+        "FLUX 0.66 0.98 0.81 0.74 0.79 0.22 0.45",
+        "1.58-bit FLUX (w/o kernel) 0.64 0.98 0.79 0.69 0.77 0.20 0.43",
+        "1.58-bit FLUX 0.64 0.98 0.77 0.68 0.79 0.21 0.44",
+        "Table 2. Evaluations on GenEval. 1.58-bit FLUX (w/o kernel) indicates no efficient kernel is applied."
+      ]
+    },
+    {
+      "page": 4,
+      "snippets": [
+        "FLUX1.58-bit FLUXFLUX1.58-bit FLUX",
+        "Figure 3. Visual comparisons between FLUX and 1.58-bit FLUX on GenEval dataset. 1.58-bit FLUX demonstrates comparable",
+        "generation quality to FLUX while employing 1.58-bit quantization, where 99.5% of the 11.9B parameters in the vision transformer are",
+        "1.58-bit FLUX utilizes a custom 1.58-bit kernel.",
+        "Evaluation. We evaluate both FLUX and 1.58-bit FLUX"
+      ]
+    },
+    {
+      "page": 5,
+      "snippets": [
+        "FLUX1.58-bit FLUXFLUX1.58-bit FLUX",
+        "Figure 4. Visual comparisons between FLUX and 1.58-bit FLUX on the validation split of T2I CompBench. 1.58-bit FLUX demon-",
+        "strates comparable generation quality to FLUX while employing 1.58-bit quantization, where 99.5% of the 11.9B parameters in the vision",
+        "noise input. 1.58-bit FLUX utilizes a custom 1.58-bit kernel.",
+        "are generated at a resolution of 1024 × 1024 for both FLUX",
+        "and 1.58-bit FLUX."
+      ]
+    },
+    {
+      "page": 6,
+      "snippets": [
+        "FLUX and FLUX on T2I Compbench and GenEval are ob-",
+        "improvements are achieved when running 1.58-bit FLUX",
+        "This work introduced 1.58-bit FLUX, in which 99.5% of",
+        "our custom computation kernels, 1.58-bit FLUX achieves a",
+        "sion gains, 1.58-bit FLUX demonstrates comparable perfor-",
+        "ity. We hope that 1.58-bit FLUX inspires the community to",
+        "We discuss the current limitations of 1.58-bit FLUX be-",
+        "FLUX reduces model size and memory consumption, its"
+      ]
+    },
+    {
+      "page": 7,
+      "snippets": [
+        "[30] Black Forest Labs. https://github.com/black-forest-labs/flux."
+      ]
+    }
+  ],
+  "figure_candidates": [
+    {
+      "page": 1,
+      "caption": "Figure 1. Visual comparisons between FLUX and 1.58-bit FLUX.1.58-bit FLUX demonstrates comparable generation quality to FLUX"
+    },
+    {
+      "page": 2,
+      "caption": "Figure 2. Efficiency measurements on the vision transformer component of FLUX and 1.58-bit FLUX.The measurements are based"
+    },
+    {
+      "page": 4,
+      "caption": "Figure 3. Visual comparisons between FLUX and 1.58-bit FLUX on GenEval dataset. 1.58-bit FLUX demonstrates comparable"
+    },
+    {
+      "page": 5,
+      "caption": "Figure 4. Visual comparisons between FLUX and 1.58-bit FLUX on the validation split of T2I CompBench. 1.58-bit FLUX demon-"
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 3,
+      "caption": "Table 1. Evaluations on T2I CompBench. 1.58-bit FLUX (w/o kernel) indicates no efficient kernel is applied."
+    },
+    {
+      "page": 3,
+      "caption": "Table 2. Evaluations on GenEval. 1.58-bit FLUX (w/o kernel) indicates no efficient kernel is applied."
+    },
+    {
+      "page": 3,
+      "caption": "Table 3. Latency measurements on the vision transformer"
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      4,
+      6,
+      7
+    ],
+    "super_resolution": [],
+    "efficiency": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "ablation": [],
+    "limitations": [
+      6
+    ]
+  },
+  "key": "bitnet_flux",
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\text\\bitnet_flux.txt"
+}

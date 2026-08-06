@@ -1,0 +1,218 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/MvpMDIkuGf8bnKt+xGijAlZYwmA</id>
+  <title>arXiv Query: search_query=ti:"video face restoration"&amp;id_list=&amp;start=0&amp;max_results=150</title>
+  <updated>2026-08-06T07:21:53Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=ti:%22video+face+restoration%22&amp;start=0&amp;max_results=150&amp;id_list=" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>150</opensearch:itemsPerPage>
+  <opensearch:totalResults>6</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/2501.01235v2</id>
+    <title>SVFR: A Unified Framework for Generalized Video Face Restoration</title>
+    <updated>2025-01-03T12:26:32Z</updated>
+    <link href="https://arxiv.org/abs/2501.01235v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2501.01235v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Face Restoration (FR) is a crucial area within image and video processing, focusing on reconstructing high-quality portraits from degraded inputs. Despite advancements in image FR, video FR remains relatively under-explored, primarily due to challenges related to temporal consistency, motion artifacts, and the limited availability of high-quality video data. Moreover, traditional face restoration typically prioritizes enhancing resolution and may not give as much consideration to related tasks such as facial colorization and inpainting. In this paper, we propose a novel approach for the Generalized Video Face Restoration (GVFR) task, which integrates video BFR, inpainting, and colorization tasks that we empirically show to benefit each other. We present a unified framework, termed as stable video face restoration (SVFR), which leverages the generative and motion priors of Stable Video Diffusion (SVD) and incorporates task-specific information through a unified face restoration framework. A learnable task embedding is introduced to enhance task identification. Meanwhile, a novel Unified Latent Regularization (ULR) is employed to encourage the shared feature representation learning among different subtasks. To further enhance the restoration quality and temporal stability, we introduce the facial prior learning and the self-referred refinement as auxiliary strategies used for both training and inference. The proposed framework effectively combines the complementary strengths of these tasks, enhancing temporal coherence and achieving superior restoration quality. This work advances the state-of-the-art in video FR and establishes a new paradigm for generalized video face restoration. Code and video demo are available at https://github.com/wangzhiyaoo/SVFR.git.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="eess.IV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-01-02T12:51:20Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Zhiyao Wang</name>
+    </author>
+    <author>
+      <name>Xu Chen</name>
+    </author>
+    <author>
+      <name>Chengming Xu</name>
+    </author>
+    <author>
+      <name>Junwei Zhu</name>
+    </author>
+    <author>
+      <name>Xiaobin Hu</name>
+    </author>
+    <author>
+      <name>Jiangning Zhang</name>
+    </author>
+    <author>
+      <name>Chengjie Wang</name>
+    </author>
+    <author>
+      <name>Yuqi Liu</name>
+    </author>
+    <author>
+      <name>Yiyi Zhou</name>
+    </author>
+    <author>
+      <name>Rongrong Ji</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2404.19500v2</id>
+    <title>Towards Real-world Video Face Restoration: A New Benchmark</title>
+    <updated>2024-05-04T07:09:48Z</updated>
+    <link href="https://arxiv.org/abs/2404.19500v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2404.19500v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind face restoration (BFR) on images has significantly progressed over the last several years, while real-world video face restoration (VFR), which is more challenging for more complex face motions such as moving gaze directions and facial orientations involved, remains unsolved. Typical BFR methods are evaluated on privately synthesized datasets or self-collected real-world low-quality face images, which are limited in their coverage of real-world video frames. In this work, we introduced new real-world datasets named FOS with a taxonomy of "Full, Occluded, and Side" faces from mainly video frames to study the applicability of current methods on videos. Compared with existing test datasets, FOS datasets cover more diverse degradations and involve face samples from more complex scenarios, which helps to revisit current face restoration approaches more comprehensively. Given the established datasets, we benchmarked both the state-of-the-art BFR methods and the video super resolution (VSR) methods to comprehensively study current approaches, identifying their potential and limitations in VFR tasks. In addition, we studied the effectiveness of the commonly used image quality assessment (IQA) metrics and face IQA (FIQA) metrics by leveraging a subjective user study. With extensive experimental results and detailed analysis provided, we gained insights from the successes and failures of both current BFR and VSR methods. These results also pose challenges to current face restoration approaches, which we hope stimulate future advances in VFR research.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.MM" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="eess.IV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-04-30T12:37:01Z</published>
+    <arxiv:comment>Project page: https://ziyannchen.github.io/projects/VFRxBenchmark/</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Ziyan Chen</name>
+    </author>
+    <author>
+      <name>Jingwen He</name>
+    </author>
+    <author>
+      <name>Xinqi Lin</name>
+    </author>
+    <author>
+      <name>Yu Qiao</name>
+    </author>
+    <author>
+      <name>Chao Dong</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2604.14560v1</id>
+    <title>DVFace: Spatio-Temporal Dual-Prior Diffusion for Video Face Restoration</title>
+    <updated>2026-04-16T02:42:31Z</updated>
+    <link href="https://arxiv.org/abs/2604.14560v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2604.14560v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Video face restoration aims to enhance degraded face videos into high-quality results with realistic facial details, stable identity, and temporal coherence. Recent diffusion-based methods have brought strong generative priors to restoration and enabled more realistic detail synthesis. However, existing approaches for face videos still rely heavily on generic diffusion priors and multi-step sampling, which limit both facial adaptation and inference efficiency. These limitations motivate the use of one-step diffusion for video face restoration, yet achieving faithful facial recovery alongside temporally stable outputs remains challenging. In this paper, we propose, DVFace, a one-step diffusion framework for real-world video face restoration. Specifically, we introduce a spatio-temporal dual-codebook design to extract complementary spatial and temporal facial priors from degraded videos. We further propose an asymmetric spatio-temporal fusion module to inject these priors into the diffusion backbone according to their distinct roles. Evaluation on various benchmarks shows that DVFace delivers superior restoration quality, temporal consistency, and identity preservation compared to recent methods. Code: https://github.com/zhengchen1999/DVFace.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-04-16T02:42:31Z</published>
+    <arxiv:comment>Code is available at: https://github.com/zhengchen1999/DVFace</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Zheng Chen</name>
+    </author>
+    <author>
+      <name>Bowen Chai</name>
+    </author>
+    <author>
+      <name>Rongjun Gao</name>
+    </author>
+    <author>
+      <name>Mingtao Nie</name>
+    </author>
+    <author>
+      <name>Xi Li</name>
+    </author>
+    <author>
+      <name>Bingnan Duan</name>
+    </author>
+    <author>
+      <name>Jianping Fang</name>
+    </author>
+    <author>
+      <name>Xiaohong Liu</name>
+    </author>
+    <author>
+      <name>Linghe Kong</name>
+    </author>
+    <author>
+      <name>Yulun Zhang</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2607.06389v1</id>
+    <title>FADRA: Frequency-Aware Diffusion with Residual Adaptation for Video Face Restoration</title>
+    <updated>2026-07-07T15:24:42Z</updated>
+    <link href="https://arxiv.org/abs/2607.06389v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2607.06389v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Video face restoration (VFR) aims to recover high-quality and temporally consistent facial details from severely degraded video sequences; however, existing methods still struggle to balance spatial fidelity and temporal coherence under complex degradations. To address this, we propose FADRA, a frequency-aware diffusion framework with iterative residual adaptation specifically tailored for robust VFR. We first leverage the strong temporal consistency of a pre-trained text-to-video diffusion model and introduce lightweight LoRA adapters together with a Low-Quality (LQ) Pixel-Alignment Feature Fusion module to efficiently adapt the frozen generative prior to the VFR task. To further adapt the frozen diffusion backbone to the downstream VFR task beyond LoRA-based adaptation, we introduce a Repeated Residual Adaptation Head (RRAH) for step-wise residual refinement after the diffusion backbone. To make this refinement explicitly guided by the degraded observation, RRAH further takes the LQ latent together with the current velocity prediction as input, allowing the model to repeatedly revisit LQ cues and predict residual updates at each flow-matching step. This LQ-guided repeated residual adaptation helps recover fine facial details while preserving the inherent temporal priors of the pre-trained model. Furthermore, to ensure the structural integrity of perceptually important details, we introduce a Frequency-Aware Loss that provides explicit supervision across multiple spectral bands, emphasizing visually sensitive frequency components that are crucial for perceptual quality and prone to temporal jittering. Extensive experiments demonstrate that FADRA recovers better facial structures and produces more temporally consistent videos than state-of-the-art methods, leading to clear gains in both quantitative metrics and visual perception.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-07-07T15:24:42Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Jin Jiang</name>
+    </author>
+    <author>
+      <name>Jia Wang</name>
+    </author>
+    <author>
+      <name>Panwen Hu</name>
+    </author>
+    <author>
+      <name>Weiran Zhao</name>
+    </author>
+    <author>
+      <name>Shengcai Liao</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2506.13355v1</id>
+    <title>DicFace: Dirichlet-Constrained Variational Codebook Learning for Temporally Coherent Video Face Restoration</title>
+    <updated>2025-06-16T10:54:28Z</updated>
+    <link href="https://arxiv.org/abs/2506.13355v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2506.13355v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Video face restoration faces a critical challenge in maintaining temporal consistency while recovering fine facial details from degraded inputs. This paper presents a novel approach that extends Vector-Quantized Variational Autoencoders (VQ-VAEs), pretrained on static high-quality portraits, into a video restoration framework through variational latent space modeling. Our key innovation lies in reformulating discrete codebook representations as Dirichlet-distributed continuous variables, enabling probabilistic transitions between facial features across frames. A spatio-temporal Transformer architecture jointly models inter-frame dependencies and predicts latent distributions, while a Laplacian-constrained reconstruction loss combined with perceptual (LPIPS) regularization enhances both pixel accuracy and visual quality. Comprehensive evaluations on blind face restoration, video inpainting, and facial colorization tasks demonstrate state-of-the-art performance. This work establishes an effective paradigm for adapting intensive image priors, pretrained on high-quality images, to video restoration while addressing the critical challenge of flicker artifacts. The source code has been open-sourced and is available at https://github.com/fudan-generative-vision/DicFace.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-06-16T10:54:28Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Yan Chen</name>
+    </author>
+    <author>
+      <name>Hanlin Shang</name>
+    </author>
+    <author>
+      <name>Ce Liu</name>
+    </author>
+    <author>
+      <name>Yuxuan Chen</name>
+    </author>
+    <author>
+      <name>Hui Li</name>
+    </author>
+    <author>
+      <name>Weihao Yuan</name>
+    </author>
+    <author>
+      <name>Hao Zhu</name>
+    </author>
+    <author>
+      <name>Zilong Dong</name>
+    </author>
+    <author>
+      <name>Siyu Zhu</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2404.13640v1</id>
+    <title>Beyond Alignment: Blind Video Face Restoration via Parsing-Guided Temporal-Coherent Transformer</title>
+    <updated>2024-04-21T12:33:07Z</updated>
+    <link href="https://arxiv.org/abs/2404.13640v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2404.13640v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Multiple complex degradations are coupled in low-quality video faces in the real world. Therefore, blind video face restoration is a highly challenging ill-posed problem, requiring not only hallucinating high-fidelity details but also enhancing temporal coherence across diverse pose variations. Restoring each frame independently in a naive manner inevitably introduces temporal incoherence and artifacts from pose changes and keypoint localization errors. To address this, we propose the first blind video face restoration approach with a novel parsing-guided temporal-coherent transformer (PGTFormer) without pre-alignment. PGTFormer leverages semantic parsing guidance to select optimal face priors for generating temporally coherent artifact-free results. Specifically, we pre-train a temporal-spatial vector quantized auto-encoder on high-quality video face datasets to extract expressive context-rich priors. Then, the temporal parse-guided codebook predictor (TPCP) restores faces in different poses based on face parsing context cues without performing face pre-alignment. This strategy reduces artifacts and mitigates jitter caused by cumulative errors from face pre-alignment. Finally, the temporal fidelity regulator (TFR) enhances fidelity through temporal feature interaction and improves video temporal consistency. Extensive experiments on face videos show that our method outperforms previous face restoration baselines. The code will be released on \href{https://github.com/kepengxu/PGTFormer}{https://github.com/kepengxu/PGTFormer}.</summary>
+    <category term="cs.MM" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="eess.IV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-04-21T12:33:07Z</published>
+    <arxiv:comment>9 pages</arxiv:comment>
+    <arxiv:primary_category term="cs.MM"/>
+    <author>
+      <name>Kepeng Xu</name>
+    </author>
+    <author>
+      <name>Li Xu</name>
+    </author>
+    <author>
+      <name>Gang He</name>
+    </author>
+    <author>
+      <name>Wenxin Yu</name>
+    </author>
+    <author>
+      <name>Yunsong Li</name>
+    </author>
+  </entry>
+</feed>

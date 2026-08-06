@@ -1,0 +1,259 @@
+{
+  "file": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\04_image_restoration\\acquire_adapt_fluxir_2504.15159.pdf",
+  "page_count": 26,
+  "first_page_excerpt": "Acquire and then Adapt: Squeezing out Text-to-Image Model for Image\nRestoration\nJunyuan Deng1 Xinyi Wu1 Yongxing Yang1 Congchao Zhu1 Song Wang1,2 Zhenyao Wu1*\n1Honor Device Co., Ltd 2Shenzhen University of Advanced Technology\n{dengjunyuan1, wuxinyi, yangyongxing1, zhucongchao, wangsong5, wuzhenyao }@honor.com\nPrivate\nPrivate\nPublic\nDataset\nSynthetic\nSynthetic\nPublic\nSynthetic\nSUPIR DreamClear Ours\nImages\nPublic\nSynthetic\nSynthetic\n🔥🔥\n🔥\n🔥\n❄ ❄\nLQ Images\n20M Images 1M Images 0.35M Images\nAdapter\n1.3B Params 2.2B Params 0.4B Params\nCost\n$12.3k $9.4k $0.8k\nDataset Adapter Cost Dataset Adapter Cost\n88k\nFigure 1. Comparison of SUPIR [94], DreamClear [3], and our proposed method. Our training dataset is constructed entirely from synthetic\nimages. Trained with such data, our method achieves the most realistic restoration results with the lowest training cost.\nAbstract\nRecently, pre-trained text-to-image (T2I) models have been\nextensively adopted for real-world image restoration be-\ncause of their powerful generative prior. However, con-\ntrolling these large models for image restoration usually re-\nquires a large number of high-quality images and immense\ncomputational resources for training, which is costly and\nnot privacy-friendly. In this paper, we find that the well-\ntrained large T2I model (i.e., Flux) is able to produce a va-\nriety of high-quality images aligned with real-world distri-\nbutions, offering an unlimited supply of training samples\nto mitigate the above issue. Specifically, we proposed a\ntraining data construction pipeline for image restoration,\nnamely FluxGen, which includes unconditional image gen-\neration, image selection, and degraded image simulation.\nA novel light-weighted adapter (FluxIR) with squeeze-and-\n*Corresponding author.\nexcitation layers is also carefully designed to control the\nlarge Diffusion Transformer (DiT)-based T2I model so that\nreasonable details can be restored. Experiments demon-\nstrate that our proposed method enables the Flux model\nto adapt effectively to real-world image restoration tasks,\nachieving superior scores and visual quality on both syn-\nthetic and real-world degradation datasets - at only about\n8.5% of the training cost compared to current approaches.\n1. Introduction\nIn real-world scenarios, images often suffer from diverse\nand unpredictable degradations during capture, storage and\ntransmission, giving rise to a wide range of image restora-\ntion (IR) tasks, e.g., deblurring [13, 35, 56, 61, 69, 82, 101],\ndenoising [7, 79, 99, 100], super-resolution [11, 18, 30, 38],\nand etc., for restoring the original high-quality images based\non the type of degradation. These methods, however, strug-\n1\narXiv:2504.15159v1  [cs.CV]  21 Apr 2025",
+  "flux_evidence": [
+    {
+      "page": 1,
+      "snippets": [
+        "trained large T2I model (i.e., Flux) is able to produce a va-",
+        "strate that our proposed method enables the Flux model"
+      ]
+    },
+    {
+      "page": 2,
+      "snippets": [
+        "ment of LLMs. Specifically, we find Flux [37] can gener-",
+        "pretrained Flux [37] model to the IR task. The adapter",
+        "• We are the first to confirm that the Flux model exhibits the",
+        "tively manipulate the super-large T2I model like Flux to",
+        "vanced pre-trained T2I diffusion model, Flux, and introduce"
+      ]
+    },
+    {
+      "page": 3,
+      "snippets": [
+        "Flux [37] extended the MM-DiT [19] architecture and used",
+        "parameters. By integrating the T5 [58] text encoder, Flux",
+        "generative prior of Flux to build a high-quality IR training",
+        "high-quality, realistic training images using Flux. Then, in",
+        "enables precise control over Flux for image restoration. Fi-",
+        "Flux",
+        "Flux-VAE",
+        "Flux-VAE"
+      ]
+    },
+    {
+      "page": 4,
+      "snippets": [
+        "Flux",
+        "(SE) layers (SEz(·) for image and SEp(·) for text) broadcast these features to all Flux MM-DiT blocks to enable precise and multi-modality",
+        "Image Selection. Although Flux is a powerful text-to-",
+        "a training-friendly 0.4B adapter, integrated with Flux — a",
+        "of the pre-trained Flux model, and its input can be reformu-"
+      ]
+    },
+    {
+      "page": 5,
+      "snippets": [
+        "Since Flux consists of 57 MM-DiT blocks, duplicating",
+        "corresponding to the i-th Flux MM-DiT block, can be com-"
+      ]
+    },
+    {
+      "page": 8,
+      "snippets": [
+        "designed light-weighted SE layers in controlling the Flux",
+        "LQ Input SDXL w/ IQA Flux w/o IQA Flux w/ IQA",
+        "where we study different T2I models,i.e. SDXL and Flux, and the",
+        "Flux with SDXL to generate 10, 000 images. Addition-",
+        "ally, we remove the IQA-based selection from the Flux-",
+        "high-quality image dataset from the Flux model, combined",
+        "contrast, images generated by Flux deliver the best visual",
+        "Flux w/o IQA 0.5254 68.66 0.6265"
+      ]
+    },
+    {
+      "page": 10,
+      "snippets": [
+        "[37] Black Forest Labs. Flux. https://github.com/",
+        "black-forest-labs/flux, 2024. 2, 3, 14"
+      ]
+    },
+    {
+      "page": 13,
+      "snippets": [
+        "MLP, meaning a single full-rank MLP was used to control all Flux MM-DiT blocks simultaneously. As shown in Tab. 5,",
+        "the optimal design for our Flux adapter is to provide dedicated control for each Flux MM-DiT block."
+      ]
+    },
+    {
+      "page": 14,
+      "snippets": [
+        "(PixelArt-Σ [9], Sana [88], SDXL [53], Playground [39], and Flux.1-dev [37]) for evaluation. As shown in Tab. 7, the images",
+        "Metric PixArt-Σ Sana SDXL Playground Flux.1-dev Ours"
+      ]
+    },
+    {
+      "page": 17,
+      "snippets": [
+        "[37] Black Forest Labs. Flux. https://github.com/black-forest-labs/flux, 2024. 2, 3, 14"
+      ]
+    },
+    {
+      "page": 22,
+      "snippets": [
+        "LQ Input SDXL Flux w/ IQA",
+        "Flux w/o IQA",
+        "Figure 12. The visual comparisons of different FluxGen settings, where we study different T2I models, i.e. SDXL and Flux, and the usage"
+      ]
+    }
+  ],
+  "figure_candidates": [
+    {
+      "page": 1,
+      "caption": "Figure 1. Comparison of SUPIR [94], DreamClear [3], and our proposed method. Our training dataset is constructed entirely from synthetic"
+    },
+    {
+      "page": 2,
+      "caption": "Fig. 1, our proposed method reduces training costs 1 by ap-"
+    },
+    {
+      "page": 3,
+      "caption": "Figure 2. An overview of our FluxGen pipeline. First, an empty"
+    },
+    {
+      "page": 4,
+      "caption": "Figure 3. Training and inference pipeline of the proposed FluxIR. FluxIR employs a single MM-DiT block with learnable T5 embeddingθp"
+    },
+    {
+      "page": 6,
+      "caption": "Figure 4. Qualitative comparison on the synthetic dataset DIV2K-Val."
+    },
+    {
+      "page": 7,
+      "caption": "Figure 5. Qualitative comparison on the real-world dataset RealLQ250."
+    },
+    {
+      "page": 8,
+      "caption": "Figure 6. The visual comparison results of our training strategies:"
+    },
+    {
+      "page": 8,
+      "caption": "Figure 7. The visual comparisons of different FluxGen settings,"
+    },
+    {
+      "page": 13,
+      "caption": "Figure 8. Visual results comparing the single MLP design and our multiple SE layers."
+    },
+    {
+      "page": 13,
+      "caption": "Fig. 10 illustrates our generated training dataset obtained with an empty prompt, and demonstrates that an empty prompt"
+    },
+    {
+      "page": 14,
+      "caption": "Figure 9. The visual comparisons of our multi-modality designs, i.e. text branch SE layers SEp(·) and trainable embeddings θp, θy. Please"
+    },
+    {
+      "page": 15,
+      "caption": "Fig. 13 presents the visual results on the DIV2K-Val [2] dataset. Fig. 14 presents the visual results on the RealSR [5] dataset."
+    },
+    {
+      "page": 15,
+      "caption": "Fig. 15 presents the visual results on the DrealSR [80] dataset. Fig. 16 presents the visual results on the RealLQ250 [3]"
+    },
+    {
+      "page": 20,
+      "caption": "Figure 10. Samples of generated images by FluxGen pipeline."
+    },
+    {
+      "page": 21,
+      "caption": "Figure 11. Samples generated by the SDXL."
+    },
+    {
+      "page": 22,
+      "caption": "Figure 12. The visual comparisons of different FluxGen settings, where we study different T2I models, i.e. SDXL and Flux, and the usage"
+    },
+    {
+      "page": 23,
+      "caption": "Figure 13. Visual comparison with SOTAs onDIV2K-Val dataset."
+    },
+    {
+      "page": 24,
+      "caption": "Figure 14. Visual comparison with SOTAs onRealSR dataset."
+    },
+    {
+      "page": 25,
+      "caption": "Figure 15. Visual comparison with SOTAs onDrealSR dataset."
+    },
+    {
+      "page": 26,
+      "caption": "Figure 16. Visual comparison with SOTAs onRealLQ250 dataset."
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 6,
+      "caption": "Table 1. Quantitative comparison against state-of-the-art methods of image restoration on both synthetic and real-world datasets. The best"
+    },
+    {
+      "page": 8,
+      "caption": "Table 2. Ablation results of various SE layer ranks on the Re-"
+    },
+    {
+      "page": 8,
+      "caption": "Table 3. Ablation comparison results of our training strategies on"
+    },
+    {
+      "page": 8,
+      "caption": "Table 4. Ablation results of different datasets generated by three"
+    },
+    {
+      "page": 13,
+      "caption": "Table 5. Comparison between Single MLP design and our multiple SE layers design on the RealLQ250 dataset."
+    },
+    {
+      "page": 14,
+      "caption": "Table 6. Ablation results of multi-modality designs on the RealLQ250 dataset."
+    },
+    {
+      "page": 14,
+      "caption": "Table 7. Comparisons with existing T2I generation methods."
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      8,
+      11,
+      12,
+      13,
+      14,
+      19,
+      20
+    ],
+    "super_resolution": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      9,
+      10,
+      11,
+      12,
+      15,
+      16,
+      17,
+      18,
+      19,
+      23
+    ],
+    "efficiency": [],
+    "ablation": [
+      7,
+      8,
+      13,
+      14
+    ],
+    "limitations": []
+  },
+  "key": "acquire_adapt_fluxir",
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\text\\acquire_adapt_fluxir.txt"
+}

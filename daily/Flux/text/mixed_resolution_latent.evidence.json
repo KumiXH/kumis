@@ -1,0 +1,283 @@
+{
+  "file": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\05_efficiency\\mixed_resolution_latent_2507.08422.pdf",
+  "page_count": 29,
+  "first_page_excerpt": "Training-free Mixed-Resolution Latent Upsampling\nfor Spatially Accelerated Diffusion Transformers\nWongi Jeong∗1 Kyungryeol Lee∗1 Hoigi Seo1 Se Young Chun1,2†\n1Dept. of Electrical and Computer Engineering, 2INMC & IPAI\nSeoul National University, Republic of Korea\n{wg7139, kr.lee, seohoiki3215, sychun}@snu.ac.kr\nhttps://ignoww.github.io/RALU project\nAbstract\nDiffusion transformers (DiTs) offer excellent scalability for\nhigh-fidelity generation, but their computational overhead\nposes a great challenge for practical deployment. Existing\nacceleration methods primarily exploit the temporal dimen-\nsion, whereas spatial acceleration remains underexplored.\nIn this work, we investigate spatial acceleration for DiTs via\nlatent upsampling. We found that na¨ıve latent upsampling\nfor spatial acceleration introduces artifacts, primarily due\nto aliasing in high-frequency edge regions and mismatching\nfrom noise-timestep discrepancies. Then, based on these\nfindings and analyses, we propose a training-free spatial\nacceleration framework, dubbed Region-Adaptive Latent Up-\nsampling (RALU), to mitigate those artifacts while achiev-\ning spatial acceleration of DiTs by our mixed-resolution\nlatent upsampling. RALU achieves artifact-free, efficient\nacceleration with early upsampling only on artifact-prone\nedge regions and noise-timestep matching for different la-\ntent resolutions, leading to up to 7.0 × speedup on FLUX-\n1.dev and 3.0× on Stable Diffusion 3 with negligible quality\ndegradation. Furthermore, our RALU is complementarily\napplicable to existing temporal acceleration methods and\ntimestep-distilled models, leading to up to 15.9×speedup.\n1. Introduction\nDiffusion models [18, 52, 53] have emerged as a dominant\nframework for generative modeling across diverse modalities\nsuch as image [5, 40, 45, 47, 62], video [2, 7, 20, 21, 34] and\naudio [17, 31, 48]. Convolutional U-Net architectures [46]\nhave served as the backbone of relatively small diffusion\nmodels. Recently, diffusion transformers (DiTs) [ 1, 8, 34,\n45] have been introduced, leveraging the scalability of trans-\nformers to achieve state-of-the-art results in visual synthesis.\nDespite the superior performance of DiTs, they suffer\nfrom high inference latency. This computational bottleneck\n* Authors contributed equally.†Corresponding author.\n“A dog is chasing after a ball and wagging its tail. ”\nFLUX-1.dev [1]\n(NFE = 7)\nTaylorSeer [32]\n(Temporal accel.)\nBottleneck Sampling [ 55]\n(Spatial accel.)\nRALU (Ours)\n(Spatial accel.)\nFigure 1. Generated 1024×1024 images using acceleration meth-\nods on FLUX-1.dev [1] for 7× speedups. While temporal acceler-\nation methods struggle with aggressive speedups and Bottleneck\nSampling [55] introduces artifacts, our RALU successfully acceler-\nates while avoiding artifacts and maintaining high image quality.\nis inherent in their transformer-based architecture, whose\ncomplexity scales quadratically with the number of input\ntokens [36, 41]. As models scale to higher resolutions and\nprocess more tokens, computational cost and latency pose\na great challenge for their deployment in real-world appli-\ncations such as real-time interactive editing or on-device\ngeneration [27].\nDistillation [14, 61] and post-training [37, 59, 60] have\nbeen explored to tackle this challenge, but they require addi-\ntional training and substantial computational cost. Training-\nfree temporal acceleration has emerged as an alterna-\ntive by reducing computation across timesteps via feature\ncaching [ 10, 35, 60, 66]. In contrast, spatial accelera-\ntion, which involves transitioning between resolutions for a\nquadratic reduction in computation,remains underexplored,\nparticularly for training-free latent upsampling in DiT.\nPrior works on spatial upsampling, often explored within\nthe tasks such as super-resolution [ 63, 65] and higher-\n1\narXiv:2507.08422v3  [cs.CV]  25 Feb 2026",
+  "flux_evidence": [
+    {
+      "page": 1,
+      "snippets": [
+        "tent resolutions, leading to up to 7.0 × speedup on FLUX-",
+        "FLUX-1.dev [1]",
+        "ods on FLUX-1.dev [1] for 7× speedups. While temporal acceler-"
+      ]
+    },
+    {
+      "page": 3,
+      "snippets": [
+        "FLUX-1.dev (prompt:“A man on the tennis court is about to use",
+        "FLUX-1.dev (prompt:”A group of people standing on top of a"
+      ]
+    },
+    {
+      "page": 5,
+      "snippets": [
+        "Base models and metrics.We adopt FLUX.1-dev [ 1]",
+        "(FLUX) and Stable Diffusion 3 Medium [ 12] (SD3) as"
+      ]
+    },
+    {
+      "page": 6,
+      "snippets": [
+        "Table 1. Quantitative comparisons of RALU with the baselines on (Top) FLUX.1-dev [1] (FLUX) and (Bottom) Stable Diffusion 3 [12]",
+        "image-text alignment, and ImageReward [58] for both. The number in parentheses next to FLUX indicates the total number of inference",
+        "FLUX (50) - 25.1 2991.0 1.00×1.095 0.707 6.75 0.634 0.698",
+        "FLUX (10)T5.18 610.02 4.90× 0.981 0.679 6.93 0.618 0.647",
+        "FLUX (7)T3.79 431.45 6.93× 0.920 0.660 8.25 0.594 0.583",
+        "Table 2. (Top) Quantitative results of integrating temporal acceleration methods into RALU under a 5× speedup setting on FLUX. (Bottom)",
+        "Quantitative results of adapting RALU on timestep-distilled models (FLUX.1-schnell, SD3.5L-Turbo). Speedups are measured relative to",
+        "FLUX.1-dev and Stable Diffusion 3.5 Large, respectively.Ddenotes the timestep-distilled model. The W value of TaylorSeer denotes the"
+      ]
+    },
+    {
+      "page": 7,
+      "snippets": [
+        "FLUX.1-devStable Diffusion 3",
+        "FLUX (NFE=50) FLUX (NFE=10,7) TeaCache [30] TaylorSeer [32] Bottleneck [55] RALU (Ours)",
+        "Figure 6. Qualitative comparison of images generated by baseline methods and RALU on FLUX and SD3 under various speedups. For",
+        "FLUX, we compare at 5× and 7× speedups; for SD3, at 2× and 3×. NFE (number of function evaluations) refers to the number of inference"
+      ]
+    },
+    {
+      "page": 8,
+      "snippets": [
+        "Table 3. Effect of NT-Matching. Results are on the FLUX 7 ×",
+        "TFLOPs for FLUX and SD3)."
+      ]
+    },
+    {
+      "page": 9,
+      "snippets": [
+        "FLUX-5× [4, 9, 15] [0.3, 0.45, 1.0] [5.12, 2.64, 2.25] 0.0177",
+        "FLUX-7× [2, 5, 10] [0.2, 0.3, 1.0] [8.14, 2.86, 2.19] 0.0255"
+      ]
+    },
+    {
+      "page": 10,
+      "snippets": [
+        "FLUX (50) - 25.1 49.7 32.8",
+        "FLUX (10)T5.18 9.99 32.8",
+        "FLUX (7)T3.79 7.21 32.8",
+        "FLUX 5× acceleration and N= 2 for SD3 2× acceleration,",
+        "FLUX 5× acceleration and N= 3 , Ntotal = 28, R= 90%",
+        "for FLUX 5 × acceleration and Ntotal = 30, δ= 0.99 for",
+        "FLUX 7× acceleration, where Ntotal is total inference steps."
+      ]
+    },
+    {
+      "page": 11,
+      "snippets": [
+        "speedups. We set N= 7 , O= 1 , W= 3 for FLUX 5 ×",
+        "acceleration, N= 11 , O= 1 , W= 3 for FLUX 7× accel-",
+        "stage [N1, N2, N3] = [4,16,21] for FLUX 5× acceleration,",
+        "[3,11,15] for FLUX 7× acceleration, [6,24,31] for SD3 2×",
+        "of FLUX.1-schnell and SD3.5L-Turbo from Hugging Face.",
+        "(DiTs) [41]: FLUX-1.dev [1] and Stable Diffusion 3 [41].",
+        "FLUX.1-devFLUX.1-dev is a diffusion-based text-to-image",
+        "methods, including our proposed approach, to FLUX.1-dev"
+      ]
+    },
+    {
+      "page": 12,
+      "snippets": [
+        "tio top-r, where r= 0.2 for FLUX-5×, FLUX-7×, SD3-3×"
+      ]
+    },
+    {
+      "page": 13,
+      "snippets": [
+        "Table S3. Comparison of different edge detection methods on FLUX.1-dev.",
+        "Table S4. Comparison of method to determine early upsampling patches on FLUX.1-dev. FLOPs are reported as Mean±Std.",
+        "Table S5. Comparison of different upsampling methods on FLUX.1-",
+        "conducted under the FLUX-5×acceleration setting."
+      ]
+    },
+    {
+      "page": 14,
+      "snippets": [
+        "grating RALU with the timestep-distilled models FLUX.1-",
+        "rated qualitative results under 5× and 7× speedup on FLUX."
+      ]
+    },
+    {
+      "page": 16,
+      "snippets": [
+        "Accel. method FLUX.1-schnell + RALU SD3.5L-Turbo"
+      ]
+    },
+    {
+      "page": 17,
+      "snippets": [
+        "FLUX (NFE=50)",
+        "FLUX (NFE=10, 7)",
+        "FLUX.1-dev",
+        "Figure S4. Qualitative comparison of images generated by baseline methods and RALU on FLUX. Best viewed in zoom."
+      ]
+    },
+    {
+      "page": 18,
+      "snippets": [
+        "FLUX (NFE=50)",
+        "FLUX (NFE=10)",
+        "Figure S5. Qualitative comparison of images generated by baseline methods and RALU on FLUX for 5× speedups. Best viewed in zoom."
+      ]
+    },
+    {
+      "page": 19,
+      "snippets": [
+        "FLUX (NFE=50)",
+        "FLUX (NFE=7)",
+        "Figure S6. Qualitative comparison of images generated by baseline methods and RALU on FLUX for 7× speedups. Best viewed in zoom."
+      ]
+    },
+    {
+      "page": 23,
+      "snippets": [
+        "Figure S10. 48 uncurated images generated by RALU on FLUX, 5×speedup."
+      ]
+    },
+    {
+      "page": 24,
+      "snippets": [
+        "Figure S11. 48 uncurated images generated by RALU on FLUX, 5×speedup."
+      ]
+    },
+    {
+      "page": 25,
+      "snippets": [
+        "Figure S12. 48 uncurated images generated by RALU on FLUX, 7×speedup."
+      ]
+    },
+    {
+      "page": 26,
+      "snippets": [
+        "Figure S13. 48 uncurated images generated by RALU on FLUX, 7×speedup."
+      ]
+    },
+    {
+      "page": 27,
+      "snippets": [
+        "[1] Black Forest Labs. FLUX. https://github.com/",
+        "black-forest-labs/flux, 2024. 1, 5, 6, 11"
+      ]
+    }
+  ],
+  "figure_candidates": [
+    {
+      "page": 1,
+      "caption": "Figure 1. Generated 1024×1024 images using acceleration meth-"
+    },
+    {
+      "page": 3,
+      "caption": "Figure 2. (a) An example of aliasing artifacts generated using"
+    },
+    {
+      "page": 3,
+      "caption": "Figure 3. (a) An example of mismatching artifacts generated using"
+    },
+    {
+      "page": 4,
+      "caption": "Figure 4. Overview of the proposed RALU framework. RALU consists of three different resolution processes: (1) low-resolution sampling"
+    },
+    {
+      "page": 5,
+      "caption": "Figure 5. Resolving artifacts from na¨ıve latent upsampling. Alias-"
+    },
+    {
+      "page": 7,
+      "caption": "Figure 6. Qualitative comparison of images generated by baseline methods and RALU on FLUX and SD3 under various speedups. For"
+    },
+    {
+      "page": 7,
+      "caption": "Fig. 7 shows the artifact ratio according to computational"
+    },
+    {
+      "page": 8,
+      "caption": "Figure 7. RALU has a drastically lower artifact ratio than"
+    },
+    {
+      "page": 8,
+      "caption": "Figure 8. Trade-off between (a) ImageReward and (b) CLIP-IQA against"
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 6,
+      "caption": "Table 1. Quantitative comparisons of RALU with the baselines on (Top) FLUX.1-dev [1] (FLUX) and (Bottom) Stable Diffusion 3 [12]"
+    },
+    {
+      "page": 6,
+      "caption": "Table 2. (Top) Quantitative results of integrating temporal acceleration methods into RALU under a 5× speedup setting on FLUX. (Bottom)"
+    },
+    {
+      "page": 8,
+      "caption": "Table 3. Effect of NT-Matching. Results are on the FLUX 7 ×"
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      1,
+      2,
+      4,
+      7,
+      8,
+      9,
+      11,
+      12,
+      13,
+      14,
+      27
+    ],
+    "super_resolution": [
+      1,
+      2,
+      27,
+      29
+    ],
+    "efficiency": [
+      1,
+      2,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      14,
+      15,
+      16,
+      18,
+      19,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28
+    ],
+    "ablation": [
+      8,
+      12
+    ],
+    "limitations": [
+      11,
+      14,
+      27,
+      28
+    ]
+  },
+  "key": "mixed_resolution_latent",
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\text\\mixed_resolution_latent.txt"
+}

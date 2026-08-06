@@ -11,9 +11,13 @@
     "local_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\01_foundations\\dit_2212.09748.pdf",
     "download_source": "https://arxiv.org/pdf/2212.09748",
     "reused_local": false,
-    "retrieved_at": "2026-08-03T12:41:00.323863+00:00",
-    "valid": false,
-    "reason": "download_failed:<urlopen error [Errno 11001] getaddrinfo failed>"
+    "retrieved_at": "2026-08-04T12:03:29.080623+00:00",
+    "valid": true,
+    "reason": "ok",
+    "size": 43824062,
+    "page_count": 25,
+    "page_count_backend": "pdfinfo",
+    "sha256": "5fbb0ec35e3ae76826240171ca63ed4c27de6cb43180367453019e9d28a8b076"
   },
   {
     "key": "rectified_flow",
@@ -27,14 +31,13 @@
     "local_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\01_foundations\\rectified_flow_2209.03003.pdf",
     "download_source": "https://arxiv.org/pdf/2209.03003",
     "reused_local": false,
-    "retrieved_at": "2026-08-04T07:38:27.367214+00:00",
+    "retrieved_at": "2026-08-04T12:03:30.143564+00:00",
     "valid": true,
     "reason": "ok",
     "size": 18024983,
     "page_count": 41,
     "page_count_backend": "pdfinfo",
-    "sha256": "d81790cb6988ef480002adcc84000d4f44855b11fb868001fd53aad133bc3a74",
-    "transport": "primary"
+    "sha256": "d81790cb6988ef480002adcc84000d4f44855b11fb868001fd53aad133bc3a74"
   },
   {
     "key": "flow_matching",
@@ -48,7 +51,7 @@
     "local_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\01_foundations\\flow_matching_2210.02747.pdf",
     "download_source": "https://arxiv.org/pdf/2210.02747",
     "reused_local": false,
-    "retrieved_at": "2026-08-04T11:49:12.835857+00:00",
+    "retrieved_at": "2026-08-04T12:03:31.204969+00:00",
     "valid": true,
     "reason": "ok",
     "size": 25147129,
@@ -68,9 +71,14 @@
     "local_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\01_foundations\\ot_cfm_2302.00482.pdf",
     "download_source": "https://arxiv.org/pdf/2302.00482",
     "reused_local": false,
-    "retrieved_at": "2026-08-03T12:41:12.335276+00:00",
-    "valid": false,
-    "reason": "download_failed:<urlopen error [Errno 11001] getaddrinfo failed>"
+    "retrieved_at": "2026-08-04T12:07:37.722731+00:00",
+    "valid": true,
+    "reason": "ok",
+    "size": 9677988,
+    "page_count": 34,
+    "page_count_backend": "pdfinfo",
+    "sha256": "c98a4834abffe8a5c4e27c13c36a10d83d38e8780c98c3891150c4e028094d0a",
+    "transport": "primary"
   },
   {
     "key": "sd3_mmdit",
@@ -84,9 +92,14 @@
     "local_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\01_foundations\\sd3_mmdit_2403.03206.pdf",
     "download_source": "https://arxiv.org/pdf/2403.03206",
     "reused_local": false,
-    "retrieved_at": "2026-08-03T12:41:16.339612+00:00",
-    "valid": false,
-    "reason": "download_failed:<urlopen error [Errno 11001] getaddrinfo failed>"
+    "retrieved_at": "2026-08-04T12:23:23.353827+00:00",
+    "valid": true,
+    "reason": "ok",
+    "size": 33973124,
+    "page_count": 28,
+    "page_count_backend": "pdfinfo",
+    "sha256": "7ba352b6ded12859cda4d47df203d5fe38ee884c45f3b67ff227549d82db1487",
+    "transport": "primary"
   },
   {
     "key": "flux_kontext",
@@ -100,9 +113,14 @@
     "local_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\02_flux_foundation\\flux_kontext_2506.15742.pdf",
     "download_source": "https://arxiv.org/pdf/2506.15742",
     "reused_local": false,
-    "retrieved_at": "2026-08-03T12:41:20.343767+00:00",
-    "valid": false,
-    "reason": "download_failed:<urlopen error [Errno 11001] getaddrinfo failed>"
+    "retrieved_at": "2026-08-04T12:27:47.751169+00:00",
+    "valid": true,
+    "reason": "ok",
+    "size": 16533584,
+    "page_count": 19,
+    "page_count_backend": "pdfinfo",
+    "sha256": "86c8acc1ca714fa463f02315d849a81b5d746c4da4ecb50743b9d672311f916b",
+    "transport": "primary"
   },
   {
     "key": "fluxsr",
@@ -116,9 +134,14 @@
     "local_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\03_super_resolution\\fluxsr_2502.01993.pdf",
     "download_source": "https://arxiv.org/pdf/2502.01993",
     "reused_local": false,
-    "retrieved_at": "2026-08-03T12:41:24.347801+00:00",
-    "valid": false,
-    "reason": "download_failed:<urlopen error [Errno 11001] getaddrinfo failed>"
+    "retrieved_at": "2026-08-04T12:32:59.488477+00:00",
+    "valid": true,
+    "reason": "ok",
+    "size": 8376248,
+    "page_count": 10,
+    "page_count_backend": "pdfinfo",
+    "sha256": "6f274a88eb29654fa9b2bfb61875188cd33562a1dcc95315d18dec1f8672191f",
+    "transport": "primary"
   },
   {
     "key": "dreamsr",
@@ -130,13 +153,14 @@
     "source_url": "https://arxiv.org/abs/2605.15682",
     "pdf_url": "https://arxiv.org/pdf/2605.15682",
     "local_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\03_super_resolution\\dreamsr_2605.15682.pdf",
-    "download_source": "D:\\Repository\\ReadPaper\\outputs\\sr_insight_report\\verified_14_paper_cases\\pdfs\\bytedance_dreamsr.pdf",
-    "reused_local": true,
-    "retrieved_at": "2026-08-03T12:41:25.383555+00:00",
+    "download_source": "https://arxiv.org/pdf/2605.15682",
+    "reused_local": false,
+    "retrieved_at": "2026-08-04T12:33:00.543179+00:00",
     "valid": true,
     "reason": "ok",
     "size": 5702198,
     "page_count": 12,
+    "page_count_backend": "pdfinfo",
     "sha256": "48f6ae4ce01ded6c0f67bb0f59250ba332b065b2b44eb60ea6e007edb2fc8428"
   },
   {
@@ -151,9 +175,14 @@
     "local_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\03_super_resolution\\op4ksr_2605.13457.pdf",
     "download_source": "https://arxiv.org/pdf/2605.13457",
     "reused_local": false,
-    "retrieved_at": "2026-08-03T12:41:29.387105+00:00",
-    "valid": false,
-    "reason": "download_failed:<urlopen error [Errno 11001] getaddrinfo failed>"
+    "retrieved_at": "2026-08-04T12:34:40.930689+00:00",
+    "valid": true,
+    "reason": "ok",
+    "size": 2707681,
+    "page_count": 20,
+    "page_count_backend": "pdfinfo",
+    "sha256": "d4c07b328290c91e6aa26b7663ac8d0b5201c258c57857a61ab38b4ae2dcea3a",
+    "transport": "primary"
   },
   {
     "key": "foa_sr",
@@ -167,9 +196,14 @@
     "local_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\03_super_resolution\\foa_sr_2606.10275.pdf",
     "download_source": "https://arxiv.org/pdf/2606.10275",
     "reused_local": false,
-    "retrieved_at": "2026-08-03T12:41:33.390120+00:00",
-    "valid": false,
-    "reason": "download_failed:<urlopen error [Errno 11001] getaddrinfo failed>"
+    "retrieved_at": "2026-08-04T12:37:44.480126+00:00",
+    "valid": true,
+    "reason": "ok",
+    "size": 8145486,
+    "page_count": 17,
+    "page_count_backend": "pdfinfo",
+    "sha256": "e0d800ad4cd89b1e923ebe7f7226949f3039a1d4ea712c0a624405cfdab43576",
+    "transport": "primary"
   },
   {
     "key": "acquire_adapt_fluxir",
@@ -183,9 +217,14 @@
     "local_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\04_image_restoration\\acquire_adapt_fluxir_2504.15159.pdf",
     "download_source": "https://arxiv.org/pdf/2504.15159",
     "reused_local": false,
-    "retrieved_at": "2026-08-03T12:41:37.394150+00:00",
-    "valid": false,
-    "reason": "download_failed:<urlopen error [Errno 11001] getaddrinfo failed>"
+    "retrieved_at": "2026-08-04T12:44:43.743693+00:00",
+    "valid": true,
+    "reason": "ok",
+    "size": 16230484,
+    "page_count": 26,
+    "page_count_backend": "pdfinfo",
+    "sha256": "5bfe2a9ff3f343e62d710e75872ebcfb5545d8e608da6dcb7bd3d52a9a85d25d",
+    "transport": "primary"
   },
   {
     "key": "lucidflux",
@@ -199,9 +238,14 @@
     "local_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\04_image_restoration\\lucidflux_2509.22414.pdf",
     "download_source": "https://arxiv.org/pdf/2509.22414",
     "reused_local": false,
-    "retrieved_at": "2026-08-03T12:41:41.397406+00:00",
-    "valid": false,
-    "reason": "download_failed:<urlopen error [Errno 11001] getaddrinfo failed>"
+    "retrieved_at": "2026-08-04T12:58:14.980634+00:00",
+    "valid": true,
+    "reason": "ok",
+    "size": 43018401,
+    "page_count": 28,
+    "page_count_backend": "pdfinfo",
+    "sha256": "1dcdf43308c8b6b87deb8483d0de3b082204e593efb096ba09723023b7919a22",
+    "transport": "primary"
   },
   {
     "key": "resflow_tuner",
@@ -215,9 +259,14 @@
     "local_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\04_image_restoration\\resflow_tuner_2603.22027.pdf",
     "download_source": "https://arxiv.org/pdf/2603.22027",
     "reused_local": false,
-    "retrieved_at": "2026-08-03T12:41:45.400403+00:00",
-    "valid": false,
-    "reason": "download_failed:<urlopen error [Errno 11001] getaddrinfo failed>"
+    "retrieved_at": "2026-08-04T13:01:01.967042+00:00",
+    "valid": true,
+    "reason": "ok",
+    "size": 6869814,
+    "page_count": 27,
+    "page_count_backend": "pdfinfo",
+    "sha256": "0ab85ac63e928e0fb5f082ad4df273fef778d1548ead73d538765ac5b3ab9071",
+    "transport": "primary"
   },
   {
     "key": "edit2restore",
@@ -231,9 +280,14 @@
     "local_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\04_image_restoration\\edit2restore_2601.03391.pdf",
     "download_source": "https://arxiv.org/pdf/2601.03391",
     "reused_local": false,
-    "retrieved_at": "2026-08-03T12:41:49.404403+00:00",
-    "valid": false,
-    "reason": "download_failed:<urlopen error [Errno 11001] getaddrinfo failed>"
+    "retrieved_at": "2026-08-04T13:21:50.705091+00:00",
+    "valid": true,
+    "reason": "ok",
+    "size": 11368204,
+    "page_count": 15,
+    "page_count_backend": "pdfinfo",
+    "sha256": "573301e16d3f3521bc481019bebeacc8538125f34a3160f139fbb0b965a93d52",
+    "transport": "primary"
   },
   {
     "key": "bitnet_flux",
@@ -247,9 +301,14 @@
     "local_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\05_efficiency\\bitnet_flux_2412.18653.pdf",
     "download_source": "https://arxiv.org/pdf/2412.18653",
     "reused_local": false,
-    "retrieved_at": "2026-08-03T12:41:53.407224+00:00",
-    "valid": false,
-    "reason": "download_failed:<urlopen error [Errno 11001] getaddrinfo failed>"
+    "retrieved_at": "2026-08-04T13:24:56.102681+00:00",
+    "valid": true,
+    "reason": "ok",
+    "size": 8450786,
+    "page_count": 8,
+    "page_count_backend": "pdfinfo",
+    "sha256": "ab3daf2303a2b73de15e10a79460ff1a7534ec5812329788d0d61b18bfe9cebb",
+    "transport": "primary"
   },
   {
     "key": "imax",
@@ -263,9 +322,14 @@
     "local_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\05_efficiency\\imax_2410.07536.pdf",
     "download_source": "https://arxiv.org/pdf/2410.07536",
     "reused_local": false,
-    "retrieved_at": "2026-08-03T12:41:57.410439+00:00",
-    "valid": false,
-    "reason": "download_failed:<urlopen error [Errno 11001] getaddrinfo failed>"
+    "retrieved_at": "2026-08-04T15:00:44.536348+00:00",
+    "valid": true,
+    "reason": "ok",
+    "size": 35221063,
+    "page_count": 18,
+    "page_count_backend": "pdfinfo",
+    "sha256": "895cec888901c1207147111994d717bf4f881677f4dbba7741114f30938cb791",
+    "transport": "primary"
   },
   {
     "key": "chipmunk",
@@ -279,9 +343,14 @@
     "local_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\05_efficiency\\chipmunk_2506.03275.pdf",
     "download_source": "https://arxiv.org/pdf/2506.03275",
     "reused_local": false,
-    "retrieved_at": "2026-08-03T12:42:01.413544+00:00",
-    "valid": false,
-    "reason": "download_failed:<urlopen error [Errno 11001] getaddrinfo failed>"
+    "retrieved_at": "2026-08-04T14:35:01.262070+00:00",
+    "valid": true,
+    "reason": "ok",
+    "size": 44214029,
+    "page_count": 32,
+    "page_count_backend": "pdfinfo",
+    "sha256": "0992091901724307a134b05b1bc96af00be8554f5cb8d77f44682f9d3f9f48c5",
+    "transport": "primary"
   },
   {
     "key": "hicache",
@@ -295,9 +364,14 @@
     "local_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\05_efficiency\\hicache_2508.16984.pdf",
     "download_source": "https://arxiv.org/pdf/2508.16984",
     "reused_local": false,
-    "retrieved_at": "2026-08-03T12:42:05.417765+00:00",
-    "valid": false,
-    "reason": "download_failed:<urlopen error [Errno 11001] getaddrinfo failed>"
+    "retrieved_at": "2026-08-04T14:40:49.020983+00:00",
+    "valid": true,
+    "reason": "ok",
+    "size": 10054658,
+    "page_count": 27,
+    "page_count_backend": "pdfinfo",
+    "sha256": "57c35de4aeedd2eeb1fa50637cd70811d3266b494a9b0e8e42e83c4f40d8fa63",
+    "transport": "primary"
   },
   {
     "key": "mixed_resolution_latent",
@@ -311,8 +385,13 @@
     "local_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\05_efficiency\\mixed_resolution_latent_2507.08422.pdf",
     "download_source": "https://arxiv.org/pdf/2507.08422",
     "reused_local": false,
-    "retrieved_at": "2026-08-03T12:42:09.421707+00:00",
-    "valid": false,
-    "reason": "download_failed:<urlopen error [Errno 11001] getaddrinfo failed>"
+    "retrieved_at": "2026-08-04T14:47:46.424102+00:00",
+    "valid": true,
+    "reason": "ok",
+    "size": 19486825,
+    "page_count": 29,
+    "page_count_backend": "pdfinfo",
+    "sha256": "e57491a4e06689a440986b5aa9e79f8678962f3f34fe399d968dac15f43f73e3",
+    "transport": "primary"
   }
 ]

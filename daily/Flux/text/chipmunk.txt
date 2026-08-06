@@ -1,0 +1,1307 @@
+=== PAGE 1 ===
+arXiv:2506.03275v1  [cs.CV]  3 Jun 2025
+Chipmunk: Training-Free Acceleration of Diffusion
+Transformers with Dynamic Column-Sparse Deltas
+Austin Silveria
+University of California, San Diego
+Together AI
+austin@together.ai
+Soham V . Govande
+Stanford University
+govande@stanford.edu
+Daniel Y. Fu
+University of California, San Diego
+Together AI
+danfu@ucsd.edu
+Abstract
+Diffusion Transformers (DiTs) have achieved state-of-the-art performance in high-
+quality image and video generation but incur substantial compute cost at inference. A
+common observation is that DiT latent noise vectors change slowly across inference
+steps, which suggests that the DiT compute may be redundant across steps. In this
+paper, we aim to speed up inference by reducing this redundancy, without additional
+training. We first study how activations change between steps in two state-of-the-art
+open-source DiTs. We find that just 5-25% of the values in attention and MLP
+explain 70-90% of the change in activations across steps. This finding motivates our
+approach, Chipmunk, which uses dynamic sparsity at inference time to recompute
+only the fastest-changing intermediate activations, while caching the rest. Dynamic
+sparsity introduces two systems challenges: (1) sparse attention and MLP operations
+tend to underutilize GPU tensor cores; and (2) computing dynamic sparsity patterns
+at runtime and caching activations both introduce overhead. To address these chal-
+lenges, Chipmunk first uses a voxel-based reordering of input tokens to introduce
+column-wise sparsity. We implement column-sparse kernels utilizing efficient sparse
+gathers from global to shared GPU memory, achieving a 9.3x speedup at 93% spar-
+sity compared to highly-optimized dense baselines. Second, Chipmunk overlaps the
+computation of sparsity patterns and cache updates with other parts of the computa-
+tion (e.g., second layer of the MLP) to hide the extra latency. Chipmunk achieves up
+to 2.16x speedup on HunyuanVideo and 1.41x on FLUX.1-dev without compromis-
+ing generation quality. Furthermore, we show that Chipmunk can be stacked on top
+of full step caching, achieving a 3.72x speedup on HunyuanVideo, a 2.67x speedup
+on W AN2.1, and a 2.25x speedup on FLUX.1-dev with minimal quality impact.
+1 Introduction
+Diffusion Transformers (DiTs) have emerged as state-of-the-art (SOTA) models for generating
+high-quality images and videos [3, 16, 21, 22, 34, 62]. However, DiTs are increasingly constrained
+by their substantial computational requirements as sequence lengths and parameters scale up
+[44, 54]. For example, HunyuanVideo, with a 118k sequence length and 13B parameters, requires
+18 minutes to generate a 5s video on an H100 GPU [ 21]. In particular, two major redundancies
+contribute significantly to unnecessary computation: the slow-changing latent vector (DiT model
+input) [32, 44, 56] across generation steps, and the inherent sparsity in DiT activations [24, 27].
+Preprint. Under review.
+
+=== PAGE 2 ===
+Figure 1: Left: Chipmunk uses intermediate activation sparsity to recompute only the fastest changing
+vectors in the output linear combinations of attention and MLPs. Middle: Column sparse kernels
+achieve low approximation error and hardware-efficiency by packing dense SRAM tiles for peak
+tensor core utilization. Right: Extra operations required to compute dynamic sparse deltas, such as
+sparsity pattern identification and cache updates, are fused with other operations to minimize overhead.
+Existing approaches leverage these redundancies by caching per-step [26], per-layer [50], or per-token
+[64] outputs, or by computing sparse attention with static local window techniques [56, 61]. In this
+paper, we ask whether we can achieve greater training-free acceleration by exploiting this redundancy
+dynamically, in themost granular manner possible.
+We begin with an initial quantitative analysis of activation patterns in two state-of-the-art open source
+DiTs (HunyuanVideo and FLUX.1-dev). We find that over 90% of the variance in cross-step attention
+activation changes is explained by only 5-25% of the intermediate activation values (Table 1). That
+is, recomputing only the top 5-25% of attention interactions and reusing the rest from the previous step
+captures over 90% of the cross-step change. For MLPs, we find 15-25% of the intermediate activation
+values explain over 70% of the variance (Table 1).
+Chipmunk. This finding motivates our method, Chipmunk, which caches intermediate activations
+and uses dynamic sparsity to recompute only the fastest-changing activations. We exploit a common
+computational structure of attention and MLPs– act(a @ b) @ c–both using a back-to-back matrix
+multiply to produce a linear combination of vectors in c (Section 2). Sparsity on the intermediate
+activations of both operations corresponds one-to-one with these individual vector contributions.
+Specifically, Chipmunk uses the magnitudes of intermediate activations to determine which vectors
+of c to recompute at each step, and uses cached values of the rest of the vectors from the previous step.
+For attention, Chipmunk chooses the top-kcolumn-chunks of the attention matrix to recompute, and
+for MLP, Chipmunk computes an approximate difference against cached activations to identify the
+top-k column-chunks to recompute. This can be interpreted intuitively as computing sparse deviations
+from straight line paths in latent space (Fig. 1, left), where the recomputed vectors are dynamically
+allocated more sequential computation steps.
+Systems Challenges. Dynamic sparsity introduces two systems challenges: (1) Sparse attention and
+MLP operations tend to underutilize tensor cores, which can make it challenging to achieve wall-clock
+speedup relative to dense baselines. (2) Computing dynamic sparsity patterns at runtime and caching
+activations introduces additional overhead.
+To address these challenges, Chipmunk uses a voxel-based ordering of the pixels (Fig. 2, left) to regroup
+spatiotemporally local tokens into column-wise sparsity patterns (Fig. 1, middle). In particular, a
+contiguous group of tokens activates thesame sparse set of individual keys/values (attention) or weights
+(MLPs). This corresponds to selecting columns ofK T /W1 and rows ofV /W2. This column-wise spar-
+sity pattern admits efficient attention and MLP kernels using sparse gathers from GPU global memory
+(HBM) to packed dense tiles in GPU shared memory (SRAM), which can then fully utilize GPU tensor
+cores (Fig. 1, middle) [6, 23, 33, 55]. To reduce the overhead of computing dynamic sparsity patterns
+and maintaining an activation cache, Chipmunk uses custom kernels to overlap sparsity pattern iden-
+tification and cache I/O operations with other computations (Fig. 1, right). Chipmunk’s column-sparse
+attention and MLP kernels scale linearly with sparsity with little overhead, achieving nearly-optimal
+2
+
+=== PAGE 3 ===
+speedup while providing 2x less approximation error than block sparsity. At 93% sparsity, our column-
+sparse attention kernel is 9.3x faster than FlashAttention-3 in the ThunderKittens library [38, 43].
+Evaluation. We evaluate Chipmunk on state-of-the-art text-to-video generation models (Hunyuan-
+Video and W AN2.1) and one state-of-the-art text-to-image generation model (FLUX.1-dev).
+• Quality. Chipmunk attains up to 92% attention sparsity across 44 of 50 generation steps on Hunyuan-
+Video with minimal impact to VBench scores. On FLUX.1-dev, Chipmunk achieves 84% attention
+sparsity and 70% MLP sparsity for 44 of 50 steps without affecting ImageReward and CLIP scores.
+• Fast Generation. Chipmunk alone achieves end-to-end generation speedups of 2.16x on
+HunyuanVideo and 1.41x on FLUX.1-dev.
+• Stacked Acceleration. Chipmunk natively stacks with existing caching strategies, such as step
+caching, leading to further acceleration—achieving speedups of 3.72x on HunyuanVideo, 2.67x
+on W AN2.1, and 2.25x on FLUX.1-dev.
+2 Background
+In this section, we discuss relevant background material on Diffusion Transformers and GPU
+architecture. Two key takeaways are that (1) multi-step DiT inference computes paths in latent space
+from noise to output and (2) GPU kernel efficiency critically depends on saturating tensor cores with
+large block matrix multiplications.
+2.1 Diffusion Transformers (DiTs)
+We briefly review diffusion models as learning to reverse a forward noising process, DiTs as
+parameterizing this reverse denoising process with transformers [ 48], and the relevant shared
+computational form of attention and MLPs in transformers.
+Diffusion models [40] reconstruct data from noise. Formally, a forward diffusion process defines
+a Markov chainq(zt | zt−1) that gradually perturbs dataz0 into noise zT . A neural network—denoted
+ϵθ(zt,t)—is trained to approximate the reverse denoising process, learning to generate data with an
+inverse mapping that iteratively reconstructsz0 from zT .
+DiTs compute per-token paths in latent space. DiTs [34] extend Vision Transformers [ 9] to
+diffusion image and video generation by applying timestep and prompt-conditioned modulation layers
+to attention and multilayer perceptron1 (MLP) outputs. The concrete representation denoised by DiTs
+is the same as language model transformers: A set of tokens, each projected from a patch of pixels
+to a high-dimensional vector representation (the latent vector) [34]. In each denoising step, the DiT
+takes this representation as input and computes a residual.
+Multi-step inference paths change direction at each step. In a single-step inference, the DiT
+computes one forward pass, adding its output to the latent vector before decoding into pixel space—a
+straight-line path from initial noise to output. Multiple steps increase expressivity by allowing each
+computation to depend on previous outputs, causing latent paths to change direction (Fig. 1, left).
+However, this sequential dependency substantially increases computational costs due to the multiple
+forward passes of the model. Prior work has found that even with models trained for single-step
+denoising, generations can achieve better quality with multiple inference steps [11, 42].
+Attention and MLPs share a computational form of act(a @ b) @ c. Recalling the equations
+for attention, softmax(q @ kT ) @v, and MLP,gelu(x @ W1) @W2, we see that both operations use
+a non-linearity to compute the scalar coefficients for a linear combination of vectors. Each scalar in
+the intermediate matrix scales one output vector. In attention, the vectors are dynamic (v is projected
+from the token representation), and in MLP, the vectors are static (rows of theW2).
+2.2 GPU Architecture
+Here, we cover the most relevant aspects of GPU architecture for attention and MLPs, the "workhorse"
+operations of DiTs. Modern GPUs parallelize these computations by dividing the work among a
+1In this paper, we use the term "MLP" to refer to the two-layer perceptrons used in every major DiT architecture
+even though technically, MLPs can have more than two layers. We also assume an activation function of GeLU,
+but this can be replaced with any arbitrary function. Finally, for simplicity in formulas in the paper, we omit bias
+terms, but our kernelsdo have full support for them.
+3
+
+=== PAGE 4 ===
+Figure 2: Left: Chipmunk reorders tokens such that column sparse patterns route voxels (3D cubes of
+pixels) to the same set of activated keys/values (attention) or model weights (columns/rows ofW1/W2
+in MLPs). Right: We plot the unexplained variance in cross-step activation changes (1 -R2). Relative
+to dynamic block sparsity, dynamic column sparsity gives a 2x reduction in unexplained variance
+across both attention and MLPs. V oxel order reduces unexplained variance in attention but has nearly
+zero impact in MLP (overlapping with the blue line).
+number of independent Streaming Multiprocessors (e.g., 132 SMs on an H100), each equipped
+with compute units and high-speed local memory (SRAM) [33, 43]. At a high level, attention and
+MLP kernels both compute two tiled matrix multiplications (GEMMs). To better understand these
+operations, we will describe dataflow for a tiled GEMM kernelC = A@ B on a modern GPU [47]: (i)
+load chunks of contiguous rows inA and columns in B from global High-Bandwidth Memory (HBM)
+to SRAM, (ii) compute matrix multiplies by feeding these blocks into tensor cores, and (iii) write
+the resulting output block of C to HBM. Both FlashAttention and high-performance GEMMs (e.g.
+cuBLAS) partition work into such tiles, fusing activation functions such as GELU and softmax [8, 43].
+Notably, FlashAttention also fuses the second GEMM into the same kernel to avoid I/O costs [8].
+Maximizing tensor core utilization is crucial to achieving peak computational performance. In
+modern GPUs, the tensor core can launch block matrix multiplies on tiles in SRAM as large as 64x256,
+and microbenchmarks show that at least 64x64 is needed to achieve peak throughput [31]. Thus, to
+keep a kernel competitive, it is critical to keep tensor cores well fed with a constant pipeline of data
+resident in SRAM [43].
+3 Method
+To investigate the interaction between slow-changing latent noise vectors [32] and naturally sparse
+activations [24, 27], we first quantify the amount of cross-step change in attention and MLP outputs
+that can be captured by a sparse recomputation. This analysis motivates Chipmunk’s unified strategy of
+caching and fine-grained sparsity across attention and MLP layers. We then demonstrate that dynamic,
+fine-grained column sparsity is both hardware-efficient and achieves low approximation error. Finally,
+we describe Chipmunk’s end-to-end algorithm, which interleaves dense and sparse computation steps
+and natively stacks with coarser caching methods (e.g., per-token, per-step).
+3.1 Motivation: Sparse Cross-Step Changes in Attention and MLPs
+Consider an arbitrary attention or MLP layer, denoting step indices1 and 2 as previous and current
+steps, respectively. For attention, define queries (qi), keys (ki), and values (vi); for MLP layers, define
+input activations (xi), and weight matrices ( W1, W2). With a mask M with entries in {0,1} that
+identifies intermediate activations exhibiting the largest cross-step changes, the outputs at the current
+step can be approximated by recomputing only the subset of most significantly changing activations.
+This involves recomputing the columns ofkT or W1 and corresponding rows of v or W2 identified
+by M, while reusing the unchanged activations from the previous step:
+oattn
+2 ≈oattn
+1 −[softmax(q1 @ kT
+1 )∗ M]@ v1 +[softmax(q2 @ kT
+2 )∗ M]@ v2 (1)
+omlp
+2 ≈omlp
+1 −[ gelu(x1 @ W1)∗M]@ W2+[ gelu(x2 @ W1)∗M]@ W2 (2)
+The empirical results summarized in Table 1 show that recomputing just a small fraction of the fastest
+changing activations captures a substantial portion of the true cross-step activation change. We measure
+R2(odense
+2 −odense
+1 ,oapprox
+2 −odense
+1 ) averaged across steps, layers, tokens, and 25 random prompts.
+4
+
+=== PAGE 5 ===
+Table 1: R2 scores between true cross-step activation change and approximated change.
+Attention Active Explained Change MLP Active Explained Change
+HunyuanVideo 5% 92.4% 25% 70.8%
+FLUX.1-dev 25% 90.7% 15% 69.0%
+Figure 3: Left, Middle: Sparse kernel runtime scales linearly with sparsity. Column sparsity is
+competitive with block sparsity.Right: FLOP breakdown by model at Chipmunk hyperparameters.
+These findings motivate Chipmunk’s caching approach (Fig. 1, left), which recomputes only the fastest
+changing vectors in the output linear combinations of attention and MLP layers, while reusing the
+remaining cached vectors. As a more general motivation beyond this specific context, we analyze the
+residual structure inherent in multi-step transformer inference more broadly. As shown in Appendix
+A, the final latent space paths produced by rectified flow DiTs can be decomposed into distinct,
+individually identifiable scaled vectors output by attention and MLP layers. Thus, the strategy of
+dynamically allocating more sequential steps to the fastest changing individual vectors can potentially
+apply to various multi-step transformer settings—such as recurrent transformer architectures [ 13]
+or autoregressive models decoding language [48] or videos [37].
+3.2 Hardware-Aware Column-Sparse Deltas in Attention and MLPs
+Recomputing individual vectors output by attention and MLPs corresponds to [1, 1] unstructured
+sparsity on the intermediate activations, which is not efficient on modern GPUs. To remedy this, first,
+we describe how hardware-aware column-sparse recomputation achieves a strong balance of reduced
+approximation error and hardware efficiency. We then detail optimizations such as voxel-based token
+reordering and efficient sparse memory operations.
+3.2.1 Tile Packing: Mapping Sparse Computation to a Compacted Dense Computation
+Chipmunk uses column sparse patterns on intermediate activations [ 6, 23, 55], where a group of
+contiguous tokens only activates a certain set of individual keys/values (attention) or neurons (MLPs),
+to achieve low approximation error while remaining hardware-efficient.
+Table 2: Comparing hardware efficiency and approximation error of block sparsity vs. column sparsity.
+Approximation error is measured as unexplained variance as described in 3.1. Runtime is measured
+as a % relative to dense computation at HunyuanVideo sequence length (118k).
+Attention MLP
+Sparsity Error Runtime Sparsity Error Runtime
+[192, 128] Block 95% 17.4% 5.1% 75% 61.3% 27.1%
+[192, 1] Column 95% 8.5% 8.5% 75% 29.1% 27.7%
+Block sparsity is efficient but has a higher approximation error than column sparsity. As
+described in Section 2, GPU kernels achieve peak efficiency by computing large block matrix
+multiplications. Block sparse kernels maintain hardware-efficiency because the outer loop simply
+skips certain tiles while leaving inner logic unchanged [47]. Block sparsity achieves near-optimal
+performance (Fig. 3, purple lines), but suffers from 2x higher approximation error than finer-grained
+column sparsity patterns (Table 2, Fig. 2).
+Column sparsity can be made efficient with sparse gathers from HBM to SRAM. We implement
+column-sparse attention and MLP kernels to achieve 2x less approximation error than block sparsity
+5
+
+=== PAGE 6 ===
+(Fig. 2, purple & cyan lines) while maintaining competitive speedups (Table 2, Fig. 3). Traditional
+high-performance dense attention and MLP kernels, such as FlashAttention-3 and cuBLAS GEMMs,
+use the following structure: (1) load dense 2D tensors from HBM to SRAM, (2) compute the large
+matrix multiplications with tensor core instructions, and (3) store results back to HBM [38, 43]. To
+maintain tensor core utilization with column sparsity, we modify step (1) to pack sparse keys/values
+from non-contiguous rows in global memory into a dense tile in shared memory (Fig. 1) [6, 23, 55].
+Tangentially, Chipmunk’s sparse kernels can take on any static sparsity pattern (e.g. Sliding Tile
+Attention [61], DiTFastAttn [56]) by simply passing in a particular set of indices. For low-level kernel
+optimizations, see Appendix B.
+Column sparsity routes a chunk of tokens to a set of individual key/values (attention) or neurons
+(MLP). Given an arbitrary attention or MLP computation, column sparse patterns mask intermediate
+activations with granularity [C,1] [6, 23, 55]. This means that, given a chunk of contiguous tokens
+of size C, the chunk only activates a certain set of individual keys/values (attention) or neurons (MLPs).
+This is in contrast to MoE models, which route individual tokens to chunks of contiguous MLP neurons
+(experts) [18]. Column sparsity is parameterized by the chunk sizeC, and on H100 GPUs, we find
+C =192 is efficient.
+Reordering tokens into video voxel/image patch chunks improves attention quality. By default,
+contiguous tokens follow raster order (left-to-right, top-down, sequential frames). However, small
+video voxels (3D cubes of pixels) or image patches have similar color and brightness, and we expect
+them to exhibit similar interactions with other tokens. Thus, we reorder tokens at the beginning of
+the diffusion process such that each contiguous token chunk, which is routed to the same set of sparse
+indices, corresponds to a voxel/patch (Alg. 1). We find this to improve attention approximation quality
+by 1.2x (Fig. 2).
+Method Speedup
+Attention & unfused column-sum 1.0x
+→ Fused Kernel 3.26x
+MLP & unfused cache operations 1.0x
+→ Fused Kernel 1.41x
+Attention mask to indices conversion (unfused) 1.0x
+→ Fused Kernel 1.39x
+PyTorch top-k 1.0x
+→ Approximate top-k 3.42x
+Table 3: Kernel optimizations applied to Chipmunk’s end-to-end algorithm measured on FLUX.1-dev
+shapes on H100-SXM5 GPUs with CUDA 12.8 and PyTorch 2.5.0.
+3.3 Chipmunk
+Across a full DiT generation, Chipmunk accelerates Diffusion Transformer (DiT) inference by interleav-
+ing dense and sparse-delta steps to exploit the slow changing activations across steps, and natively stacks
+with coarser forms of caching (e.g., per-step [26], per-layer [50], per-token [64]). Dense steps refresh
+cached activations and identify dynamic sparsity patterns, while sparse steps efficiently compute sparse
+activation deltas against cached activations. Structured column-chunk sparsity patterns are applied to
+the intermediate activations of both attention and MLP to enable hardware-efficient sparse algorithms.
+To improve this column-sparse approximation quality, Chipmunk applies a reordering to tokens at the
+beginning of the diffusion process such that each contiguous chunk ofc tokens corresponds to a 3D
+video voxel (Alg. 1). All tokens in one voxel will therefore share the same sparsity pattern in later
+steps. The inverse reordering is then applied before the final decoding to pixel space. Optimized fused
+kernels minimize the overhead of computing dynamic sparse activation deltas, and their performance
+impacts are summarized in Table 3. In the discussion of this section, we describe a reference-correct
+implementation of Chipmunk, with kernel optimizations further detailed in Appendix B.
+3.3.1 Chipmunk Attention
+Dense Steps. We run full scaled-dot-product attention on the reordered sequence
+6
+
+=== PAGE 7 ===
+Q,K,V ∈ RB×H×N ×E, P=softmax
+ QK⊤
+√
+E
+
+, Odense = PV.
+We then partition the query axis of attention matrixP into chunks of c contiguous tokens (the queries
+of one voxel),
+P →reshape
+
+B,H, N
+c ,c,N
+
+and sum over thec dimension. The result is a “column-sum” tensor
+D ∈ RB×H× N
+c ×N , Db,h,i,j =
+(i+1)c−1X
+q=ic
+Pb,h,q,j
+which tells us, for each voxel i, how much total attention probability it assigns to key j (Alg. 4).
+Computing full attention and the column-sum are fused into a single kernel (Table 3 Row Group 1,
+Appendix B.2).
+A top-k over the last dimension then selects the most-attended keys/values for each query voxel:
+idxb,h,i,:k =TopKk
+
+Db,h,i,:
+
+These indices are cached for the upcoming sparse steps. Finally, Chipmunk defines the attention
+activation cache as
+Ocache = Odense −softmax
+
+QK⊤
+idx
+
+Vidx
+such that subsequent steps can directly add to this cache to compute a sparse replacement of the top
+attention interactions identified by the cached indices (Alg. 2).
+Sparse Delta Steps. In subsequent sparse steps Chipmunk only recomputes the top attention
+interactions defined by the indices cache (Alg. 3):
+∆O=softmax
+
+QK⊤
+idx
+
+Vidx, O= Ocache+∆O.
+The computational complexity of attention thus drops fromO(N 2) to O(N k), reproducing the dense
+result when k = N. Conceptually, this computation corresponds exactly to Fig. 1 (Left), where
+we visualize the sparse recomputation of the fastest changing vectors in attention’s output linear
+combination (scaled rows ofV), while reusing the remaining vectors from the cache.
+3.3.2 Chipmunk MLP
+For MLP layers, Chipmunk similarly alternates dense and sparse-delta computations. Dense steps
+fully compute activations and initialize caches, while sparse steps efficiently identify and recompute
+only activations that significantly change across steps (Alg. 5).
+Dense steps. A standard two-layer MLP layer produces
+A= σ
+
+XW⊤
+1 +b1
+
+, Odense = A W2+b2,
+with shapes X ∈ RB×N ×D, W1,2 ∈ RF ×D. Chipmunk caches three tensors on dense steps:
+1. Tile-mean pre-activation Tm =meanc(reshapec(X)W⊤
+1 ) ∈ RB×N/c×F .
+2. Full activation tensor Acache.
+3. MLP output Mcache = Odense.
+7
+
+=== PAGE 8 ===
+Sparse Delta Steps. Chipmunk uses a token-merged approximation to identify thek neurons that
+have changed the most since the last step (for each size-c chunk of contiguous tokens) (Alg. 7):
+∆tm = |T−Tm|, idx=TopK(∆tm) ∈ RB×N/c×k,
+We then recompute only those token-neuron interactions and reuse the rest from the cache (Alg. 6).
+As an optimization, we compute MLP in a single step—without the separate subtraction and addition
+of Eq. 1—because of the static nature of the second operand (W2) (Appendix B.3).
+∆M= σ
+
+XW⊤
+1,idx −Acache, idx
+
+W2,idx, O= Mcache+∆M.
+Analogous to attention, this computation corresponds exactly to Fig. 1, Left. We compute a sparse
+replacement of the fastest changing vectors in MLP’s output linear combination (scaled rows ofW2),
+while reusing the remaining vectors from the cache.
+3.3.3 Natively stacking with coarser DiT caching techniques.
+Chipmunk’s caching and sparsity operate at a fine granularity within attention and MLP layers,
+naturally complementing other acceleration methods that cache at coarser granularities such as steps,
+layers, or tokens. To demonstrate this, in the following section, we stack Chipmunk with step caching
+and sliding tile attention to achieve a strong speed-quality tradeoff.
+4 Experiments
+We evaluate Chipmunk against state-of-the-art DiT acceleration methods on text-to-video and
+text-to-image tasks. First, we outline our experimental setup (4.1). Quantitative comparisons in Tables
+4 and 5 demonstrate Chipmunk’s efficiency and quality improvements (4.2). Qualitative examples
+(Fig. 4) illustrate Chipmunk’s preservation of visual quality under significant acceleration (4.3).
+Method Efficiency VBench Dimension
+Speedup ↑ Latency (s) ↓ Total ↑ Quality ↑ Semantic ↑
+HunyuanVideo, T =50 (720 x 1280 x 129)
+Hunyuan 1x 1030s 83.24 85.09 75.82
+STA 1.79x 575s 82.46 84.63 73.83
+Chipmunk 2.16x 477s 82.94 84.60 76.3
+Step Caching (TeaCache) 3.69x 279s 80.79 82.87 72.5
+Chipmunk+Step Cache 3.72x 277s 82.5 84.23 75.6
+W AN2.1,T =50 (720 x 1280 x 121)
+W AN2.1 1x 1357s 81.47 83.57 73.08
+STA 1.36x 998s 81.84 83.65 74.60
+Chipmunk+STA 1.56x 870s 81.71 83.61 74.12
+Step Caching (TeaCache) 2.0x 678s 81.17 83.24 72.87
+Chipmunk-56%
++STA+Step Cache 2.20x 616s 81.73 83.74 73.69
+Chipmunk-73%
++STA+Step Cache 2.67x 508s 81.11 82.88 74.05
+Table 4: Performance comparison of various methods across different datasets for video generation.
+Note: Chipmunk-X% denotes a sparsity level ofX% to assess the speed-quality tradeoff.
+4.1 Setup
+Models. We evaluate Chipmunk across three state-of-art DiT models: HunyuanVideo and W AN2.1
+for text-to-video generation and FLUX.1-dev for text-to-image generation, all using their default
+number of generation steps (50). As shown in Fig. 3 (right), these models vary in sequence and FLOP
+breakdown, creating a strong evaluation of acceleration ability in different inference regimes. Of the
+three models, FLUX.1-dev has the smallest sequence length at 4.5k and allocates a majority of FLOPs
+to MLP layers. WAN2.1 and HunyuanVideo are extremely bound by attention at sequence lengths
+of 76k and 118k, respectively. All benchmarks are performed on H100-SXM5 GPUs with CUDA
+12.8 and PyTorch 2.5.0, comparing against a 650 TFLOP FlashAttention-3 baseline [38].
+8
+
+=== PAGE 9 ===
+Method Efficiency Visual Quality
+FLOPs ↓ Speedup ↑ Latency (s) ↓ ImRe ↑
+FLUX.1-dev, T =50 (768 × 1280)
+Flux 100% 1x 6.60s 0.76
+STA 84% 1.15x 5.73s 0.75
+DiTFastAttn 83% 1.09x 6.05s 0.80
+Chipmunk 58% 1.41x 4.90s 0.80
+Step+Token Caching (ToCa) 66% 1.51x 4.37s 0.76
+Step Caching (TeaCache) 39% 2.51x 2.64s 0.68
+Chipmunk+Step Cache 31% 2.56x 2.57s 0.77
+Table 5: Performance comparison of various methods for ImageReward for image generation.
+Method Efficiency Visual Quality
+FLOPs ↓ Speedup ↑ Latency (s) ↓ GenEval ↑ CLIP ↑
+FLUX.1-dev, T =50 (768 × 1280)
+Flux 100% 1x 6.60s 0.66 31.07
+Step+Token Caching (ToCa) 66% 1.51x 4.37s 0.65 31.21
+Step Caching (TeaCache) 45% 2.23x 2.95s 0.61 31.37
+Chipmunk-77%+Step Cache 31% 2.56x 2.57s 0.62 31.18
+Chipmunk-65%+Step Cache 38% 2.25x 2.93s 0.66 31.43
+Table 6: Performance comparison of various methods across various GenEval and CLIP. Note:
+Chipmunk-X denotes a sparsity level ofX% to assess the speed-quality tradeoff.
+Baselines. We compare Chipmunk against a number of recent DiT acceleration techniques including
+TeaCache [26], ToCa [64], Sliding Tile Attention (STA) [61], and DiTFastAttn [56]. TeaCache is a
+method for dynamically reusing DiT step outputs during slow-changing portions of the generation
+process, and ToCa dynamically computes token importance scores to recompute activations for only
+the most important tokens while reusing the rest. STA extends sliding window attention to 3D video
+to exploit the natural locality in attention computations, and DiTFastAttn reuses non-local attention
+interactions in a subset of steps to avoid a full recomputation. Here, we also stack Chipmunk with a
+simple static step cache schedule, untuned for any particular model/prompt. Full baseline descriptions
+are available in Appendix D.1.
+Evaluations and Metrics. We evaluate text-to-video generation with the standard VBench
+evaluation, comprised of 16 dimensions that are weighted to produce a final score shown to align
+with human judgement [ 17]. For text-to-image generation, we compute three standard metrics:
+(i) ImageReward (ImRe) [ 52], which is a common human-preference trained reward model; (ii)
+CLIP, which is a widely used metric assessing semantic alignment between text prompts and images
+(evaluated on a random subset of 10,000 images from MSCOCO2017) [25, 35]; and (iii) GenEval,
+which is another automatic evaluation metric designed specifically to gauge the quality and accuracy
+of image generations by comparing them to reference textual prompts, capturing aspects such as
+relevance, coherence, and descriptive fidelity [14].
+Figure 4: Qualitative comparisons across videos (left) and images (right). For videos, frames are
+stacked vertically (down is later). See Appendix D.2 for more.
+9
+
+=== PAGE 10 ===
+Hyperparameters. In a warm-up phase for each model, we test 100 E2E generations in order to select
+values ofMLP sparsity leveland attention sparsity levelthat will achieve 95% of the change in activa-
+tions across steps. For thestep schedule hyperparameter, we choose a simple schedule of interleaving 1
+dense step every 10 sparse steps; further optimization could yield additional efficiency improvements.
+4.2 Quantitative Results
+Across image and video models, Chipmunk achieves the largest acceleration levels while maintaining
+near-lossless quality across ImageReward, CLIP, and VBench (Tables 4, 5, and 6). We evaluate results
+in the context of three regimes:(1) Acceleration Held Constant.Holding acceleration level constant,
+Chipmunk’s fine-grained caching of individual attention and MLP vectors enable it to maintain higher
+quality than TeaCache, which caches full step outputs (HunyuanVideo, rows 4-5; Flux Table 5, rows
+6-7; Flux Table 6, rows 3-4). (2) Quality Held Constant. When quality is held nearly constant,
+Chipmunk achieves higher acceleration than STA, ToCa, and DiTFastAttn, due to its dynamic, granular
+identification of sparsity patterns (HunyuanVideo, rows 2-3; WAN2.1, rows 2-3; Flux Table 5, rows
+2-5; Flux Table 6, rows 2 and 4). (3) Chipmunk Speed-Quality Tradeoff. Chipmunk’s sparsity
+hyperparameter can modulate the speed-quality tradeoff (W AN2.1, rows 5-6, Flux Table 6, rows 4-5).
+4.3 Qualitative Results
+In videos, we observe that Chipmunk preserves small, high-moving parts such as hands knitting (Fig.
+4). In images, Chipmunk maintains strong visual quality, including details from long prompts. In
+both text-to-image and text-to-video tasks, Chipmunk enhances details on the subject of the generation,
+such as the buttons on the captain’s jacket. We hypothesize this is due to the∼90% sparse attention
+matrix focusing on the most relevant parts of the prompt (e.g., the subject). We speculate Chipmunk’s
+improved ImageReward, VBench, and CLIP scores may stem from this focus on subject prominence,
+as these metrics evaluate how closely outputs align with prompts that largely describe a subject [35, 52].
+For a sample of playable VBench video generations, please see these anonymized YouTube links:
+W AN2.1 and HunyuanVideo.
+Failure Modes. At times, the background of videos appears slightly out of focus (bookshelf behind
+the woman knitting), which we similarly speculate can be attributed to the sparsity in the attention
+matrix concentrating on subject-based parts of the prompt. In text-to-image tasks, even though
+Chipmunk maintains prompt adherence and high visual quality, we find minor differences in details
+of the generations when compared to the reference images (e.g., the number of background birds in
+row 1), likely due to the number of FLOPs removed.
+5 Related Work
+Step Distillation and Consistency Models.Step distillation and related methods such as Consistency
+Models reduce inference time by training few-step models to approximate the outputs of a many-step
+teacher models[11, 42, 60]. These approaches uniformly allocate fewer inference steps across all
+model computations, effectively learning to compensate by proportionally increasing the magnitude
+of latent-space updates per step. In contrast, Chipmunk dynamically allocates computational resources
+within a step,selectively recomputingthe fastest-changing activation vectors without training.
+Training-Free Activation Caching. Training-free activation caching methods can be categorized
+into three buckets depending on their granularity: (i) at the step level, (ii) at the layer level, and (iii)
+at the token level [63]. Approaches such as TeaCache [26] and AdaCache [19] operate at the per-step
+level, using adaptive mechanisms to determine optimal steps to skip. Approaches such as BlockCache
+[50] and ∆-DiT [4] operate at the per-layer attention/MLP layer level. Finally, approaches like ToCa
+and DaTo [58, 64] operate at the per-token level within attention and MLP layers. Chipmunk has finer
+granularity than the aforementioned methods, operating at the per-vector level within attention and
+MLP layers. Therefore, it is possible to complement Chipmunk with any of these approaches.
+Sparse Attention Computation. The natural sparsity and locality in large attention matrices is a
+common observation , and many methods exploit it [5, 45, 46, 53, 59]. Sliding Tile Attention and
+Sparse VideoGen implement static attention masks to only attend to spatiotemporally local tokens
+[51, 61]. Similarly, DiTFastAttention implements a sliding window pattern to recompute static local
+attention [56]. Chipmunk can be complemented with any static sparsity pattern by passing the relevant
+indices as kernel inputs.
+10
+
+=== PAGE 11 ===
+6 Conclusion
+We introduce Chipmunk, a novel, training-free approach designed to accelerate DiT inference by
+dynamically exploiting the inherent sparsity and slow-changing patterns of intermediate activations.
+Chipmunk leverages the shared computational structure of attention and MLPs to identify and
+recompute only the activations that change most rapidly, caching the rest for reuse across inference
+steps. Chipmunk achieves substantial reductions in computational load, resulting in faster inference
+times with minimal compromises to visual quality.
+Limitations. Chipmunk provides optimal speedups primarily for large, compute-bound DiTs, and is
+less effective for smaller models or those with compact matrix shapes (e.g., Facebook DiT, PixArt-α),
+where sparsity overheads may dominate computational gains. Additionally, while Chipmunk can
+be applied to models with any number of steps, few-step models with larger activation changes across
+steps may present less opportunities for caching, resulting in more modest acceleration benefits.
+Future Work. Chipmunk is currently training-free, but future work should explore the potential of
+integrating sparse recomputation into the training process to allow models to learn to dynamically apply
+sequential steps to the fastest-changing vectors. Separately, in this work, we only stack Chipmunk
+with per-step caching, but future work may stack it with per-layer and per-token caching as well.
+7 Acknowledgements
+We thank Aaryan Singhal, Rahul Chalamala, Neil Movva, and Hayden Prairie for helpful feedback
+and discussions during this work.
+References
+[1] S. Arora, S. Eyuboglu, M. Zhang, A. Timalsina, S. Alberti, D. Zinsley, J. Zou, A. Rudra, and
+C. Ré. Simple linear attention language models balance the recall-throughput tradeoff, 2025.
+URL https://arxiv.org/abs/2402.18668.
+[2] B. Chen, T. Dao, E. Winsor, Z. Song, A. Rudra, and C. Ré. Scatterbrain: Unifying sparse and
+low-rank attention approximation, 2021. URLhttps://arxiv.org/abs/2110.15343.
+[3] J. Chen, J. Yu, C. Ge, L. Yao, E. Xie, Y . Wu, Z. Wang, J. Kwok, P. Luo, H. Lu, and Z. Li. Pixart-α:
+Fast training of diffusion transformer for photorealistic text-to-image synthesis, 2023. URL
+https://iclr.cc/media/iclr-2024/Slides/18231.pdf.
+[4] P. Chen, M. Shen, P. Ye, J. Cao, C. Tu, C.-S. Bouganis, Y . Zhao, and T. Chen. δ-dit:
+A training-free acceleration method tailored for diffusion transformers, 2024. URL
+https://arxiv.org/abs/2406.01125.
+[5] Y . Chen, S. Qian, H. Tang, X. Lai, Z. Liu, S. Han, and J. Jia. Longlora: Efficient fine-tuning
+of long-context large language models, 2024. URLhttps://arxiv.org/abs/2309.12307.
+[6] Z. Chen, Z. Qu, L. Liu, Y . Ding, and Y . Xie. Efficient tensor core-based gpu kernels for structured
+sparsity under reduced precision. In Proceedings of the International Conference for High
+Performance Computing, Networking, Storage and Analysis, SC ’21, New York, NY , USA, 2021.
+Association for Computing Machinery. ISBN 9781450384421. doi: 10.1145/3458817.3476182.
+URL https://doi.org/10.1145/3458817.3476182.
+[7] K. Choromanski, V . Likhosherstov, D. Dohan, X. Song, A. Gane, T. Sarlos, P. Hawkins, J. Davis,
+A. Mohiuddin, L. Kaiser, D. Belanger, L. Colwell, and A. Weller. Rethinking attention with
+performers, 2022. URL https://arxiv.org/abs/2009.14794.
+[8] T. Dao, D. Y . Fu, S. Ermon, A. Rudra, and C. Ré. Flashattention: Fast and memory-efficient
+exact attention with io-awareness, 2022. URLhttps://arxiv.org/abs/2205.14135.
+[9] A. Dosovitskiy, L. Beyer, A. Kolesnikov, D. Weissenborn, X. Zhai, T. Unterthiner,
+M. Dehghani, M. Minderer, G. Heigold, S. Gelly, J. Uszkoreit, and N. Houlsby. An
+image is worth 16x16 words: Transformers for image recognition at scale, 2021. URL
+https://iclr.cc/virtual/2021/poster/3013.
+11
+
+=== PAGE 12 ===
+[10] N. Elhage, N. Nanda, C. Olsson, T. Henighan, N. Joseph, B. Mann, A. Askell, Y . Bai, A. Chen,
+T. Conerly, N. DasSarma, D. Drain, D. Ganguli, Z. Hatfield-Dodds, D. Hernandez, A. Jones,
+J. Kernion, L. Lovitt, K. Ndousse, D. Amodei, T. Brown, J. Clark, J. Kaplan, S. McCandlish,
+and C. Olah. A mathematical framework for transformer circuits.Transformer Circuits Thread,
+2021. https://transformer-circuits.pub/2021/framework/index.html.
+[11] P. Esser, S. Kulal, A. Blattmann, R. Entezari, J. Müller, H. Saini, Y . Levi, D. Lorenz, A. Sauer,
+F. Boesel, D. Podell, T. Dockhorn, Z. English, K. Lacey, A. Goodwin, Y . Marek, and
+R. Rombach. Scaling rectified flow transformers for high-resolution image synthesis, 2024. URL
+https://proceedings.mlr.press/v235/esser24a.html.
+[12] W. Fedus, B. Zoph, and N. Shazeer. Switch transformers: Scaling to trillion parameter models
+with simple and efficient sparsity, 2022. URLhttps://arxiv.org/abs/2101.03961.
+[13] J. Geiping, S. McLeish, N. Jain, J. Kirchenbauer, S. Singh, B. R. Bartoldson, B. Kailkhura,
+A. Bhatele, and T. Goldstein. Scaling up test-time compute with latent reasoning: A recurrent
+depth approach. arXiv preprint arXiv:2502.05171, 2025.
+[14] D. Ghosh, H. Hajishirzi, and L. Schmidt. Geneval: An object-focused framework for evaluating
+text-to-image alignment, 2023. URL https://arxiv.org/abs/2310.11513.
+[15] J. Ho, A. Jain, and P. Abbeel. Denoising diffusion probabilistic models, 2020. URL
+https://arxiv.org/abs/2006.11239.
+[16] W. Hong, M. Ding, W. Zheng, X. Liu, and J. Tang. Cogvideo: Large-scale pretraining for text-
+to-video generation via transformers, 2022. URLhttps://arxiv.org/abs/2205.15868.
+[17] Z. Huang, Y . He, J. Yu, F. Zhang, C. Si, Y . Jiang, Y . Zhang, T. Wu, Q. Jin, N. Chanpaisit,
+Y . Wang, X. Chen, L. Wang, D. Lin, Y . Qiao, and Z. Liu. Vbench: Comprehensive bench-
+mark suite for video generative models, 2023. URL https://openaccess.thecvf.com/
+content/CVPR2024/html/Huang_VBench_Comprehensive_Benchmark_Suite_for_
+Video_Generative_Models_CVPR_2024_paper.html.
+[18] A. Q. Jiang, A. Sablayrolles, A. Roux, A. Mensch, B. Savary, C. Bamford, D. S. Chaplot,
+D. de las Casas, E. B. Hanna, F. Bressand, G. Lengyel, G. Bour, G. Lample, L. R. Lavaud,
+L. Saulnier, M.-A. Lachaux, P. Stock, S. Subramanian, S. Yang, S. Antoniak, T. L. Scao,
+T. Gervet, T. Lavril, T. Wang, T. Lacroix, and W. E. Sayed. Mixtral of experts, 2024. URL
+https://arxiv.org/abs/2401.04088.
+[19] K. Kahatapitiya, H. Liu, S. He, D. Liu, M. Jia, C. Zhang, M. S. Ryoo, and T. Xie.
+Adaptive caching for faster video generation with diffusion transformers, 2024. URL
+https://arxiv.org/abs/2411.02397.
+[20] N. Kitaev, Łukasz Kaiser, and A. Levskaya. Reformer: The efficient transformer, 2020. URL
+https://arxiv.org/abs/2001.04451.
+[21] W. Kong, Q. Tian, Z. Zhang, R. Min, Z. Dai, J. Zhou, J. Xiong, X. Li, B. Wu, J. Zhang,
+et al. Hunyuanvideo: A systematic framework for large video generative models.
+arXiv preprint arXiv:2412.03603 . URL https://ui.adsabs.harvard.edu/abs/
+2024arXiv241203603K/abstract.
+[22] B. F. Labs. Flux. https://github.com/black-forest-labs/flux, 2024.
+[23] S. Li, K. Osawa, and T. Hoefler. Efficient quantized sparse matrix operations on tensor
+cores. In SC22: International Conference for High Performance Computing, Networking,
+Storage and Analysis, page 1–15. IEEE, Nov. 2022. doi: 10.1109/sc41404.2022.00042. URL
+http://dx.doi.org/10.1109/SC41404.2022.00042.
+[24] Z. Li, C. You, S. Bhojanapalli, D. Li, A. S. Rawat, S. J. Reddi, K. Ye, F. Chern, F. Yu, R. Guo,
+et al. The lazy neuron phenomenon: On emergence of activation sparsity in transformers.arXiv
+preprint arXiv:2210.06313, 2022.
+12
+
+=== PAGE 13 ===
+[25] T.-Y . Lin, M. Maire, S. Belongie, L. Bourdev, R. Girshick, J. Hays, P. Perona, D. Ramanan,
+C. L. Zitnick, and P. Dollár. Microsoft coco: Common objects in context, 2015. URL
+https://arxiv.org/abs/1405.0312.
+[26] F. Liu, S. Zhang, X. Wang, Y . Wei, H. Qiu, Y . Zhao, Y . Zhang, Q. Ye, and F. Wan. Timestep embed-
+ding tells: It’s time to cache for video diffusion model.arXiv preprint arXiv:2411.19108, 2024.
+[27] J. Liu, P. Ponnusamy, T. Cai, H. Guo, Y . Kim, and B. Athiwaratkun. Training-free activation
+sparsity in large language models.arXiv preprint arXiv:2408.14690, 2024.
+[28] X. Liu, C. Gong, and Q. Liu. Flow straight and fast: Learning to generate and transfer data with
+rectified flow, 2022. URLhttps://iclr.cc/virtual/2023/oral/12626.
+[29] Z. Liu, J. Wang, T. Dao, T. Zhou, B. Yuan, Z. Song, A. Shrivastava, C. Zhang, Y . Tian, C. Re,
+and B. Chen. Deja vu: Contextual sparsity for efficient llms at inference time, 2023. URL
+https://arxiv.org/abs/2310.17157.
+[30] C. Lu, Y . Zhou, F. Bao, J. Chen, C. Li, and J. Zhu. Dpm-solver: A fast ode
+solver for diffusion probabilistic model sampling in around 10 steps, 2022. URL
+https://arxiv.org/abs/2206.00927.
+[31] W. Luo, R. Fan, Z. Li, D. Du, Q. Wang, and X. Chu. Benchmarking and dissecting the nvidia hop-
+per gpu architecture, 2024. URL https://ieeexplore.ieee.org/document/10579250.
+[32] X. Ma, G. Fang, and X. Wang. Deepcache: Accelerating diffusion models for free. In
+Proceedings of the IEEE/CVF conference on computer vision and pattern recognition, pages
+15762–15772, 2024.
+[33] NVIDIA. Gpu performance background user’s guide, 2024. URL https://docs.nvidia.
+com/deeplearning/performance/dl-performance-gpu-background/index.html .
+[34] W. Peebles and S. Xie. Scalable diffusion models with transformers, 2023. URL
+https://openaccess.thecvf.com/content/ICCV2023/html/Peebles_Scalable_
+Diffusion_Models_with_Transformers_ICCV_2023_paper.html.
+[35] A. Radford, J. W. Kim, C. Hallacy, A. Ramesh, G. Goh, S. Agarwal, G. Sastry, A. Askell,
+P. Mishkin, J. Clark, G. Krueger, and I. Sutskever. Learning transferable visual models from
+natural language supervision, 2021. URL https://arxiv.org/abs/2103.00020.
+[36] T. Salimans and J. Ho. Progressive distillation for fast sampling of diffusion models, 2022. URL
+https://arxiv.org/abs/2202.00512.
+[37] Sand-AI. Magi-1: Autoregressive video generation at scale, 2025. URL https:
+//static.magi.world/static/files/MAGI_1.pdf.
+[38] J. Shah, G. Bikshandi, Y . Zhang, V . Thakkar, P. Ramani, and T. Dao. Flashattention-
+3: Fast and accurate attention with asynchrony and low-precision, 2024. URL
+https://tridao.me/blog/2024/flash3/.
+[39] N. Shazeer, A. Mirhoseini, K. Maziarz, A. Davis, Q. Le, G. Hinton, and J. Dean. Outra-
+geously large neural networks: The sparsely-gated mixture-of-experts layer, 2017. URL
+https://arxiv.org/abs/1701.06538.
+[40] J. Sohl-Dickstein, E. A. Weiss, N. Maheswaranathan, and S. Ganguli. Deep un-
+supervised learning using nonequilibrium thermodynamics, 2015. URL https:
+//proceedings.mlr.press/v37/sohl-dickstein15.html.
+[41] J. Song, C. Meng, and S. Ermon. Denoising diffusion implicit models, 2022. URL
+https://arxiv.org/abs/2010.02502.
+[42] Y . Song, P. Dhariwal, M. Chen, and I. Sutskever. Consistency models, 2023. URL
+https://proceedings.mlr.press/v202/song23a.html.
+[43] B. F. Spector, S. Arora, A. Singhal, D. Y . Fu, and C. Ré. Thunderkittens: Simple, fast, and
+adorable ai kernels, 2024. URLhttps://iclr.cc/virtual/2025/poster/31243.
+13
+
+=== PAGE 14 ===
+[44] X. Sun, J. Fang, A. Li, and J. Pan. Unveiling redundancy in diffusion transformers (dits): A
+systematic study, 2024. URLhttps://arxiv.org/abs/2411.13588.
+[45] X. Tan, Y . Chen, Y . Jiang, X. Chen, K. Yan, N. Duan, Y . Zhu, D. Jiang, and H. Xu.
+Dsv: Exploiting dynamic sparsity to accelerate large-scale video dit training, 2025. URL
+https://arxiv.org/abs/2502.07590.
+[46] J. Tang, Y . Zhao, K. Zhu, G. Xiao, B. Kasikci, and S. Han. Quest: Query-aware sparsity for
+efficient long-context llm inference, 2024. URLhttps://arxiv.org/abs/2406.10774.
+[47] P. Tillet, H. T. Kung, and D. Cox. Triton: an intermediate language and compiler for tiled
+neural network computations. In Proceedings of the 3rd ACM SIGPLAN International
+Workshop on Machine Learning and Programming Languages, MAPL 2019, page 10–19, New
+York, NY , USA, 2019. Association for Computing Machinery. ISBN 9781450367196. doi:
+10.1145/3315508.3329973. URL https://doi.org/10.1145/3315508.3329973.
+[48] A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N. Gomez, L. Kaiser, and
+I. Polosukhin. Attention is all you need, 2023. URLhttps://arxiv.org/abs/1706.03762.
+[49] S. Wang, B. Z. Li, M. Khabsa, H. Fang, and H. Ma. Linformer: Self-attention with linear
+complexity, 2020. URL https://arxiv.org/abs/2006.04768.
+[50] F. Wimbauer, B. Wu, E. Schoenfeld, X. Dai, J. Hou, Z. He, A. Sanakoyeu, P. Zhang, S. Tsai,
+J. Kohler, C. Rupprecht, D. Cremers, P. Vajda, and J. Wang. Cache me if you can: Accelerating
+diffusion models through block caching, 2024. URLhttps://arxiv.org/abs/2312.03209.
+[51] H. Xi, S. Yang, Y . Zhao, C. Xu, M. Li, X. Li, Y . Lin, H. Cai, J. Zhang, D. Li, J. Chen, I. Stoica,
+K. Keutzer, and S. Han. Sparse videogen: Accelerating video diffusion transformers with
+spatial-temporal sparsity, 2025. URLhttps://arxiv.org/abs/2502.01776.
+[52] J. Xu, X. Liu, Y . Wu, Y . Tong, Q. Li, M. Ding, J. Tang, and Y . Dong. Imagereward:
+Learning and evaluating human preferences for text-to-image generation. In A. Oh, T. Nau-
+mann, A. Globerson, K. Saenko, M. Hardt, and S. Levine, editors, Advances in Neural
+Information Processing Systems, volume 36, pages 15903–15935. Curran Associates, Inc.,
+2023. URL https://proceedings.neurips.cc/paper_files/paper/2023/file/
+33646ef0ed554145eab65f6250fab0c9-Paper-Conference.pdf.
+[53] R. Xu, G. Xiao, H. Huang, J. Guo, and S. Han. Xattention: Block sparse attention with
+antidiagonal scoring, 2025. URL https://arxiv.org/abs/2503.16428.
+[54] J. Yao, W. Cheng, W. Liu, and X. Wang. Fasterdit: Towards faster diffusion transformers training
+without architecture modification, 2024. URLhttps://arxiv.org/abs/2410.10356.
+[55] Z. Ye, L. Chen, R. Lai, W. Lin, Y . Zhang, S. Wang, T. Chen, B. Kasikci, V . Grover, A. Krish-
+namurthy, et al. Flashinfer: Efficient and customizable attention engine for llm inference serving.
+arXiv preprint arXiv:2501.01005, 2025.
+[56] Z. Yuan, H. Zhang, P. Lu, X. Ning, L. Zhang, T. Zhao, S. Yan, G. Dai, and
+Y . Wang. Ditfastattn: Attention compression for diffusion transformer models,
+2024. URL https://proceedings.neurips.cc/paper_files/paper/2024/hash/
+0267925e3c276e79189251585b4100bf-Abstract-Conference.html.
+[57] M. Zaheer, G. Guruganesh, A. Dubey, J. Ainslie, C. Alberti, S. Ontanon, P. Pham, A. Ravula,
+Q. Wang, L. Yang, and A. Ahmed. Big bird: Transformers for longer sequences, 2021. URL
+https://arxiv.org/abs/2007.14062.
+[58] E. Zhang, B. Xiao, J. Tang, Q. Ma, C. Zou, X. Ning, X. Hu, and L. Zhang. Token
+pruning for caching better: 9 times acceleration on stable diffusion for free, 2024. URL
+https://arxiv.org/abs/2501.00375.
+[59] J. Zhang, J. wei, H. Huang, P. Zhang, J. Zhu, and J. Chen. Sageattention: Accurate 8-bit attention
+for plug-and-play inference acceleration, 2025. URLhttps://arxiv.org/abs/2410.02367.
+14
+
+=== PAGE 15 ===
+[60] L. Zhang and K. Ma. Accelerating diffusion models with one-to-many knowledge distillation,
+2024. URL https://arxiv.org/abs/2410.04191.
+[61] P. Zhang, Y . Chen, R. Su, H. Ding, I. Stoica, Z. Liu, and H. Zhang. Fast video generation with
+sliding tile attention, 2025. URL https://arxiv.org/abs/2502.04507.
+[62] Z. Zheng, X. Peng, T. Yang, C. Shen, S. Li, H. Liu, Y . Zhou, T. Li, and Y . You. Open-sora: Democ-
+ratizing efficient video production for all, 2024. URLhttps://arxiv.org/abs/2412.20404.
+[63] C. Zou, E. Zhang, R. Guo, H. Xu, C. He, X. Hu, and L. Zhang. Accelerating diffusion
+transformers with dual feature caching, 2024. URLhttps://arxiv.org/abs/2412.18911.
+[64] C. Zou, X. Liu, T. Liu, S. Huang, and L. Zhang. Accelerating diffusion transformers with
+token-wise feature caching, 2025. URLhttps://iclr.cc/virtual/2025/poster/27718.
+15
+
+=== PAGE 16 ===
+A Extended Discussion of Latent Space Path Decompositions
+In this appendix, we formally demonstrate that the latent space paths of rectified flow Diffusion
+Transformers (DiTs) can be decomposed into a sum of individually scaled vectors output by the attention
+and MLP layers (Fig. 5). This decomposition does not claim that each individual vector evolves along
+an independent path (since the vectors interact via non-linearities) – rather, we claim that the final latent
+space path comprises only scaled and shifted vectors output by attention and MLP layers. We assume
+that in each step of the diffusion process, the DiT output is scaled according to the noise schedule and
+added to the latent vector representation, as in the architectures of HunyuanVideo and FLUX.1-dev [11].
+Attention and MLP Outputs as Scaled Vector Additions. We begin by explicitly defining attention
+and MLP layers within a DiT residual block.
+Attention: Given query q ∈ Rn×dc, key k ∈ Rn×dc, and valuev ∈ Rn×dc matrices projected from the
+residual stream x ∈ Rn×d, attention computes:
+Attention(q,k,v)= softmax
+ qk⊤
+√dc
+
+v (3)
+To explicitly show the decomposition into individual vectors, we rewrite attention per-head and
+per-token. Consider a single attention head h with projection matrices W h
+q ,W h
+k ,W h
+v ∈ Rd×dc, and
+output projection W h
+o ∈ Rdc×d. For each tokeni, attention can be expressed as a linear combination
+of dynamically computed vectors from the combined value-output projection:
+Attnh(xi)=
+X
+j
+αh
+ij ·(xjW h
+v W h
+o ), (4)
+where αh
+ij =softmaxj
+
+(xiW h
+q )(xW h
+k )⊤
+√dc
+!
+(5)
+This shows that attention produces a weighted sum of vectors(xjW h
+v W h
+o ), with scalars αh
+ij computed
+via softmax (Fig. 6, left). Each individual vector is thus scaled dynamically based on token interactions.
+MLP: Similarly, given weight matricesW1 ∈ Rd×df , W2 ∈ Rdf ×d and biases b1 ∈ Rdf , b2 ∈ Rd, the
+MLP operation computes:
+MLP(x)= GELU(xW1+b1)W2+b2 (6)
+The MLP can be viewed as outputting scaled rows of W2 (the bias is a single extra static vector).
+Specifically, for tokenxi:
+MLP(xi)=
+dfX
+m=1
+GELU(xiW :,m
+1 +b1)·W m,:
+2 +b2 (7)
+Thus, MLP outputs scaled rows fromW2, with scalar coefficients computed as GELU applied to the
+dot product ofxi with each column ofW1 (plus a static shift from the bias).
+Distributive Operations. Having established attention and MLP as explicitly adding scaled vectors,
+we now formally discuss operations distributing over vector addition within DiTs.
+Modulations: Element-wise multiplication by modulation factorsm ∈ Rd distributes trivially:
+m⊙
+X
+i
+vi =
+X
+i
+(m⊙vi) (8)
+Layernorm: For vectors vi, layer normalization is defined element-wise:
+LN
+ X
+i
+vi
+!
+=
+X
+i
+vi −E[P
+ivi]p
+Var[P
+ivi] γ+β (9)
+The mean and variance computations do not distribute over vector addition – however, the resulting
+modification to the residual stream, as visualized in Fig. 5, only uses the mean and variance scalars
+as scale and shift factors, which do distribute over the sum of individual vectors. Thus, in the residual
+stream framework [10], layernorm can be interpreted as performing a two phase computation: (1) a
+non-distributive "read" of the residual stream to compute scale and shift factors, (2) a distributive "write"
+over all vectors in the residual stream using the now fixed scale and shift factors computed in phase (1).
+This means that after layernorm, the residual stream is still a sum of individually identifiable vectors.
+16
+
+=== PAGE 17 ===
+Figure 5: An individual-vector interpetation of the full HunyuanVideo DiT architecture. Attention
+and MLPs add new vectors to the residual stream, with downstream modulation, layernorm, and linear
+projection operations distributing over the vector sums.
+17
+
+=== PAGE 18 ===
+Figure 6: Left: Both MLP and attention operations use a non-linearity to compute the scalar coefficients
+for a linear combination of value vectors. In attention, the value vectors are dynamic (V is projected
+from the current token representation). In MLP, the value vectors are static (rows of the weights W2).
+Right: DiTs accumulate sums of these scaled and shifted value vectors (MLP and attention outputs).
+Linear Projections: Linear projections defined by matricesW distribute linearly:
+W
+ X
+i
+vi
+!
+=
+X
+i
+W vi (10)
+Non-Distributive Operations. Operations such as softmax and GELU do not distribute over vector
+addition, but similar to layernorm, they do not directly modify the vectors in the residual stream in
+a non-distributive manner. Instead, they compute scalar coefficients that scale the vectors newly added
+to the residual stream (Fig. 5).
+Final Latent Space Path Decomposition. Considering these properties collectively, we assert the
+following:
+1. Attention and MLP layers output sums of scaled vectors, incrementally updating the residual
+stream.
+2. Modulations, scale and shift factors computed by layer normalization, and linear projections
+distribute over these vector additions.
+3. Non-distributive operations (softmax, GELU) are solely used to compute scalar coefficients
+of newly added vectors without directly modifying the residual stream.
+Thus, the latent space path of a DiT output at any inference stept, denoted zt, can be formally expressed
+as a sum of individually scaled vectors from attention and MLP layers across all previous stepst′ > t
+(where z0 is the fully denoised output):
+zt =LNt(Modt,final⊙zt+1We)Wu ∗st (11)
++
+X
+l∈layers
+X
+h
+X
+j
+LNt(Modl,t,attn ⊙αh,l,t
+j (xl,t
+j W h,l
+v W h,l
+o ))Wu ∗st (12)
++
+X
+l∈layers
+X
+m
+LNt(Modl,t,mlp ⊙βl,t
+m W m,:,l
+2 )Wu ∗st (13)
+Here, vectors xl,t
+j W h,l
+v W h,l
+o and W m,:,l
+2 represent individual vectors produced by attention and MLP
+respectively, and scalars αh,l,t
+j , βl,t
+f represent their corresponding coefficients computed through
+non-linear activations. LNt represents layernorm with scale and shift factors computed according to
+the state of the residual stream at timestept. We, Wu represent the embed/unembed linear projections,
+18
+
+=== PAGE 19 ===
+respectively, and st represents the scale factor applied to the DiT output at timestep t according to
+the diffusion noise schedule.
+B Kernel Optimizations
+In this appendix, we provide additional details on Chipmunk’s kernel optimizations. We structure
+this discussion into three primary categories: (1) efficiently identifying dynamic sparsity patterns
+in attention kernels, (2) optimizing column-sparse computations in MLP layers, and (3) reducing GPU
+memory overhead through effective caching strategies.
+B.1 Architecture Agnostic
+Chipmunk works on all modern GPUs with tensor cores. Although our CUDA kernels are optimized
+specifically for NVIDIA H100 GPUs, Chipmunk can be efficiently implemented on earlier or later
+GPU architectures by using architecture-agnostic kernels written in Triton. These kernels can also
+be tuned for optimal performance on other hardware. We include several example Triton kernels in
+our codebase for reference.
+B.2 Efficient Dynamic Sparsity Pattern Identification in Attention
+We first address the challenge of efficiently identifying sparsity patterns in attention computations.
+As discussed previously (Section 3.2), Chipmunk employs fused kernels that simultaneously compute
+attention outputs and sparsity patterns via column sums (Alg. 4). A direct summation of the
+unnormalized logits (qkT ) across rows is infeasible because row magnitudes can vary significantly
+without softmax normalization. Naively computing column sums directly on the post-softmax matrix
+is also impractical due to FlashAttention’s [8] incremental softmax, which never fully materializes
+intermediate softmax results within the kernel.
+To overcome these limitations without resorting to slower, unfused kernels, we employ an approx-
+imation leveraging the slow-changing nature of activations across inference steps. Specifically, we
+reuse softmax normalization constants from the previous inference step to approximate column sums.
+Although slightly stale, these constants remain effective due to the incremental changes between
+steps. Thus, our fused kernel outputs both the correctly normalized attention result and an approximate
+column sum (normalized using previous constants) suitable for subsequent top-k sparsity selection.
+B.3 Optimizing Column-Sparse Delta MLP Computations
+Next, we detail kernel optimizations specific to column-sparse delta computations within the MLP
+layers. Here, the static nature of MLP value vectors (rows of weight matrixW2) allows for additional
+optimization compared to attention, which has dynamic vectors projected from token representations.
+B.3.1 Computing MLP Step-Deltas Efficiently in One Pass
+Unlike attention, MLP step-deltas can be efficiently computed in a single step rather than requiring
+a subtraction and subsequent addition of vectors (Alg. 6). Given cached activations and MLP outputs,
+we directly compute sparse cross-step deltas as follows:
+1. Compute sparse intermediate activations.
+2. Compute the difference against the cached activation.
+3. Multiply this sparse delta by the static value vectors (rows ofW2).
+4. Directly accumulate this result into the cached output.
+This reduces computational overhead compared to the two-step subtraction-addition method required
+for dynamic attention vectors, but introduces additional challenges in kernel optimization.
+B.3.2 Persistent Grid and Warp-Specialization for Complex Epilogues
+The first GEMM kernel in Chipmunk’s MLP delta computation involves a complex epilogue due to
+the combined computational steps of delta computation and memory operations (Alg. 6). To optimize
+these, we find the combination of persistent grids and warp-specialization to be particularly effective:
+1. Persistent Grid Kernels:One threadblock is launched per GPU Streaming Multiprocessor
+(SM), allowing each threadblock to iterate over multiple work tiles.
+19
+
+=== PAGE 20 ===
+2. Warp-Specialization: Within each threadblock, separate warp groups are assigned to
+compute/data loading operations, allowing better overlap between computation and memory
+operations.
+This combination allows the overlap of the producer warpgroup’s memory loading prologue with the
+consumer warpgroups’ high latency epilogue operations.
+B.3.3 Custom Kernel for Efficient Cache Writeback
+We also found the most time-consuming step in the first MLP GEMM epilogue to be the scattering
+of activation cache updates into global memory. To address this, we fuse this memory-bound cache
+writeback operation into the second GEMM operation, which is compute-bound. Specifically,
+we utilize the CUDA driver API to allocate streaming multiprocessors (SMs) to a custom kernel
+implementing the cache writeback operation, while using the rest of the SMs for the GEMM. We
+compute the number of SMs to allocate based on the degree of wave quantization so that this does not
+impact the runtime of the GEMM—it just repurposes any leftover SMs. Our custom cache writeback
+kernel uses the TMA-based reduction PTX instructions (cp.reduce.async.bulk) to perform large
+atomic updates into global tensors.
+B.4 Minimizing GPU Memory Overhead from Activation Caches
+Finally, Chipmunk stores activation caches MLP and attention layers, making memory efficiency
+critical—particularly in single-GPU workloads with large sequence lengths (e.g., HunyuanVideo with
+118k tokens per video). Each attention layer requires caching (1) boolean masks indicating active
+[192, 1] columns, and (2) activation outputs from the previous inference step.
+We implement two optimizations to reduce GPU memory footprint:
+1. Bitpacked Sparsity Masks: Standard boolean masks (torch.bool) consume one byte per
+entry. With a torch-compiled bitpacking function, we reduce memory usage by 8x, while
+incurring negligible computational overhead.
+2. CPU Offloading with Double-Buffered Communication: We preallocate pinned
+(page-locked) CPU tensors and implement double-buffering on the GPU. This approach
+reduces GPU memory and communication overhead by overlapping GPU computations of
+the current layer with simultaneous transfers of the next layer’s sparsity masks and activations
+from CPU to GPU memory.
+Table 7: Memory usage comparison between naive and optimized implementations.
+Naive Optimized Memory Reduction
+Sparsity Mask Cache 104 GB 13 GB 8x
+Activation Cache 43 GB 2.8 GB 15x
+Column-Sum Intermediate State 668 GB 3.5 GB 192x
+C Chipmunk Algorithm
+In this appendix, we describe Chipmunk’s algorithms in detail. The algorithms described here are
+for reference-correct implementations, rather than optimized for speed. In practice, operations in these
+algorithms implemented in optimized CUDA kernels as described in Section 3 and Appendix B.
+20
+
+=== PAGE 21 ===
+Algorithm 1: Voxel Reordering.Reorders tokens so that contiguous chunks correspond to coherent
+3D voxels, improving the quality of subsequent column-sparse approximations. 
+# x : (b , t , h , w , d ) 3 D tokens
+# vt , vh , vw : int , int , int Voxel shape
+def v o x e l _ o r d e r (x , vt , vh , vw ):
+return re ar ra ng e (
+x ,
+’b ( tc vt ) ( hc vh ) ( wc vw ) d -> b tc hc wc vt vh vw d ’ ,
+vt = vt , vh = vh , vw = vw
+)
+def r e v e r s e _ v o x e l _ o r d e r (x , vt , vh , vw ):
+return re ar ra ng e (
+x ,
+’b tc hc wc vt vh vw d -> b ( tc vt ) ( hc vh ) ( wc vw ) d ’ ,
+vt = vt , vh = vh , vw = vw
+)
+ 
+Algorithm 2: Chipmunk Attention. Computes attention outputs by interleaving dense and sparse-delta
+steps. Dense steps initialize sparsity patterns and caches, while sparse steps selectively recompute
+attention interactions based on cached indices and activations. 
+def c h i p m u n k _ a t t n (q , k , v , i s _ d e n s e _ s t e p ):
+# q , k , v : (b , h , n , e )
+# i s _ d e n s e _ s t e p : bool
+# returns o : (b , h , n , e )
+if i s _ d e n s e _ s t e p :
+o , cs , m , l = c o l s u m _ a t t n (
+q , k , v ,
+prev_m , prev_l
+)
+inds , counts = topk ( cs , dim = -1)
+prev_m = m
+prev_l = l
+o_cache = c o l s p a r s e _ d e l t a _ a t t n (
+q , k , v ,
+inds , counts ,
+o , o_scale = -1
+)
+else :
+o = c o l s p a r s e _ d e l t a _ a t t n (
+q , k , v ,
+inds , counts ,
+o_cache , o_scale = 1
+)
+return o
+ 
+21
+
+=== PAGE 22 ===
+Algorithm 3: Column Sparse Delta Attention.Efficiently recomputes sparse attention interactions
+defined by previously cached indices. 
+def c o l s p a r s e _ d e l t a _ a t t n (q , k , v , inds , counts , o_cache , o_scale ):
+# q , k , v : (b , h , n , e )
+# inds : (b , h , n /c , topk ) sparse indices per Q - tile
+# counts : (b , h , n / c ) number active per Q - tile
+# o_cache : (b , h , n , e )
+# c : q tile size
+# ck : kv tile size
+o = o_cache . clone ()
+for i in range (0 , n , c ):
+q_tile = q [: , : , i : i + c ] # (b , h , c , e )
+o_tile = o [: , : , i : i + c ] # (b , h , c , e )
+idx_q = inds [: , : , i // c , :] # (b , h , topk )
+c o u n t s _ a m t = counts [: , : , i // c ] # (b , h , 1)
+for j in range (0 , counts_amt , ck ):
+idx_tile = idx_q [... , j : j + ck ] # (b , h , ck )
+k_tile = k . gather ( idx_tile , dim = -2) # (b , h , ck , e )
+v_tile = v . gather ( idx_tile , dim = -2) # (b , h , ck , e )
+qk = q_tile @ k_tile . T ( -2 , -1) # (b , h , c , ck )
+p = o n l i n e _ s o f t m a x ( qk ) # (b , h , c , qk )
+o_tile += o_scale * ( p @ v_tile ) # (b , h , c , e )
+return o
+ 
+Algorithm 4: Column Sum Attention. Computes standard attention along with column-wise sums of
+attention probabilities, which are used for dynamically identifying sparsity patterns. 
+def c o l s u m _ a t t n (q , k , v , prev_m , prev_l ):
+# q , k , v : (b , h , n , e )
+# prev_m : (b , h , n , 1)
+# prev_l : (b , h , n , 1)
+# returns o : (b , h , n , e )
+# cs : (b , h , n /c , n ) column - chunk sums
+qk = q @ k . T ( -2 , -1) / sqrt ( e ) # (b , h , n , n )
+p = softmax ( qk , dim = -1) # (b , h , n , n )
+o = p @ v # (b , h , n , e )
+p_approx = exp ( qk - prev_m ) / prev_l # (b , h , n , n )
+cs = r ea rra ng e ( # (b , h , n /c , n )
+p_approx ,
+’b h ( nc c ) m -> b h nc c m ’ ,
+c = c
+). sum ( dim = -2)
+return o , cs
+ 
+22
+
+=== PAGE 23 ===
+Algorithm 5: Chipmunk MLP.Performs MLP layer computations by alternating dense and sparse-
+delta steps. Dense steps compute full activations and initialize caches, and sparse steps efficiently
+update only the activations that exhibit significant changes across inference steps. 
+def c h i p m u n k _ m l p (x , w1 , w2 , i s _ d e n s e _ s t e p ):
+# x : (b , n , d )
+# w1 , w2 : (f , d )
+# i s _ d e n s e _ s t e p : bool
+# returns o : (b , n , d )
+if i s _ d e n s e _ s t e p :
+o , preact , act = mlp (x , w1 , w2 )
+tm_cache = rea rr an ge (
+preact ,
+’b ( nc c ) d -> b nc c d ’ ,
+c =192
+). mean ( dim = -2)
+ac t_ ca ch e = act . clone ()
+ml p_ ca ch e = o . clone ()
+else :
+inds , counts = c o m p u t e _ m l p _ i n d i c e s (
+x ,
+w1 ,
+tm_cache
+)
+o = c o l s p a r s e _ d e l t a _ m l p (
+x ,
+w1 , w2 ,
+self . inds , self . counts ,
+act_cache , o_cache
+)
+return o
+ 
+23
+
+=== PAGE 24 ===
+Algorithm 6: Column Sparse Delta MLP.Computes sparse deltas for MLP outputs by selectively
+recomputing only significantly changed neuron activations. 
+def c o l s p a r s e _ m l p _ d e l t a (x , w1 , w2 , inds , counts , a_cache , o_cache ):
+# x , w1 , w2 : (b , n , d ) , (f , d ) , (f , d )
+# inds : (b , n /c , topk ) active neurons per token - tile
+# counts : (b , n / c ) number active per token - tile
+# a_cache : (b , f , n ) cached a c t i v a t i o n s
+# o_cache : (b , n , d ) cached MLP output
+#
+# c : M tile size
+# cn : N tile size
+# ck : K tile size
+# ---- GEMM1 : delta = x @ W1 [ idx , :]. T - a_cache ----
+tasks = [( i , j ) for i in range (0 , n , c )
+for j in range (0 , counts [ i ] , cn )]
+for (i , j ) tasks :
+idx_tile = inds [: , i // c , j : j + cn ] # (b , cn )
+a_tile = a_cache [ idx_tile ]. T # (b , c , cn )
+pre = z e r o s _ l i k e ( a_tile ) # (b , c , cn )
+for k in range (0 , d , ck ):
+x_tile = x [: , i : i + c , k : k + ck ] # (b , c , ck )
+w1_tile = w1 [ idx_tile , k : k + ck ] # (b , cn , ck )
+pre += x_tile @ w1_tile . T # (b , c , cn )
+a = act_fn ( pre + w1 . bias [ idx_tile ]) # (b , c , cn )
+delta = a - a_cache # (b , c , cn )
+a_cache . scatter_ ( -2 , idx , a . T ) # (b , cn , c )
+# ---- GEMM2 : o_cache += delta @ W2 [ idx , :] ----
+tasks = [( i , j ) for i in range (0 , n , c )
+for j in range (0 , d , cn )]
+for (i , j ) tasks :
+o_tile = o_cache [: , i : i + c ] # (b , c , cn )
+for k in range (0 , counts [ i ] , ck ):
+idx_tile = inds [: , i // c , k : k + ck ] # (b , ck )
+d_tile = delta [: , i : i + c , k : k + ck ] # (b , c , ck )
+w2_tile = w2 [ idx_tile , j : j + cn ] # (b , ck , cn )
+o_tile += delta @ w2_tile # (b , c , cn )
+return o_cache # (b , n , d )
+ 
+24
+
+=== PAGE 25 ===
+Algorithm 7: Computing MLP Sparse Indices. Identifies neurons in MLP layers with the largest
+cross-step activation changes. 
+def c o m p u t e _ m l p _ i n d i c e s (x , w1 , tm_cache ):
+# x : (b , n , d )
+# w1 : (f , d )
+# tm_cache : (b , n /c , f )
+#
+# returns inds : (b , n /c , topk ) top neurons per token - group
+# counts : (b , n /c , 1) active neurons per token - group
+tm = re arr an ge ( # (b , n /c , d )
+x ,
+’b ( nc c ) d -> b nc c d ’ ,
+c = c
+). mean ( dim = -2)
+tm = tm @ w1 . T # (b , n /c , f )
+delta = ( tm - tm_cache ). abs () # (b , n /c , f )
+inds , counts = delta . topk ( dim = -1). indices # (b , n /c , topk )
+return inds , counts
+ 
+25
+
+=== PAGE 26 ===
+D Evaluations
+D.1 Hyperparameters
+In this section, we expand upon the hyperparameters of all methods used to create the tables.
+• TeaCache: The threshold parameter is set to 0.78 for FLUX.1-dev, 0.2 for WAN2.1, and
+0.65 for HunyuanVideo. We implement TeaCache by copying the reference repository
+implementation.
+• Sliding Tile Attention: We approximated the tile size to approximately cover 58% sparsity,
+as described in their paper [61]. For speedup numbers, we run their kernel at this sparsity level
+and measure the kernel duration, replacing the existing attention runtime with the new number.
+• DiTFastAttn: The default hyperparameters available at the xDiT GitHub repository were
+used: window size=512, number of calibrations=4, and with caching enabled.
+• ToCa: The default hyperparameters suggested in their paper were used (N=2, R=90%) [64].
+• Chipmunk: We apply 84% attention sparsity and 70% MLP sparsity for FLUX.1-dev. For
+text-to-video generation we use 95% attention sparsity on HunyuanVideo and 82% attention
+sparsity on W AN2.1. Since MLP runtime accounts for a very small percentage of wall clock
+time in both HunyuanVideo and WAN2.1, we only apply sparse attention deltas to achieve
+the best speed-quality tradeoff. For WAN2.1, when we stack Chipmunk with STA, we use
+a configuration of STA with a sliding tile size of 3 voxels, where each voxel is a (4,6,8) chunk
+of tokens. This corresponds to roughly 7% of the total attention mask.
+• Step Caching: For entries marked Chipmunk + Step Caching, we use a simple uniform
+schedule we found to approximate the behavior of a number of adaptive scheduling methods.
+In the middle W steps of the diffusion process, we only compute everynth step, skipping
+all others by reusing the last computed model output. We use W = 30 and n = 4, which
+corresponds to a roughly 1.8x speedup with 50 total steps. Thus, each step is either (i) fully
+skipped, (ii) partially sparse (Chipmunk), or (iii) fully dense.
+D.2 HunyuanVideo
+We include additional qualitative studies on text-to-video generation quality in Figure 11.
+D.3 W AN2.1
+We include additional qualitative studies on text-to-video generation quality in Figures 9, 10, and 12. In
+Fig. 9, we test the effect of reusing non-recomputed attention interactions from a previous step and using
+dynamically identified sparsity patterns. On the left, we observe that only using a static local mask at
+high sparsity levels introduces quality degradation and object warping. On the right, we find that reusing
+attention interactions and adding only 1% of dynamically selected top attention interactions restores
+significant quality. We also study the speed-quality tradeoff at high levels of sparsity in Fig. 10. At high
+levels of sparsity, such as 92% on the left, we observe warping on detailed objects such as a hand making
+fine motor movements to draw on paper. We find that slightly increasing the number of dynamically
+selected attention interactions to be recomputed, from 1% to 5%, significantly improves quality.
+D.4 FLUX.1-dev
+Evaluation across prompts. Using the methods of the main results table in the paper body, we
+generate images across a variety of prompts and methods (Fig. 7). We observe that naively skipping
+steps may impair visual quality due to blur and loss of detail. We find Chipmunk preserves aesthetic
+quality but may change some details of the image while maintaining strong adherence to prompts.
+Although DiTFastAttn has strong quality, it only achieves a minor speedup.
+Evaluation across speed-quality tradeoff. We evaluate multiple values of MLP and attention
+sparsity, ranging from 0% to 90%, to better understand how the MLP & attention sparsity parameters
+modulate the speed-quality tradeoff (Fig. 8). The images maintain strong quality levels of sparsity
+reaching 70-80%. Beyond 80%, significant artifacts are introduced.
+E Extended Related Work
+Towards Few-Step Diffusion Models. Early diffusion models required hundreds to thousands of
+denoising steps per generated sample, originating from the foundational work of Sohl-Dickstein et
+26
+
+=== PAGE 27 ===
+Figure 7: Images on 1280x768 FLUX.1-dev evaluated on different captions and prompts randomly
+sampled from the ImageReward dataset. On the left, we have vanilla reference images. Naively
+skipping steps (third column) introduces significant artifacts, such as a blurry images and a loss of
+detail. Chipmunk preserves aesthetic quality but may change some details of the image (despite
+maintaining prompt adherence). DiTFastAttn also achieves high quality but only a minor speedup.
+27
+
+=== PAGE 28 ===
+Figure 8: Speed-quality tradeoff on 1280x768 images generated on FLUX.1-dev with 50 steps at
+varying levels of Chipmunk sparsity. The images maintain strong quality at high levels of sparsity
+reaching 70-80%. Beyond 80%, significant artifacts are introduced and visual quality noticeably
+degrades resulting in blurry images or loss of detail. A single value was used for both attention and
+MLP sparsity. Prompts are listed below:
+• "anthropomorphic crow werecreature, photograph captured in a forest"
+• "a concept art of a vehicle, cyberpunk"
+• "astronaut drifting afloat in space, in the darkness away from anyone else, alone, black
+background dotted with stars, realistic"
+• "photo of a interior taken with a cheap digital camera at night flash lighting"
+• "A realistic photo of a man with big ears"
+• "delicious plate of food"
+• "tumultuous plunging waves, anime, artwork, studio ghibli, stylized, in an anime format"
+• "an alien planet viewed from space, extremely, beautiful, dynamic, creative, cinematic"
+al. [40] and Ho et al. [15]. Subsequent methods significantly reduced inference steps by enhancing
+sampling efficiency: DDIM introduced a non-Markovian forward diffusion process that decouples
+training and sampling steps, while the DPM-Solver family achieved substantial speedups by utilizing
+dedicated diffusion ODE solvers without retraining [30, 41]. Another line of research has specifically
+targeted training processes optimized for single-step inference. For instance, Rectified Flow [28] learns
+straight-line mappings from noise to data, and Consistency Models [42] directly model single-step
+noise-to-data transformations from arbitrary points along the noising trajectory. Additionally, step-
+distillation techniques, such as Progressive Distillation [36], efficiently train few-step student models
+to approximate the longer sampling trajectories of multi-step teacher models. Complementing these
+approaches, which allocate computational resources uniformly once the number of steps is determined,
+Chipmunk studies an orthogonal dimension of efficiency: dynamically allocating computation within
+individual inference steps by selectively recomputing only the most important activations.
+Efficient Attention Approximations. The quadratic complexity of self-attention mechanisms has
+driven extensive research into efficient approximations. Prior works have explored many strategies,
+including low-rank approximations [49], random-feature projections [7], locality-sensitive hashing
+or local attention masks [20, 57], and combined sparse-plus-low-rank decompositions [1, 2]. Recent
+studies on video and diffusion models have adopted static sliding-window attention masks [56, 61]
+and quantized attention computations [ 59]. Chipmunk focuses on a dynamic sparse attention
+28
+
+=== PAGE 29 ===
+Figure 9: Ablation of adding deltas (to reuse attention interactions that are not recomputed) and 1%
+dynamic TopK attention mask on top of static local voxel attention. We find that at high sparsity levels,
+using only a static local mask results in artifacts and object warping. Adding deltas and just 1% of
+the dynamically selected top attention interactions significantly improves quality.Note: Because the
+3D dimensions do not divide evenly into 3D voxels, both configurations shown above also use full
+attention to and from the remainder slice in each dimension.
+approximation to speedup DiTs and can be complemented with other techniques such as low-rank
+approximations or static mask patterns.
+Efficient MLP Approximations. Conditional computation strategies such as Mixture-of-Experts
+[12, 39] selectively activate a subset of expert MLP modules per token, reducing FLOPs proportionally
+to top-k gating decisions. More fine-grained neuron-level sparsity methods, such as contextual sparsity
+[29], dynamically select only the most relevant neurons during autoregressive decoding, guided by
+a lightweight prediction model. Chipmunk complements these existing conditional computation
+techniques with the addition of activation reuse across inference steps. Instead of purely gating experts
+or neurons, Chipmunk leverages multi-step inference to selectively recompute only the neurons exhibit-
+ing significant changes, while reusing the activations of non-activated neurons from a cache. While
+initially demonstrated for diffusion models, the general concept of caching and sparse recomputation
+has potential applicability in other multi-step inference contexts, such as autoregressive decoding.
+29
+
+=== PAGE 30 ===
+Figure 10: Comparing the quality of W AN2.1 generation at 1% dynamic top-k attention interactions
+and 5% dynamic top-k attention interactions. On the left, we see that at high sparsity levels, detailed
+objects such as the pencil and hands begin to experience warping. We then see on the right that
+increasing the number of dynamically selected top-k attention interactions from 1% to 5% restores
+high quality generation of the pencil and hands.
+30
+
+=== PAGE 31 ===
+Figure 11: Qualitative video generation comparison across different methods for HunyuanVideo
+31
+
+=== PAGE 32 ===
+Figure 12: Qualitative video generation comparison across different methods for W AN2.1.
+32

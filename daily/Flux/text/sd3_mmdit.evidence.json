@@ -1,0 +1,153 @@
+{
+  "file": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\01_foundations\\sd3_mmdit_2403.03206.pdf",
+  "page_count": 28,
+  "first_page_excerpt": "Scaling Rectified Flow Transformers for High-Resolution Image Synthesis\nPatrick Esser * Sumith Kulal Andreas Blattmann Rahim Entezari Jonas M ¨uller Harry Saini Yam Levi\nDominik Lorenz Axel Sauer Frederic Boesel Dustin Podell Tim Dockhorn Zion English\nKyle Lacey Alex Goodwin Yannik Marek Robin Rombach *\nStability AI\nFigure 1. High-resolution samples from our 8B rectified flow model, showcasing its capabilities in typography, precise prompt following\nand spatial reasoning, attention to fine details, and high image quality across a wide variety of styles.\nAbstract\nDiffusion models create data from noise by invert-\ning the forward paths of data towards noise and\nhave emerged as a powerful generative modeling\ntechnique for high-dimensional, perceptual data\nsuch as images and videos. Rectified flow is a re-\ncent generative model formulation that connects\ndata and noise in a straight line. Despite its better\ntheoretical properties and conceptual simplicity, it\nis not yet decisively established as standard prac-\ntice. In this work, we improve existing noise sam-\npling techniques for training rectified flow mod-\nels by biasing them towards perceptually relevant\nscales. Through a large-scale study, we demon-\n*Equal contribution . <first.last>@stability.ai.\nstrate the superior performance of this approach\ncompared to established diffusion formulations\nfor high-resolution text-to-image synthesis. Ad-\nditionally, we present a novel transformer-based\narchitecture for text-to-image generation that uses\nseparate weights for the two modalities and en-\nables a bidirectional flow of information between\nimage and text tokens, improving text comprehen-\nsion, typography, and human preference ratings.\nWe demonstrate that this architecture follows pre-\ndictable scaling trends and correlates lower vali-\ndation loss to improved text-to-image synthesis as\nmeasured by various metrics and human evalua-\ntions. Our largest models outperform state-of-the-\nart models, and we will make our experimental\ndata, code, and model weights publicly available.\n1\narXiv:2403.03206v1  [cs.CV]  5 Mar 2024",
+  "flux_evidence": [],
+  "figure_candidates": [
+    {
+      "page": 1,
+      "caption": "Figure 1. High-resolution samples from our 8B rectified flow model, showcasing its capabilities in typography, precise prompt following"
+    },
+    {
+      "page": 5,
+      "caption": "Figure 2. Our model architecture. Concatenation is indicated by ⊙ and element-wise multiplication by ∗. The RMS-Norm for Q and K"
+    },
+    {
+      "page": 7,
+      "caption": "Figure 3. Rectified flows are sample efficient. Rectified Flows"
+    },
+    {
+      "page": 9,
+      "caption": "Figure 4. Training dynamics of model architectures. Compara-"
+    },
+    {
+      "page": 9,
+      "caption": "Figure 5. Effects of QK-normalization. Normalizing the Q- and"
+    },
+    {
+      "page": 9,
+      "caption": "Figure 5, the additional normalization prevents the attention"
+    },
+    {
+      "page": 10,
+      "caption": "Figure 6. Timestep shifting at higher resolutions. Top right: Hu-"
+    },
+    {
+      "page": 10,
+      "caption": "Figure 7. Human Preference Evaluation against currrent"
+    },
+    {
+      "page": 11,
+      "caption": "Figure 8 are only FLOPs from video training and do not"
+    },
+    {
+      "page": 11,
+      "caption": "Figure 12 illustrates how training a larger model for longer"
+    },
+    {
+      "page": 12,
+      "caption": "Figure 8. Quantitative effects of scaling. We analyze the impact of model size on performance, maintaining consistent training"
+    },
+    {
+      "page": 12,
+      "caption": "Figure 9. Impact of T5. We observe T5 to be important for"
+    },
+    {
+      "page": 21,
+      "caption": "Figure 10. FID scores after training flow models with different sizes (parameterized via their depth) on the latent space of different"
+    },
+    {
+      "page": 21,
+      "caption": "Figure 11 visualizes the distributions of thelogit-normal sampler and the mode sampler introduced in Section 3.1. Notably,"
+    },
+    {
+      "page": 22,
+      "caption": "Figure 11. The mode (left) and logit-normal (right) distributions that we explore for biasing the sampling of training timesteps."
+    },
+    {
+      "page": 22,
+      "caption": "Figure 12. Qualitative effects of scaling. Displayed are examples demonstrating the impact of scaling training steps (left to right: 50k,"
+    },
+    {
+      "page": 23,
+      "caption": "Figure 13. Comparison between base models and DPO-finetuned models. DPO-finetuning generally results in more aesthetically pleasing"
+    },
+    {
+      "page": 23,
+      "caption": "Figure 13 shows samples of the respective base models and DPO-finetuned models."
+    },
+    {
+      "page": 24,
+      "caption": "Figure 14. Human preference evaluation between base models and DPO-finetuned models. Human evaluators prefer DPO-finetuned"
+    },
+    {
+      "page": 25,
+      "caption": "Figure 15. Zero Shot Text manipulation and insertion with the 2B Edit model"
+    },
+    {
+      "page": 27,
+      "caption": "Figure 16. Results of deduplicating our training datasets for various filtering thresholds."
+    },
+    {
+      "page": 28,
+      "caption": "Figure 17. SSCD-based deduplication prevents memorization. To assess how well our SSCD-based deduplication works, we extract"
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 6,
+      "caption": "Table 1. Global ranking of variants. For this ranking, we apply"
+    },
+    {
+      "page": 6,
+      "caption": "Table 2. Metrics for different variants. FID and CLIP scores of"
+    },
+    {
+      "page": 7,
+      "caption": "Table 3. Improved Autoencoders. Reconstruction performance"
+    },
+    {
+      "page": 7,
+      "caption": "Table 4. Improved Captions . Using a 50/50 mixing ratio of"
+    },
+    {
+      "page": 11,
+      "caption": "Table 5. GenEval comparisons. Our largest model (depth=38)"
+    },
+    {
+      "page": 11,
+      "caption": "Table 6. Impact of model size on sampling efficiency. The table"
+    },
+    {
+      "page": 24,
+      "caption": "Table 7. Key figures for preencoding frozen input networks. Mem is the memory required to load the model on the GPU. FP [ms] is"
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      1,
+      2,
+      4,
+      5,
+      9,
+      12,
+      14,
+      15,
+      17,
+      23,
+      26
+    ],
+    "super_resolution": [
+      16,
+      23
+    ],
+    "efficiency": [
+      12,
+      24
+    ],
+    "ablation": [],
+    "limitations": []
+  },
+  "key": "sd3_mmdit",
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\text\\sd3_mmdit.txt"
+}

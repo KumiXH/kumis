@@ -1,0 +1,290 @@
+[
+  {
+    "key": "dit",
+    "role": "architecture",
+    "page": 3,
+    "caption": "Figure 3, DiT architecture",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\dit\\architecture_page_3.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\01_foundations\\dit_2212.09748.pdf"
+  },
+  {
+    "key": "dit",
+    "role": "result",
+    "page": 1,
+    "caption": "Figure 1, generated samples",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\dit\\result_page_1.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\01_foundations\\dit_2212.09748.pdf"
+  },
+  {
+    "key": "rectified_flow",
+    "role": "concept",
+    "page": 4,
+    "caption": "Figure 2, rectified-flow construction",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\rectified_flow\\concept_page_4.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\01_foundations\\rectified_flow_2209.03003.pdf"
+  },
+  {
+    "key": "flow_matching",
+    "role": "concept",
+    "page": 6,
+    "caption": "Figures 2-3, OT and diffusion probability paths",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\flow_matching\\concept_page_6.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\01_foundations\\flow_matching_2210.02747.pdf"
+  },
+  {
+    "key": "ot_cfm",
+    "role": "method",
+    "page": 3,
+    "caption": "Conditional flow matching and minibatch OT",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\ot_cfm\\method_page_3.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\01_foundations\\ot_cfm_2302.00482.pdf"
+  },
+  {
+    "key": "sd3_mmdit",
+    "role": "architecture",
+    "page": 5,
+    "caption": "Figure 2, MMDiT architecture",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\sd3_mmdit\\architecture_page_5.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\01_foundations\\sd3_mmdit_2403.03206.pdf"
+  },
+  {
+    "key": "sd3_mmdit",
+    "role": "result",
+    "page": 1,
+    "caption": "Figure 1, high-resolution samples",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\sd3_mmdit\\result_page_1.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\01_foundations\\sd3_mmdit_2403.03206.pdf"
+  },
+  {
+    "key": "flux_kontext",
+    "role": "architecture",
+    "page": 5,
+    "caption": "Figure 4, FLUX.1 Kontext overview",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\flux_kontext\\architecture_page_5.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\02_flux_foundation\\flux_kontext_2506.15742.pdf"
+  },
+  {
+    "key": "flux_kontext",
+    "role": "editing",
+    "page": 3,
+    "caption": "Figure 2, iterative editing",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\flux_kontext\\editing_page_3.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\02_flux_foundation\\flux_kontext_2506.15742.pdf"
+  },
+  {
+    "key": "fluxsr",
+    "role": "architecture",
+    "page": 5,
+    "caption": "Figure 3, FluxSR training framework",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\fluxsr\\architecture_page_5.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\03_super_resolution\\fluxsr_2502.01993.pdf"
+  },
+  {
+    "key": "fluxsr",
+    "role": "result",
+    "page": 8,
+    "caption": "Figure 5, Real-ISR comparison",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\fluxsr\\result_page_8.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\03_super_resolution\\fluxsr_2502.01993.pdf"
+  },
+  {
+    "key": "dreamsr",
+    "role": "architecture",
+    "page": 3,
+    "caption": "Figure 2, DreamSR architecture",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\dreamsr\\architecture_page_3.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\03_super_resolution\\dreamsr_2605.15682.pdf"
+  },
+  {
+    "key": "dreamsr",
+    "role": "result",
+    "page": 7,
+    "caption": "Figure 4, qualitative comparison",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\dreamsr\\result_page_7.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\03_super_resolution\\dreamsr_2605.15682.pdf"
+  },
+  {
+    "key": "op4ksr",
+    "role": "architecture",
+    "page": 5,
+    "caption": "Figure 4, OP4KSR architecture",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\op4ksr\\architecture_page_5.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\03_super_resolution\\op4ksr_2605.13457.pdf"
+  },
+  {
+    "key": "op4ksr",
+    "role": "result",
+    "page": 11,
+    "caption": "Figure 8, qualitative comparison",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\op4ksr\\result_page_11.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\03_super_resolution\\op4ksr_2605.13457.pdf"
+  },
+  {
+    "key": "op4ksr",
+    "role": "ablation",
+    "page": 14,
+    "caption": "Figure 10, periodic-artifact ablation",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\op4ksr\\ablation_page_14.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\03_super_resolution\\op4ksr_2605.13457.pdf"
+  },
+  {
+    "key": "foa_sr",
+    "role": "architecture",
+    "page": 4,
+    "caption": "Figure 2, FoA-SR framework",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\foa_sr\\architecture_page_4.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\03_super_resolution\\foa_sr_2606.10275.pdf"
+  },
+  {
+    "key": "foa_sr",
+    "role": "result",
+    "page": 8,
+    "caption": "Figure 3, faithful/aesthetic comparison",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\foa_sr\\result_page_8.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\03_super_resolution\\foa_sr_2606.10275.pdf"
+  },
+  {
+    "key": "acquire_adapt_fluxir",
+    "role": "architecture",
+    "page": 4,
+    "caption": "Figure 3, FluxIR pipeline",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\acquire_adapt_fluxir\\architecture_page_4.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\04_image_restoration\\acquire_adapt_fluxir_2504.15159.pdf"
+  },
+  {
+    "key": "acquire_adapt_fluxir",
+    "role": "result",
+    "page": 7,
+    "caption": "Figure 5, RealLQ250 comparison",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\acquire_adapt_fluxir\\result_page_7.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\04_image_restoration\\acquire_adapt_fluxir_2504.15159.pdf"
+  },
+  {
+    "key": "edit2restore",
+    "role": "method",
+    "page": 5,
+    "caption": "Figure 1, few-shot adaptation setting",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\edit2restore\\method_page_5.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\04_image_restoration\\edit2restore_2601.03391.pdf"
+  },
+  {
+    "key": "edit2restore",
+    "role": "result",
+    "page": 9,
+    "caption": "Figure 2, restoration comparison",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\edit2restore\\result_page_9.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\04_image_restoration\\edit2restore_2601.03391.pdf"
+  },
+  {
+    "key": "lucidflux",
+    "role": "architecture",
+    "page": 4,
+    "caption": "Figure 2, LucidFlux architecture",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\lucidflux\\architecture_page_4.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\04_image_restoration\\lucidflux_2509.22414.pdf"
+  },
+  {
+    "key": "lucidflux",
+    "role": "result",
+    "page": 9,
+    "caption": "Figure 4, RealLQ250 comparison",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\lucidflux\\result_page_9.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\04_image_restoration\\lucidflux_2509.22414.pdf"
+  },
+  {
+    "key": "resflow_tuner",
+    "role": "architecture",
+    "page": 4,
+    "caption": "ResFlow-Tuner framework",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\resflow_tuner\\architecture_page_4.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\04_image_restoration\\resflow_tuner_2603.22027.pdf"
+  },
+  {
+    "key": "resflow_tuner",
+    "role": "table",
+    "page": 11,
+    "caption": "Tables 1-2, quantitative comparison",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\resflow_tuner\\table_page_11.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\04_image_restoration\\resflow_tuner_2603.22027.pdf"
+  },
+  {
+    "key": "bitnet_flux",
+    "role": "efficiency",
+    "page": 2,
+    "caption": "Figure 2, memory and latency",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\bitnet_flux\\efficiency_page_2.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\05_efficiency\\bitnet_flux_2412.18653.pdf"
+  },
+  {
+    "key": "bitnet_flux",
+    "role": "result",
+    "page": 4,
+    "caption": "Figure 3, visual comparison",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\bitnet_flux\\result_page_4.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\05_efficiency\\bitnet_flux_2412.18653.pdf"
+  },
+  {
+    "key": "imax",
+    "role": "method",
+    "page": 4,
+    "caption": "Figure 3, projected-flow mechanism",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\imax\\method_page_4.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\05_efficiency\\imax_2410.07536.pdf"
+  },
+  {
+    "key": "imax",
+    "role": "result",
+    "page": 2,
+    "caption": "Figure 1, high-resolution generation",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\imax\\result_page_2.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\05_efficiency\\imax_2410.07536.pdf"
+  },
+  {
+    "key": "chipmunk",
+    "role": "architecture",
+    "page": 2,
+    "caption": "Figure 1, dynamic column-sparse deltas",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\chipmunk\\architecture_page_2.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\05_efficiency\\chipmunk_2506.03275.pdf"
+  },
+  {
+    "key": "chipmunk",
+    "role": "table",
+    "page": 9,
+    "caption": "Table 5 and Figure 4, FLUX evaluation",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\chipmunk\\table_page_9.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\05_efficiency\\chipmunk_2506.03275.pdf"
+  },
+  {
+    "key": "hicache",
+    "role": "method",
+    "page": 5,
+    "caption": "Figure 3, Hermite cache forecast",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\hicache\\method_page_5.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\05_efficiency\\hicache_2508.16984.pdf"
+  },
+  {
+    "key": "hicache",
+    "role": "table",
+    "page": 7,
+    "caption": "Table 3, FLUX.1-dev comparison",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\hicache\\table_page_7.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\05_efficiency\\hicache_2508.16984.pdf"
+  },
+  {
+    "key": "mixed_resolution_latent",
+    "role": "architecture",
+    "page": 4,
+    "caption": "Figure 4, RALU framework",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\mixed_resolution_latent\\architecture_page_4.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\05_efficiency\\mixed_resolution_latent_2507.08422.pdf"
+  },
+  {
+    "key": "mixed_resolution_latent",
+    "role": "result",
+    "page": 7,
+    "caption": "Figure 6, accelerated generation comparison",
+    "image": "D:\\Repository\\ReadPaper\\daily\\Flux\\figures\\paper_pages\\mixed_resolution_latent\\result_page_7.png",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\05_efficiency\\mixed_resolution_latent_2507.08422.pdf"
+  }
+]

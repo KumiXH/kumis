@@ -1,0 +1,136 @@
+{
+  "file": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\04_image_restoration\\edit2restore_2601.03391.pdf",
+  "page_count": 15,
+  "first_page_excerpt": "Edit2Restore: Few-Shot Image Restoration\nvia Parameter-Efficient Adaptation\nof Pre-trained Editing Models\nM. Akın Yılmaz1[0000−0002−0795−8970], Ahmet Bilican2[0009−0000−6406−8168],\nBurak Can Biner1[0009−0009−8580−8220], and\nA. Murat Tekalp2[0000−0003−1465−8121]\n1 Codeway AI, Istanbul, Turkey\n2 Koc University, Istanbul, Turkey\nAbstract.Image restoration has traditionally required training spe-\ncialized models on thousands of paired examples per degradation type.\nWe challenge this paradigm by demonstrating that powerful pre-trained\ntext-conditioned image editing models can be efficiently adapted for\nmultiple restoration tasks through parameter-efficient fine-tuning with\nremarkably few examples. Our approach fine-tunes LoRA adapters on\nFLUX.1 Kontext, a state-of-the-art 12B parameter flow matching model\nfor image-to-image translation, using only 16-128 paired images per task,\nguided by simple text prompts that specify the restoration operation.\nUnlike existing methods that train specialized restoration networks from\nscratch with thousands of samples, we leverage the rich visual priors\nalready encoded in large-scale pre-trained editing models, dramatically\nreducing data requirements while maintaining high perceptual quality. A\nsingle unified LoRA adapter, conditioned on task-specific text prompts,\neffectively handles multiple degradations including denoising, derain-\ning, and dehazing. Through comprehensive ablation studies, we analyze:\n(i) the impact of training set size on restoration quality, (ii) trade-offs be-\ntweentask-specificversusunifiedmulti-taskadapters,(iii)theroleoftext\nencoder fine-tuning, and (iv) zero-shot baseline performance. While our\nmethod prioritizes perceptual quality over pixel-perfect reconstruction\nmetrics like PSNR/SSIM, our results demonstrate that pre-trained im-\nage editing models, when properly adapted, offer a compelling and data-\nefficient alternative to traditional image restoration approaches, open-\ning new avenues for few-shot, prompt-guided image enhancement. The\ncode to reproduce our results are available at:https://github.com/\nmakinyilmaz/Edit2Restore\nKeywords:few-shot image restoration·pre-trained image editing mod-\nels·parameter-efficient adaptation.\n1 Introduction\nImage restoration, recovering high-quality images from degraded observations,\nhas traditionally relied on training specialized models for each degradation type,\narXiv:2601.03391v2  [eess.IV]  20 Jan 2026",
+  "flux_evidence": [
+    {
+      "page": 1,
+      "snippets": [
+        "FLUX.1 Kontext, a state-of-the-art 12B parameter flow matching model"
+      ]
+    },
+    {
+      "page": 2,
+      "snippets": [
+        "remarkable models like FLUX.1 Kontext [5] with sophisticated understanding of",
+        "In this work, we demonstrate that FLUX.1 Kontext [5], a prominent text-",
+        "just 16-128 paired images per task. FLUX.1 Kontext is a 12 billion parameter",
+        "We fine-tune lightweight LoRA [15] adapters on FLUX.1 Kontext, guided by"
+      ]
+    },
+    {
+      "page": 4,
+      "snippets": [
+        "recent models achieve state-of-the-art quality: FLUX.1 Kontext [5] employs a",
+        "We demonstrate that LoRA adaptation of FLUX.1 Kontext, when combined",
+        "Our method leverages FLUX.1 Kontext [5], a 12 billion parameter flow match-"
+      ]
+    },
+    {
+      "page": 5,
+      "snippets": [
+        "3.1 Preliminaries: FLUX.1 Kontext",
+        "FLUX.1 Kontext is a rectified flow transformer that performs image-to-image",
+        "Unlike traditional diffusion models that predict noise, FLUX.1 Kontext uses"
+      ]
+    },
+    {
+      "page": 6,
+      "snippets": [
+        "FLUX.1 Kontext is pre-trained on billions of image-text pairs, learning rich",
+        "Rather than fine-tuning all 12 billion parameters of FLUX.1 Kontext, we employ",
+        "’rain’, ’haze’). This simplicity serves two purposes:(1)it leverages FLUX.1 Kon-"
+      ]
+    },
+    {
+      "page": 7,
+      "snippets": [
+        "scale to 2.5 following FLUX.1 Kontext’s default sampling schedule. Inference"
+      ]
+    },
+    {
+      "page": 8,
+      "snippets": [
+        "we first evaluate FLUX.1 Kontext’s zero-shot restoration capabilities without",
+        "29.62 atσ= 15to 81.75 atσ= 50. These results confirm that while FLUX.1",
+        "encodersfrozenorjointlyfine-tunethemalongsideLoRAadapters.FLUX.1Kon-"
+      ]
+    },
+    {
+      "page": 10,
+      "snippets": [
+        "priors in FLUX.1 Kontext are sufficiently rich that even minimal task-specific"
+      ]
+    },
+    {
+      "page": 12,
+      "snippets": [
+        "training examples. Our systematic investigation reveals that while FLUX.1 Kon-"
+      ]
+    },
+    {
+      "page": 13,
+      "snippets": [
+        "5. Black Forest Labs, Batifol, S., Blattmann, A., Boesel, F., et al.: FLUX.1 Kontext:"
+      ]
+    }
+  ],
+  "figure_candidates": [
+    {
+      "page": 4,
+      "caption": "Figure 1 illustrates our overall framework."
+    },
+    {
+      "page": 5,
+      "caption": "Fig. 1.Traditionalapproachesrequiretrainingspecificmodelswiththousandsofpaired"
+    },
+    {
+      "page": 9,
+      "caption": "Fig. 2.Qualitative comparison of image restoration results."
+    },
+    {
+      "page": 9,
+      "caption": "Figure 2 provides visual evidence of these improvements. The progression"
+    },
+    {
+      "page": 11,
+      "caption": "Fig. 3.Qualitative comparison between task-specific and unified multi-task adapters"
+    },
+    {
+      "page": 12,
+      "caption": "Figure 3 provides visual evidence supporting these findings, showing that uni-"
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 11,
+      "caption": "Table 2 presents the quantitative comparison across all restoration tasks."
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      2,
+      3,
+      4,
+      5,
+      10,
+      12,
+      13
+    ],
+    "super_resolution": [
+      15
+    ],
+    "efficiency": [],
+    "ablation": [
+      1,
+      3,
+      4,
+      12
+    ],
+    "limitations": [
+      8
+    ]
+  },
+  "key": "edit2restore",
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\text\\edit2restore.txt"
+}

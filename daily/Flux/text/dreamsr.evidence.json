@@ -1,0 +1,126 @@
+{
+  "file": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\03_super_resolution\\dreamsr_2605.15682.pdf",
+  "page_count": 12,
+  "first_page_excerpt": "DreamSR: Towards Ultra-High-Resolution Image Super-Resolution via a\nReceptive-Field Enhanced Diffusion Transformer\nQingji Dong1 Hang Dong1* Mingqin Chen1 Rui Zhang1 Yitong Wang1\n1 ByteDance Inc.\nAbstract\nLarge-scale pre-trained diffusion models have been exten-\nsively adopted for real-world image Super-Resolution be-\ncause of their powerful generative priors through textual\nguidance. However, when super-resolving high-resolution\nimages with patch-wise inference strategy, most exist-\ning diffusion-based SR methods tend to suffer from over-\ngeneration, due to the misalignment between the global\nprompt from LR image and the incomplete semantic infor-\nmation of local patches during each inference step. On the\nother hand, most existing methods also failed to generate\ndetailed texture in local patches due to the overemphasis on\nglobal generation capabilities in network designs and train-\ning strategies. To address this issue, we present DreamSR,\na novel SR model that suppresses local over-generation\nand improves fine-detail synthesis, thereby achieving visu-\nally faithful results with ultra-high-quality details. Specif-\nically, we propose a dual-branch MM-ControlNet, where\nthe ControlNet generates local textual feature with patch-\nlevel prompts while the pre-trained DiT provides global\ntextual feature with global prompts, thereby mitigating\nover-generation and ensuring semantic consistency across\npatches. We also design a comprehensive training strat-\negy with stage-specific data processing pipelines and\na Receptive-Field Enhancement strategy, enhancing the\nmodel’s capability to capture patch information and effec-\ntively restore local textures. Extensive experiments demon-\nstrate that DreamSR outperforms state-of-the-art methods,\nproviding high-quality SR results. Code and model are\navailable at https://github.com/jerrydong0219/DreamSR.\n1. Introduction\nReal-world Image Super-Resolution (Real-ISR) aims to re-\nconstruct high-resolution (HR) images from low-resolution\n(LR) inputs with unknown degradation. This task requires\nthe model not only to effectively remove diverse degrada-\ntions but also to generate perceptually realistic details, es-\n*Corresponding Author.\npecially in challenging ultra-high-resolution (≥4K) scenar-\nios. Recent text-to-image (T2I) diffusion-based Real-ISR\napproaches [68, 70] significantly outperform earlier GAN-\nbased methods [6, 29, 56], owing to the appropriate selec-\ntion of generative prior and the effective incorporation of\nthese priors into Real-ISR. However, these methods still\nface limitations; either the selection of pre-trained priors\nis suboptimal, or the pre-trained image priors are insuffi-\nciently exploited. The problem becomes particularly pro-\nnounced in ultra-high-resolution scenarios, where patch-\nwise inference [2] is necessary due to computational con-\nstraints. During patch-wise inference, the limited seman-\ntic information within each patch conflicts with the global\ntextural guidance derived from the LR image, resulting\nin undesired artifacts (over-generation). Trivially employ-\ning local prompts fails to reconstruct fine textures (under-\ngeneration), as such local prompts are inadequate to activate\nthe full generative capacity of the pre-trained model.\nIn this paper, we propose DreamSR, a method tailored\nfor ultra-high-resolution image reconstruction with patch-\nwise inference, aiming at fully leveraging the pre-trained\nT2I generative prior. Specifically, we employ FLUX [3] as\nour backbone due to its unified architecture, which avoids\nthe split of generative priors across separate base and refiner\nmodels, i.e., SDXL [43]. To address the aforementioned\nover-generation and under-generation issues, we introduce\na dual-branch network architecture Patch Context aware\nMM-ControlNet. In this design, one ControlNet branch\nutilizes local prompts to capture visual features of local\npatches, while the fixed DiT backbone leverages global\nprompts to fully activate the pre-trained generative prior.\nBased on the proposed architecture, we design a two-stage\ninference framework consisting of degradation removal and\ntexture generation. We define the multi-step denoising pro-\ncess of the diffusion model as the texture generation stage,\nwhich focuses on refining high-frequency textures. An ac-\ncelerated LoRA module is adopted in the degradation re-\nmoval stage to mitigate the latent distribution shift between\ndegraded LR images and natural images. The degradation\nremoval stage not only speeds up and reduces the early de-\nnoising steps of the reconstruction process, but also aligns\nThis CVPR paper is the Open Access version, provided by the Computer Vision Foundation.\nExcept for this watermark, it is identical to the accepted version;\nthe final published version of the proceedings is available on IEEE Xplore.\n38258",
+  "flux_evidence": [
+    {
+      "page": 1,
+      "snippets": [
+        "T2I generative prior. Specifically, we employ FLUX [3] as"
+      ]
+    },
+    {
+      "page": 3,
+      "snippets": [
+        "FLUX VAEFLUX DiTPatch Contextaware MM-ControlNetContext Cross-Attention ModuleRestoration Acceleration LoRA",
+        "as MM-DiT, used in models like FLUX [3] and SD3.0",
+        "We build our DreamSR framework upon Flux.1-dev model",
+        "FLUX.1-dev [3]. To enhance the text interaction capabil-"
+      ]
+    },
+    {
+      "page": 4,
+      "snippets": [
+        "tion method that leverages the FLUX model to erase de-"
+      ]
+    },
+    {
+      "page": 5,
+      "snippets": [
+        "FLUX DiTPatch Context aware MM-ControlNetRestoration Acceleration LoRA",
+        "using the FLUX model conditioned onP img +P neg."
+      ]
+    },
+    {
+      "page": 9,
+      "snippets": [
+        "[3] Black Forest Labs. Flux.https://github.com/",
+        "black- forest- labs/flux, 2024. Accessed: 2024."
+      ]
+    }
+  ],
+  "figure_candidates": [
+    {
+      "page": 2,
+      "caption": "Figure 1. Example of local over-generation in patch-wise inference for high-resolution images. When existing methods adopt patch-wise"
+    },
+    {
+      "page": 3,
+      "caption": "Figure 2. Overview of the proposed DreamSR architecture. Our framework consists of two stages: a degradation removal one-step process"
+    },
+    {
+      "page": 5,
+      "caption": "Figure 3. Overall training pipeline for DreamSR."
+    },
+    {
+      "page": 7,
+      "caption": "Figure 4. Qualitative comparisons with different methods on real-world datasets. Our DreamSR achieves the best performance, generating"
+    },
+    {
+      "page": 8,
+      "caption": "Figure 5. Visual comparison of different prompt configurations."
+    },
+    {
+      "page": 8,
+      "caption": "Figure 6. Visual comparison of diffeterent training strategies, (a)"
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 6,
+      "caption": "Table 1. Quantitative comparison with state-of-the-art methods on real-world image super-resolution benchmarks. The best and second"
+    },
+    {
+      "page": 7,
+      "caption": "Table 2. Inference-time performance of diffusion-based SR meth-"
+    },
+    {
+      "page": 8,
+      "caption": "Table 3. Ablation results of different architectures of ControlNet"
+    },
+    {
+      "page": 8,
+      "caption": "Table 4. Ablation results of diffeterent training strategies on Re-"
+    },
+    {
+      "page": 8,
+      "caption": "Table 5. Ablation results of Restoration Acceleration LoRA on"
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      7,
+      8,
+      9,
+      10
+    ],
+    "super_resolution": [
+      1,
+      2,
+      3,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "efficiency": [],
+    "ablation": [
+      7,
+      8
+    ],
+    "limitations": [
+      1
+    ]
+  },
+  "key": "dreamsr",
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\text\\dreamsr.txt"
+}

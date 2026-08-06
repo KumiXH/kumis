@@ -1,0 +1,174 @@
+{
+  "file": "D:\\Repository\\ReadPaper\\daily\\Flux\\papers\\03_super_resolution\\op4ksr_2605.13457.pdf",
+  "page_count": 20,
+  "first_page_excerpt": "OP4KSR: One-Step Patch-Free 4K\nSuper-Resolution with Periodic Artifact\nSuppression\nChengyan Deng1, Pengbin Yu2, Zhentao Chen2, Wei Shen2, Kai Zhang3, Meng\nLi2, Lunxi Yuan2, Xue Zhou1, and Li Yu1⋆\n1 School of Automation Engineering, University of Electronic Science and Technology\nof China\n2 OPPO AI Center, OPPO Inc.\n3 School of Intelligence Science and Technology, Nanjing University\ndengchengyan@std.uestc.edu.cn, lyu@uestc.edu.cn\nAbstract. Diffusion-based real-world image super-resolution (Real-ISR)\nhas achieved remarkable perceptual quality; however, directly super-\nresolving images to 4K remains limited by extreme memory consumption.\nConsequently, prior methods adopt patch-based inference, sacrificing\nglobal context and introducing semantic confusion, spatial inconsistency,\nand severe latency. We propose OP4KSR, a one-step patch-free 4K SR ap-\nproach built upon the powerful Flux backbone. By leveraging the extreme-\ncompression F16 VAE, OP4KSR makes 4K SR inference tractable under\npractical GPU budgets, preserving global spatial-semantic coherence\nwhile enabling highly efficient inference. However, adapting this one-step\narchitecture intrinsically triggers severe periodic artifacts. We trace this\nto a RoPE base frequency allocation mismatch and intra-token spatial am-\nbiguity, both exacerbated by the lack of iterative refinement. To suppress\nthese artifacts, we couple RoPE base frequency rescaling (RFR) with\nan autocorrelation-based periodicity loss (LAP). Furthermore, we curate\na dedicated training dataset alongside three benchmarks (one synthetic\nand two real-world) to advance 4K SR research. Extensive experiments\ndemonstrate that OP4KSR achieves competitive perceptual quality with\nefficient inference, generating a4096×4096output in only 5.75 seconds on\na single NVIDIA H20 GPU. Code, models, and datasets will be released\nupon paper acceptance.\nKeywords:Image Super-Resolution·One-Step 4K·Periodic Artifact\nSuppression·Flux\n1 Introduction\nSingle Image Super-Resolution (SISR) aims to recover original high-resolution\n(HR) images from degraded low-resolution (LR) images. Early approaches,\n⋆ Corresponding author.\narXiv:2605.13457v1  [cs.CV]  13 May 2026",
+  "flux_evidence": [
+    {
+      "page": 1,
+      "snippets": [
+        "proach built upon the powerful Flux backbone. By leveraging the extreme-",
+        "Suppression·Flux"
+      ]
+    },
+    {
+      "page": 3,
+      "snippets": [
+        "free framework for4K SRbased on the Flux framework. First, we adopt an",
+        "pre-trained Flux framework to the one-"
+      ]
+    },
+    {
+      "page": 4,
+      "snippets": [
+        "–We analyze the underlying causes of severe periodic artifacts in one-step Flux",
+        "(e.g., Stable Diffusion [4] and Flux [23]), diffusion models have demonstrated"
+      ]
+    },
+    {
+      "page": 5,
+      "snippets": [
+        "SR capabilities. However, applying such one-step truncation to Flux-based 4K"
+      ]
+    },
+    {
+      "page": 6,
+      "snippets": [
+        "3.2 Overcoming Periodic Artifacts in One-Step Flux SR"
+      ]
+    },
+    {
+      "page": 11,
+      "snippets": [
+        "T2I Prior – SDXL PixArt-α– SD 2-base SD 2.1-base Flux.1 UltraFlux"
+      ]
+    },
+    {
+      "page": 12,
+      "snippets": [
+        "T2I Prior – SDXL PixArt-α– SD 2-base SD 2.1-base Flux.1 UltraFlux"
+      ]
+    },
+    {
+      "page": 13,
+      "snippets": [
+        "Metrics ResShift SUPIR DreamClear SinSR AddSR OSEDiff OMGSROP4KSRT2I Prior – SDXL PixArt-α– SD 2-base SD 2.1-base Flux.1 UltraFlux",
+        "version of ResShift and the Flux-based variant of OMGSR.",
+        "Meanwhile, OMGSR, a Flux-based one-step SR method, suffers from noticeable",
+        "OP4KSR requires only 5.75s per image, approximately16× faster than Flux-"
+      ]
+    },
+    {
+      "page": 17,
+      "snippets": [
+        "23. Labs, B.F.: Flux.https://github.com/black-forest-labs/flux(2023)"
+      ]
+    }
+  ],
+  "figure_candidates": [
+    {
+      "page": 2,
+      "caption": "Fig. 1:Illustration of key limitations in patch-based 4K super-resolution. (a) Semantic"
+    },
+    {
+      "page": 3,
+      "caption": "Fig. 2:Visual examples of periodic artifacts. These artifacts typically manifest in large,"
+    },
+    {
+      "page": 3,
+      "caption": "Fig. 3, the framework empowers OP4KSR to achieve a nearly10× speedup over"
+    },
+    {
+      "page": 3,
+      "caption": "Fig. 3:Performance and runtime compar-"
+    },
+    {
+      "page": 5,
+      "caption": "Fig. 4:Overall architecture of OP4KSR. To suppress periodic artifacts, we introduce"
+    },
+    {
+      "page": 6,
+      "caption": "Fig. 5:Impact of RoPE base frequency θ on spatial perception. (a) Phase collapse"
+    },
+    {
+      "page": 7,
+      "caption": "Fig. 5(a). Consequently, the rotational terms of the matrix critically approximate"
+    },
+    {
+      "page": 7,
+      "caption": "Fig. 6:Illustrationofintra-tokenblindness.Left:The"
+    },
+    {
+      "page": 9,
+      "caption": "Fig. 7:Data curation pipeline for the"
+    },
+    {
+      "page": 11,
+      "caption": "Fig. 8:Qualitative comparisons of different methods on twosynthetic datasets."
+    },
+    {
+      "page": 12,
+      "caption": "Fig. 9:Qualitative comparisons of different methods on tworeal-world datasets."
+    },
+    {
+      "page": 14,
+      "caption": "Fig. 10:Ablation study of the proposed artifact suppression mechanism in frequency"
+    },
+    {
+      "page": 14,
+      "caption": "Fig. 10(b), the baseline spectrum exhibits anomalous, grid-like high-frequency"
+    }
+  ],
+  "table_candidates": [],
+  "keyword_pages": {
+    "architecture": [
+      1,
+      3,
+      4,
+      5,
+      6,
+      7,
+      9,
+      10,
+      12
+    ],
+    "super_resolution": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      7,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "efficiency": [
+      1,
+      2,
+      3,
+      13,
+      20
+    ],
+    "ablation": [
+      13,
+      14
+    ],
+    "limitations": [
+      2,
+      3,
+      5,
+      15
+    ]
+  },
+  "key": "op4ksr",
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\Flux\\text\\op4ksr.txt"
+}

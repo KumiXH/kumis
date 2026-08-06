@@ -1,0 +1,1117 @@
+=== PAGE 1 ===
+DreamSR: Towards Ultra-High-Resolution Image Super-Resolution via a
+Receptive-Field Enhanced Diffusion Transformer
+Qingji Dong1 Hang Dong1* Mingqin Chen1 Rui Zhang1 Yitong Wang1
+1 ByteDance Inc.
+Abstract
+Large-scale pre-trained diffusion models have been exten-
+sively adopted for real-world image Super-Resolution be-
+cause of their powerful generative priors through textual
+guidance. However, when super-resolving high-resolution
+images with patch-wise inference strategy, most exist-
+ing diffusion-based SR methods tend to suffer from over-
+generation, due to the misalignment between the global
+prompt from LR image and the incomplete semantic infor-
+mation of local patches during each inference step. On the
+other hand, most existing methods also failed to generate
+detailed texture in local patches due to the overemphasis on
+global generation capabilities in network designs and train-
+ing strategies. To address this issue, we present DreamSR,
+a novel SR model that suppresses local over-generation
+and improves fine-detail synthesis, thereby achieving visu-
+ally faithful results with ultra-high-quality details. Specif-
+ically, we propose a dual-branch MM-ControlNet, where
+the ControlNet generates local textual feature with patch-
+level prompts while the pre-trained DiT provides global
+textual feature with global prompts, thereby mitigating
+over-generation and ensuring semantic consistency across
+patches. We also design a comprehensive training strat-
+egy with stage-specific data processing pipelines and
+a Receptive-Field Enhancement strategy, enhancing the
+model’s capability to capture patch information and effec-
+tively restore local textures. Extensive experiments demon-
+strate that DreamSR outperforms state-of-the-art methods,
+providing high-quality SR results. Code and model are
+available at https://github.com/jerrydong0219/DreamSR.
+1. Introduction
+Real-world Image Super-Resolution (Real-ISR) aims to re-
+construct high-resolution (HR) images from low-resolution
+(LR) inputs with unknown degradation. This task requires
+the model not only to effectively remove diverse degrada-
+tions but also to generate perceptually realistic details, es-
+*Corresponding Author.
+pecially in challenging ultra-high-resolution (≥4K) scenar-
+ios. Recent text-to-image (T2I) diffusion-based Real-ISR
+approaches [68, 70] significantly outperform earlier GAN-
+based methods [6, 29, 56], owing to the appropriate selec-
+tion of generative prior and the effective incorporation of
+these priors into Real-ISR. However, these methods still
+face limitations; either the selection of pre-trained priors
+is suboptimal, or the pre-trained image priors are insuffi-
+ciently exploited. The problem becomes particularly pro-
+nounced in ultra-high-resolution scenarios, where patch-
+wise inference [2] is necessary due to computational con-
+straints. During patch-wise inference, the limited seman-
+tic information within each patch conflicts with the global
+textural guidance derived from the LR image, resulting
+in undesired artifacts (over-generation). Trivially employ-
+ing local prompts fails to reconstruct fine textures (under-
+generation), as such local prompts are inadequate to activate
+the full generative capacity of the pre-trained model.
+In this paper, we propose DreamSR, a method tailored
+for ultra-high-resolution image reconstruction with patch-
+wise inference, aiming at fully leveraging the pre-trained
+T2I generative prior. Specifically, we employ FLUX [3] as
+our backbone due to its unified architecture, which avoids
+the split of generative priors across separate base and refiner
+models, i.e., SDXL [43]. To address the aforementioned
+over-generation and under-generation issues, we introduce
+a dual-branch network architecture Patch Context aware
+MM-ControlNet. In this design, one ControlNet branch
+utilizes local prompts to capture visual features of local
+patches, while the fixed DiT backbone leverages global
+prompts to fully activate the pre-trained generative prior.
+Based on the proposed architecture, we design a two-stage
+inference framework consisting of degradation removal and
+texture generation. We define the multi-step denoising pro-
+cess of the diffusion model as the texture generation stage,
+which focuses on refining high-frequency textures. An ac-
+celerated LoRA module is adopted in the degradation re-
+moval stage to mitigate the latent distribution shift between
+degraded LR images and natural images. The degradation
+removal stage not only speeds up and reduces the early de-
+noising steps of the reconstruction process, but also aligns
+This CVPR paper is the Open Access version, provided by the Computer Vision Foundation.
+Except for this watermark, it is identical to the accepted version;
+the final published version of the proceedings is available on IEEE Xplore.
+38258
+
+=== PAGE 2 ===
+LR input LR inputDreamSR DreamSR
+SeeSR
+SUPIR
+DiT4SR
+SeeSR
+SUPIR
+DiT4SR
+DreamSR
+DreamSR
+DreamSR
+DreamSR
+DreamSR
+DreamSRThe image features a majestic mountain range in the background, with two large horned animals standing in the foreground. The animals are likely antelopes or gazelles, as they are described as having horns and standing in a grassy field. The image features a large, ornate building with a distinctive Asian architectural style. The building is surrounded by a stone wallandbarrentrees. In the foreground, there is a small cart and a barrel, adding a sense of scale to the scene.
+Figure 1. Example of local over-generation in patch-wise inference for high-resolution images. When existing methods adopt patch-wise
+inference strategy, inconsistent semantic details may appear, due to the misalignment between the global prompt and local patches. On the
+other hand, the proposed DreamSR can effectively suppresses such artifacts and restores fine-grained textures with high fidelity.
+the latent space of LR inputs with that of natural images.
+To enhance the model’s performance on generating fine-
+grained detail in local patches, we introduce a comprehen-
+sive training strategy with stage-specific data processing
+pipelines to improve the generation ability on local fea-
+tures with limited semantics. For the degradation removal
+stage, we adopt the traditional Real-ESRGAN [57] degra-
+dation pipeline. For the texture generation stage, we pro-
+pose a novel image-to-image degradation pipeline to pro-
+duce training pairs with substantial texture-level discrepan-
+cies, thereby improving the model’s capacity for generat-
+ing fine-grained details with textural guidance. Addition-
+ally, a Receptive-Field Enhancement strategy is introduced
+to align the feature’s receptive fields during training and in-
+ference, further boosting its overall capability.
+The contributions of this work are summarized as fol-
+lows: (i) We present DreamSR, a multi-stage ISR model
+architected upon pre-trained DiT models. By leveraging
+their powerful image priors and our specifically designed
+MM-DiT network architecture, it effectively pushes the per-
+formance ceiling of image super-resolution. (ii) We intro-
+duce a Patch Context aware MM-ControlNet, which lever-
+ages a dual-branch ControlNet to integrate global textual
+semantics with local patch-level prompts through cross-
+attention, enabling alignment between patch-level visual
+features and local textual information, thereby suppressing
+over-generation in patch regions. (iii) We devise a compre-
+hensive training pipeline that utilizes diverse degradation
+strategies to increase model performance. The incorpora-
+tion of a Receptive-Field Enhancement mechanism further
+enhances the model’s ability to capture fine-grained details
+during ultra-high-resolution image reconstruction. (iv) We
+demonstrate through both quantitative and qualitative evalu-
+ations that our DreamSR outperforms state-of-the-art meth-
+ods on real-world datasets with multiple resolutions.
+2. Related Work
+Image Super-Resolution.Deep learning-based image
+super-resolution (ISR) methods have achieved remarkable
+progress in recent years. CNN-based approaches [16, 19,
+36, 75, 76] and Transformer-based models [9, 12, 13, 33,
+40, 74] have continually advanced the performance up-
+per bound. However, due to the complexity and diver-
+sity of real-world degradations, these methods often strug-
+gle to effectively remove artifacts and recover fine textures.
+To mitigate the domain discrepancy between synthetic and
+real degradations, several studies [57, 72] have focused on
+learned degradation modeling. Yet, a noticeable gap still
+remains between synthetically degraded datasets and real-
+world low-resolution images, leading to suboptimal per-
+formance in recovering natural details or enhancing mid-
+quality real images.
+Recently, generative models have been increasingly in-
+troduced into ISR to further improve perceptual quality.
+GAN-based methods [8, 34, 35, 48, 55, 64] significantly
+enhance the realism of generated details. With the advance-
+ment of diffusion models, many approaches [14, 69] have
+integrated them into SR pipelines, achieving impressive re-
+sults. Several works [17, 23, 41, 44, 51, 52, 54, 65, 68] em-
+ploy ControlNet-like structures to incorporate degradation
+priors, while others introduce semantic cues [7, 15, 30, 31,
+38, 42, 49, 50, 58, 62, 67, 71] to exploit the text-image in-
+teraction capabilities of text-to-image models, thereby im-
+proving detail generation. With the emergence of the Diffu-
+sion Transformer (DiT), text–image interaction capabilities
+have been further strengthened, giving rise to a new wave of
+DiT-based SR methods. However, these methods generally
+overlook the crucial alignment between textual information
+and local image patches at ultra-high resolutions, limiting
+their ability to fully exploit localized detail generation.
+38259
+
+=== PAGE 3 ===
+MM-DiTBlock
+MM-DiTBlock
+MM-DiTBlock
+LLava
+ZeroLinear
+𝑧!"#
+Single-DiTBlock×2𝑁
+×𝑁
+×4𝑁
+𝑧()𝑧!
+𝑧#
+t steps𝑧*
+Degradation Removal One-step ProcessTexture Generation Multi-Step Process
+(a) Overall Architecture
+Cross-AttentionMLP
+Linear
+𝑓!+!, 𝑓-,!+!,
+𝑄𝐾𝑉
+(b) Context Cross-AttentionModule
+MM-DiTBlock
+MM-DiTBlock LinearLinear
+ZeroLinear
+Text Encoder
+TrainableModuleFrozenModule
+FLUX VAEFLUX DiTPatch Contextaware MM-ControlNetContext Cross-Attention ModuleRestoration Acceleration LoRA
+𝑓!+!’,𝑃!"#$%𝑃&'()"'
+𝐸!"#$% 𝐸!"#$%
+𝐸&'()"' 𝐸&'()"'
+𝑧,0
+Figure 2. Overview of the proposed DreamSR architecture. Our framework consists of two stages: a degradation removal one-step process
+and a texture generation process. The Restoration Acceleration LoRA is introduced to compress the early denoising process, while the
+Patch Context aware MM-ControlNet integrates global and local textual features through the Context Cross-Attention module for effective
+semantic alignment and fine-grained detail generation.
+Diffusion Models.Diffusion models [24] have demon-
+strated exceptional capability in generating high-quality and
+diverse natural images. Latent Diffusion Models (LDMs)
+[46] extend the diffusion process into latent space, greatly
+improving efficiency while maintaining fidelity in text-to-
+image synthesis. Through large-scale image–text pretrain-
+ing, these models effectively capture complex image man-
+ifolds and semantic relationships. Several studies [10, 18,
+45, 47, 63] have shown that text-to-image diffusion priors
+outperform GAN-based priors in modeling diverse natu-
+ral images, motivating their adoption in high-quality super-
+resolution tasks. More recently, the Diffusion Transformer
+(DiT) architecture has emerged as a powerful alternative to
+conventional U-Net backbones, becoming the new main-
+stream design. In particular, multi-modal variants such
+as MM-DiT, used in models like FLUX [3] and SD3.0
+[22], not only scale model capacity but also strengthen im-
+age–text interaction, resulting in more semantically aligned
+visual outputs. As a result, leveraging such powerful dif-
+fusion priors for high-fidelity and controllable image super-
+resolution has become an active research direction.
+3. Methods
+We build our DreamSR framework upon Flux.1-dev model
+[3], aiming to push the performance boundary of im-
+age super-resolution by leveraging the powerful pre-trained
+generative priors of a Diffusion Transformer (DiT). As
+shown in Figure 2, our DreamSR consists of a fixed DiT,
+a Patch Context aware MM-ControlNet and a Restoration
+Acceleration LoRA [25] module. The reconstruction pro-
+cess is decomposed into two stages: degradation removal
+and texture generation. In the degradation removal stage,
+the Restoration Acceleration LoRA module is integrated
+into the DiT network, which compresses the early-stage de-
+noising process and reduces inference computational cost.
+In the texture generation stage, the diffusion model (DiT
+&ControlNet) performs multi-step denoising to synthesize
+and refine high-frequency textures.
+To mitigate the over-generation artifacts that arise from
+semantic mismatches between local patches and global text
+during patch-wise inference, we propose a Patch Context
+aware MM-ControlNet. Unlike previous methods [1] that
+inject only visual features from ControlNet into DiT, our ap-
+proach integrates both visual and textual features from the
+MM-DiT blocks , where local textual information is seam-
+lessly incorporated and effectively combined with global se-
+mantics. This design facilitates consistent semantic under-
+standing across patches, ensuring coherent global structures
+and precise local texture reconstruction.
+3.1. Patch Context aware MM-ControlNet
+We construct our Patch Context aware MM-ControlNetF θ
+by partially copying the layers from the DiT networkϵ ϕ in
+FLUX.1-dev [3]. To enhance the text interaction capabil-
+ity ofF θ, we selectively employ these text-related blocks
+(MM-DiT) while discarding Single DiT blocks. These text-
+related blocks can efficiently process patch-level textual in-
+38260
+
+=== PAGE 4 ===
+formation and integrate the resulting features into the main
+network, strengthening its overall capability. Furthermore,
+to balance restoration performance and inference efficiency,
+we perform a trimmed replication of the MM-DiT by keep-
+ing only half of the MM-DiT blocks inF θ. The intermedi-
+ate features from these blocks are evenly injected into the
+corresponding MM-DiT blocks of the main network.
+During inference, given an LQ imageI lq ∈R H×W×C ,
+we first partition it into overlapping patchesI patch =
+Iij ∈R p×p×C
+for subsequent patch-wise processing.
+We use a multi-modal LLM LLaV A [39] to generate both a
+global promptP global describing the entire image and local-
+ized promptsP patch ={P ij}corresponding to individual
+image patches. During network processing,I lq is first pro-
+cessed by EncoderE, then gets the latent presentz lq. The
+patch latentz i,j
+lq partitioned fromz lq and local prompt em-
+beddingE ij are fed into the MM-ControlNet, while noisy
+patch latentz i,j
+t partitioned fromz t and global text prompt
+embeddingE global are injected directly into the DiT net-
+work. For a patch latentz ij
+lq, the MM-ControlNet outputs a
+series image featuresf c,img ={f l
+c,img}and text features
+fc,txt ={f l
+c,txt}, l= 1, ...,9. For each blockl, as for the
+image features, a zero-MLP is used and the feature is di-
+rectly injected into the main DiT block as
+f ′l
+img =f l
+img +M l(f l
+c,img),(1)
+whereM l
+img(.)is the zero-MLP layer. As for text fea-
+tures, we introduce a Context Cross-Attention module to
+enable effective fusion of global and local textual informa-
+tion, which can be defined as
+f ′l
+txt =M l
+txt(CrossAttention(Q l
+txt, Kl
+c,txt, V l
+c,txt)),
+(2)
+whereQ l
+txt =P Q(f l
+txt),K l
+c,txt =P K(f l
+c,txt)andV l
+c,txt =
+PV (f l
+c,txt),Ml
+txt(.)is the MLP layer andP(·)represents a
+linear projection function. This cross-attention mechanism
+enables dynamic emphasis on the most relevant semantic
+cues from the global prompt for each local patch while sup-
+pressing irrelevant or redundant contextual signals. Conse-
+quently, our design facilitates more precise details gener-
+ation within each local region and preserves the semantic
+consistency of the overall image.
+After obtaining the predicted velocity fieldv ij
+p for each
+patch latentz ij
+t from the network, we follow the same pro-
+cedure as Multi-Diffusion [2] to aggregate all patch outputs
+and getv p , thereby enhancing the global semantic coher-
+ence and consistency of the reconstructed image.
+3.2. Restoration Acceleration LoRA
+Based on the designed model architecture, to increase effi-
+ciency when reconstructing high-resolution images, we de-
+fine a two-stage inference process: degradation removal and
+texture generation. Many recent diffusion-based SR meth-
+ods [1, 37, 67, 68] adopt a degradation removal module to
+prevent the network from confusing image semantics with
+degradation information, allowing the main network to fo-
+cus more on details generation rather than removing image-
+independent degradation patterns, thereby improving the
+generative quality and stability of the reconstruction. In-
+spired by one-step diffusion SR approaches [20, 61], we el-
+egantly integrate the degradation removal process into our
+network, enabling rapid degradation elimination through a
+single forward inference while effectively compressing the
+overall inference process. The restored latent produced in
+this stage provides a cleaner and more semantically consis-
+tent representation, which significantly benefits the subse-
+quent multi-step texture generation phase.
+Specifically, during the first inference step, following
+common practices of the one-step SR model, we augment
+the DiT network with a Restoration Accelerate LoRA mod-
+ule. The LQ latentz lq is fed into both the main DiT network
+and the MM-ControlNet for a single forward pass, produc-
+ing latent output with degradations removedz dr.z dr serves
+as the condition input for the MM-ControlNet. After get-
+ting degradation-removed results, unlike previous methods
+that still initiate the multi-step generation from pure noise,
+we utilizez dr as the intermediate state of the diffusion pro-
+cess. Specifically, the noisy latentzt is abtained by injecting
+controlled Gaussian noise intoz dr as
+zt = (1−t)z dr +t·ϵ,(3)
+wheretis the predefined interpolation step. Starting the
+diffusion process from this intermediate statez t allows the
+model to bypass redundant early-stage denoising iterations
+and instead focus on fine-grained texture refinement, effi-
+ciently generating high-quality results.
+3.3. Training strategy
+To address the insufficient detail generation issue, we de-
+velop a comprehensive training strategy with stage-specific
+data processing pipelines, enhancing the model’s sensitivity
+to local textural guidance. We also develop Receptive-Field
+Enhancement strategy to align the model’s receptive fields
+during training and inference, boosting its overall capabil-
+ity. The overall training pipeline is shown in Figure 7.
+Stage-specific degradation pipelines.Since the two model
+stages have distinct priorities, we employ different degra-
+dation pipelines to generate training pairs. For the first
+stage (degradation removal), we use the traditional Real-
+ESRGAN pipeline [57]. For the second stage (texture gen-
+eration), we introduce an image-to-image (i2i) degrada-
+tion method that leverages the FLUX model to erase de-
+tails from high-quality images, enhancing detail generation
+through textural guidance. Unlike Real-ESRGAN’s pixel-
+wise degradation, which compromises both structure and
+38261
+
+=== PAGE 5 ===
+Blur
+𝑃!"#+𝑃$%#
+Noise
+Image to image Degradation
+Real-ESRGAN Degradation
+Update withℒ!+ℒ"
+Update withℒ#$%&
+TrainableModuleFrozenModule
+FLUX DiTPatch Context aware MM-ControlNetRestoration Acceleration LoRA
+𝐼'(
+𝐼#(
+𝐼#(
+Figure 3. Overall training pipeline for DreamSR.
+texture, our i2i approach selectively removes texture details
+while maintaining global structural consistency. This al-
+lows the network to focus on reconstructing high-frequency
+details with textual guidance, improving output fidelity and
+realism. Specifically, we start with a high-quality image
+Ihq, an image promptP img and a negative promptP neg.
+After downsamplingI hq, we encode it via a V AE encoder to
+obtainz hq. This latent representation is blended with Gaus-
+sian noise (strength: 0.3–0.5) and then partially denoised
+using the FLUX model conditioned onP img +P neg.
+Joint training.During training, we employ a joint opti-
+mization strategy to concurrently train the proposed MM-
+ControlNet and the Restoration Accelerate LoRA module.
+Specifically, in the initial phase, we first optimize the MM-
+ControlNet using the datasets generated by the i2i degrada-
+tion pipeline. The initial training process can stabilize the
+output. The model typically predicts velocity fieldv p and
+we use velocity loss to update the MM-ControlNet parame-
+ters. The velocity loss can be formulated as
+vgt =z 1 −z 0,(4)
+Lv =||v p −v gt||2
+2,(5)
+wherez 0 =E(I gt)is the target latent,z 1 is the added
+random noise. In addition, we introduce pixel-level loss
+to further enhance the reconstruction fidelity. When the
+sampledtin range0∼0.2, we get the prediction output
+ˆz0 =z t −tv p and apply it with the V AE DecoderDinto
+pixel space. BesidesL v, we additionally use MSE loss and
+perceptual loss [73] to update the parameter. The pixel loss
+can be defined as
+Lp =||D( ˆz0)−I gt||2
+2 +λLP IP S(D( ˆz0), Igt),(6)
+whereλis a weighting scalar.
+Subsequently, during the iterative training process, the
+network to be updated is randomly selected at each step.
+When training the Restoration Acceleration LoRA module
+for the one-step degradation removal stage, we modify the
+training objective to image-level loss, directly supervising
+the model with the ground-truth image. To further enhance
+perceptual quality, we employ a combination of perceptual
+loss and GAN loss. Additionally, since the latent output
+from the one-step process is directly fed into the subsequent
+multi-step generation stage, a latent-level loss is introduced
+to refine the learned representations and ensure consistency
+across the two stages. The whole loss can be written as
+Llora =||ˆzdr −z 0||2
+2 +||D( ˆzdr)−I gt||2
+2
++λ 1LP IP S(D(ˆzdr), Igt) +λ 2GAN(D( ˆzdr)),
+(7)
+whereλ 1 andλ 2 are weighting scalars. The detailed train-
+ing schemes are provided in the supplementary material.
+Receptive-Field Enhancement training.To enable ultra-
+high-resolution image restoration, it is crucial to align the
+data distributions between training and inference. The key
+lies in the distinction between local and global prompts.
+Unlike previous approaches that rely on downsampling
+or randomly cropping large patches (e.g., 768×768 or
+1024×1024) from medium-resolution (around 1K resolu-
+tion) datasets, e.g., LSDIR [32] and FFHQ [27], where local
+prompts become too similar to global prompts, causing the
+network to overlook local prompts guidance during recon-
+struction. So we introduce a Receptive-Field Enhancement
+training strategy, ensuring sufficient divergence between lo-
+cal and global prompts, thereby reinforcing the importance
+of local prompt conditions in the reconstruction process.
+Specifically, we directly extract 512×512 patches from na-
+tive high-resolution images (mostly around 2K resolution).
+4. Experiments
+4.1. Datasets and implementation details
+Datasets.For training, we utilize a collected dataset con-
+sisting of 580,000 high-quality general images and 120,000
+face images, each paired with corresponding text descrip-
+tions. We pre-generate the corresponding LR counterparts
+using our i2i degradation pipeline, while the Real-ESRGAN
+degradation method is also applied online during the train-
+ing process with the same configuration as SeeSR [62].
+Since our method specifically focuses on the Real-ISR
+task, we evaluate our model on widely used real-world
+datasets, including RealSR [5], DrealSR [60], RealLR200
+[62], RealLQ250 [1] and RealDeg [11] social media sub-
+set. Following SeeSR, the LR images from RealSR and
+DrealSR are center-cropped to128×128. RealLR200 con-
+tains images ranging from100×100to400×400, Re-
+alLQ250 provides images at256×256, and RealDeg in-
+cludes high-resolution images with a short edge of 720. All
+experiments are conducted with the scaling factor of×4.
+Evaluation Metrics.In order to comprehensively eval-
+uate the performance of different methods, we employ a
+suite of both reference-based and no-reference metrics. For
+reference-based assessment, we utilize PSNR and SSIM
+[59] to measure reconstruction fidelity, and LPIPS [73] to
+quantify perceptual quality. For no-reference evaluation, we
+include MANIQA [66], MUSIQ [28], and CLIPIQA+ [53]
+to assess image quality from diverse perspectives.
+38262
+
+=== PAGE 6 ===
+Table 1. Quantitative comparison with state-of-the-art methods on real-world image super-resolution benchmarks. The best and second
+performance are highlighted in red and blue, respectively.
+Datasets Metrics Methods
+BSRGAN[72] Real-ESRGAN[57]StableSR[54] DiffBIR[37] SeeSR[62] SUPIR[68] OSEDiff[61] FaithDiff[11] DreamClear[1] DiT4SR[21] Ours
+RealSR
+PSNR↑ 26.3785 25.6855 25.5091 24.8340 25.1465 22.4082 23.3748 24.5681 25.0070 23.5397 20.9305
+SSIM↑ 0.7651 0.7614 0.7491 0.6501 0.7210 0.5995 0.7105 0.6927 0.7026 0.6680 0.6058
+LPIPS↓ 0.2656 0.2710 0.2604 0.3650 0.3008 0.4204 0.3032 0.2949 0.3258 0.3143 0.4079
+MUSIQ↑ 63.2871 60.3671 61.8059 69.2790 69.8241 63.4065 69.2206 68.7046 58.3191 67.5601 70.5560
+MANIQA↑ 0.3758 0.3737 0.3769 0.5582 0.5437 0.4472 0.4847 0.4742 0.4313 0.4540 0.5731
+CLIPIQA+↑ 0.5822 0.5840 0.6145 0.7233 0.6912 0.5989 0.7200 0.6720 0.5920 0.6609 0.7318
+DRealSR
+PSNR↑ 28.7025 28.6147 29.0182 25.9035 28.0707 24.4641 25.9906 26.2201 28.5904 25.6479 24.0158
+SSIM↑ 0.8028 0.8052 0.8044 0.6245 0.7683 0.6198 0.7475 0.6857 0.7532 0.6772 0.6484
+LPIPS↓ 0.2858 0.2819 0.2898 0.4669 0.3175 0.4650 0.3138 0.3669 0.3680 0.3745 0.4639
+MUSIQ↑ 57.1687 54.2752 51.3571 66.1187 65.0895 62.3864 65.2829 66.5850 43.4771 65.1260 67.3315
+MANIQA↑ 0.3403 0.3440 0.3177 0.5543 0.5129 0.4542 0.4765 0.4575 0.3055 0.4425 0.5404
+CLIPIQA+↑ 0.5621 0.5546 0.5349 0.7173 0.6792 0.6145 0.7008 0.6686 0.5060 0.6668 0.7028
+RealLQ250
+MUSIQ↑ 63.5230 62.5185 56.6588 67.5315 70.3712 65.9080 69.2500 69.6166 67.1254 71.8311 71.6516
+MANIQA↑ 0.3515 0.3565 0.2932 0.4900 0.4894 0.3848 0.4245 0.3971 0.4938 0.4607 0.5319
+CLIPIQA+↑ 0.6019 0.6116 0.5709 0.6917 0.7037 0.6542 0.7077 0.6792 0.6922 0.7106 0.7206
+RealLR200
+MUSIQ↑ 64.8724 62.9628 63.2798 66.4224 69.6413 63.8806 69.2590 68.7590 66.3161 70.6282 70.6862
+MANIQA↑ 0.3704 0.3689 0.3689 0.4736 0.4698 0.3979 0.4426 0.4268 0.4758 0.4650 0.5488
+CLIPIQA+↑ 0.6260 0.6221 0.6409 0.6918 0.7088 0.6418 0.7149 0.6846 0.6912 0.7086 0.7391
+RealDeg
+MUSIQ↑ 43.8358 44.8099 35.5875 40.6098 45.5557 45.5267 44.6909 47.5436 41.8048 44.7736 45.6234
+MANIQA↑ 0.3648 0.3848 0.3291 0.4413 0.4535 0.3613 0.4391 0.3862 0.3854 0.4437 0.4574
+CLIPIQA+↑ 0.5921 0.6102 0.5358 0.6367 0.6579 0.6094 0.6534 0.6329 0.6290 0.6841 0.6647
+Implementation details.Our model is trained on 16 H20
+GPUs with a batch size of 64 using AdamW optimizer
+(lr=5e-6). During training, images are randomly cropped to
+512×512patches with online-generated local text prompts.
+The rank of Restoration Acceleration LoRA is set to 256.
+We first train the MM-ControlNet alone for 20,000 steps
+to stabilize the output. Subsequently, the model alternates
+between a multi-step texture generation stage and a single-
+step degradation removal stage for approximately 100,000
+steps. The hyperparametersλ,λ 1, andλ 2 are set to 2, 2
+and 0.5, respectively. To support both patch-based high-
+resolution restoration and full-image SR for smaller inputs,
+we resize images to a 1024-pixel shorter side with 0.2 prob-
+ability while maintaining local text consistency with global
+text. During inference, we sett= 0.8and the total num-
+ber of steps to 17, where the first step performs degradation
+removal and the remaining 16 steps are used for texture gen-
+eration, resulting in an overall 1+16 inference scheme.
+4.2. Comparison with Existing Methods
+We compare our method with state-of-the-art Real-ISR
+methods, including GAN-based methods (i.e. BSRGAN
+[72], Real-ESRGAN [57]) and diffusion-based methods(i.e.
+StableSR [54], DiffBIR [37], SeeSR [62], SUPIR [68],
+OSEDiff [61], FaithDiff [11], DreamClear [1], DiT4SR
+[21]). We use the publicly released codes and models, with
+default inference configurations for testing.
+Quantitative Comparisons.We first show the quantitative
+comparison on the five real-world datasets in Table 1. It
+can be seen that our method achieves competitive perfor-
+mance on 5 datasets containing various resolutions. For the
+128×128resolution RealSR and DRealSR datasets, our
+method reaches the best results on non-reference metrics,
+which reflects the excellent image quality of our results.
+Due to the inherently strong detail generation capability
+of diffusion-based models, none of the diffusion-based ap-
+proaches, including ours, achieves outstanding performance
+on reference metrics. This phenomenon has also been
+widely noted in prior studies [4, 26, 68] that existing refer-
+ence metrics are not suitable for evaluation with the model’s
+generative ability increasing. On the RealLQ250 and Re-
+alLR200 datasets, our method exhibits overwhelming per-
+formance, consistently achieving top results across all non-
+reference metrics. Furthermore, on the high-resolution Re-
+alDeg dataset, our model demonstrates excellent objective
+performance, validating the superiority of our approach in
+handling high-resolution image reconstruction tasks.
+Qualitative Comparisons.The qualitative comparisons
+against other methods are provided in Figure 4, which
+clearly demonstrate that our approach generates more nat-
+ural textures and preserves fine-grained details better than
+existing methods. For the first two rows, which are sam-
+pled from the RealLQ250 dataset with256×256low-
+resolution inputs, our method reconstructs clearer and more
+plausible details, achieving visually superior results. For
+the last row, which is selected from the RealDeg dataset
+with high-resolution outputs, we observe that many compet-
+ing methods fail to properly recover consistent details due
+to semantic misalignment during inference, often generat-
+ing distorted or incorrect textures, while some approaches
+38263
+
+=== PAGE 7 ===
+FaithDiff DreamClear DiT4SR DreamSR
+LR StableSR SeeSR SUPIR
+FaithDiff DreamClear DiT4SR DreamSR
+LR StableSR SeeSR SUPIR
+FaithDiff DreamClear DiT4SR DreamSR
+LR input
+LR input
+DreamSR
+DreamSR
+LR input DreamSR
+LR StableSR SeeSR SUPIR
+1K
+1K
+4K
+Figure 4. Qualitative comparisons with different methods on real-world datasets. Our DreamSR achieves the best performance, generating
+more realistic images with fine-scale structures and details. More visual results are included in the supplementary material.
+Table 2. Inference-time performance of diffusion-based SR meth-
+ods for the diffusion process on 2560x1440 resolution images. All
+methods are tested on a H20 GPU. The best and second perfor-
+mances are highlighted in red and blue, respectively.
+StableSR DiffBIR SeeSR SUPIR FaithDiff DreamClear DiT4SR Ours
+Step 200 50 50 50 20 50 40 1+16
+Time (s) 156 127 119 124 30 185 228 86
+are unable to produce fine-grained details, leading to overly
+smooth reconstructions. In contrast, our approach produces
+structurally coherent and detailed reconstructions, demon-
+strating its robustness and superior visual fidelity.
+Inference time Comparisons.We evaluate the inference
+efficiency of our model on standard 2K images using a sin-
+gle H20 GPU. Benefiting from our acceleration design, the
+proposed method achieves high-quality detail reconstruc-
+tion with only 1+16 inference steps. Our step count is sig-
+nificantly lower than that of other diffusion-based SR meth-
+ods. Despite the relatively large parameter size of the DiT
+architecture, our model still runs faster than most methods
+built upon SD [46] or SDXL [43] UNet backbones, and is
+only slower than FaithDiff, which adopts a lightweight de-
+sign. Overall, our approach achieves a favorable balance
+between inference speed and reconstruction quality.
+4.3. Ablation Study
+Effectiveness of dual-branch MM-ControlNet.To val-
+idate the effectiveness of the proposed dual-branch MM-
+ControlNet, we conduct an ablation study by replacing our
+MM-ControlNet with a conventional ControlNet architec-
+ture that removes the text feature branch. The model is
+trained under the same settings as the full model, except
+that it uses global prompt. During testing, we evaluate two
+variants: one using only the global prompt and the other
+using only patch-level prompts as botch DiT and Control-
+38264
+
+=== PAGE 8 ===
+Table 3. Ablation results of different architectures of ControlNet
+on RealDeg dataset. After removing the text feature branch of
+ControlNet, we use different prompt settings to test.
+Text branch Global prompt Patch prompt MUSIQ↑MANIQA↑CLIPIQA+↑
+w/o✓ 41.6816 0.3891 0.6251
+w/o✓ 41.5523 0.3932 0.6177
+w✓ ✓ 45.6234 0.4574 0.6647
+LR(a) Single-branch & gp(b) Single-branch & pp(c) Dual-branch
+Figure 5. Visual comparison of different prompt configurations.
+(a) Single-branch ControlNet with global prompt, (b) single-
+branch ControlNet with patch-level prompt, and (c) our full dual-
+branch model.
+Net inputs. We evaluate the performance on the RealDeg
+dataset. As shown in Table 3, both variants perform worse
+than the full version of DreamSR across all metrics. More-
+over, qualitative results shown in Figure 5 reveal that when
+conditioned solely on the global prompt, the model tends
+to suffer from over-generation artifacts. Conversely, when
+conditioned only on patch-level prompts, the model lacks
+sufficient global semantic awareness, leading to unnatural
+and incoherent textures. These observations demonstrate
+that our dual-branch ControlNet design effectively enables
+interaction between global and local textual information
+through cross-attention, thereby enhancing both semantic
+consistency and detail generation in reconstructed images.
+Effectiveness of Training Strategy.To verify the effective-
+ness of our proposed training strategy, which includes di-
+verse degradation modeling and Receptive-Field Enhance-
+ment training, we conduct ablation experiments on the Re-
+alDeg dataset. Specifically, we test two simplified settings:
+(1) training with only Real-ESRGAN degradation, and (2)
+removing receptive-field enhancement strategy by resizing
+the short side of images to 1024 and cropping 1024×1024
+patches for training. As shown in Table 4, both ablated set-
+tings result in a clear drop across all non-reference met-
+rics, confirming the effectiveness of our full training de-
+sign. As shown in Figure 6, when only Real-ESRGAN
+degradation is used, the model fails to reconstruct rich im-
+age details resulting in overly smooth and texture-lacking
+outputs. In contrast, our i2i degradation preserves global
+structures while introducing stronger local detail variations,
+effectively improving texture synthesis. Moreover, without
+the receptive-field enhancement strategy, the model tends to
+overfit global semantics and leads to degraded reconstruc-
+tion of local details. These results demonstrate that both
+training components are crucial for achieving high-quality
+detail generation in ultra-high-resolution restoration.
+Table 4. Ablation results of diffeterent training strategies on Re-
+alDeg dataset.
+Setting MUSIQ↑MANIQA↑CLIPIQA+↑
+w/o i2i deg 43.7706 0.3917 0.6355
+w/o RFE train 43.5546 0.3868 0.5975
+Full setting 45.6234 0.4574 0.6647
+LR(a) w/o i2i deg(b) w/o RFE train(c) Full setting
+Figure 6. Visual comparison of diffeterent training strategies, (a)
+Without the proposed i2i degradation, (b) without receptive-field
+enhancement training, and (c) our full model.
+Table 5. Ablation results of Restoration Acceleration LoRA on
+RealDeg dataset. All models are trained using the Real-ESRGAN
+degradation for fair comparison.
+RA LoRA Inference steps MUSIQ↑MANIQA↑CLIPIQA+↑
+w/o 20 37.9976 0.3868 0.5975
+w/o 30 38.3402 0.3865 0.6042
+w 1+16 43.7706 0.3917 0.6355
+Effectiveness of Restoration Acceleration LoRA.To
+evaluate the effectiveness of the proposed Restoration Ac-
+celeration LoRA, we conduct an ablation study by remov-
+ing the LoRA module and training the model only on the
+multi-step diffusion stage. It is worth noting that, since dif-
+ferent degradation strategies may introduce additional vari-
+ables affecting the LoRA’s performance, we adopt only the
+Real-ESRGAN degradation setting for this experiment to
+ensure a fair comparison. As shown in Table 5, when
+the LoRA module is removed, even with a larger number
+of inference steps, the performance consistently lags be-
+hind our full multi-stage model across all metrics. This re-
+sult demonstrates that the proposed LoRA effectively com-
+presses the early-stage denoising process without compro-
+mising restoration quality, validating the rationality and ef-
+ficiency of our two-stage inference framework.
+5. Conclusion
+In this paper, we introduced DreamSR, a diffusion-based
+framework for real-world ultra-high-resolution image
+super-resolution. By addressing the semantic misalignment
+inherent in patch-wise inference, DreamSR effectively
+suppresses local over-generation and enhances fine-detail
+synthesis. Our dual-branch MM-ControlNet integrates
+global and local textual guidance through cross-attention,
+achieving consistent semantic alignment between patches
+and global context. Furthermore, the proposed Receptive
+Field Enhancement training strategy enables the model to
+better capture local texture information while maintaining
+global structural fidelity. Extensive experiments demon-
+strate that DreamSR achieves state-of-the-art performance
+and superior perceptual quality on real-world benchmarks.
+38265
+
+=== PAGE 9 ===
+References
+[1] Yuang Ai, Xiaoqiang Zhou, Huaibo Huang, Xiaotian
+Han, Zhengyu Chen, Quanzeng You, and Hongxia Yang.
+Dreamclear: High-capacity real-world image restoration
+with privacy-safe dataset curation. Advances in Neural
+Information Processing Systems, 37:55443–55469, 2024. 3,
+4, 5, 6
+[2] Omer Bar-Tal, Lior Yariv, Yaron Lipman, and Tali Dekel.
+Multidiffusion: Fusing diffusion paths for controlled image
+generation. 2023. 1, 4
+[3] Black Forest Labs. Flux.https://github.com/
+black- forest- labs/flux, 2024. Accessed: 2024.
+1, 3
+[4] Yochai Blau and Tomer Michaeli. The perception-distortion
+tradeoff. In Proceedings of the IEEE conference on computer
+vision and pattern recognition, pages 6228–6237, 2018. 6
+[5] Jianrui Cai, Hui Zeng, Hongwei Yong, Zisheng Cao, and Lei
+Zhang. Toward real-world single image super-resolution:
+A new benchmark and a new model. In Proceedings of
+the IEEE/CVF international conference on computer vision,
+pages 3086–3095, 2019. 5
+[6] Kelvin CK Chan, Xintao Wang, Xiangyu Xu, Jinwei Gu,
+and Chen Change Loy. Glean: Generative latent bank
+for large-factor image super-resolution. In Proceedings of
+the IEEE/CVF conference on computer vision and pattern
+recognition, pages 14245–14254, 2021. 1
+[7] Bin Chen, Gehui Li, Rongyuan Wu, Xindong Zhang, Jie
+Chen, Jian Zhang, and Lei Zhang. Adversarial diffu-
+sion compression for real-world image super-resolution. In
+Proceedings of the Computer Vision and Pattern Recognition
+Conference, pages 28208–28220, 2025. 2
+[8] Chaofeng Chen, Xinyu Shi, Yipeng Qin, Xiaoming Li, Xi-
+aoguang Han, Tao Yang, and Shihui Guo. Real-world
+blind super-resolution via feature matching with implicit
+high-resolution priors. In Proceedings of the 30th ACM
+International Conference on Multimedia, pages 1329–1338,
+2022. 2
+[9] Hanting Chen, Yunhe Wang, Tianyu Guo, Chang Xu, Yip-
+ing Deng, Zhenhua Liu, Siwei Ma, Chunjing Xu, Chao Xu,
+and Wen Gao. Pre-trained image processing transformer.
+In Proceedings of the IEEE/CVF conference on computer
+vision and pattern recognition, pages 12299–12310, 2021. 2
+[10] Junsong Chen, Jincheng Yu, Chongjian Ge, Lewei Yao, Enze
+Xie, Yue Wu, Zhongdao Wang, James Kwok, Ping Luo,
+Huchuan Lu, et al. Pixart-α: Fast training of diffusion
+transformer for photorealistic text-to-image synthesis. arXiv
+preprint arXiv:2310.00426, 2023. 3
+[11] Junyang Chen, Jinshan Pan, and Jiangxin Dong. Faithd-
+iff: Unleashing diffusion priors for faithful image super-
+resolution. In Proceedings of the Computer Vision and
+Pattern Recognition Conference, pages 28188–28197, 2025.
+5, 6
+[12] Xiangyu Chen, Xintao Wang, Jiantao Zhou, Yu Qiao,
+and Chao Dong. Activating more pixels in image super-
+resolution transformer. In Proceedings of the IEEE/CVF
+conference on computer vision and pattern recognition,
+pages 22367–22377, 2023. 2
+[13] Zheng Chen, Yulun Zhang, Jinjin Gu, Linghe Kong, Xi-
+aokang Yang, and Fisher Yu. Dual aggregation transformer
+for image super-resolution. In Proceedings of the IEEE/CVF
+international conference on computer vision, pages 12312–
+12321, 2023. 2
+[14] Kun Cheng, Lei Yu, Zhijun Tu, Xiao He, Liyu Chen, Yong
+Guo, Mingrui Zhu, Nannan Wang, Xinbo Gao, and Jie Hu.
+Effective diffusion transformer architecture for image super-
+resolution. In Proceedings of the AAAI Conference on
+Artificial Intelligence, pages 2455–2463, 2025. 2
+[15] Qinpeng Cui, Yixuan Liu, Xinyi Zhang, Qiqi Bao, Qing-
+min Liao, Li Wang, Tian Lu, Zicheng Liu, Zhongdao Wang,
+and Emad Barsoum. Taming diffusion prior for image
+super-resolution with domain shift sdes. arXiv preprint
+arXiv:2409.17778, 2024. 2
+[16] Tao Dai, Jianrui Cai, Yongbing Zhang, Shu-Tao Xia, and
+Lei Zhang. Second-order attention network for single im-
+age super-resolution. In Proceedings of the IEEE/CVF
+conference on computer vision and pattern recognition,
+pages 11065–11074, 2019. 2
+[17] Junyuan Deng, Xinyi Wu, Yongxing Yang, Congchao Zhu,
+Song Wang, and Zhenyao Wu. Acquire and then adapt:
+Squeezing out text-to-image model for image restoration. In
+Proceedings of the Computer Vision and Pattern Recognition
+Conference, pages 23195–23206, 2025. 2
+[18] Prafulla Dhariwal and Alexander Nichol. Diffusion mod-
+els beat gans on image synthesis. Advances in neural
+information processing systems, 34:8780–8794, 2021. 3
+[19] Chao Dong, Chen Change Loy, Kaiming He, and Xiaoou
+Tang. Learning a deep convolutional network for im-
+age super-resolution. In European conference on computer
+vision, pages 184–199. Springer, 2014. 2
+[20] Linwei Dong, Qingnan Fan, Yihong Guo, Zhonghao Wang,
+Qi Zhang, Jinwei Chen, Yawei Luo, and Changqing Zou.
+Tsd-sr: One-step diffusion with target score distillation for
+real-world image super-resolution. In Proceedings of the
+Computer Vision and Pattern Recognition Conference, pages
+23174–23184, 2025. 4
+[21] Zheng-Peng Duan, Jiawei Zhang, Xin Jin, Ziheng Zhang,
+Zheng Xiong, Dongqing Zou, Jimmy S Ren, Chunle Guo,
+and Chongyi Li. Dit4sr: Taming diffusion transformer for
+real-world image super-resolution. In Proceedings of the
+IEEE/CVF International Conference on Computer Vision,
+pages 18948–18958, 2025. 6
+[22] Patrick Esser, Sumith Kulal, Andreas Blattmann, Rahim
+Entezari, Jonas M ¨uller, Harry Saini, Yam Levi, Dominik
+Lorenz, Axel Sauer, Frederic Boesel, et al. Scaling recti-
+fied flow transformers for high-resolution image synthesis.
+In Forty-first international conference on machine learning,
+2024. 3
+[23] Junhao Gu, Peng-Tao Jiang, Hao Zhang, Mi Zhou, Jinwei
+Chen, Wenming Yang, and Bo Li. Consissr: Delving deep
+into consistency in diffusion-based image super-resolution.
+2024. 2
+38266
+
+=== PAGE 10 ===
+[24] Jonathan Ho, Ajay Jain, and Pieter Abbeel. Denoising dif-
+fusion probabilistic models. Advances in neural information
+processing systems, 33:6840–6851, 2020. 3
+[25] Edward J Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-
+Zhu, Yuanzhi Li, Shean Wang, Lu Wang, Weizhu Chen, et al.
+Lora: Low-rank adaptation of large language models. ICLR,
+1(2):3, 2022. 3
+[26] Gu Jinjin, Cai Haoming, Chen Haoyu, Ye Xiaoxing,
+Jimmy S Ren, and Dong Chao. Pipal: a large-scale image
+quality assessment dataset for perceptual image restoration.
+In European conference on computer vision, pages 633–651.
+Springer, 2020. 6
+[27] Tero Karras, Samuli Laine, and Timo Aila. A style-based
+generator architecture for generative adversarial networks.
+In Proceedings of the IEEE/CVF conference on computer
+vision and pattern recognition, pages 4401–4410, 2019. 5
+[28] Junjie Ke, Qifei Wang, Yilin Wang, Peyman Milanfar, and
+Feng Yang. Musiq: Multi-scale image quality transformer.
+In Proceedings of the IEEE/CVF international conference on
+computer vision, pages 5148–5157, 2021. 5
+[29] Christian Ledig, Lucas Theis, Ferenc Husz´ar, Jose Caballero,
+Andrew Cunningham, Alejandro Acosta, Andrew Aitken,
+Alykhan Tejani, Johannes Totz, Zehan Wang, et al. Photo-
+realistic single image super-resolution using a generative ad-
+versarial network. In Proceedings of the IEEE conference on
+computer vision and pattern recognition, pages 4681–4690,
+2017. 1
+[30] Jianze Li, Jiezhang Cao, Zichen Zou, Xiongfei Su, Xin
+Yuan, Yulun Zhang, Yong Guo, and Xiaokang Yang.
+Distillation-free one-step diffusion for real-world image
+super-resolution. 2024. 2
+[31] Jianze Li, Jiezhang Cao, Yong Guo, Wenbo Li, and Yulun
+Zhang. One diffusion step to real-world super-resolution via
+flow trajectory distillation.arXiv preprint arXiv:2502.01993,
+2025. 2
+[32] Yawei Li, Kai Zhang, Jingyun Liang, Jiezhang Cao, Ce Liu,
+Rui Gong, Yulun Zhang, Hao Tang, Yun Liu, Denis Deman-
+dolx, et al. Lsdir: A large scale dataset for image restoration.
+In Proceedings of the IEEE/CVF Conference on Computer
+Vision and Pattern Recognition, pages 1775–1787, 2023. 5
+[33] Jingyun Liang, Jiezhang Cao, Guolei Sun, Kai Zhang, Luc
+Van Gool, and Radu Timofte. Swinir: Image restoration
+using swin transformer. In Proceedings of the IEEE/CVF
+international conference on computer vision, pages 1833–
+1844, 2021. 2
+[34] Jie Liang, Hui Zeng, and Lei Zhang. Details or artifacts:
+A locally discriminative learning approach to realistic im-
+age super-resolution. In Proceedings of the IEEE/CVF
+conference on computer vision and pattern recognition,
+pages 5657–5666, 2022. 2
+[35] Jie Liang, Hui Zeng, and Lei Zhang. Efficient and
+degradation-adaptive network for real-world image super-
+resolution. In European Conference on Computer Vision,
+pages 574–591. Springer, 2022. 2
+[36] Bee Lim, Sanghyun Son, Heewon Kim, Seungjun Nah,
+and Kyoung Mu Lee. Enhanced deep residual networks
+for single image super-resolution. In Proceedings of the
+IEEE conference on computer vision and pattern recognition
+workshops, pages 136–144, 2017. 2
+[37] Xinqi Lin, Jingwen He, Ziyan Chen, Zhaoyang Lyu, Bo Dai,
+Fanghua Yu, Yu Qiao, Wanli Ouyang, and Chao Dong. Diff-
+bir: Toward blind image restoration with generative diffusion
+prior. In European conference on computer vision, pages
+430–448. Springer, 2024. 4, 6
+[38] Xinqi Lin, Fanghua Yu, Jinfan Hu, Zhiyuan You, Wu Shi,
+Jimmy S Ren, Jinjin Gu, and Chao Dong. Harnessing
+diffusion-yielded score priors for image restoration. arXiv
+preprint arXiv:2507.20590, 2025. 2
+[39] Haotian Liu, Chunyuan Li, Qingyang Wu, and Yong Jae Lee.
+Visual instruction tuning. Advances in neural information
+processing systems, 36:34892–34916, 2023. 4
+[40] Yong Liu, Hang Dong, Boyang Liang, Songwei Liu, Qingji
+Dong, Kai Chen, Fangmin Chen, Lean Fu, and Fei Wang.
+Unfolding once is enough: A deployment-friendly trans-
+former unit for super-resolution. In Proceedings of the 31st
+ACM international conference on multimedia, pages 7952–
+7960, 2023. 2
+[41] Yong Liu, Hang Dong, Jinshan Pan, Qingji Dong, Kai Chen,
+Rongxiang Zhang, Lean Fu, and Fei Wang. Patchscaler: An
+efficient patch-independent diffusion model for image super-
+resolution. In Proceedings of the IEEE/CVF International
+Conference on Computer Vision, pages 11283–11293, 2025.
+2
+[42] Mehdi Noroozi, Isma Hadji, Brais Martinez, Adrian Bulat,
+and Georgios Tzimiropoulos. You only need one step: Fast
+super-resolution with stable diffusion via scale distillation.
+In European Conference on Computer Vision, pages 145–
+161. Springer, 2024. 2
+[43] Dustin Podell, Zion English, Kyle Lacey, Andreas
+Blattmann, Tim Dockhorn, Jonas M ¨uller, Joe Penna, and
+Robin Rombach. Sdxl: Improving latent diffusion mod-
+els for high-resolution image synthesis. arXiv preprint
+arXiv:2307.01952, 2023. 1, 7
+[44] Yunpeng Qu, Kun Yuan, Kai Zhao, Qizhi Xie, Jinhua Hao,
+Ming Sun, and Chao Zhou. Xpsr: Cross-modal priors
+for diffusion-based image super-resolution. In European
+Conference on Computer Vision, pages 285–303. Springer,
+2024. 2
+[45] Aditya Ramesh, Prafulla Dhariwal, Alex Nichol, Casey Chu,
+and Mark Chen. Hierarchical text-conditional image gener-
+ation with clip latents. arXiv preprint arXiv:2204.06125, 1
+(2):3, 2022. 3
+[46] Robin Rombach, Andreas Blattmann, Dominik Lorenz,
+Patrick Esser, and Bj ¨orn Ommer. High-resolution image
+synthesis with latent diffusion models. In Proceedings of
+the IEEE/CVF conference on computer vision and pattern
+recognition, pages 10684–10695, 2022. 3, 7
+[47] Chitwan Saharia, William Chan, Saurabh Saxena, Lala
+Li, Jay Whang, Emily L Denton, Kamyar Ghasemipour,
+Raphael Gontijo Lopes, Burcu Karagol Ayan, Tim Salimans,
+et al. Photorealistic text-to-image diffusion models with deep
+language understanding. Advances in neural information
+processing systems, 35:36479–36494, 2022. 3
+[48] Haoze Sun, Wenbo Li, Jianzhuang Liu, Haoyu Chen, Ren-
+jing Pei, Xueyi Zou, Youliang Yan, and Yujiu Yang. Coser:
+38267
+
+=== PAGE 11 ===
+Bridging image and language for cognitive super-resolution.
+In Proceedings of the IEEE/CVF Conference on Computer
+Vision and Pattern Recognition, pages 25868–25878, 2024.
+2
+[49] Lingchen Sun, Rongyuan Wu, Zhengqiang Zhang, Hongwei
+Yong, and Lei Zhang. Improving the stability of diffusion
+models for content consistent super-resolution. CoRR, 2024.
+2
+[50] Lingchen Sun, Rongyuan Wu, Zhiyuan Ma, Shuaizheng
+Liu, Qiaosi Yi, and Lei Zhang. Pixel-level and semantic-
+level adjustable super-resolution: A dual-lora approach. In
+Proceedings of the Computer Vision and Pattern Recognition
+Conference, pages 2333–2343, 2025. 2
+[51] Li-Yuan Tsao, Hao-Wei Chen, Hao-Wei Chung, Deqing Sun,
+Chun-Yi Lee, Kelvin CK Chan, and Ming-Hsuan Yang.
+Holisdip: Image super-resolution via holistic semantics and
+diffusion prior. arXiv preprint arXiv:2411.18662, 2024. 2
+[52] Yuhao Wan, Peng-Tao Jiang, Qibin Hou, Hao Zhang, Jin-
+wei Chen, Ming-Ming Cheng, and Bo Li. Clearsr: Latent
+low-resolution image embeddings help diffusion-based real-
+world super resolution models see clearer. 2024. 2
+[53] Jianyi Wang, Kelvin CK Chan, and Chen Change Loy.
+Exploring clip for assessing the look and feel of im-
+ages. In Proceedings of the AAAI conference on artificial
+intelligence, pages 2555–2563, 2023. 5
+[54] Jianyi Wang, Zongsheng Yue, Shangchen Zhou, Kelvin CK
+Chan, and Chen Change Loy. Exploiting diffusion prior for
+real-world image super-resolution. International Journal of
+Computer Vision, 132(12):5929–5949, 2024. 2, 6
+[55] Xintao Wang, Ke Yu, Shixiang Wu, Jinjin Gu, Yihao Liu,
+Chao Dong, Yu Qiao, and Chen Change Loy. Esrgan: En-
+hanced super-resolution generative adversarial networks. In
+Proceedings of the European conference on computer vision
+(ECCV) workshops, pages 0–0, 2018. 2
+[56] Xintao Wang, Yu Li, Honglun Zhang, and Ying Shan. To-
+wards real-world blind face restoration with generative fa-
+cial prior. In Proceedings of the IEEE/CVF conference on
+computer vision and pattern recognition, pages 9168–9178,
+2021. 1
+[57] Xintao Wang, Liangbin Xie, Chao Dong, and Ying Shan.
+Real-esrgan: Training real-world blind super-resolution with
+pure synthetic data. In Proceedings of the IEEE/CVF
+international conference on computer vision, pages 1905–
+1914, 2021. 2, 4, 6
+[58] Yufei Wang, Wenhan Yang, Xinyuan Chen, Yaohui Wang,
+Lanqing Guo, Lap-Pui Chau, Ziwei Liu, Yu Qiao, Alex C
+Kot, and Bihan Wen. Sinsr: diffusion-based image super-
+resolution in a single step. In Proceedings of the IEEE/CVF
+conference on computer vision and pattern recognition,
+pages 25796–25805, 2024. 2
+[59] Zhou Wang, Alan C Bovik, Hamid R Sheikh, and Eero P Si-
+moncelli. Image quality assessment: from error visibility to
+structural similarity. IEEE transactions on image processing,
+13(4):600–612, 2004. 5
+[60] Pengxu Wei, Ziwei Xie, Hannan Lu, Zongyuan Zhan, Qix-
+iang Ye, Wangmeng Zuo, and Liang Lin. Component
+divide-and-conquer for real-world image super-resolution. In
+European conference on computer vision, pages 101–117.
+Springer, 2020. 5
+[61] Rongyuan Wu, Lingchen Sun, Zhiyuan Ma, and Lei Zhang.
+One-step effective diffusion network for real-world im-
+age super-resolution. Advances in Neural Information
+Processing Systems, 37:92529–92553, 2024. 4, 6
+[62] Rongyuan Wu, Tao Yang, Lingchen Sun, Zhengqiang Zhang,
+Shuai Li, and Lei Zhang. Seesr: Towards semantics-
+aware real-world image super-resolution. In Proceedings of
+the IEEE/CVF conference on computer vision and pattern
+recognition, pages 25456–25467, 2024. 2, 5, 6
+[63] Enze Xie, Junsong Chen, Junyu Chen, Han Cai, Haotian
+Tang, Yujun Lin, Zhekai Zhang, Muyang Li, Ligeng Zhu,
+Yao Lu, et al. Sana: Efficient high-resolution image syn-
+thesis with linear diffusion transformers. arXiv preprint
+arXiv:2410.10629, 2024. 3
+[64] Liangbin Xie, Xintao Wang, Xiangyu Chen, Gen Li, Ying
+Shan, Jiantao Zhou, and Chao Dong. Desra: detect and
+delete the artifacts of gan-based real-world super-resolution
+models. arXiv preprint arXiv:2307.02457, 2023. 2
+[65] Rui Xie, Chen Zhao, Kai Zhang, Zhenyu Zhang, Jun Zhou,
+Jian Yang, and Ying Tai. Addsr: Accelerating diffusion-
+based blind super-resolution with adversarial diffusion dis-
+tillation. arXiv preprint arXiv:2404.01717, 2024. 2
+[66] Sidi Yang, Tianhe Wu, Shuwei Shi, Shanshan Lao, Yuan
+Gong, Mingdeng Cao, Jiahao Wang, and Yujiu Yang.
+Maniqa: Multi-dimension attention network for no-reference
+image quality assessment. In Proceedings of the IEEE/CVF
+conference on computer vision and pattern recognition,
+pages 1191–1200, 2022. 5
+[67] Tao Yang, Rongyuan Wu, Peiran Ren, Xuansong Xie, and
+Lei Zhang. Pixel-aware stable diffusion for realistic image
+super-resolution and personalized stylization. In European
+conference on computer vision, pages 74–91. Springer,
+2024. 2, 4
+[68] Fanghua Yu, Jinjin Gu, Zheyuan Li, Jinfan Hu, Xiangtao
+Kong, Xintao Wang, Jingwen He, Yu Qiao, and Chao Dong.
+Scaling up to excellence: Practicing model scaling for photo-
+realistic image restoration in the wild. In Proceedings of
+the IEEE/CVF conference on computer vision and pattern
+recognition, pages 25669–25680, 2024. 1, 2, 4, 6
+[69] Zongsheng Yue, Jianyi Wang, and Chen Change Loy.
+Resshift: Efficient diffusion model for image super-
+resolution by residual shifting. Advances in Neural
+Information Processing Systems, 36:13294–13307, 2023. 2
+[70] Zongsheng Yue, Jianyi Wang, and Chen Change Loy. Effi-
+cient diffusion model for image restoration by residual shift-
+ing. IEEE Transactions on Pattern Analysis and Machine
+Intelligence, 2024. 1
+[71] Aiping Zhang, Zongsheng Yue, Renjing Pei, Wenqi Ren,
+and Xiaochun Cao. Degradation-guided one-step im-
+age super-resolution with diffusion priors. arXiv preprint
+arXiv:2409.17058, 2024. 2
+[72] Kai Zhang, Jingyun Liang, Luc Van Gool, and Radu Timo-
+fte. Designing a practical degradation model for deep blind
+image super-resolution. In Proceedings of the IEEE/CVF
+international conference on computer vision, pages 4791–
+4800, 2021. 2, 6
+38268
+
+=== PAGE 12 ===
+[73] Richard Zhang, Phillip Isola, Alexei A Efros, Eli Shecht-
+man, and Oliver Wang. The unreasonable effectiveness
+of deep features as a perceptual metric. In Proceedings
+of the IEEE conference on computer vision and pattern
+recognition, pages 586–595, 2018. 5
+[74] Xindong Zhang, Hui Zeng, Shi Guo, and Lei Zhang.
+Efficient long-range attention network for image super-
+resolution. In European conference on computer vision,
+pages 649–667. Springer, 2022. 2
+[75] Yulun Zhang, Kunpeng Li, Kai Li, Lichen Wang, Bineng
+Zhong, and Yun Fu. Image super-resolution using very deep
+residual channel attention networks. In Proceedings of the
+European conference on computer vision (ECCV), pages
+286–301, 2018. 2
+[76] Yulun Zhang, Yapeng Tian, Yu Kong, Bineng Zhong, and
+Yun Fu. Residual dense network for image super-resolution.
+In Proceedings of the IEEE conference on computer vision
+and pattern recognition, pages 2472–2481, 2018. 2
+38269

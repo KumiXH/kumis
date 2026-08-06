@@ -1,0 +1,1476 @@
+=== PAGE 1 ===
+Acquire and then Adapt: Squeezing out Text-to-Image Model for Image
+Restoration
+Junyuan Deng1 Xinyi Wu1 Yongxing Yang1 Congchao Zhu1 Song Wang1,2 Zhenyao Wu1*
+1Honor Device Co., Ltd 2Shenzhen University of Advanced Technology
+{dengjunyuan1, wuxinyi, yangyongxing1, zhucongchao, wangsong5, wuzhenyao }@honor.com
+Private
+Private
+Public
+Dataset
+Synthetic
+Synthetic
+Public
+Synthetic
+SUPIR DreamClear Ours
+Images
+Public
+Synthetic
+Synthetic
+🔥🔥
+🔥
+🔥
+❄ ❄
+LQ Images
+20M Images 1M Images 0.35M Images
+Adapter
+1.3B Params 2.2B Params 0.4B Params
+Cost
+$12.3k $9.4k $0.8k
+Dataset Adapter Cost Dataset Adapter Cost
+88k
+Figure 1. Comparison of SUPIR [94], DreamClear [3], and our proposed method. Our training dataset is constructed entirely from synthetic
+images. Trained with such data, our method achieves the most realistic restoration results with the lowest training cost.
+Abstract
+Recently, pre-trained text-to-image (T2I) models have been
+extensively adopted for real-world image restoration be-
+cause of their powerful generative prior. However, con-
+trolling these large models for image restoration usually re-
+quires a large number of high-quality images and immense
+computational resources for training, which is costly and
+not privacy-friendly. In this paper, we find that the well-
+trained large T2I model (i.e., Flux) is able to produce a va-
+riety of high-quality images aligned with real-world distri-
+butions, offering an unlimited supply of training samples
+to mitigate the above issue. Specifically, we proposed a
+training data construction pipeline for image restoration,
+namely FluxGen, which includes unconditional image gen-
+eration, image selection, and degraded image simulation.
+A novel light-weighted adapter (FluxIR) with squeeze-and-
+*Corresponding author.
+excitation layers is also carefully designed to control the
+large Diffusion Transformer (DiT)-based T2I model so that
+reasonable details can be restored. Experiments demon-
+strate that our proposed method enables the Flux model
+to adapt effectively to real-world image restoration tasks,
+achieving superior scores and visual quality on both syn-
+thetic and real-world degradation datasets - at only about
+8.5% of the training cost compared to current approaches.
+1. Introduction
+In real-world scenarios, images often suffer from diverse
+and unpredictable degradations during capture, storage and
+transmission, giving rise to a wide range of image restora-
+tion (IR) tasks, e.g., deblurring [13, 35, 56, 61, 69, 82, 101],
+denoising [7, 79, 99, 100], super-resolution [11, 18, 30, 38],
+and etc., for restoring the original high-quality images based
+on the type of degradation. These methods, however, strug-
+1
+arXiv:2504.15159v1  [cs.CV]  21 Apr 2025
+
+=== PAGE 2 ===
+gle to maintain generalizability under complex real-world
+degradation due to the limited model capacity and con-
+strained training data. To alleviate this problem, many re-
+searchers have developed methods [46, 75, 85, 94] based
+on pre-trained text-to-image (T2I) models [19, 52, 53, 62].
+Trained on vast collections of real image-text pairs, these
+T2I models encapsulate extensive prior knowledge, en-
+abling them to enrich low-quality images of any type with
+realistic details. However, an immense dataset and exten-
+sive training period are required to prevent alterations of
+image content and the generation of inaccurate details.
+Early generative-based IR methods [46, 49, 54, 55, 67,
+68, 75, 85, 106] are typically built upon the Stable-Diffusion
+model, combining several publicly available datasets such
+as DIV2K [2], Flickr2K [44], LSDIR [41] and DIV8K [25]
+to create a diverse training set. As generative models
+have scaled up, the following work [94] increased the
+scale of training data by collecting more high-quality, high-
+resolution images. Nevertheless, acquiring large amounts
+of data remains challenging: manual data collection incurs
+high costs, while web scraping poses potential copyright
+and privacy risks. Furthermore, the resulting datasets re-
+main limited in scope. The recent work [3] approaches these
+challenges by incorporating one million generated high-
+quality images. However, the utilization of the sophisti-
+cated multimodal large language model ( i.e., Gemini-1.5-
+Pro [70]) and the necessity for finetuning the T2I model
+result in a less efficient data curation process. In this pa-
+per, we proposeFluxGen, a streamlined and highly efficient
+data generation pipeline that operates without the involve-
+ment of LLMs. Specifically, we find Flux [37] can gener-
+ate highly realistic and diverse images directly from random
+noise. We also incorporate no-reference image quality as-
+sessments (IQA) methods [32, 74, 91] for image filtering,
+along with advanced degradation techniques [77, 102] for
+constructing training image pairs.
+Typically, for generative-based IR methods [46, 75, 85],
+large-scale trainable adapters are needed to control T2I
+models external control signals. These adapters are usu-
+ally replications of the U-Net [63] encoder from the T2I
+model or the full model, resulting in substantial training
+time and GPU resource demands. Moreover, with the con-
+tinued growth in the parameter size of T2I models, recent
+efforts have concentrated on scaling up adapters to more ef-
+fectively control these increasingly powerful models. For
+example, SUPIR [94] employs a 1.3B adapter for 3.5B
+SDXL [53], while DreamClear [3] introduces 2.2B adapter
+for 0.6B PixArt- α [10]. In this work, we carefully de-
+sign a light-weighted ControlNet-like adapter FluxIR with
+only 0.4B trainable parameters to adapt the powerful 12B
+pretrained Flux [37] model to the IR task. The adapter
+consists of an MM-DIT [19] block and multiple squeeze-
+and-excitation (SE) layers, where the former extracts con-
+trol signal features and the latter modulates the denoising
+process efficiently using these features. As illustrated in
+Fig. 1, our proposed method reduces training costs 1 by ap-
+proximately 93.5% and91.5% compared to SUPIR [94] and
+DreamClear [3], respectively, while also achieving the best
+image restoration quality. The main contributions of this
+paper are summarized as follows:
+• We are the first to confirm that the Flux model exhibits the
+remarkable capacity to generate highly lifelike images for
+the curation of IR datasets. Our proposed FluxGen can
+automatically generate an unlimited number of training
+samples in a simple and effective manner.
+• We design FluxIR, a light-weighted adapter equipped
+with a few squeeze-and-excitation layers, that can effec-
+tively manipulate the super-large T2I model like Flux to
+restore reasonable details for degraded images within 14
+GPU-days.
+• Extensive experiments demonstrate that our method
+achieves optimal performance in handling real-world de-
+graded images and producing the most realistic and satis-
+factory results.
+2. Related Work
+Image Restoration. Image restoration aims to reconstruct
+clear, detailed images from degraded ones under various
+types of degradation. Early approaches often assumed spe-
+cific degradation processes [15, 17, 27, 30, 38, 64, 104]
+or incorporated degradation prediction directly into the
+model [21, 51, 73, 76, 81, 98]. However, these meth-
+ods struggle to generalize to real-world scenarios. Recent
+studies have advanced image restoration by building com-
+plex real-world degradation processes [77, 102]. These
+approaches simulate real-world degradation through var-
+ied random combinations of factors like noise, blur, JPEG
+compression, etc. These simulations have driven notable
+improvements in restoration performance, boosting image
+quality substantially [6, 42, 43, 77, 102]. Building on the
+successes of text-to-image diffusion models [19, 37, 53, 62],
+several studies [8, 12, 14, 20, 24, 31, 40, 72, 75, 84, 85, 89,
+92, 94] have leveraged the generative prior from pre-trained
+T2I models to restore images with significantly enhanced
+quality and high-frequency details. In this work, we take a
+further step by leveraging the generative prior from the ad-
+vanced pre-trained T2I diffusion model, Flux, and introduce
+a novel MM-DiT-based adapter to recover missing details
+and enhance the aesthetic quality of the input images.
+Large Text-to-Image Diffusion Model. Diffusion
+Model [16, 28, 65, 66] have achieved superior performance
+on image synthesis. Stable Diffusion (SD) [62] is one of
+the most famous models, which compresses images into
+1Training costs are calculated by multiplying the GPU rental price by
+the total GPU hours used.
+2
+
+=== PAGE 3 ===
+the latent space using a high-fidelity high-compression ra-
+tio V AE [36]. Later, Diffusion transformer (DiT) [52] pro-
+posed replacing the traditional U-Net framework [63] with
+a transformer, aiming to improve scalability when trained
+on large datasets. As a result, SD3 [19], which adopts the
+multimodal diffusion transformer-based (MM-DiT) frame-
+work, has demonstrated outstanding performance in both
+text-to-image generation and visual quality. More recently,
+Flux [37] extended the MM-DiT [19] architecture and used
+a 16-channel V AE to scale the T2I diffusion model to 12B
+parameters. By integrating the T5 [58] text encoder, Flux
+achieved top performance in text-image alignment, visual
+quality, and aesthetic quality. In this paper, we leverage the
+generative prior of Flux to build a high-quality IR training
+dataset and restore the details of degraded images.
+Data Distillation. Scaling up datasets has proven essen-
+tial for improving the performance of large-scale models
+across various fields, including natural language process-
+ing (NLP) [1, 71], text-to-image [19, 37, 53, 62], image
+restoration [94], and etc. However, collecting such large-
+scale real-world data is prohibitively expensive. As a re-
+sult, researchers are increasingly turning to generated data,
+distilling datasets from generative models to make dataset
+expansion more efficient and cost-effective. For instance,
+BOOT [23] and DKDM [87] utilize synthetic data gener-
+ated from pretrained models to optimize the diffusion mod-
+els. GSDD [97] employs GAN inversion techniques [86] to
+learn a GAN distribution and generate images for the im-
+age super-resolution task. Recently, 800K training samples
+generated by DeepSeek-R1 [26] have been used to enhance
+the reasoning capabilities of small dense models like Qwen
+[90] and Llama[22]. Closest to our work, DreamClear [3]
+fine-tunes a text-to-image diffusion model to generate high-
+quality data with designed prompts. However, both [97] and
+[3] still require external data for either tuning or inversion,
+which is time-consuming and raises privacy concerns. To
+address this, we propose a novel data generation pipeline
+that distills a high-quality IR training dataset directly from
+pre-trained text-to-image models, without the need for ex-
+ternal data and additional training.
+3. Method
+In Sec. 3.1, we introduce FluxGen, a pipeline for generating
+high-quality, realistic training images using Flux. Then, in
+Sec. 3.2, we present FluxIR, a ControlNet-like adapter that
+enables precise control over Flux for image restoration. Fi-
+nally, Sec. 3.3 details efficient training strategies, including
+a novel timestep sampler and pixel-space loss functions.
+3.1. FluxGen
+Image generation. Both the quality and volume of training
+images are critical for neural network performance in image
+restoration tasks. Existing works [60, 94, 105] choose to
+start
+Flux
+Prompt: ""
+T5 CLIP
+End
+Flux-VAE
+Decoder
+ IQA
+Low Score
+High Score
+Image Degradation
+ Flux-VAE
+Encoder
+Random 
+Gaussian Noise
+Figure 2. An overview of our FluxGen pipeline. First, an empty
+prompt and random Gaussian noisez1 are input into Flux, generat-
+ing an image latent z0 over T steps. A V AE decoder then mapsz0
+to its corresponding image x0. High-quality images are curated by
+IQA-based selection, followed by image degradation to construct
+the final paired dataset.
+collect millions of images to build their training data. How-
+ever, constructing such large datasets introduces four sig-
+nificant challenges: 1) The data collection process is labor-
+intensive, requiring extensive human effort for preprocess-
+ing; 2) The use of this data raises privacy and copyright con-
+cerns; 3) Commercially purchased datasets are prohibitively
+expensive, limiting access for many research institutions; 4)
+Handling large volumes of high-resolution images is diffi-
+cult due to high bandwidth and storage requirements.
+Recently, Flux has effectively leveraged the scalable
+MM-DiT [19] alongside a 16-channel V AE to achieve lead-
+ing performance in generating high-quality, high-resolution
+images. These images display realistic high-frequency tex-
+ture details that far surpass those produced by other T2I
+models. In our proposed method, we utilize Flux for the
+first time to generate a large volume of high-quality train-
+ing images at a low cost. Unlike [60, 94, 105], acquiring
+high-quality and realistic images from Flux is labor-free,
+copyright-compliant, cost-effective, and easy to implement.
+As shown in Fig. 2, we input an empty prompt into
+Flux and manipulate the initial random noise to generate
+millions of images using the capabilities of the pre-trained
+Flux model. Here we take advantage of the random text
+prompt-dropping design in diffusion-based text-to-image
+(T2I) models [19, 59, 62] which allows T2I models to pro-
+duce a diverse range of realistic images from their gener-
+ative prior without the designed prompt. Notably, we can
+also leverage large language models (LLMs) like GPT-4 [1]
+and LLaMA [71] to craft tailored text prompts for FluxGen.
+The corresponding generated images can be used to train
+image restoration models focused on specific objects ( e.g.,
+3
+
+=== PAGE 4 ===
+VAE
+Encoder
+MM-DiT
+MM-DiT
+MM-DiT
+MM-DiT
+VAE
+Encoder
+Prompt: "High-resolution, 4K and All-
+In-Focus Image"
+T5
+CLIP
+HQ
+LQ
+Loss
+VAE 
+Decoder
+VAE 
+Decoder
+Loss
+VAE 
+Decoder
+SE LayerFluxIR
+🔥 🔥 🔥 🔥
+🔥🔥
+🔥
+🔥
+❄
+❄
+❄
+❄
+❄ ❄ ❄
+❄ ❄
+❄
+🔥 Trainable
+❄  Fixed
+Excitation
+MLP
+Squeeze
+MLP
+🔥
+🔥
+Flux
+Pred
+Figure 3. Training and inference pipeline of the proposed FluxIR. FluxIR employs a single MM-DiT block with learnable T5 embeddingθp
+and CLIP embedding θy to extract image feature fz and text feature fp from the low-quality control latent zlq. The squeeze-and-excitation
+(SE) layers (SEz(·) for image and SEp(·) for text) broadcast these features to all Flux MM-DiT blocks to enable precise and multi-modality
+control.
+animals, plants, and the moon) or particular domains ( e.g.,
+nighttime scenes and aerial photography).
+Image Selection. Although Flux is a powerful text-to-
+image model, the stability of the images it generates is not
+guaranteed. Low-quality images can significantly affect the
+training of image restoration models. To address this, we
+distill the dataset using various non-reference image qual-
+ity assessment (IQA) models, including CLIP-IQA [74],
+MANIQA [91], and MUSIQ [32]. Specifically, we se-
+lect images with CLIP-IQA, MANIQA, and MUSIQ scores
+within the top 95% as our training set. This process ensures
+that low-quality and failed generated images are removed
+from the training dataset, thus significantly enhancing our
+image restoration performance.
+Pair-data Construction. The degradation of ground truth
+images has been widely studied in [77, 102], with common
+degradation types including blur, downsampling, noise,
+JPEG compression and etc. In this paper, we apply the syn-
+thetic degradation method [77] with the same settings as
+[85] to construct paired data for training.
+3.2. FluxIR Architecture
+A typical solution for the T2I-based image restoration is
+training a ControlNet [103] upon a T2I model, with a V AE
+encoder to project the input image into latent space. The
+ControlNet is initialized as a copy of the U-Net encoder,
+with zero convolution layers acting as bridges to integrate
+conditional controls. Then the extracted multi-level features
+are injected into corresponding layers of the U-Net decoder.
+Recently, DreamClear [3] introduced a DiT-based Control-
+Net model by duplicating all 28 DiT blocks from PixArt-
+α [10]. With 2.2B trainable parameters in ControlNet, it
+requires 224 GPU days for training, which is surprisingly
+time-consuming. To solve this issue, we carefully design
+a training-friendly 0.4B adapter, integrated with Flux — a
+much larger MM-DiT-based text-to-image model with ap-
+proximately 12B parameters.
+The detailed FluxIR architecture is illustrated in Fig. 3.
+To extract control signal from V AE embedding featurezlq,
+only one MM-DiT block is involved in our FluxIR adapter
+for lightweight purposes. The MM-DiT block, denoted as
+D(z, p, y, t; Θd), is initialized from the first MM-DiT block
+of the pre-trained Flux model, and its input can be reformu-
+lated as
+zc = zt + Mi(zlq; Θi), (1)
+where Mi(·; Θi) is a multi-layer perceptron (MLP) with
+parameters Θi initialized to zero and zt = (1 − t)z0 + tz1
+represents the linear combination of the noise latent z1 and
+the ground truth latent z0 at timestep t. To bridge the gap
+between the adapter and original T2I model, we employ a
+learnable T5 [58] embedding θp and a learnable CLIP [57]
+4
+
+=== PAGE 5 ===
+embedding θy and adjust the T5 embeddingp as pc = p+θp
+and the CLIP embeddingy as yc = y+θy. Finally, the MM-
+DiT block with parameters Θd outputs an image feature fz
+and a text feature fp as follows:
+fz, fp = D(zc, pc, yc, t; Θd). (2)
+Since Flux consists of 57 MM-DiT blocks, duplicating
+conditional features from a single MM-DiT adapter is in-
+sufficient to control the entire T2I model. We introduce a
+set of squeeze-and-excitation (SE) layers to broadcast con-
+trol signals to all 57 MM-DiT blocks. Each SE layer selec-
+tively emphasizes informative features and suppresses less
+useful ones, enabling targeted control of its corresponding
+MM-DiT block. The SE layer comprises a squeeze MLP
+layer and an excitation MLP layer, formulated as follows:
+SE(x) = We(Wsx + Bs) + Be, (3)
+where Ws ∈ Rr×c and Bs ∈ Rr is the weight and bias
+of squeeze MLP layers with input channel of c and rank of
+r, while the weight We ∈ Rc×r and bias Be ∈ Rc of ex-
+citation layer are initialized to zero values. Unlike existing
+works [3, 46, 75, 94] that control only the image branch, we
+implement multi-modality controls on both the image and
+text information. The control signals of the i-th SE layer,
+corresponding to the i-th Flux MM-DiT block, can be com-
+puted as
+zi
+c = SEi
+z(fz), p i
+c = SEi
+p(fp). (4)
+Compared with a full-rank MLP, our proposed SE layer is
+extremely lightweight with only approximately 2% of the
+parameters. Our SE layer shares the same name as SE block
+in [29], but differs in both motivation and implementation.
+[29] squeezes spatial features to extract channel-level atten-
+tion for recalibrating the original feature, while our SE lay-
+ers reduce the channel dimension and distill the essential
+features for targeted control.
+3.3. Efficient Training Strategy
+Timestep Sampling. The timestep sampling strategy can
+improve the training process for diffusion model [93]. Sta-
+ble Diffusion 3 [19] proposes a logit-normal sampling strat-
+egy to emphasize training velocity when t is in the mid-
+dle of [0, 1]. However, directly employing a logit-normal
+sampling strategy for IR model training is inappropriate.
+The starting point of the inference process is pure Gaus-
+sian noise at t = 1, which is seldom sampled during train-
+ing [45]. This leads to ineffective IR control at t = 1, nega-
+tively affecting subsequent iterations. Therefore, we rewrite
+the timestep sampling function to ensure accurate control at
+the starting point. The sampling function is defined as fol-
+lows:
+t =f(u) =
+
+
+
+0 if u < 0
+1 if u > 1
+u otherwise,
+(5)
+u ∼ U (−ϵ, 1 + ϵ), (6)
+where the hyper-parameter ϵ set to 0.05 in our experiments.
+Here we first sample the temporary timestep u from a uni-
+form distribution within the range of (−ϵ, 1 + ϵ). And then
+we clamp u to the range [0, 1], resulting in a probability of
+ϵ
+1+2ϵ for sampling the values 0 and 1, respectively.
+Optimization Strategy. The typical rectified flow model
+[4, 47, 48] is trained to predict the velocity field vp, and the
+Mean Squared Error (MSE) loss is employed for supervis-
+ing the error between predicted velocity fieldvp and ground
+truth velocity field vgt as
+vgt = z1 − z0, (7)
+LMSE = ∥vp − vgt∥2
+2. (8)
+However, this loss function in latent space inevitably ig-
+nores the high-frequency information of image [96], which
+is crucial for image restoration tasks. Following [33, 34, 83,
+92, 96], we incorporate a pixel-space loss function to super-
+vise the error between the decoded latent ˆzt = z0 + t · vp
+and the decoded ground truth latent zt = z0 + t · vgt after
+applying the V AE decoderVd into pixel space:
+LP = ∥Vd(z0 + t · vp) − Vd(z0 + t · vgt)∥1. (9)
+The final loss function of FluxIR is defined as:
+L = LMSE + αLP , (10)
+where α is set to 1 in our experiment setting.
+4. Experiments
+4.1. Experimental Settings
+Test Datasets. Following [3, 46, 75, 85, 94], we evaluate
+our method on both synthetic and real-world datasets. For
+the synthetic one, we randomly crop 600 images from the
+validation dataset of DIV2K with size of 1024 × 1024 and
+degrade them using the same settings as training, named
+DIV2K-Val. For real-world datasets, we utilize the most
+commonly used RealSR [5] and DrealSR [80] datasets,
+center-cropping HQ images to 1024 × 1024 and LQ im-
+ages to 256 × 256. Additionally, we include RealLQ250
+from [3, 85, 94], a dataset of 250 LQ images at 256 × 256
+resolution without corresponding HQ images.
+Implementation Details. In the FluxGen pipeline, we
+generate images at a resolution of 1024 × 768, using the
+5
+
+=== PAGE 6 ===
+Table 1. Quantitative comparison against state-of-the-art methods of image restoration on both synthetic and real-world datasets. The best
+and the second best performance for each metric are highlighted in red and blue, respectively.
+Datasets Metrics
+Methods
+BSRGAN Real-
+ESRGAN SwinIR DASR StableSR DiffBIR ResShift SinSR SeeSR SUPIR Dream-
+Clear Ours
+DIV2K-Val
+CLIPIQA ↑ 0.4741 0.4695 0.4513 0.3948 0.4085 0.5640 0.4240 0.4915 0.5909 0.5285 0.4961 0.5934
+MUSIQ ↑ 63.6223 63.8292 63.6854 59.4515 55.9995 69.0996 60.4907 64.4171 70.8168 68.8143 67.1506 69.6956
+MANIQA ↑ 0.4717 0.5197 0.5211 0.4316 0.4961 0.5978 0.4950 0.5059 0.5909 0.6043 0.5941 0.6331
+PSNR ↑ 21.6118 21.5077 21.0653 21.5082 20.0416 21.3925 21.4906 20.7884 21.2923 20.1696 19.7605 19.3811
+SSIM ↑ 0.5742 0.5821 0.5762 0.5674 0.5318 0.5297 0.5557 0.5015 0.5603 0.5145 0.4963 0.4574
+LPIPS ↓ 0.3366 0.3045 0.3115 0.3320 0.3459 0.3172 0.3086 0.3443 0.2799 0.3184 0.2895 0.3888
+RealSR
+CLIPIQA ↑ 0.4378 0.4197 0.4020 0.3153 0.4318 0.5310 0.3874 0.4445 0.5513 0.4594 0.5094 0.5413
+MUSIQ ↑ 63.4256 60.9526 58.6029 45.7800 58.8339 65.5924 54.4401 59.4758 69.0118 63.9510 64.1779 67.4536
+MANIQA ↑ 0.5059 0.5277 0.4765 0.3875 0.5469 0.5888 0.4688 0.5232 0.6115 0.5903 0.5997 0.6334
+PSNR ↑ 24.6354 24.1773 24.4184 25.0954 20.4413 23.9748 24.1925 24.2417 24.1676 22.3887 22.0330 20.7176
+SSIM ↑ 0.7484 0.7482 0.7566 0.7569 0.6320 0.6766 0.6892 0.6637 0.6967 0.6450 0.6442 0.5269
+LPIPS ↓ 0.2109 0.2082 0.2049 0.2495 0.2305 0.2484 0.2440 0.2601 0.2105 0.2674 0.2547 0.3672
+DrealSR
+CLIPIQA ↑ 0.4219 0.3922 0.3878 0.3165 0.4206 0.4889 0.4060 0.4188 0.5295 0.4544 0.4046 0.5136
+MUSIQ ↑ 61.2255 58.3819 57.3308 46.4866 56.3195 62.0861 53.9293 58.3077 67.2415 64.7508 56.5999 66.6202
+MANIQA ↑ 0.4823 0.4911 0.4710 0.3828 0.5224 0.5566 0.4611 0.4830 0.5928 0.5764 0.5423 0.6024
+PSNR ↑ 24.0480 24.1436 23.8878 25.1821 21.9354 23.9912 22.9158 23.4737 24.1699 22.6023 22.8037 21.3549
+SSIM ↑ 0.7268 0.7390 0.7290 0.7689 0.6616 0.6364 0.6330 0.6190 0.7147 0.6406 0.6186 0.5675
+LPIPS ↓ 0.2257 0.2226 0.2175 0.2474 0.2357 0.3123 0.3263 0.3544 0.2396 0.3069 0.2905 0.4310
+RealLQ250
+CLIPIQA ↑ 0.4701 0.4359 0.4400 0.3486 0.4009 0.5377 0.4165 0.4810 0.5569 0.4808 0.4876 0.5639
+MUSIQ ↑ 63.5206 62.5161 63.3724 53.0238 56.7121 67.5326 59.5056 63.8644 70.3768 65.7804 66.5102 70.7770
+MANIQA ↑ 0.5007 0.5239 0.5335 0.4414 0.5144 0.5877 0.5005 0.5160 0.5927 0.5829 0.5853 0.6314
+GT
+LQ Input Real-ESRGAN SeeSR
+SUPIR DreamClear FluxIR (Ours)
+Figure 4. Qualitative comparison on the synthetic dataset DIV2K-Val.
+guidance scale of 4 and timesteps of 20. In all experiments,
+we exclusively use 350,000 images generated by FluxGen,
+with no external data involved. We randomly center-crop
+the images to the sizes of 1024 × 768, 768 × 768, and
+512 × 768 to accommodate different aspect ratios. We train
+our FluxIR model using the AdamW [50] optimizer with a
+learning rate of 1 × 10−5. The training process takes about
+3.5 days on 4 NVIDIA H800 GPUs with a batch size of 64.
+For inference, we adopt 20 sampling steps to generate our
+IR results across all of our experiments.
+Metrics. Following [94], we use PSNR, SSIM, and
+LPIPS as full-reference metrics and MANIQA, CLIPIQA,
+and MUSIQ as non-reference metrics 2 for comprehensive
+evaluation. Our method, like other generative IR ap-
+proaches [3, 46, 75, 85, 94], achieves strong results in non-
+reference metrics but performs less competitively on full-
+reference metrics.
+4.2. Comparison with Existing Methods
+We conduct both quantitative and qualitative compar-
+isons of our FluxIR with state-of-the-art image restora-
+tion methods, including early approaches (BSRGAN [102],
+2We utilize the GitHub repository - https : / / github . com /
+chaofengc/IQA- PyTorch to evaluate non-reference metric scores
+with model names “maniqa-pipal”, “clipiqa+ vitL14 512”, and “musiq”,
+respectively.
+6
+
+=== PAGE 7 ===
+FluxIR (Ours)
+LQ Input Real-ESRGAN SeeSR
+SUPIR DreamClear FluxIR (Ours)
+FluxIR (Ours)
+LQ Input Real-ESRGAN SeeSR
+SUPIR DreamClear FluxIR (Ours)
+Figure 5. Qualitative comparison on the real-world dataset RealLQ250.
+RealESRGAN[77], SwinIR [42] and DASR[43]) and re-
+cent generative IR models (StableSR [75], DiffBIR [46],
+ResShift [95], SinSR [78], SeeSR [85], SUPIR [94],
+DreamClear [3]).
+Quantitative Comparisons. Tab. 1 shows the quanti-
+tative comparisons with the existing SOTAs on the four
+datasets. Our FluxIR model achieves the best score in
+MANIQA with a significant margin across all synthetic
+and real-world datasets. On the RealLQ250 dataset, our
+method significantly outperforms other methods across all
+non-reference metrics, while MANIQA even surpasses the
+second-best method by over 6.53%. On the other three
+synthetic and real-world datasets, our approach achieves
+the best or second-best scores in all non-reference metrics
+(CILPIQA, MUSIQ, and MANIQA). It is worth mentioning
+that our proposed method trained within 14 GPU-days sig-
+nificantly reduces training costs by approximately 93.5%
+and 91.5% compared to SUPIR [94] and DreamClear [3],
+respectively.
+Qualitative Comparisons. We present a qualitative
+comparison on the synthetic dataset DIV2K-Val in Fig. 4.
+Our method demonstrates a notable advantage in generating
+high-frequency details, such as lip texture, hair, eyelashes,
+and pupils in portrait images. In contrast, SUPIR [94] and
+DreamClear [3] fail to accurately reproduce human skin tex-
+tures, and SeeSR [85] produces overly smooth results, lack-
+ing the natural skin texture and fine details. For the real-
+world dataset RealLQ250, we provide a qualitative com-
+parison in Fig. 5. In the first row, which shows restoration
+results for a low-quality image of a cat, our method effec-
+tively reconstructs realistic high-frequency details such as
+fur, whiskers, and eyes. SeeSR [85] restores some fur and
+whiskers but lacks overall realism, while other methods fail
+to produce a high-quality, realistic result. In the second row,
+focusing on text recovery, our method achieves the most ac-
+curate text reconstruction, whereas other methods introduce
+various text distortions. Specifically, SUPIR [94] produces
+blurry results, and SeeSR [85] mistakenly recovers incor-
+rect text content.
+4.3. Ablation Study
+Effectiveness of SE layer. We evaluate the impact of
+different ranks of our SE layer by setting r to 16, 32, 64,
+and 128, respectively. Another variant is replacing the SE
+layer with a single MLP, i.e. a full rank setting. As shown
+in Tab. 2, the SE layer withr = 32 achieves the best perfor-
+mance on CLIPIQA, MANIQA, and CLIPIQA. Compared
+to using full-rank MLPs, the SE layer with low-rank re-
+sults in a comparable performance while saving over 72% of
+7
+
+=== PAGE 8 ===
+Table 2. Ablation results of various SE layer ranks on the Re-
+alLQ250 dataset. The number of parameters in FluxIR without
+the SE layers is 387M.
+Rank CLIPIQA ↑ MUSIQ ↑ MANIQA ↑ # Params
+16 0.5389 69.72 0.6222 387M + 11.6M
+32 0.5639 70.78 0.6314 387M + 22.8M
+64 0.5529 70.37 0.6306 387M + 45.2M
+128 0.5606 70.54 0.6292 387M + 90.0M
+Full 0.5720 70.79 0.6324 387M + 1076.2M
+LQ Input w/o + w/o w/o Full Setting
+Figure 6. The visual comparison results of our training strategies:
+timestep sampling function f(u) and LP loss. Please zoom in for
+a better view.
+the parameters. This demonstrates the effectiveness of our
+designed light-weighted SE layers in controlling the Flux
+model. By utilizing our SE layers with a rank of 32, we
+can outperform other state-of-the-art (SOTA) methods us-
+ing only 0.4B adapter parameters, which is only 30.8% and
+18.6% the size of SUPIR and DreamClear, respectively.
+Effectiveness of Training Strategies. We conduct ab-
+lation studies to evaluate our proposed training strategies:
+timestep sampling function f(u) and LP loss. Firstly, we
+use the logit-normal sampling strategy [19] to train our
+model without LP loss as a baseline. Then we include
+our proposed timestep sampling function f(u) as the sec-
+ond setting. We compare these two experiments with our
+full training strategies in the Tab. 3, which clearly demon-
+strates the significant performance improvement of the new
+sampling function and LP loss. Fig. 6 illustrates that the
+logit-normal sampling produces low-quality content, while
+our proposed sampling function f(u) effectively addresses
+this issue by bridging the gap between training and infer-
+ence. Additionally, applying the pixel-space lossLP allows
+for the restoration of more high-frequency details.
+Table 3. Ablation comparison results of our training strategies on
+the RealLQ250 dataset.
+Strategy CLIPIQA ↑ MUSIQ ↑ MANIQA ↑
+w/o LP and w/o f(u) 0.4416 62.18 0.5720
+w/o LP 0.5082 68.53 0.6128
+Full Setting 0.5639 70.78 0.6314
+LQ Input SDXL w/ IQA Flux w/o IQA Flux w/ IQA
+Figure 7. The visual comparisons of different FluxGen settings,
+where we study different T2I models,i.e. SDXL and Flux, and the
+usage of IQA selections. Please zoom in for a better view.
+Effectiveness of FluxGen. We follow the same settings
+of our FluxGen pipeline but replace the T2I model from
+Flux with SDXL to generate 10, 000 images. Addition-
+ally, we remove the IQA-based selection from the Flux-
+Gen pipeline. The results in Tab. 4 demonstrate that a
+high-quality image dataset from the Flux model, combined
+with IQA selection, leads to high-quality IR results. Fig. 7
+shows that the visual results based on the SDXL dataset are
+abysmal, exhibiting a smearing and distortion effect. In
+contrast, images generated by Flux deliver the best visual
+aesthetic quality. Our IQA selection can eliminate poorly
+generated images to achieve more realistic results. The sam-
+ples of generated images by FluxGen can be found in the
+supplemental materials.
+Table 4. Ablation results of different datasets generated by three
+FluxGen settings on the RealLQ250 dataset.
+FluxGen CLIPIQA ↑ MUSIQ ↑ MANIQA ↑
+SDXL w/ IQA 0.5787 69.28 0.5630
+Flux w/o IQA 0.5254 68.66 0.6265
+Flux w/ IQA 0.5487 70.16 0.6267
+5. Conclusion
+In this paper, we squeezed out the powerful T2I model -
+Flux for image restoration, by acquiring training data from
+it and then building a lightweight adapter to control it. To
+tackle the challenge of acquiring a large-scale high-quality
+image dataset, we proposed FluxGen for streamlined and
+highly efficient data generation. We present FluxIR, a
+lightweight adapter designed to control the T2I model for
+real-world image restoration, where the SE layers broadcast
+the control signals to all Flux MM-DiT blocks and modu-
+late both image and text embedding to enable precise and
+multi-modality control. Extensive qualitative and quantita-
+tive experiments demonstrated that our method shows su-
+perior performance on image restoration tasks and signifi-
+cantly reduces the training cost of large-scale generative IR
+model, in comparison with previous state-of-the-arts.
+8
+
+=== PAGE 9 ===
+References
+[1] Josh Achiam, Steven Adler, Sandhini Agarwal, Lama
+Ahmad, Ilge Akkaya, Florencia Leoni Aleman, Diogo
+Almeida, Janko Altenschmidt, Sam Altman, Shyamal
+Anadkat, et al. Gpt-4 technical report. arXiv preprint
+arXiv:2303.08774, 2023. 3
+[2] Eirikur Agustsson and Radu Timofte. Ntire 2017 challenge
+on single image super-resolution: Dataset and study. In
+CVPRW, pages 126–135, 2017. 2, 15
+[3] Yuang Ai, Xiaoqiang Zhou, Huaibo Huang, Xiaotian
+Han, Zhengyu Chen, Quanzeng You, and Hongxia Yang.
+Dreamclear: High-capacity real-world image restora-
+tion with privacy-safe dataset curation. arXiv preprint
+arXiv:2410.18666, 2024. 1, 2, 3, 4, 5, 6, 7, 15
+[4] Michael S Albergo and Eric Vanden-Eijnden. Building nor-
+malizing flows with stochastic interpolants. arXiv preprint
+arXiv:2209.15571, 2022. 5
+[5] Jianrui Cai, Hui Zeng, Hongwei Yong, Zisheng Cao,
+and Lei Zhang. Toward real-world single image super-
+resolution: A new benchmark and a new model. In ICCV,
+pages 3086–3095, 2019. 5, 15
+[6] Chaofeng Chen, Xinyu Shi, Yipeng Qin, Xiaoming Li, Xi-
+aoguang Han, Tao Yang, and Shihui Guo. Real-world blind
+super-resolution via feature matching with implicit high-
+resolution priors. In ACM MM, pages 1329–1338, 2022.
+2
+[7] Haoyu Chen, Jinjin Gu, Yihao Liu, Salma Abdel Magid,
+Chao Dong, Qiong Wang, Hanspeter Pfister, and Lei Zhu.
+Masked image training for generalizable deep image de-
+noising. In CVPR, pages 1692–1703, 2023. 1
+[8] Haolan Chen, Jinhua Hao, Kai Zhao, Kun Yuan, Ming
+Sun, Chao Zhou, and Wei Hu. Cassr: Activating image
+power for real-world image super-resolution.arXiv preprint
+arXiv:2403.11451, 2024. 2
+[9] Junsong Chen, Chongjian Ge, Enze Xie, Yue Wu, Lewei
+Yao, Xiaozhe Ren, Zhongdao Wang, Ping Luo, Huchuan
+Lu, and Zhenguo Li. Pixart- σ: Weak-to-strong training of
+diffusion transformer for 4k text-to-image generation. In
+ECCV, pages 74–91. Springer, 2024. 14
+[10] Junsong Chen, YU Jincheng, GE Chongjian, Lewei Yao,
+Enze Xie, Zhongdao Wang, James Kwok, Ping Luo,
+Huchuan Lu, and Zhenguo Li. Pixart- α: Fast training of
+diffusion transformer for photorealistic text-to-image syn-
+thesis. In ICLR, 2024. 2, 4
+[11] Zheng Chen, Yulun Zhang, Jinjin Gu, Linghe Kong, Xi-
+aokang Yang, and Fisher Yu. Dual aggregation transformer
+for image super-resolution. In ICCV, pages 12312–12321,
+2023. 1
+[12] Zheng Chen, Yulun Zhang, Jinjin Gu, Xin Yuan, Linghe
+Kong, Guihai Chen, and Xiaokang Yang. Image super-
+resolution with text prompt diffusion. arXiv preprint
+arXiv:2311.14282, 2023. 2
+[13] Zheng Chen, Yulun Zhang, Ding Liu, Jinjin Gu, Linghe
+Kong, Xin Yuan, et al. Hierarchical integration diffusion
+model for realistic image deblurring. NeurIPS, 36, 2024. 1
+[14] Qinpeng Cui, Yixuan Liu, Xinyi Zhang, Qiqi Bao,
+Zhongdao Wang, Qingmin Liao, Li Wang, Tian Lu,
+and Emad Barsoum. Taming diffusion prior for image
+super-resolution with domain shift sdes. arXiv preprint
+arXiv:2409.17778, 2024. 2
+[15] Tao Dai, Jianrui Cai, Yongbing Zhang, Shu-Tao Xia, and
+Lei Zhang. Second-order attention network for single im-
+age super-resolution. In CVPR, pages 11065–11074, 2019.
+2
+[16] Prafulla Dhariwal and Alexander Nichol. Diffusion mod-
+els beat gans on image synthesis. NeurIPS, 34:8780–8794,
+2021. 2
+[17] Chao Dong, Chen Change Loy, Kaiming He, and Xiaoou
+Tang. Learning a deep convolutional network for image
+super-resolution. In ECCV, pages 184–199. Springer, 2014.
+2
+[18] Chao Dong, Chen Change Loy, Kaiming He, and Xiaoou
+Tang. Image super-resolution using deep convolutional net-
+works. IEEE TPAMI, 38(2):295–307, 2015. 1
+[19] Patrick Esser, Sumith Kulal, Andreas Blattmann, Rahim
+Entezari, Jonas M ¨uller, Harry Saini, Yam Levi, Dominik
+Lorenz, Axel Sauer, Frederic Boesel, et al. Scaling rectified
+flow transformers for high-resolution image synthesis. In
+ICML, 2024. 2, 3, 5, 8
+[20] Yuanting Fan, Chengxu Liu, Nengzhong Yin, Changlong
+Gao, and Xueming Qian. Adadiffsr: Adaptive region-aware
+dynamic acceleration diffusion model for real-world image
+super-resolution. arXiv preprint arXiv:2410.17752, 2024.
+2
+[21] Manuel Fritsche, Shuhang Gu, and Radu Timofte. Fre-
+quency separation for real-world super-resolution. In IC-
+CVW, pages 3599–3608. IEEE, 2019. 2
+[22] Aaron Grattafiori, Abhimanyu Dubey, Abhinav Jauhri, Ab-
+hinav Pandey, Abhishek Kadian, Ahmad Al-Dahle, Aiesha
+Letman, Akhil Mathur, Alan Schelten, Alex Vaughan,
+et al. The llama 3 herd of models. arXiv preprint
+arXiv:2407.21783, 2024. 3
+[23] Jiatao Gu, Shuangfei Zhai, Yizhe Zhang, Lingjie Liu, and
+Joshua M Susskind. Boot: Data-free distillation of denois-
+ing diffusion models with bootstrapping. In ICML Work-
+shop, 2023. 3
+[24] Junhao Gu, Peng-Tao Jiang, Hao Zhang, Mi Zhou, Jinwei
+Chen, Wenming Yang, and Bo Li. Consissr: Delving deep
+into consistency in diffusion-based image super-resolution.
+arXiv preprint arXiv:2410.13807, 2024. 2
+[25] Shuhang Gu, Andreas Lugmayr, Martin Danelljan, Manuel
+Fritsche, Julien Lamour, and Radu Timofte. Div8k: Diverse
+8k resolution image dataset. In ICCVW, pages 3512–3516.
+IEEE, 2019. 2
+[26] Daya Guo, Dejian Yang, Haowei Zhang, Junxiao Song,
+Ruoyu Zhang, Runxin Xu, Qihao Zhu, Shirong Ma, Peiyi
+Wang, Xiao Bi, et al. Deepseek-r1: Incentivizing reason-
+ing capability in llms via reinforcement learning. arXiv
+preprint arXiv:2501.12948, 2025. 3
+[27] Xiangyu He, Zitao Mo, Peisong Wang, Yang Liu,
+Mingyuan Yang, and Jian Cheng. Ode-inspired network
+design for single image super-resolution. In CVPR, pages
+1732–1741, 2019. 2
+9
+
+=== PAGE 10 ===
+[28] Jonathan Ho, Ajay Jain, and Pieter Abbeel. Denoising dif-
+fusion probabilistic models.NeurIPS, 33:6840–6851, 2020.
+2
+[29] Jie Hu, Li Shen, and Gang Sun. Squeeze-and-excitation
+networks. In CVPR, pages 7132–7141, 2018. 5
+[30] Huaibo Huang, Ran He, Zhenan Sun, and Tieniu Tan.
+Wavelet-srnet: A wavelet-based cnn for multi-scale face su-
+per resolution. In ICCV, pages 1689–1697, 2017. 1, 2
+[31] Jen-Yuan Huang, Haofan Wang, Qixun Wang, Xu Bai, Hao
+Ai, Peng Xing, and Jen-Tse Huang. Instantir: Blind image
+restoration with instant generative reference.arXiv preprint
+arXiv:2410.06551, 2024. 2
+[32] Junjie Ke, Qifei Wang, Yilin Wang, Peyman Milanfar, and
+Feng Yang. Musiq: Multi-scale image quality transformer.
+In ICCV, pages 5148–5157, 2021. 2, 4
+[33] Gwanghyun Kim, Taesung Kwon, and Jong Chul Ye. Dif-
+fusionclip: Text-guided diffusion models for robust image
+manipulation. In CVPR, pages 2426–2435, 2022. 5
+[34] Jinseok Kim and Tae-Kyun Kim. Arbitrary-scale image
+generation and upsampling using latent diffusion model and
+implicit neural decoder. In CVPR, pages 9202–9211, 2024.
+5
+[35] Tae Hyun Kim, Seungjun Nah, and Kyoung Mu Lee. Deep
+multi-scale convolutional neural network for dynamic scene
+deblurring. In CVPR, pages 1–21. IEEE, 2017. 1
+[36] Diederik P. Kingma and Max Welling. Auto-encoding vari-
+ational bayes. In ICLR, 2013. 3
+[37] Black Forest Labs. Flux. https://github.com/
+black-forest-labs/flux, 2024. 2, 3, 14
+[38] Christian Ledig, Lucas Theis, Ferenc Husz ´ar, Jose Ca-
+ballero, Andrew Cunningham, Alejandro Acosta, Andrew
+Aitken, Alykhan Tejani, Johannes Totz, Zehan Wang, et al.
+Photo-realistic single image super-resolution using a gen-
+erative adversarial network. In CVPR, pages 4681–4690,
+2017. 1, 2
+[39] Daiqing Li, Aleks Kamko, Ehsan Akhgari, Ali Sabet, Lin-
+miao Xu, and Suhail Doshi. Playground v2.5: Three in-
+sights towards enhancing aesthetic quality in text-to-image
+generation. arXiv preprint arXiv:2402.17245, 2024. 14
+[40] Jianze Li, Jiezhang Cao, Zichen Zou, Xiongfei Su, Xin
+Yuan, Yulun Zhang, Yong Guo, and Xiaokang Yang.
+Distillation-free one-step diffusion for real-world image
+super-resolution. arXiv preprint arXiv:2410.04224, 2024.
+2
+[41] Yawei Li, Kai Zhang, Jingyun Liang, Jiezhang Cao, Ce Liu,
+Rui Gong, Yulun Zhang, Hao Tang, Yun Liu, Denis Deman-
+dolx, et al. Lsdir: A large scale dataset for image restora-
+tion. In CVPR, pages 1775–1787, 2023. 2
+[42] Jingyun Liang, Jiezhang Cao, Guolei Sun, Kai Zhang, Luc
+Van Gool, and Radu Timofte. Swinir: Image restoration
+using swin transformer. In ICCV, pages 1833–1844, 2021.
+2, 7
+[43] Jie Liang, Hui Zeng, and Lei Zhang. Efficient and
+degradation-adaptive network for real-world image super-
+resolution. In ECCV, pages 574–591. Springer, 2022. 2,
+7
+[44] Bee Lim, Sanghyun Son, Heewon Kim, Seungjun Nah, and
+Kyoung Mu Lee. Enhanced deep residual networks for sin-
+gle image super-resolution. In CVPRW, pages 136–144,
+2017. 2
+[45] Shanchuan Lin, Bingchen Liu, Jiashi Li, and Xiao Yang.
+Common diffusion noise schedules and sample steps are
+flawed. In WACV, pages 5404–5411, 2024. 5
+[46] Xinqi Lin, Jingwen He, Ziyan Chen, Zhaoyang Lyu, Bo
+Dai, Fanghua Yu, Wanli Ouyang, Yu Qiao, and Chao Dong.
+Diffbir: Towards blind image restoration with generative
+diffusion prior. arXiv preprint arXiv:2308.15070, 2023. 2,
+5, 6, 7
+[47] Yaron Lipman, Ricky TQ Chen, Heli Ben-Hamu, Maxim-
+ilian Nickel, and Matt Le. Flow matching for generative
+modeling. arXiv preprint arXiv:2210.02747, 2022. 5
+[48] Xingchao Liu, Chengyue Gong, and Qiang Liu. Flow
+straight and fast: Learning to generate and transfer data
+with rectified flow.arXiv preprint arXiv:2209.03003, 2022.
+5
+[49] Yong Liu, Hang Dong, Jinshan Pan, Qingji Dong, Kai
+Chen, Rongxiang Zhang, Lean Fu, and Fei Wang. Patch-
+scaler: An efficient patch-independent diffusion model for
+super-resolution. arXiv preprint arXiv:2405.17158, 2024.
+2
+[50] I Loshchilov. Decoupled weight decay regularization. arXiv
+preprint arXiv:1711.05101, 2017. 6
+[51] Shunta Maeda. Unpaired image super-resolution using
+pseudo-supervision. In CVPR, pages 291–300, 2020. 2
+[52] William Peebles and Saining Xie. Scalable diffusion mod-
+els with transformers. In ICCV, pages 4195–4205, 2023. 2,
+3
+[53] Dustin Podell, Zion English, Kyle Lacey, Andreas
+Blattmann, Tim Dockhorn, Jonas M ¨uller, Joe Penna, and
+Robin Rombach. Sdxl: Improving latent diffusion mod-
+els for high-resolution image synthesis. arXiv preprint
+arXiv:2307.01952, 2023. 2, 3, 14
+[54] Chenyang Qi, Zhengzhong Tu, Keren Ye, Mauricio Delbra-
+cio, Peyman Milanfar, Qifeng Chen, and Hossein Talebi.
+Tip: Text-driven image processing with semantic and
+restoration instructions. arXiv preprint arXiv:2312.11595,
+2023. 2
+[55] Yunpeng Qu, Kun Yuan, Kai Zhao, Qizhi Xie, Jinhua Hao,
+Ming Sun, and Chao Zhou. Xpsr: Cross-modal priors for
+diffusion-based image super-resolution. In ECCV, pages
+285–303. Springer, 2025. 2
+[56] Yuhui Quan, Zicong Wu, and Hui Ji. Neumann network
+with recursive kernels for single image defocus deblurring.
+In CVPR, pages 5754–5763, 2023. 1
+[57] Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya
+Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sastry,
+Amanda Askell, Pamela Mishkin, Jack Clark, et al. Learn-
+ing transferable visual models from natural language super-
+vision. In ICML, pages 8748–8763. PMLR, 2021. 4, 13
+[58] Colin Raffel, Noam Shazeer, Adam Roberts, Katherine
+Lee, Sharan Narang, Michael Matena, Yanqi Zhou, Wei Li,
+and Peter J Liu. Exploring the limits of transfer learning
+with a unified text-to-text transformer. Journal of machine
+learning research, 21(140):1–67, 2020. 3, 4, 13
+10
+
+=== PAGE 11 ===
+[59] Aditya Ramesh, Prafulla Dhariwal, Alex Nichol, Casey
+Chu, and Mark Chen. Hierarchical text-conditional
+image generation with clip latents. arXiv preprint
+arXiv:2204.06125, 1(2):3, 2022. 3
+[60] Yulin Ren, Xin Li, Bingchen Li, Xingrui Wang, Mengxi
+Guo, Shijie Zhao, Li Zhang, and Zhibo Chen. Moe-diffir:
+Task-customized diffusion priors for universal compressed
+image restoration. In ECCV, pages 116–134. Springer,
+2025. 3
+[61] Jaesung Rim, Haeyun Lee, Jucheol Won, and Sunghyun
+Cho. Real-world blur dataset for learning and bench-
+marking deblurring algorithms. In ECCV, pages 184–201.
+Springer, 2020. 1
+[62] Robin Rombach, Andreas Blattmann, Dominik Lorenz,
+Patrick Esser, and Bj ¨orn Ommer. High-resolution image
+synthesis with latent diffusion models. In CVPR, pages
+10684–10695, 2022. 2, 3
+[63] Olaf Ronneberger, Philipp Fischer, and Thomas Brox. U-
+net: Convolutional networks for biomedical image segmen-
+tation. In MICCAI, pages 234–241. Springer, 2015. 2, 3
+[64] Mehdi SM Sajjadi, Bernhard Scholkopf, and Michael
+Hirsch. Enhancenet: Single image super-resolution through
+automated texture synthesis. In ICCV, pages 4491–4500,
+2017. 2
+[65] Jascha Sohl-Dickstein, Eric Weiss, Niru Maheswaranathan,
+and Surya Ganguli. Deep unsupervised learning using
+nonequilibrium thermodynamics. In ICML, pages 2256–
+2265. PMLR, 2015. 2
+[66] Yang Song and Stefano Ermon. Generative modeling by
+estimating gradients of the data distribution. NeurIPS, 32,
+2019. 2
+[67] Haoze Sun, Wenbo Li, Jianzhuang Liu, Haoyu Chen,
+Renjing Pei, Xueyi Zou, Youliang Yan, and Yujiu Yang.
+Coser: Bridging image and language for cognitive super-
+resolution. In CVPR, pages 25868–25878, 2024. 2
+[68] Lingchen Sun, Rongyuan Wu, Zhengqiang Zhang, Hong-
+wei Yong, and Lei Zhang. Improving the stability of diffu-
+sion models for content consistent super-resolution. arXiv
+e-prints, pages arXiv–2401, 2023. 2
+[69] Xin Tao, Hongyun Gao, Xiaoyong Shen, Jue Wang, and Ji-
+aya Jia. Scale-recurrent network for deep image deblurring.
+In CVPR, pages 8174–8182, 2018. 1
+[70] Gemini Team, Petko Georgiev, Ving Ian Lei, Ryan Burnell,
+Libin Bai, Anmol Gulati, Garrett Tanzer, Damien Vincent,
+Zhufeng Pan, Shibo Wang, et al. Gemini 1.5: Unlocking
+multimodal understanding across millions of tokens of con-
+text. arXiv preprint arXiv:2403.05530, 2024. 2
+[71] Hugo Touvron, Thibaut Lavril, Gautier Izacard, Xavier
+Martinet, Marie-Anne Lachaux, Timoth ´ee Lacroix, Bap-
+tiste Rozi `ere, Naman Goyal, Eric Hambro, Faisal Azhar,
+et al. Llama: Open and efficient foundation language mod-
+els. arXiv preprint arXiv:2302.13971, 2023. 3
+[72] Yuhao Wan, Peng-Tao Jiang, Qibin Hou, Hao Zhang, Jin-
+wei Chen, Ming-Ming Cheng, and Bo Li. Clearsr: La-
+tent low-resolution image embeddings help diffusion-based
+real-world super resolution models see clearer. arXiv
+preprint arXiv:2410.14279, 2024. 2
+[73] Ziyu Wan, Bo Zhang, Dongdong Chen, Pan Zhang, Dong
+Chen, Jing Liao, and Fang Wen. Bringing old photos back
+to life. In CVPR, pages 2747–2757, 2020. 2
+[74] Jianyi Wang, Kelvin CK Chan, and Chen Change Loy. Ex-
+ploring clip for assessing the look and feel of images. In
+AAAI, pages 2555–2563, 2023. 2, 4
+[75] Jianyi Wang, Zongsheng Yue, Shangchen Zhou, Kelvin CK
+Chan, and Chen Change Loy. Exploiting diffusion prior
+for real-world image super-resolution. IJCV, pages 1–21,
+2024. 2, 5, 6, 7
+[76] Longguang Wang, Yingqian Wang, Xiaoyu Dong, Qingyu
+Xu, Jungang Yang, Wei An, and Yulan Guo. Unsuper-
+vised degradation representation learning for blind super-
+resolution. In CVPR, pages 10581–10590, 2021. 2
+[77] Xintao Wang, Liangbin Xie, Chao Dong, and Ying Shan.
+Real-esrgan: Training real-world blind super-resolution
+with pure synthetic data. In ICCV, pages 1905–1914, 2021.
+2, 4, 7
+[78] Yufei Wang, Wenhan Yang, Xinyuan Chen, Yaohui Wang,
+Lanqing Guo, Lap-Pui Chau, Ziwei Liu, Yu Qiao, Alex C
+Kot, and Bihan Wen. Sinsr: diffusion-based image super-
+resolution in a single step. In CVPR, pages 25796–25805,
+2024. 7
+[79] Zichun Wang, Ying Fu, Ji Liu, and Yulun Zhang. Lg-bpn:
+Local and global blind-patch network for self-supervised
+real-world denoising. In CVPR, pages 18156–18165, 2023.
+1
+[80] Pengxu Wei, Ziwei Xie, Hannan Lu, Zongyuan Zhan, Qix-
+iang Ye, Wangmeng Zuo, and Liang Lin. Component
+divide-and-conquer for real-world image super-resolution.
+In ECCV, pages 101–117. Springer, 2020. 5, 15
+[81] Yunxuan Wei, Shuhang Gu, Yawei Li, Radu Timofte, Long-
+cun Jin, and Hengjie Song. Unsupervised real-world im-
+age super resolution via domain-distance aware training. In
+CVPR, pages 13385–13394, 2021. 2
+[82] Jay Whang, Mauricio Delbracio, Hossein Talebi, Chitwan
+Saharia, Alexandros G Dimakis, and Peyman Milanfar. De-
+blurring via stochastic refinement. In CVPR, pages 16293–
+16303, 2022. 1
+[83] Hanlin Wu, Jiangwei Mo, Xiaohui Sun, and Jie Ma. Latent
+diffusion, implicit amplification: Efficient continuous-scale
+super-resolution for remote sensing images. arXiv preprint
+arXiv:2410.22830, 2024. 5
+[84] Rongyuan Wu, Lingchen Sun, Zhiyuan Ma, and Lei Zhang.
+One-step effective diffusion network for real-world image
+super-resolution. arXiv preprint arXiv:2406.08177, 2024.
+2
+[85] Rongyuan Wu, Tao Yang, Lingchen Sun, Zhengqiang
+Zhang, Shuai Li, and Lei Zhang. Seesr: Towards semantics-
+aware real-world image super-resolution. In CVPR, pages
+25456–25467, 2024. 2, 4, 5, 6, 7
+[86] Weihao Xia, Yulun Zhang, Yujiu Yang, Jing-Hao Xue,
+Bolei Zhou, and Ming-Hsuan Yang. Gan inversion: A sur-
+vey. IEEE TPAMI, 45(3):3121–3138, 2022. 3
+[87] Qianlong Xiang, Miao Zhang, Yuzhang Shang, Jianlong
+Wu, Yan Yan, and Liqiang Nie. Dkdm: Data-free knowl-
+edge distillation for diffusion models with any architecture.
+arXiv preprint arXiv:2409.03550, 2024. 3
+11
+
+=== PAGE 12 ===
+[88] Enze Xie, Junsong Chen, Junyu Chen, Han Cai, Haotian
+Tang, Yujun Lin, Zhekai Zhang, Muyang Li, Ligeng Zhu,
+Yao Lu, et al. Sana: Efficient high-resolution image syn-
+thesis with linear diffusion transformers. arXiv preprint
+arXiv:2410.10629, 2024. 14
+[89] Rui Xie, Ying Tai, Chen Zhao, Kai Zhang, Zhenyu
+Zhang, Jun Zhou, Xiaoqian Ye, Qian Wang, and Jian
+Yang. Addsr: Accelerating diffusion-based blind super-
+resolution with adversarial diffusion distillation. arXiv
+preprint arXiv:2404.01717, 2024. 2
+[90] An Yang, Baosong Yang, Beichen Zhang, Binyuan Hui,
+Bo Zheng, Bowen Yu, Chengyuan Li, Dayiheng Liu, Fei
+Huang, Haoran Wei, Huan Lin, Jian Yang, Jianhong Tu,
+Jianwei Zhang, Jianxin Yang, Jiaxi Yang, Jingren Zhou,
+Junyang Lin, Kai Dang, Keming Lu, Keqin Bao, Kexin
+Yang, Le Yu, Mei Li, Mingfeng Xue, Pei Zhang, Qin Zhu,
+Rui Men, Runji Lin, Tianhao Li, Tingyu Xia, Xingzhang
+Ren, Xuancheng Ren, Yang Fan, Yang Su, Yichang Zhang,
+Yu Wan, Yuqiong Liu, Zeyu Cui, Zhenru Zhang, and
+Zihan Qiu. Qwen2.5 technical report. arXiv preprint
+arXiv:2412.15115, 2024. 3
+[91] Sidi Yang, Tianhe Wu, Shuwei Shi, Shanshan Lao,
+Yuan Gong, Mingdeng Cao, Jiahao Wang, and Yujiu
+Yang. Maniqa: Multi-dimension attention network for no-
+reference image quality assessment. In CVPR, pages 1191–
+1200, 2022. 2, 4
+[92] Tao Yang, Rongyuan Wu, Peiran Ren, Xuansong Xie, and
+Lei Zhang. Pixel-aware stable diffusion for realistic im-
+age super-resolution and personalized stylization. arXiv
+preprint arXiv:2308.14469, 2023. 2, 5
+[93] Jingfeng Yao, Wang Cheng, Wenyu Liu, and Xinggang
+Wang. Fasterdit: Towards faster diffusion transformers
+training without architecture modification. arXiv preprint
+arXiv:2410.10356, 2024. 5
+[94] Fanghua Yu, Jinjin Gu, Zheyuan Li, Jinfan Hu, Xiang-
+tao Kong, Xintao Wang, Jingwen He, Yu Qiao, and Chao
+Dong. Scaling up to excellence: Practicing model scaling
+for photo-realistic image restoration in the wild. In CVPR,
+pages 25669–25680, 2024. 1, 2, 3, 5, 6, 7
+[95] Zongsheng Yue, Jianyi Wang, and Chen Change Loy.
+Resshift: Efficient diffusion model for image super-
+resolution by residual shifting. NeurIPS, 36, 2024. 7
+[96] Christina Zhang, Simran Motwani, Matthew Yu, Ji Hou,
+Felix Juefei-Xu, Sam Tsai, Peter Vajda, Zijian He, and
+Jialiang Wang. Pixel-space post-training of latent diffusion
+models. arXiv preprint arXiv:2409.17565, 2024. 5
+[97] Haiyu Zhang, Shaolin Su, Yu Zhu, Jinqiu Sun, and Yan-
+ning Zhang. Gsdd: Generative space dataset distillation for
+image super-resolution. In AAAI, pages 7069–7077, 2024.
+3
+[98] Jiahui Zhang, Shijian Lu, Fangneng Zhan, and Yingchen
+Yu. Blind image super-resolution via contrastive represen-
+tation learning. arXiv preprint arXiv:2107.00708, 2021. 2
+[99] Kai Zhang, Wangmeng Zuo, Yunjin Chen, Deyu Meng, and
+Lei Zhang. Beyond a gaussian denoiser: Residual learning
+of deep cnn for image denoising. IEEE TIP, 26(7):3142–
+3155, 2017. 1
+[100] Kai Zhang, Wangmeng Zuo, and Lei Zhang. Ffdnet: To-
+ward a fast and flexible solution for cnn-based image de-
+noising. IEEE TIP, 27(9):4608–4622, 2018. 1
+[101] Kaihao Zhang, Wenhan Luo, Yiran Zhong, Lin Ma, Bjorn
+Stenger, Wei Liu, and Hongdong Li. Deblurring by realistic
+blurring. In CVPR, pages 2737–2746, 2020. 1
+[102] Kai Zhang, Jingyun Liang, Luc Van Gool, and Radu Timo-
+fte. Designing a practical degradation model for deep blind
+image super-resolution. In ICCV, pages 4791–4800, 2021.
+2, 4, 6
+[103] Lvmin Zhang, Anyi Rao, and Maneesh Agrawala. Adding
+conditional control to text-to-image diffusion models. In
+ICCV, pages 3836–3847, 2023. 4
+[104] Yulun Zhang, Kunpeng Li, Kai Li, Lichen Wang, Bineng
+Zhong, and Yun Fu. Image super-resolution using very deep
+residual channel attention networks. In ECCV, pages 286–
+301, 2018. 2
+[105] Yuhong Zhang, Hengsheng Zhang, Xinning Chai,
+Zhengxue Cheng, Rong Xie, Li Song, and Wenjun
+Zhang. Diff-restorer: Unleashing visual prompts for
+diffusion-based universal image restoration. arXiv preprint
+arXiv:2407.03636, 2024. 3
+[106] Yixuan Zhu, Wenliang Zhao, Ao Li, Yansong Tang, Jie
+Zhou, and Jiwen Lu. Flowie: Efficient image enhancement
+via rectified flow. In CVPR, pages 13–22, 2024. 2
+12
+
+=== PAGE 13 ===
+Acquire and then Adapt: Squeezing out Text-to-Image Model for Image
+Restoration
+Supplementary Material
+6. More Ablation Studies.
+More Ablation of SE layers. To validate the necessity of multiple SE layers in FluxIR, we replaced them with a single
+MLP, meaning a single full-rank MLP was used to control all Flux MM-DiT blocks simultaneously. As shown in Tab. 5,
+the single MLP will strongly degrade the generation performance in all metric scores. Additionally, Fig. 8 illustrates that
+using a single MLP limits the model’s generative capacity, resulting in lower-quality outputs. These findings highlight that
+the optimal design for our Flux adapter is to provide dedicated control for each Flux MM-DiT block.
+Table 5. Comparison between Single MLP design and our multiple SE layers design on the RealLQ250 dataset.
+Control Layer CLIPIQA ↑ MUSIQ ↑ MANIQA ↑
+FluxIR 0.5639 70.78 0.6314
+Single MLP 0.5111 64.46 0.5547
+FluxIR
+LQ Input
+Single MLP
+Figure 8. Visual results comparing the single MLP design and our multiple SE layers.
+Ablation on multi-modality designs. In our proposed FluxIR, we introduce multi-modality controls on both the image
+and text information with a learnable T5 [58] embedding θp and a learnable CLIP [57] embedding θy. To justify the effec-
+tiveness of these designs, we evaluate the model variants by removing T5 embedding θy and CLIP embedding θy and text
+branch SE layer SEp(·), respectively. Tab. 6 presents the quantitative results onRealLQ250 dataset. The results indicate that
+the text branch SE layer is crucial for enhancing the performance of our FluxIR model. The trainable T5 embedding θp and
+CLIP embedding θy show marginal differences from the baseline in evaluation metrics. As shown in Fig. 9, removing the
+text branch SE layers SE p(·) leads to a significant decline in image restoration performance. The trainable T5 embedding
+θp and CLIP embedding θy also contribute slight improvements in visual quality. The overall results demonstrate that the
+multi-modality design of FluxIR effectively boosts performance in the image restoration task.
+7. Samples of Training dataset built by FluxGen
+In this section, we present the dozens of samples produced by the FluxGen pipeline with the resolution of 1, 024 × 768.
+Fig. 10 illustrates our generated training dataset obtained with an empty prompt, and demonstrates that an empty prompt
+13
+
+=== PAGE 14 ===
+Table 6. Ablation results of multi-modality designs on the RealLQ250 dataset.
+Multi-Modality CLIPIQA ↑ MUSIQ ↑ MANIQA ↑
+Baseline 0.5639 70.78 0.6314
+w/o θp,θy 0.5626 70.53 0.6308
+w/o SEp(·) 0.5259 67.63 0.6266
+LQ Input w/o Baselinew/o
+Figure 9. The visual comparisons of our multi-modality designs, i.e. text branch SE layers SEp(·) and trainable embeddings θp, θy. Please
+zoom in for a better view.
+is sufficient to produce diverse scene images with high resolution and aesthetic quality including cars, portraits, anime
+characters, animals, plants, food, buildings, indoor settings, furniture, the sea, and sunsets. We found that some ground
+truth images from FluxGen contain bokeh effects, which can occasionally cause localized blurriness in the restored results.
+However, based on subjective evaluations across four test datasets, the impact is minimal and acceptable. Similar issues could
+also arise in real-world datasets if not properly cleaned. Meanwhile, we show SDXL generated data in Fig. 11, which is also
+employed in the ablation studies. Without carefully designed prompt, SDXL cannot produce high-quality images for image
+restoration tasks. Fig. 12 shows more visual comparisons to further justify the effectiveness of FluxGen on the choice of
+text-to-image model and IQA selection. Furthermore, we generated 2,000 images from each of the five existing T2I models
+(PixelArt-Σ [9], Sana [88], SDXL [53], Playground [39], and Flux.1-dev [37]) for evaluation. As shown in Tab. 7, the images
+generated by our FluxGen pipeline achieved superior IQA scores.
+Table 7. Comparisons with existing T2I generation methods.
+Metric PixArt-Σ Sana SDXL Playground Flux.1-dev Ours
+CLIPIQA ↑ 0.4981 0.5135 0.5821 0.5822 0.6763 0.7295
+MUSIQ ↑ 64.93 66.75 70.49 70.35 75.02 75.37
+MANIQA ↑ 0.5519 0.5944 0.5831 0.6666 0.6590 0.6962
+14
+
+=== PAGE 15 ===
+8. More Visualization Comparison.
+Here, we provide additional visual results on synthetic and real-world datasets compared with state-of-the-art methods.
+Fig. 13 presents the visual results on the DIV2K-Val [2] dataset. Fig. 14 presents the visual results on the RealSR [5] dataset.
+Fig. 15 presents the visual results on the DrealSR [80] dataset. Fig. 16 presents the visual results on the RealLQ250 [3]
+dataset. Our FluxIR achieves the best performance in terms of generation quality, texture details, and aesthetic quality.
+Please zoom in for a better view.
+15
+
+=== PAGE 16 ===
+References
+[1] Josh Achiam, Steven Adler, Sandhini Agarwal, Lama Ahmad, Ilge Akkaya, Florencia Leoni Aleman, Diogo Almeida, Janko Al-
+tenschmidt, Sam Altman, Shyamal Anadkat, et al. Gpt-4 technical report. arXiv preprint arXiv:2303.08774, 2023. 3
+[2] Eirikur Agustsson and Radu Timofte. Ntire 2017 challenge on single image super-resolution: Dataset and study. In CVPRW, pages
+126–135, 2017. 2, 15
+[3] Yuang Ai, Xiaoqiang Zhou, Huaibo Huang, Xiaotian Han, Zhengyu Chen, Quanzeng You, and Hongxia Yang. Dreamclear: High-
+capacity real-world image restoration with privacy-safe dataset curation. arXiv preprint arXiv:2410.18666, 2024. 1, 2, 3, 4, 5, 6, 7,
+15
+[4] Michael S Albergo and Eric Vanden-Eijnden. Building normalizing flows with stochastic interpolants. arXiv preprint
+arXiv:2209.15571, 2022. 5
+[5] Jianrui Cai, Hui Zeng, Hongwei Yong, Zisheng Cao, and Lei Zhang. Toward real-world single image super-resolution: A new
+benchmark and a new model. In ICCV, pages 3086–3095, 2019. 5, 15
+[6] Chaofeng Chen, Xinyu Shi, Yipeng Qin, Xiaoming Li, Xiaoguang Han, Tao Yang, and Shihui Guo. Real-world blind super-
+resolution via feature matching with implicit high-resolution priors. In ACM MM, pages 1329–1338, 2022. 2
+[7] Haoyu Chen, Jinjin Gu, Yihao Liu, Salma Abdel Magid, Chao Dong, Qiong Wang, Hanspeter Pfister, and Lei Zhu. Masked image
+training for generalizable deep image denoising. In CVPR, pages 1692–1703, 2023. 1
+[8] Haolan Chen, Jinhua Hao, Kai Zhao, Kun Yuan, Ming Sun, Chao Zhou, and Wei Hu. Cassr: Activating image power for real-world
+image super-resolution. arXiv preprint arXiv:2403.11451, 2024. 2
+[9] Junsong Chen, Chongjian Ge, Enze Xie, Yue Wu, Lewei Yao, Xiaozhe Ren, Zhongdao Wang, Ping Luo, Huchuan Lu, and Zhenguo
+Li. Pixart- σ: Weak-to-strong training of diffusion transformer for 4k text-to-image generation. In ECCV, pages 74–91. Springer,
+2024. 14
+[10] Junsong Chen, YU Jincheng, GE Chongjian, Lewei Yao, Enze Xie, Zhongdao Wang, James Kwok, Ping Luo, Huchuan Lu, and
+Zhenguo Li. Pixart- α: Fast training of diffusion transformer for photorealistic text-to-image synthesis. In ICLR, 2024. 2, 4
+[11] Zheng Chen, Yulun Zhang, Jinjin Gu, Linghe Kong, Xiaokang Yang, and Fisher Yu. Dual aggregation transformer for image
+super-resolution. In ICCV, pages 12312–12321, 2023. 1
+[12] Zheng Chen, Yulun Zhang, Jinjin Gu, Xin Yuan, Linghe Kong, Guihai Chen, and Xiaokang Yang. Image super-resolution with text
+prompt diffusion. arXiv preprint arXiv:2311.14282, 2023. 2
+[13] Zheng Chen, Yulun Zhang, Ding Liu, Jinjin Gu, Linghe Kong, Xin Yuan, et al. Hierarchical integration diffusion model for realistic
+image deblurring. NeurIPS, 36, 2024. 1
+[14] Qinpeng Cui, Yixuan Liu, Xinyi Zhang, Qiqi Bao, Zhongdao Wang, Qingmin Liao, Li Wang, Tian Lu, and Emad Barsoum. Taming
+diffusion prior for image super-resolution with domain shift sdes. arXiv preprint arXiv:2409.17778, 2024. 2
+[15] Tao Dai, Jianrui Cai, Yongbing Zhang, Shu-Tao Xia, and Lei Zhang. Second-order attention network for single image super-
+resolution. In CVPR, pages 11065–11074, 2019. 2
+[16] Prafulla Dhariwal and Alexander Nichol. Diffusion models beat gans on image synthesis. NeurIPS, 34:8780–8794, 2021. 2
+[17] Chao Dong, Chen Change Loy, Kaiming He, and Xiaoou Tang. Learning a deep convolutional network for image super-resolution.
+In ECCV, pages 184–199. Springer, 2014. 2
+[18] Chao Dong, Chen Change Loy, Kaiming He, and Xiaoou Tang. Image super-resolution using deep convolutional networks. IEEE
+TPAMI, 38(2):295–307, 2015. 1
+[19] Patrick Esser, Sumith Kulal, Andreas Blattmann, Rahim Entezari, Jonas M ¨uller, Harry Saini, Yam Levi, Dominik Lorenz, Axel
+Sauer, Frederic Boesel, et al. Scaling rectified flow transformers for high-resolution image synthesis. In ICML, 2024. 2, 3, 5, 8
+[20] Yuanting Fan, Chengxu Liu, Nengzhong Yin, Changlong Gao, and Xueming Qian. Adadiffsr: Adaptive region-aware dynamic
+acceleration diffusion model for real-world image super-resolution. arXiv preprint arXiv:2410.17752, 2024. 2
+[21] Manuel Fritsche, Shuhang Gu, and Radu Timofte. Frequency separation for real-world super-resolution. In ICCVW, pages 3599–
+3608. IEEE, 2019. 2
+[22] Aaron Grattafiori, Abhimanyu Dubey, Abhinav Jauhri, Abhinav Pandey, Abhishek Kadian, Ahmad Al-Dahle, Aiesha Letman, Akhil
+Mathur, Alan Schelten, Alex Vaughan, et al. The llama 3 herd of models. arXiv preprint arXiv:2407.21783, 2024. 3
+[23] Jiatao Gu, Shuangfei Zhai, Yizhe Zhang, Lingjie Liu, and Joshua M Susskind. Boot: Data-free distillation of denoising diffusion
+models with bootstrapping. In ICML Workshop, 2023. 3
+[24] Junhao Gu, Peng-Tao Jiang, Hao Zhang, Mi Zhou, Jinwei Chen, Wenming Yang, and Bo Li. Consissr: Delving deep into consistency
+in diffusion-based image super-resolution. arXiv preprint arXiv:2410.13807, 2024. 2
+[25] Shuhang Gu, Andreas Lugmayr, Martin Danelljan, Manuel Fritsche, Julien Lamour, and Radu Timofte. Div8k: Diverse 8k resolution
+image dataset. In ICCVW, pages 3512–3516. IEEE, 2019. 2
+[26] Daya Guo, Dejian Yang, Haowei Zhang, Junxiao Song, Ruoyu Zhang, Runxin Xu, Qihao Zhu, Shirong Ma, Peiyi Wang, Xiao Bi,
+et al. Deepseek-r1: Incentivizing reasoning capability in llms via reinforcement learning. arXiv preprint arXiv:2501.12948, 2025.
+3
+16
+
+=== PAGE 17 ===
+[27] Xiangyu He, Zitao Mo, Peisong Wang, Yang Liu, Mingyuan Yang, and Jian Cheng. Ode-inspired network design for single image
+super-resolution. In CVPR, pages 1732–1741, 2019. 2
+[28] Jonathan Ho, Ajay Jain, and Pieter Abbeel. Denoising diffusion probabilistic models. NeurIPS, 33:6840–6851, 2020. 2
+[29] Jie Hu, Li Shen, and Gang Sun. Squeeze-and-excitation networks. In CVPR, pages 7132–7141, 2018. 5
+[30] Huaibo Huang, Ran He, Zhenan Sun, and Tieniu Tan. Wavelet-srnet: A wavelet-based cnn for multi-scale face super resolution. In
+ICCV, pages 1689–1697, 2017. 1, 2
+[31] Jen-Yuan Huang, Haofan Wang, Qixun Wang, Xu Bai, Hao Ai, Peng Xing, and Jen-Tse Huang. Instantir: Blind image restoration
+with instant generative reference. arXiv preprint arXiv:2410.06551, 2024. 2
+[32] Junjie Ke, Qifei Wang, Yilin Wang, Peyman Milanfar, and Feng Yang. Musiq: Multi-scale image quality transformer. In ICCV,
+pages 5148–5157, 2021. 2, 4
+[33] Gwanghyun Kim, Taesung Kwon, and Jong Chul Ye. Diffusionclip: Text-guided diffusion models for robust image manipulation.
+In CVPR, pages 2426–2435, 2022. 5
+[34] Jinseok Kim and Tae-Kyun Kim. Arbitrary-scale image generation and upsampling using latent diffusion model and implicit neural
+decoder. In CVPR, pages 9202–9211, 2024. 5
+[35] Tae Hyun Kim, Seungjun Nah, and Kyoung Mu Lee. Deep multi-scale convolutional neural network for dynamic scene deblurring.
+In CVPR, pages 1–21. IEEE, 2017. 1
+[36] Diederik P. Kingma and Max Welling. Auto-encoding variational bayes. In ICLR, 2013. 3
+[37] Black Forest Labs. Flux. https://github.com/black-forest-labs/flux, 2024. 2, 3, 14
+[38] Christian Ledig, Lucas Theis, Ferenc Husz ´ar, Jose Caballero, Andrew Cunningham, Alejandro Acosta, Andrew Aitken, Alykhan
+Tejani, Johannes Totz, Zehan Wang, et al. Photo-realistic single image super-resolution using a generative adversarial network. In
+CVPR, pages 4681–4690, 2017. 1, 2
+[39] Daiqing Li, Aleks Kamko, Ehsan Akhgari, Ali Sabet, Linmiao Xu, and Suhail Doshi. Playground v2.5: Three insights towards
+enhancing aesthetic quality in text-to-image generation. arXiv preprint arXiv:2402.17245, 2024. 14
+[40] Jianze Li, Jiezhang Cao, Zichen Zou, Xiongfei Su, Xin Yuan, Yulun Zhang, Yong Guo, and Xiaokang Yang. Distillation-free
+one-step diffusion for real-world image super-resolution. arXiv preprint arXiv:2410.04224, 2024. 2
+[41] Yawei Li, Kai Zhang, Jingyun Liang, Jiezhang Cao, Ce Liu, Rui Gong, Yulun Zhang, Hao Tang, Yun Liu, Denis Demandolx, et al.
+Lsdir: A large scale dataset for image restoration. In CVPR, pages 1775–1787, 2023. 2
+[42] Jingyun Liang, Jiezhang Cao, Guolei Sun, Kai Zhang, Luc Van Gool, and Radu Timofte. Swinir: Image restoration using swin
+transformer. In ICCV, pages 1833–1844, 2021. 2, 7
+[43] Jie Liang, Hui Zeng, and Lei Zhang. Efficient and degradation-adaptive network for real-world image super-resolution. In ECCV,
+pages 574–591. Springer, 2022. 2, 7
+[44] Bee Lim, Sanghyun Son, Heewon Kim, Seungjun Nah, and Kyoung Mu Lee. Enhanced deep residual networks for single image
+super-resolution. In CVPRW, pages 136–144, 2017. 2
+[45] Shanchuan Lin, Bingchen Liu, Jiashi Li, and Xiao Yang. Common diffusion noise schedules and sample steps are flawed. InWACV,
+pages 5404–5411, 2024. 5
+[46] Xinqi Lin, Jingwen He, Ziyan Chen, Zhaoyang Lyu, Bo Dai, Fanghua Yu, Wanli Ouyang, Yu Qiao, and Chao Dong. Diffbir:
+Towards blind image restoration with generative diffusion prior.arXiv preprint arXiv:2308.15070, 2023. 2, 5, 6, 7
+[47] Yaron Lipman, Ricky TQ Chen, Heli Ben-Hamu, Maximilian Nickel, and Matt Le. Flow matching for generative modeling. arXiv
+preprint arXiv:2210.02747, 2022. 5
+[48] Xingchao Liu, Chengyue Gong, and Qiang Liu. Flow straight and fast: Learning to generate and transfer data with rectified flow.
+arXiv preprint arXiv:2209.03003, 2022. 5
+[49] Yong Liu, Hang Dong, Jinshan Pan, Qingji Dong, Kai Chen, Rongxiang Zhang, Lean Fu, and Fei Wang. Patchscaler: An efficient
+patch-independent diffusion model for super-resolution. arXiv preprint arXiv:2405.17158, 2024. 2
+[50] I Loshchilov. Decoupled weight decay regularization. arXiv preprint arXiv:1711.05101, 2017. 6
+[51] Shunta Maeda. Unpaired image super-resolution using pseudo-supervision. In CVPR, pages 291–300, 2020. 2
+[52] William Peebles and Saining Xie. Scalable diffusion models with transformers. In ICCV, pages 4195–4205, 2023. 2, 3
+[53] Dustin Podell, Zion English, Kyle Lacey, Andreas Blattmann, Tim Dockhorn, Jonas M ¨uller, Joe Penna, and Robin Rombach. Sdxl:
+Improving latent diffusion models for high-resolution image synthesis. arXiv preprint arXiv:2307.01952, 2023. 2, 3, 14
+[54] Chenyang Qi, Zhengzhong Tu, Keren Ye, Mauricio Delbracio, Peyman Milanfar, Qifeng Chen, and Hossein Talebi. Tip: Text-driven
+image processing with semantic and restoration instructions. arXiv preprint arXiv:2312.11595, 2023. 2
+[55] Yunpeng Qu, Kun Yuan, Kai Zhao, Qizhi Xie, Jinhua Hao, Ming Sun, and Chao Zhou. Xpsr: Cross-modal priors for diffusion-based
+image super-resolution. In ECCV, pages 285–303. Springer, 2025. 2
+[56] Yuhui Quan, Zicong Wu, and Hui Ji. Neumann network with recursive kernels for single image defocus deblurring. In CVPR, pages
+5754–5763, 2023. 1
+[57] Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sastry, Amanda Askell,
+Pamela Mishkin, Jack Clark, et al. Learning transferable visual models from natural language supervision. In ICML, pages 8748–
+8763. PMLR, 2021. 4, 13
+17
+
+=== PAGE 18 ===
+[58] Colin Raffel, Noam Shazeer, Adam Roberts, Katherine Lee, Sharan Narang, Michael Matena, Yanqi Zhou, Wei Li, and Peter J Liu.
+Exploring the limits of transfer learning with a unified text-to-text transformer.Journal of machine learning research, 21(140):1–67,
+2020. 3, 4, 13
+[59] Aditya Ramesh, Prafulla Dhariwal, Alex Nichol, Casey Chu, and Mark Chen. Hierarchical text-conditional image generation with
+clip latents. arXiv preprint arXiv:2204.06125, 1(2):3, 2022. 3
+[60] Yulin Ren, Xin Li, Bingchen Li, Xingrui Wang, Mengxi Guo, Shijie Zhao, Li Zhang, and Zhibo Chen. Moe-diffir: Task-customized
+diffusion priors for universal compressed image restoration. In ECCV, pages 116–134. Springer, 2025. 3
+[61] Jaesung Rim, Haeyun Lee, Jucheol Won, and Sunghyun Cho. Real-world blur dataset for learning and benchmarking deblurring
+algorithms. In ECCV, pages 184–201. Springer, 2020. 1
+[62] Robin Rombach, Andreas Blattmann, Dominik Lorenz, Patrick Esser, and Bj ¨orn Ommer. High-resolution image synthesis with
+latent diffusion models. In CVPR, pages 10684–10695, 2022. 2, 3
+[63] Olaf Ronneberger, Philipp Fischer, and Thomas Brox. U-net: Convolutional networks for biomedical image segmentation. In
+MICCAI, pages 234–241. Springer, 2015. 2, 3
+[64] Mehdi SM Sajjadi, Bernhard Scholkopf, and Michael Hirsch. Enhancenet: Single image super-resolution through automated texture
+synthesis. In ICCV, pages 4491–4500, 2017. 2
+[65] Jascha Sohl-Dickstein, Eric Weiss, Niru Maheswaranathan, and Surya Ganguli. Deep unsupervised learning using nonequilibrium
+thermodynamics. In ICML, pages 2256–2265. PMLR, 2015. 2
+[66] Yang Song and Stefano Ermon. Generative modeling by estimating gradients of the data distribution. NeurIPS, 32, 2019. 2
+[67] Haoze Sun, Wenbo Li, Jianzhuang Liu, Haoyu Chen, Renjing Pei, Xueyi Zou, Youliang Yan, and Yujiu Yang. Coser: Bridging
+image and language for cognitive super-resolution. In CVPR, pages 25868–25878, 2024. 2
+[68] Lingchen Sun, Rongyuan Wu, Zhengqiang Zhang, Hongwei Yong, and Lei Zhang. Improving the stability of diffusion models for
+content consistent super-resolution. arXiv e-prints, pages arXiv–2401, 2023. 2
+[69] Xin Tao, Hongyun Gao, Xiaoyong Shen, Jue Wang, and Jiaya Jia. Scale-recurrent network for deep image deblurring. In CVPR,
+pages 8174–8182, 2018. 1
+[70] Gemini Team, Petko Georgiev, Ving Ian Lei, Ryan Burnell, Libin Bai, Anmol Gulati, Garrett Tanzer, Damien Vincent, Zhufeng
+Pan, Shibo Wang, et al. Gemini 1.5: Unlocking multimodal understanding across millions of tokens of context. arXiv preprint
+arXiv:2403.05530, 2024. 2
+[71] Hugo Touvron, Thibaut Lavril, Gautier Izacard, Xavier Martinet, Marie-Anne Lachaux, Timoth´ee Lacroix, Baptiste Rozi`ere, Naman
+Goyal, Eric Hambro, Faisal Azhar, et al. Llama: Open and efficient foundation language models. arXiv preprint arXiv:2302.13971,
+2023. 3
+[72] Yuhao Wan, Peng-Tao Jiang, Qibin Hou, Hao Zhang, Jinwei Chen, Ming-Ming Cheng, and Bo Li. Clearsr: Latent low-resolution
+image embeddings help diffusion-based real-world super resolution models see clearer. arXiv preprint arXiv:2410.14279, 2024. 2
+[73] Ziyu Wan, Bo Zhang, Dongdong Chen, Pan Zhang, Dong Chen, Jing Liao, and Fang Wen. Bringing old photos back to life. In
+CVPR, pages 2747–2757, 2020. 2
+[74] Jianyi Wang, Kelvin CK Chan, and Chen Change Loy. Exploring clip for assessing the look and feel of images. In AAAI, pages
+2555–2563, 2023. 2, 4
+[75] Jianyi Wang, Zongsheng Yue, Shangchen Zhou, Kelvin CK Chan, and Chen Change Loy. Exploiting diffusion prior for real-world
+image super-resolution. IJCV, pages 1–21, 2024. 2, 5, 6, 7
+[76] Longguang Wang, Yingqian Wang, Xiaoyu Dong, Qingyu Xu, Jungang Yang, Wei An, and Yulan Guo. Unsupervised degradation
+representation learning for blind super-resolution. In CVPR, pages 10581–10590, 2021. 2
+[77] Xintao Wang, Liangbin Xie, Chao Dong, and Ying Shan. Real-esrgan: Training real-world blind super-resolution with pure synthetic
+data. In ICCV, pages 1905–1914, 2021. 2, 4, 7
+[78] Yufei Wang, Wenhan Yang, Xinyuan Chen, Yaohui Wang, Lanqing Guo, Lap-Pui Chau, Ziwei Liu, Yu Qiao, Alex C Kot, and Bihan
+Wen. Sinsr: diffusion-based image super-resolution in a single step. In CVPR, pages 25796–25805, 2024. 7
+[79] Zichun Wang, Ying Fu, Ji Liu, and Yulun Zhang. Lg-bpn: Local and global blind-patch network for self-supervised real-world
+denoising. In CVPR, pages 18156–18165, 2023. 1
+[80] Pengxu Wei, Ziwei Xie, Hannan Lu, Zongyuan Zhan, Qixiang Ye, Wangmeng Zuo, and Liang Lin. Component divide-and-conquer
+for real-world image super-resolution. In ECCV, pages 101–117. Springer, 2020. 5, 15
+[81] Yunxuan Wei, Shuhang Gu, Yawei Li, Radu Timofte, Longcun Jin, and Hengjie Song. Unsupervised real-world image super
+resolution via domain-distance aware training. In CVPR, pages 13385–13394, 2021. 2
+[82] Jay Whang, Mauricio Delbracio, Hossein Talebi, Chitwan Saharia, Alexandros G Dimakis, and Peyman Milanfar. Deblurring via
+stochastic refinement. In CVPR, pages 16293–16303, 2022. 1
+[83] Hanlin Wu, Jiangwei Mo, Xiaohui Sun, and Jie Ma. Latent diffusion, implicit amplification: Efficient continuous-scale super-
+resolution for remote sensing images. arXiv preprint arXiv:2410.22830, 2024. 5
+[84] Rongyuan Wu, Lingchen Sun, Zhiyuan Ma, and Lei Zhang. One-step effective diffusion network for real-world image super-
+resolution. arXiv preprint arXiv:2406.08177, 2024. 2
+18
+
+=== PAGE 19 ===
+[85] Rongyuan Wu, Tao Yang, Lingchen Sun, Zhengqiang Zhang, Shuai Li, and Lei Zhang. Seesr: Towards semantics-aware real-world
+image super-resolution. In CVPR, pages 25456–25467, 2024. 2, 4, 5, 6, 7
+[86] Weihao Xia, Yulun Zhang, Yujiu Yang, Jing-Hao Xue, Bolei Zhou, and Ming-Hsuan Yang. Gan inversion: A survey. IEEE TPAMI,
+45(3):3121–3138, 2022. 3
+[87] Qianlong Xiang, Miao Zhang, Yuzhang Shang, Jianlong Wu, Yan Yan, and Liqiang Nie. Dkdm: Data-free knowledge distillation
+for diffusion models with any architecture. arXiv preprint arXiv:2409.03550, 2024. 3
+[88] Enze Xie, Junsong Chen, Junyu Chen, Han Cai, Haotian Tang, Yujun Lin, Zhekai Zhang, Muyang Li, Ligeng Zhu, Yao Lu, et al.
+Sana: Efficient high-resolution image synthesis with linear diffusion transformers. arXiv preprint arXiv:2410.10629, 2024. 14
+[89] Rui Xie, Ying Tai, Chen Zhao, Kai Zhang, Zhenyu Zhang, Jun Zhou, Xiaoqian Ye, Qian Wang, and Jian Yang. Addsr: Accelerating
+diffusion-based blind super-resolution with adversarial diffusion distillation. arXiv preprint arXiv:2404.01717, 2024. 2
+[90] An Yang, Baosong Yang, Beichen Zhang, Binyuan Hui, Bo Zheng, Bowen Yu, Chengyuan Li, Dayiheng Liu, Fei Huang, Haoran
+Wei, Huan Lin, Jian Yang, Jianhong Tu, Jianwei Zhang, Jianxin Yang, Jiaxi Yang, Jingren Zhou, Junyang Lin, Kai Dang, Keming
+Lu, Keqin Bao, Kexin Yang, Le Yu, Mei Li, Mingfeng Xue, Pei Zhang, Qin Zhu, Rui Men, Runji Lin, Tianhao Li, Tingyu Xia,
+Xingzhang Ren, Xuancheng Ren, Yang Fan, Yang Su, Yichang Zhang, Yu Wan, Yuqiong Liu, Zeyu Cui, Zhenru Zhang, and Zihan
+Qiu. Qwen2.5 technical report. arXiv preprint arXiv:2412.15115, 2024. 3
+[91] Sidi Yang, Tianhe Wu, Shuwei Shi, Shanshan Lao, Yuan Gong, Mingdeng Cao, Jiahao Wang, and Yujiu Yang. Maniqa: Multi-
+dimension attention network for no-reference image quality assessment. In CVPR, pages 1191–1200, 2022. 2, 4
+[92] Tao Yang, Rongyuan Wu, Peiran Ren, Xuansong Xie, and Lei Zhang. Pixel-aware stable diffusion for realistic image super-
+resolution and personalized stylization. arXiv preprint arXiv:2308.14469, 2023. 2, 5
+[93] Jingfeng Yao, Wang Cheng, Wenyu Liu, and Xinggang Wang. Fasterdit: Towards faster diffusion transformers training without
+architecture modification. arXiv preprint arXiv:2410.10356, 2024. 5
+[94] Fanghua Yu, Jinjin Gu, Zheyuan Li, Jinfan Hu, Xiangtao Kong, Xintao Wang, Jingwen He, Yu Qiao, and Chao Dong. Scaling up to
+excellence: Practicing model scaling for photo-realistic image restoration in the wild. In CVPR, pages 25669–25680, 2024. 1, 2, 3,
+5, 6, 7
+[95] Zongsheng Yue, Jianyi Wang, and Chen Change Loy. Resshift: Efficient diffusion model for image super-resolution by residual
+shifting. NeurIPS, 36, 2024. 7
+[96] Christina Zhang, Simran Motwani, Matthew Yu, Ji Hou, Felix Juefei-Xu, Sam Tsai, Peter Vajda, Zijian He, and Jialiang Wang.
+Pixel-space post-training of latent diffusion models. arXiv preprint arXiv:2409.17565, 2024. 5
+[97] Haiyu Zhang, Shaolin Su, Yu Zhu, Jinqiu Sun, and Yanning Zhang. Gsdd: Generative space dataset distillation for image super-
+resolution. In AAAI, pages 7069–7077, 2024. 3
+[98] Jiahui Zhang, Shijian Lu, Fangneng Zhan, and Yingchen Yu. Blind image super-resolution via contrastive representation learning.
+arXiv preprint arXiv:2107.00708, 2021. 2
+[99] Kai Zhang, Wangmeng Zuo, Yunjin Chen, Deyu Meng, and Lei Zhang. Beyond a gaussian denoiser: Residual learning of deep cnn
+for image denoising. IEEE TIP, 26(7):3142–3155, 2017. 1
+[100] Kai Zhang, Wangmeng Zuo, and Lei Zhang. Ffdnet: Toward a fast and flexible solution for cnn-based image denoising. IEEE TIP,
+27(9):4608–4622, 2018. 1
+[101] Kaihao Zhang, Wenhan Luo, Yiran Zhong, Lin Ma, Bjorn Stenger, Wei Liu, and Hongdong Li. Deblurring by realistic blurring. In
+CVPR, pages 2737–2746, 2020. 1
+[102] Kai Zhang, Jingyun Liang, Luc Van Gool, and Radu Timofte. Designing a practical degradation model for deep blind image
+super-resolution. In ICCV, pages 4791–4800, 2021. 2, 4, 6
+[103] Lvmin Zhang, Anyi Rao, and Maneesh Agrawala. Adding conditional control to text-to-image diffusion models. In ICCV, pages
+3836–3847, 2023. 4
+[104] Yulun Zhang, Kunpeng Li, Kai Li, Lichen Wang, Bineng Zhong, and Yun Fu. Image super-resolution using very deep residual
+channel attention networks. In ECCV, pages 286–301, 2018. 2
+[105] Yuhong Zhang, Hengsheng Zhang, Xinning Chai, Zhengxue Cheng, Rong Xie, Li Song, and Wenjun Zhang. Diff-restorer: Un-
+leashing visual prompts for diffusion-based universal image restoration. arXiv preprint arXiv:2407.03636, 2024. 3
+[106] Yixuan Zhu, Wenliang Zhao, Ao Li, Yansong Tang, Jie Zhou, and Jiwen Lu. Flowie: Efficient image enhancement via rectified
+flow. In CVPR, pages 13–22, 2024. 2
+19
+
+=== PAGE 20 ===
+Figure 10. Samples of generated images by FluxGen pipeline.
+20
+
+=== PAGE 21 ===
+Figure 11. Samples generated by the SDXL.
+21
+
+=== PAGE 22 ===
+LQ Input SDXL Flux w/ IQA
+Flux w/o IQA
+Figure 12. The visual comparisons of different FluxGen settings, where we study different T2I models, i.e. SDXL and Flux, and the usage
+of IQA selections. Please zoom in for a better view.
+22
+
+=== PAGE 23 ===
+GT SUPIR DreamClear FluxIR (Ours)
+LQ Input Real-ESRGAN SeeSR
+GT SUPIR DreamClear FluxIR (Ours)
+LQ Input Real-ESRGAN SeeSR
+GT SUPIR DreamClear FluxIR (Ours)
+LQ Input Real-ESRGAN SeeSR
+Figure 13. Visual comparison with SOTAs onDIV2K-Val dataset.
+23
+
+=== PAGE 24 ===
+GT SUPIR DreamClear FluxIR (Ours)
+LQ Input Real-ESRGAN SeeSR
+GT SUPIR DreamClear FluxIR (Ours)
+LQ Input Real-ESRGAN SeeSR
+GT SUPIR DreamClear FluxIR (Ours)
+LQ Input Real-ESRGAN SeeSR
+Figure 14. Visual comparison with SOTAs onRealSR dataset.
+24
+
+=== PAGE 25 ===
+GT SUPIR DreamClear FluxIR (Ours)
+LQ Input Real-ESRGAN SeeSR
+GT SUPIR DreamClear FluxIR (Ours)
+LQ Input Real-ESRGAN SeeSR
+GT SUPIR DreamClear FluxIR (Ours)
+LQ Input Real-ESRGAN SeeSR
+Figure 15. Visual comparison with SOTAs onDrealSR dataset.
+25
+
+=== PAGE 26 ===
+FluxIR (Ours) SUPIR DreamClear FluxIR (Ours)
+LQ Input Real-ESRGAN SeeSR
+FluxIR (Ours) SUPIR DreamClear FluxIR (Ours)
+LQ Input Real-ESRGAN SeeSR
+FluxIR (Ours) SUPIR DreamClear FluxIR (Ours)
+LQ Input Real-ESRGAN SeeSR
+Figure 16. Visual comparison with SOTAs onRealLQ250 dataset.
+26

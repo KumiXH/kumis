@@ -1,0 +1,639 @@
+=== PAGE 1 ===
+Edit2Restore: Few-Shot Image Restoration
+via Parameter-Efficient Adaptation
+of Pre-trained Editing Models
+M. Akın Yılmaz1[0000−0002−0795−8970], Ahmet Bilican2[0009−0000−6406−8168],
+Burak Can Biner1[0009−0009−8580−8220], and
+A. Murat Tekalp2[0000−0003−1465−8121]
+1 Codeway AI, Istanbul, Turkey
+2 Koc University, Istanbul, Turkey
+Abstract.Image restoration has traditionally required training spe-
+cialized models on thousands of paired examples per degradation type.
+We challenge this paradigm by demonstrating that powerful pre-trained
+text-conditioned image editing models can be efficiently adapted for
+multiple restoration tasks through parameter-efficient fine-tuning with
+remarkably few examples. Our approach fine-tunes LoRA adapters on
+FLUX.1 Kontext, a state-of-the-art 12B parameter flow matching model
+for image-to-image translation, using only 16-128 paired images per task,
+guided by simple text prompts that specify the restoration operation.
+Unlike existing methods that train specialized restoration networks from
+scratch with thousands of samples, we leverage the rich visual priors
+already encoded in large-scale pre-trained editing models, dramatically
+reducing data requirements while maintaining high perceptual quality. A
+single unified LoRA adapter, conditioned on task-specific text prompts,
+effectively handles multiple degradations including denoising, derain-
+ing, and dehazing. Through comprehensive ablation studies, we analyze:
+(i) the impact of training set size on restoration quality, (ii) trade-offs be-
+tweentask-specificversusunifiedmulti-taskadapters,(iii)theroleoftext
+encoder fine-tuning, and (iv) zero-shot baseline performance. While our
+method prioritizes perceptual quality over pixel-perfect reconstruction
+metrics like PSNR/SSIM, our results demonstrate that pre-trained im-
+age editing models, when properly adapted, offer a compelling and data-
+efficient alternative to traditional image restoration approaches, open-
+ing new avenues for few-shot, prompt-guided image enhancement. The
+code to reproduce our results are available at:https://github.com/
+makinyilmaz/Edit2Restore
+Keywords:few-shot image restoration·pre-trained image editing mod-
+els·parameter-efficient adaptation.
+1 Introduction
+Image restoration, recovering high-quality images from degraded observations,
+has traditionally relied on training specialized models for each degradation type,
+arXiv:2601.03391v2  [eess.IV]  20 Jan 2026
+
+=== PAGE 2 ===
+2 Yılmaz et al.
+requiring thousands of paired training examples per task. Recent all-in-one
+restoration methods [12,21,33] attempt to handle multiple degradations within
+a unified framework, yet still demand extensive paired datasets and specialized
+architectures trained from scratch. For example, InstructIR [12] requires training
+a restoration network with over 10,000 synthetically generated text prompts and
+thousands of image pairs per degradation to achieve state-of-the-art results.
+We pose afundamental question:Can powerful pre-trained image editing
+models be efficiently adapted for image restoration with dramatically fewer train-
+ing examples?Recent advances in image generation and editing have produced
+remarkable models like FLUX.1 Kontext [5] with sophisticated understanding of
+image structure, quality, and semantics learned from enormous datasets. These
+models excel at text-conditioned image-to-image translation tasks such as object
+removal, style transfer, and content modification. However, their potential for
+inverse problems, specifically image restoration, remains largely unexplored in
+the few-shot regime.
+In this work, we demonstrate that FLUX.1 Kontext [5], a prominent text-
+conditioned image editing model based on rectified flow matching, can be effi-
+ciently adapted for multiple restoration tasks using remarkably few examples:
+just 16-128 paired images per task. FLUX.1 Kontext is a 12 billion parameter
+model designed for image-to-image translation, capable of performing diverse
+editing operations guided by natural language instructions. Ourkey insightis
+thatthe visual understanding already encoded in such models including knowledge
+about image quality, degradation patterns, and natural statistics can be efficiently
+transferred to restoration tasks through parameter-efficient fine-tuning (PEFT),
+without requiring the model to be trained from scratch.
+We fine-tune lightweight LoRA [15] adapters on FLUX.1 Kontext, guided by
+simple text prompts that specify the restoration operation (’remove the noise
+from the image’, ’remove the haze from the image’, ’remove the rain from the
+image’). The model performs image-to-image translation: given a degraded in-
+put image and a restoration instruction, it generates the corresponding clean
+output. Unlike InstructIR which trains specialized restoration networks from
+scratch, we leverage the pre-trained visual understanding already embedded in
+large-scale image editing models. A single unified LoRA adapter, conditioned on
+task-specific text prompts, effectively handles multiple degradations including
+denoising, deraining, and dehazing, all learned from minimal training data.
+Unlike traditional image restoration methods that are optimized for pixel-
+level reconstruction metrics (PSNR/SSIM) usingℓ1 orℓ 2 losses, our approach is
+basedonoptimizationofperceptualimagequalitysimilartoflowmatching-based
+editing models. While we report PSNR/SSIM for completeness, our primary
+focus is on perceptual visual quality. This reflects a fundamental trade-off: pixel-
+perfect reconstruction versus perceptually plausible restoration.
+Overall, we can summarize our contributions as follows:
+–Wepresentthefirstapproachdemonstratingthatpre-trainedtext-conditioned
+image editing models can be effectively adapted for image restoration with
+minimal paired data, achieving orders of magnitude better data efficiency
+than existing methods requiring thousands of examples.
+
+=== PAGE 3 ===
+Edit2Restore 3
+–We introduce a parameter-efficient fine-tuning framework where a single
+LoRA adapter handles multiple restoration tasks (denoising, deraining, de-
+hazing) through natural language instructions, eliminating the need for task-
+specific architectures.
+–We conduct extensive ablations examining: the relationship between training
+set size and restoration quality, establishing performance bounds from 16 to
+128 images; trade-offs between task-specific versus unified multi-task LoRA
+training; impact of fine-tuning text encoders versus keeping them frozen.
+–We demonstrate that leveraging visual priors from pre-trained image edit-
+ing models opens a compelling alternative pathway for image restoration,
+one that prioritizes perceptual quality and data efficiency over pixel-perfect
+metrics, enabling practical few-shot learning scenarios.
+2 Related Work
+2.1 Task-Specific Image Restoration Models
+Image restoration aims to recover high-quality images from degraded observa-
+tions. Early research developed specialized models for specific degradation types,
+including denoising [47], deblurring [19,32], low-light enhancement [7,42], dehaz-
+ing [35], deraining [17], desnowing [10,27], and raindrop removal [34].CNN-based
+methods like NAFNet [8], MPRNet [46], and HINet [9], followed by transformer
+based approaches such as Restormer [45], SwinIR [23], and Uformer [41] ad-
+vanced the field through better architectural designs. However, these methods
+optimize pixel-level metrics, usingℓ1 orℓ 2 losses, requiring thousands of paired
+data per task and fall short in naturalness (perceptual quality).
+2.2 Multi-Task Image Restoration Models
+Recent work has explored models capable of handling multiple restoration tasks.
+Among these, AirNet [21] employed contrastive learning to distinguish degrada-
+tiontypes.Prompt-basedmethods[12,22,30,33,38]introducedlearnableparame-
+ters or natural language instructions to encode degradation-specific information,
+guiding restoration backbones like NAFNet [8] and Restormer [45]. For instance,
+InstructIR [12] uses human-written text prompts to achieve strong results across
+multiple tasks. However, these methods train restoration networks from scratch,
+requiring thousands of paired images per task and substantial computational
+costs. Only recent work like LoRA-IR [1] has explored parameter-efficient adap-
+tation through low-rank techniques.
+With the success of diffusion models in generation, several works leverage
+diffusion priors for restoration [2,18,24,29,40,48]. While effective, most diffusion-
+based approaches are computationally expensive and require large data.
+Our work differs fundamentally from the state of the art: rather than train-
+ing specialized architectures from scratch, we adapt pre-trained image editing
+models with remarkably few examples, demonstrating that powerful visual priors
+from large-scale generative training can be efficiently transferred to restoration
+through parameter-efficient fine-tuning.
+
+=== PAGE 4 ===
+4 Yılmaz et al.
+2.3 Text-Conditioned Image Editing Models
+Recent text-conditioned image editing models excel at modifying images accord-
+ing to natural language instructions while preserving unrelated content. Early
+work like InstructPix2Pix [6] demonstrated instruction-following editing, while
+recent models achieve state-of-the-art quality: FLUX.1 Kontext [5] employs a
+dual-stream architecture processing image and text separately, Qwen-Image-
+Edit [43] offers a competitive alternative, and unified models [11,31,44] handle
+both understanding and generation within single architectures.
+These models benefit from pre-training on billions of image-text pairs, learn-
+ing rich visual priors about image structure, quality patterns, and natural statis-
+tics. Modern architectures combine semantic features from vision-language mod-
+els with reconstructive features from VAE encoders, achieving both semantic
+coherence and visual fidelity.
+Our key insight is that image-to-image translation aligns naturally with
+image-to-image restoration: transforming degraded inputs to clean outputs via
+text instructions is fundamentally an editing operation. Rather than training
+from scratch, we demonstrate that parameter-efficient fine-tuning of these pre-
+trained priors requires only 16-128 examples per task, dramatically reducing
+data requirements while achieving competitive quality.
+2.4 Parameter-Efficient Fine-Tuning
+Parameter-efficient fine-tuning (PEFT) methods [4,15,49] enable adapting large
+pre-trained models to new tasks while training only a small fraction of parame-
+ters. LoRA (Low-Rank Adaptation) [15] injects trainable low-rank matrices into
+model layers, achieving strong performance in language and vision tasks with
+minimal parameters.
+We demonstrate that LoRA adaptation of FLUX.1 Kontext, when combined
+with proper text conditioning and limited paired data, enables effective multi-
+task restoration. Our comprehensive ablations examine rank selection, text en-
+coder training strategies, and the effectiveness of parameter-efficient adaptation
+for few-shot restoration, providing insights for future research in this direction.
+3 Edit2Restore: Proposed Methodology
+We propose a PEFT approach for adapting a pre-trained image editing model
+to text-conditioned multi-task image restoration with minimal training data.
+Our method leverages FLUX.1 Kontext [5], a 12 billion parameter flow match-
+ing model designed for text-conditioned image-to-image translation, and adapts
+it to multi-task image restoration through Low-Rank Adaptation (LoRA) [15].
+Figure 1 illustrates our overall framework.
+
+=== PAGE 5 ===
+Edit2Restore 5
+Fig. 1.Traditionalapproachesrequiretrainingspecificmodelswiththousandsofpaired
+examples for each restoration task. Recent diffusion-based multi-task image restora-
+tion models leverage strong priors but still demand extensive paired data to train from
+scratch. Our approach achieves few-shot efficiency by adapting pre-trained image edit-
+ing models with only 16-128 examples per task through parameter-efficient fine-tuning.
+3.1 Preliminaries: FLUX.1 Kontext
+FLUX.1 Kontext is a rectified flow transformer that performs image-to-image
+translation conditioned on both text instructions and input images. Given a
+degraded imagex deg ∈R H×W×3 and a text prompttdescribing the desired
+restoration operation, the model generates a restored imagex res through an
+iterative flow matching process in latent space.
+The model consists of three main components that work together to generate
+images. A variational autoencoder with 16 latent channels encodes images into
+latent representationsz=E(x)and decodes them back to pixel spacex=D(z).
+Two text encoders, CLIP [36] and T5 [37], process the text prompttinto em-
+beddings that condition the generation process. Finally, a flow matching trans-
+former with a hybrid architecture combining double-stream and single-stream
+transformer blocks operates on the latent space, performing iterative refinement
+guided by text conditioning.
+Unlike traditional diffusion models that predict noise, FLUX.1 Kontext uses
+rectifiedflowmatching[25,26]whichlearnstopredictvelocityfields.Theforward
+process constructs a linear interpolation path between clean latentzclean and
+Gaussian noiseϵ∼ N(0,I):
+zt = (1−t)z clean +tϵ(1)
+wheret∈[0,1]is the timestep. The model learns to predict the velocityv=
+ϵ−z clean that connects the two endpoints. This formulation provides straighter
+
+=== PAGE 6 ===
+6 Yılmaz et al.
+generation trajectories compared to standard diffusion processes, enabling faster
+and more stable sampling.
+FLUX.1 Kontext is pre-trained on billions of image-text pairs, learning rich
+priors about image structure, quality, and editing operations. Our key insight is
+that these pre-trained representations already encode knowledge about degra-
+dations and can be efficiently adapted for restoration.
+3.2 LoRA for Image Restoration
+Rather than fine-tuning all 12 billion parameters of FLUX.1 Kontext, we employ
+Low-RankAdaptationtoinjecttrainableparametersefficiently.Forapre-trained
+weight matrixW0 ∈R d×k in the transformer layers, LoRA constrains the weight
+update through low-rank decomposition:
+W=W 0 +∆W=W 0 +BA(2)
+whereB∈R d×r andA∈R r×k with rankr≪min(d, k). During training,W 0
+remains frozen whileBandAare trained.
+We apply LoRA to the attention projection layers in the flow matching trans-
+former. Specifically, we inject LoRA adapters into the query, key, and value
+projection matrices of each attention block. This results in a small fraction of
+trainable parameters, while maintaining the model’s expressive capacity for the
+restoration task.
+3.3 Text Prompt Design
+We use simple, consistent prompts for each restoration task. Our prompt design
+follows the template:
+"remove the [degradation] from the image"
+where[degradation]is replaced with the specific corruption type (’noise’,
+’rain’, ’haze’). This simplicity serves two purposes:(1)it leverages FLUX.1 Kon-
+text’s pre-trained understanding of editing instructions without requiring exten-
+sive prompt engineering, and(2)it enables straightforward multi-task learning
+where the model learns to distinguish tasks primarily through the prompt con-
+ditioning.
+For the unified multi-task setting, we condition each training sample on its
+corresponding task-specific prompt, allowing a single LoRA adapter to handle
+multipledegradationtypes.Duringinference,theappropriatepromptisprovided
+to guide the restoration process.
+4 Experiments
+We present comprehensive experiments analyzing our parameter-efficient adap-
+tation approach for image restoration. Our evaluation focuses on establishing
+performance bounds, investigating the impact of training set size, and examin-
+ing key design choices including text encoder fine-tuning and multi-task versus
+single-task learning strategies.
+
+=== PAGE 7 ===
+Edit2Restore 7
+4.1 Experimental Setup
+Datasets.We construct small training sets by sampling paired images from
+established restoration benchmarks. For denoising, we sample from BSD400 [3];
+for deraining, from Rain100L [13]; and for dehazing, from the Reside (outdoor)
+SOTS [20] dataset. For denoising, we ensure balanced coverage across noise levels
+by generating approximately equal numbers of degraded images atσ= 15,25,50.
+For evaluation, we use standard benchmarks: BSD68 for denoising (at noise
+levelsσ= 15,25,50), Rain100L for deraining, and 500 images from the SOTS
+outdoor set for dehazing. These datasets provide diverse test conditions to assess
+generalization beyond the limited training samples.
+Image resolution handling.During training, all samples are resized to1024×
+1024resolution. At test time, input images are first resized to1024×1024for
+processing,andtherestoredoutputisthenresizedbacktotheoriginalresolution,
+ensuring compatibility with arbitrary input dimensions while maintaining the
+model’s expected operating resolution.
+Implementation details.All experiments are conducted on a single NVIDIA
+H100 GPU. The LoRA rank and batch size are set to64,4respectively for all
+experiments. Each training run is performed for 1,920 iterations across all exper-
+imental configurations to ensure fair comparison. For multi-task training with
+three degradation types (denoising, deraining, dehazing), this corresponds to
+approximately 640 iterations per task when using 32 images per task (96 total
+images with batch size 4). We employ the AdamW optimizer [28] with learning
+rate1×10 −4 for the transformer LoRA parameters. When fine-tuning the text
+encoder, we use a lower learning rate of5×10 −6 to prevent catastrophic for-
+getting of pre-trained text representations. Weight decay is set to1×10−4 for
+transformer parameters and1×10 −3 for text encoder parameters. We apply a
+constant learning rate schedule with 500 warmup steps. Training is performed in
+mixed precision (bfloat16) with gradient checkpointing enabled to reduce mem-
+ory consumption.
+During training, we use logit-normal timestep sampling withµ= 0.0and
+σ= 1.0for the rectified flow matching objective. Dataset entries are shuffled
+before training to mix all degradation types uniformly across batches. During
+inference, we follow the rectified flow sampling procedure. Starting from pure
+noise, we iteratively integrate the learned velocity field to generate the clean
+latent. For all experiments, we use 28 integration steps and set the guidance
+scale to 2.5 following FLUX.1 Kontext’s default sampling schedule. Inference
+takes approximately 15-20 seconds per image at1024×1024resolution on a
+single H100 GPU.
+Evaluation metrics.We report three complementary metrics to assess restora-
+tion quality from different perspectives: (1)FID (Fréchet Inception Dis-
+tance)[14] measures distribution-level similarity between restored and ground
+truth images, capturing overall perceptual quality and realism; (2)CMMD
+(CLIP Maximum Mean Discrepancy)[16] evaluates feature-space similar-
+ity using maximum mean discrepancy, providing a robust measure of distribution
+matching; (3)CLIP-IQA[39] assesses perceptual image quality using CLIP-
+
+=== PAGE 8 ===
+8 Yılmaz et al.
+T able 1.Effect of LoRA fine-tuning compared to zero-shot baseline. Both fine-tuned
+configurations use LoRA rankr= 64trained on 128 image pairs per task. TF
+and TE stand for Transformer and Text Encoder respectively. Metrics reported as
+FID/CMMD/CLIP-IQA (lower/lower/higher is better).
+Configuration Dehazing Deraining Denoising BSD68
+SOTS Rain100Lσ= 15σ= 25σ= 50
+Baseline (No LoRA)24.15/0.41.0.72 37.68/0.52/0.90 29.62/0.54/0.80 45.93/0.70/0.76 81.75/0.94/0.73
+LoRA: TF 15.74/0.13/0.60 12.36/0.42/0.91 30.53/0.68/0.89 36.08/0.72/0.87 51.98/0.73/0.86
+LoRA: TF + TE15.05/0.12/0.59 11.76/0.40/0.91 28.80/0.56/0.89 36.60/0.65/0.88 52.13/0.67/0.88
+based features, aligning with human perception of visual quality. These metrics
+prioritize perceptual quality over pixel-perfect reconstruction, consistent with
+our approach’s focus on leveraging pre-trained generative priors rather than op-
+timizing for PSNR/SSIM.
+4.2 Zero-Shot Baseline and Text Encoder Fine-tuning
+To establish the effectiveness of our parameter-efficient adaptation approach,
+we first evaluate FLUX.1 Kontext’s zero-shot restoration capabilities without
+any fine-tuning. This baseline examines whether the model’s pre-trained under-
+standing can perform text-guided degradation removal using only task-specific
+prompts likeremove the haze from the image.
+Baseline PerformanceTable 1 presents our findings comparing the baseline
+against LoRA-adapted configurations. The baseline results reveal significant
+limitations in the model’s inherent restoration capabilities. On dehazing, the
+baseline achieves FID/CMMD/CLIP-IQA of 24.15/0.41/0.72, while deraining
+produces 37.68/0.52/0.90. The denoising results are particularly telling: perfor-
+mance degrades substantially at higher noise levels, with FID increasing from
+29.62 atσ= 15to 81.75 atσ= 50. These results confirm that while FLUX.1
+Kontext possesses rich visual priors from editing pre-training, these priors alone
+are insufficient for effective restoration without task-specific adaptation.
+Parameter-efficient fine-tuning.When the model transformer is fine-tuned
+using LoRA adapters, substantial improvements are observed across nearly all
+tasks. Training on only 128 paired images per task with frozen text encoders
+(LoRA: TF), we observe dramatic gains: FID drops from 24.15 to 15.74 for de-
+hazing (35% reduction) and from 37.68 to 12.36 for deraining (67% reduction).
+For high-noise denoising (σ= 50), FID improves from 81.75 to 51.98. Interest-
+ingly, low-noise denoising (σ= 15) shows a slight degradation in FID, though
+CMMD and CLIP-IQA metrics improve substantially. This suggests that while
+distribution-level statistics may shift, the perceptual quality and feature-space
+representations become more aligned with ground truth.
+Text encoder fine-tuning.A critical design choice is whether to keep the text
+encodersfrozenorjointlyfine-tunethemalongsideLoRAadapters.FLUX.1Kon-
+text employs two pre-trained text encoders (CLIP and T5) that process prompts
+into conditioning embeddings. Freezing these encoders preserves their general-
+
+=== PAGE 9 ===
+Edit2Restore 9
+Fig. 2.Qualitative comparison of image restoration results.
+purpose text understanding, while fine-tuning allows adaptation to restoration-
+specific semantics—potentially improving alignment between instructions and
+the corresponding visual transformations. Our results demonstrate consistent
+advantages from joint fine-tuning (LoRA: TF + TE). For dehazing, both FID
+and CMMD improve, indicating better distribution matching with ground truth
+images. Deraining shows similar trends with FID dropping from 12.36 to 11.76
+and CMMD from 0.42 to 0.40. Across all denoising noise levels, distribution-
+level metrics improve notably—particularly CMMD scores, which decrease con-
+sistently: atσ= 15from 0.68 to 0.56, atσ= 25from 0.72 to 0.65, and atσ= 50
+from 0.73 to 0.67. While CLIP-IQA scores remain relatively stable across config-
+urations, the consistent improvements in FID and CMMD validate that adapting
+both visual and textual representations enhances the model’s ability to under-
+stand and execute restoration instructions.
+Figure 2 provides visual evidence of these improvements. The progression
+fromzero-shottoLoRAadaptation,andfurthertojointtextencoderfine-tuning,
+produces outputs with enhanced structural coherence and more natural appear-
+ance. Details are better preserved, artifacts are more effectively removed, and
+the overall visual fidelity improves substantially. Based on these findings, we
+adopt joint fine-tuning of text encoders and LoRA adapters for all subsequent
+
+=== PAGE 10 ===
+10 Yılmaz et al.
+T able 2.Data efficiency analysis showing restoration performance across varying train-
+ing set sizes. All experiments use unified multi-task LoRA (r= 64) with text encoder
+fine-tuning. Metrics are FID/CMMD/CLIP-IQA (lower/lower/higher is better).
+Unified
+Adapter
+# Pairs
+(Per task)
+Dehazing Deraining Denoising BSD68
+SOTS Rain100Lσ= 15σ= 25σ= 50
+✓
+128 15.05/0.12/0.59 11.76/0.40/0.91 28.80/0.56/0.89 36.60/0.65/0.88 52.13/0.67/0.88
+64 15.60/0.14/0.58 11.29/0.41/0.91 28.89/0.58/0.90 35.77/0.63/0.90 51.97/0.73/0.88
+32 15.20/0.11/0.63 11.92/0.41/0.91 28.64/0.58/0.90 37.12/0.69/0.90 51.99/0.78/0.89
+16 14.66/0.13/0.60 12.29/0.44/0.91 27.73/0.57/0.90 36.05/0.57/0.89 53.88/0.81/0.88
+✗16 14.41/0.14/0.60 11.86/0.41/0.90 29.36/0.64/0.89 37.05/0.72/0.88 51.10/0.83/0.88
+experiments, as the consistent distribution-level improvements justify the mod-
+est additional computational cost.
+4.3 Data Efficiency Analysis
+A central claim of our work is that pre-trained image editing models can be
+effectively adapted for restoration with remarkably few training examples. To
+validate this hypothesis, we systematically investigate the relationship between
+training set size and restoration quality by varying the number of paired images
+per task from 16 to 128.
+Table2presentstheresultsacrossallrestorationtasksusingdifferenttraining
+set sizes. All experiments use unified multi-task LoRA training with rankr= 64,
+text encoder fine-tuning enabled, and are trained for 1,920 iterations to ensure
+fair comparison. The results demonstrate a striking finding: even with as few
+as 16 paired images per task (48 total images across three tasks), our method
+achieves competitive restoration quality across all degradation types.
+Examining the metrics across different training set sizes, we observe that
+performance remains relatively stable as we increase from 16 to 128 pairs. For
+instance, in dehazing on SOTS, FID scores range from 14.66 to 15.60, while
+CMMD scores vary from 0.112 to 0.136 across different training sizes. Compa-
+rable trends can also be observed for deraining and denoising tasks.
+This stability in performance metrics suggests that the pre-trained visual
+priors in FLUX.1 Kontext are sufficiently rich that even minimal task-specific
+adaptation (16 pairs) is enough to guide the model toward effective restoration.
+While we observe some minor fluctuations in metrics as training set size in-
+creases, these variations do not follow a consistent monotonic trend, indicating
+that the model has largely captured the essential restoration patterns from the
+smallest training set.
+4.4 Unified Multi-Task vs Task-Specific Adapters
+A critical design decision in our parameter-efficient adaptation framework is
+whether to train separate task-specific LoRA adapters for each restoration oper-
+ation or employ a single unified adapter that handles multiple degradation types
+through text prompt conditioning. To investigate this trade-off, we compare two
+
+=== PAGE 11 ===
+Edit2Restore 11
+Fig. 3.Qualitative comparison between task-specific and unified multi-task adapters
+across different restoration tasks. Both configurations produce visually similar results,
+demonstrating that a single unified adapter can effectively handle multiple degradation
+types through text prompt conditioning while maintaining quality comparable to spe-
+cialized task-specific adapters. The unified model offers practical advantages in terms
+of storage and deployment simplicity without sacrificing restoration quality.
+configurations: (1)Task-specific LoRA: separate adapters trained indepen-
+dently for each task with 16 paired images, and (2)Unified LoRA: a single
+adapter trained on all three tasks simultaneously (48 total images: 16 per task)
+with task-specific text prompt conditioning. Both configurations use LoRA rank
+r= 64with text encoder fine-tuning enabled.
+Table 2 presents the quantitative comparison across all restoration tasks.
+The results reveal patterns that challenge conventional assumptions about task-
+specific specialization. For dehazing on SOTS, the unified adapter achieves com-
+parable performance to the task-specific approach across all metrics. For derain-
+ing on Rain100L, the task-specific adapter shows slight advantages in FID and
+CMMD, while CLIP-IQA scores remain nearly identical, suggesting comparable
+perceptual quality despite minor differences in distribution-level metrics.
+In denoising experiments on BSD68, the unified adapter demonstrates clear
+advantages at lower noise levels. Atσ= 15, it outperforms task-specific training
+by approximately 1.6 FID points while maintaining identical CLIP-IQA scores.
+Atσ= 25, the unified approach shows superior FID and particularly strong
+CMMD improvements . Only at the highest noise level (σ= 50) does the task-
+specific adapter gain a modest FID advantage, though perceptual quality metrics
+remain comparable. These results demonstrate that unified multi-task learning
+often matches or exceeds task-specific performance in few-shot regimes.
+
+=== PAGE 12 ===
+12 Yılmaz et al.
+Figure 3 provides visual evidence supporting these findings, showing that uni-
+fied and task-specific adapters produce comparable visual quality across different
+degradation types. Beyond performance parity, unified adapters offer substantial
+practical advantages: a single model handles multiple restoration operations, re-
+ducing storage requirements by two-thirds and simplifying deployment. Our find-
+ings suggest that unified multi-task learning should be the preferred approach
+for few-shot restoration, challenging the conventional wisdom that specialized
+models are necessary for optimal quality.
+5 Conclusion
+We have demonstrated that powerful pre-trained text-conditioned image editing
+models can be effectively repurposed for image restoration with remarkably few
+training examples. Our systematic investigation reveals that while FLUX.1 Kon-
+textshowslimitedrestorationcapabilityinzero-shotsettings,parameter-efficient
+LoRA adaptation with only tens of paired images per task unlocks substantial
+performance improvements across denoising, deraining, and dehazing.
+Our comprehensive ablation studies establish three critical insights. First,
+restoration quality exhibits remarkable stability across varying training set sizes,
+with even minimal data sufficient to unlock the model’s restoration capabili-
+ties. This demonstrates that rich visual priors learned during large-scale editing
+pre-training can be efficiently transferred to restoration tasks with diminish-
+ing returns beyond small training sets. Second, jointly fine-tuning text encoders
+alongside LoRA adapters consistently improves distribution-level metrics, re-
+vealing that adapting both visual and linguistic representations strengthens the
+alignment between restoration instructions and corresponding image transfor-
+mations. Third, unified multi-task adapters not only match but often exceed
+task-specific adapters in few-shot regimes, demonstrating that a single model can
+effectively handle multiple degradation types through text prompt conditioning
+while offering significant practical advantages in storage and deployment.
+Our work establishes a practical pathway for leveraging large-scale pretrained
+imageeditingmodelsindata-scarcerestorationscenarios.Bydemonstratingthat
+sophisticatedrestorationcapabilitiescanbeachievedthroughparameter-efficient
+fine-tuning with orders of magnitude fewer examples than traditional training-
+from-scratch approaches, we open new possibilities for efficient adaptation of
+generative editing models to inverse problems. Future research could extend
+this framework to broader restoration tasks, investigate the transferability of
+editing priors across different architectures, and develop principled methods for
+determining optimal adaptation strategies based on task characteristics.
+AcknowledgementsThis work was supported by Codeway. A.M. Tekalp ac-
+knowledges support from Turkish Academy of Sciences (TÜBA).
+
+=== PAGE 13 ===
+Edit2Restore 13
+References
+1. Ai, Y., Huang, H., He, R.: Lora-ir: Taming low-rank experts for efficient all-in-one
+image restoration. arXiv preprint arXiv:2410.15385 (2024) 3
+2. Ai, Y., Huang, H., Zhou, X., Wang, J., He, R.: Multimodal prompt perceiver:
+Empoweradaptiveness,generalizabilityandfidelityforall-in-oneimagerestoration.
+arXiv preprint arXiv:2312.02918 (2024) 3
+3. Arbeláez, P., Maire, M., Fowlkes, C., Malik, J.: Contour detection and hierarchical
+image segmentation. IEEE Transactions on Pattern Analysis and Machine Intelli-
+gence33(5), 898–916 (2011).https://doi.org/10.1109/TPAMI.2010.1617
+4. Bilican, A., Yılmaz, M.A., Tekalp, A.M., Cinbiş, R.G.: Exploring sparsity for pa-
+rameterefficientfinetuningusingwavelets.arXivpreprintarXiv:2505.12532(2025)
+4
+5. Black Forest Labs, Batifol, S., Blattmann, A., Boesel, F., et al.: FLUX.1 Kontext:
+Flow matching for in-context image generation and editing in latent space. arXiv
+preprint arXiv:2506.15742 (2025) 2, 4
+6. Brooks, T., Holynski, A., Efros, A.A.: Instructpix2pix: Learning to follow image
+editing instructions. arXiv preprint arXiv:2211.09800 (2022) 4
+7. Cai, Y., Bian, H., Lin, J., Wang, H., Timofte, R., Zhang, Y.: Retinexformer:
+One-stage retinex-based transformer for low-light image enhancement. In: Pro-
+ceedings of the IEEE/CVF International Conference on Computer Vision (ICCV).
+pp. 12504–12513 (October 2023) 3
+8. Chen, L., Chu, X., Zhang, X., Sun, J.: Simple baselines for image restoration. arXiv
+preprint arXiv:2204.04676 (2022) 3
+9. Chen, L., Lu, X., Zhang, J., Chu, X., Chen, C.: Hinet: Half instance normalization
+network for image restoration. In: Proceedings of the IEEE/CVF Conference on
+Computer Vision and Pattern Recognition (CVPR) Workshops. pp. 182–192 (June
+2021) 3
+10. Chen, S., Ye, T., Liu, Y., Chen, E., Shi, J., Zhou, J.: Snowformer: Scale-aware
+transformer via context interaction for single image desnowing. arXiv preprint
+arXiv:2208.09703 (2022) 3
+11. Chen, X., Wu, Z., Liu, X., Pan, Z., Liu, W., Xie, Z., Yu, X., Ruan, C.: Janus-pro:
+Unified multimodal understanding and generation with data and model scaling.
+arXiv preprint arXiv:2501.17811 (2025) 4
+12. Conde, M.V., Geigle, G., Timofte, R.: InstructIR: High-quality image restoration
+following human instructions. In: Eur. Conf. Comput. Vis. (2024) 2, 3
+13. Fan, Q., Chen, D., Yuan, L., Hua, G., Yu, N., Chen, B.: A general decoupled
+learning framework for parameterized image operators. IEEE Transactions on Pat-
+tern Analysis and Machine Intelligence43(1), 33–47 (2021).https://doi.org/10.
+1109/TPAMI.2019.29257937
+14. Heusel,M.,Ramsauer,H.,Unterthiner,T.,Nessler,B.,Hochreiter,S.:Ganstrained
+by a two time-scale update rule converge to a local nash equilibrium. In: Guyon,
+I., Luxburg, U.V., Bengio, S., Wallach, H., Fergus, R., Vishwanathan, S., Garnett,
+R. (eds.) Advances in Neural Information Processing Systems. vol. 30. Curran
+Associates, Inc. (2017),https://proceedings.neurips.cc/paper_files/paper/
+2017/file/8a1d694707eb0fefe65871369074926d-Paper.pdf7
+15. Hu, E.J., Shen, Y., Wallis, P., Allen-Zhu, Z., Li, Y., Wang, S., Wang, L., Chen,
+W.: LoRA: Low-rank adaptation of large language models. In: Int. Conf. Learn.
+Represent. (2022) 2, 4
+
+=== PAGE 14 ===
+14 Yılmaz et al.
+16. Jayasumana,S.,Ramalingam,S.,Veit,A.,Glasner,D.,Chakrabarti,A.,Kumar,S.:
+Rethinking fid: Towards a better evaluation metric for image generation. In: 2024
+IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR).
+pp. 9307–9315 (2024).https://doi.org/10.1109/CVPR52733.2024.008897
+17. Jiang, K., Wang, Z., Yi, P., Chen, C., Huang, B., Luo, Y., Ma, J., Jiang, J.:
+Multi-scale progressive fusion network for single image deraining. In: IEEE/CVF
+Conference on Computer Vision and Pattern Recognition (CVPR) (June 2020) 3
+18. Jiang, Y., Zhang, Z., Xue, T., Gu, J.: Autodir: Automatic all-in-one image restora-
+tion with latent diffusion. arXiv preprint arXiv:2310.10123 (2023) 3
+19. Kupyn, O., Budzan, V., Mykhailych, M., Mishkin, D., Matas, J.: Deblurgan: Blind
+motion deblurring using conditional adversarial networks. ArXiv e-prints (2017) 3
+20. Li, B., Ren, W., Fu, D., Tao, D., Feng, D., Zeng, W., Wang, Z.: Benchmarking
+single-image dehazing and beyond. IEEE Transactions on Image Processing28(1),
+492–505 (2019).https://doi.org/10.1109/TIP.2018.28679517
+21. Li, B., Liu, X., Hu, P., Wu, Z., Lv, J., Peng, X.: All-in-one image restoration for
+unknowncorruption.In:IEEEConf.Comput.Vis.PatternRecog.pp.17452–17462
+(2022) 2, 3
+22. Li,Z.,Lei,Y.,Ma,C.,Zhang,J.,Shan,H.:Prompt-in-promptlearningforuniversal
+image restoration. arXiv preprint arXiv:2312.05038 (2023) 3
+23. Liang, J., Cao, J., Sun, G., Zhang, K., Van Gool, L., Timofte, R.: SwinIR: Image
+restoration using swin transformer. In: IEEE Int. Conf. Comput. Vis. Workshops.
+pp. 1833–1844 (2021) 3
+24. Lin, X., He, J., Chen, Z., Lyu, Z., Dai, B., Yu, F., Ouyang, W., Qiao, Y., Dong,
+C.: Diffbir: Towards blind image restoration with generative diffusion prior. arXiv
+preprint arXiv:2308.15070 (2024) 3
+25. Lipman, Y., Chen, R.T.Q., Ben-Hamu, H., Nickel, M., Le, M.: Flow matching for
+generative modeling. In: Int. Conf. Learn. Represent. (2023) 5
+26. Liu, X., Gong, C., Liu, Q.: Flow straight and fast: Learning to generate and transfer
+data with rectified flow. In: Int. Conf. Learn. Represent. (2023) 5
+27. Liu, Y.F., Jaw, D.W., Huang, S.C., Hwang, J.N.: Desnownet: Context-aware deep
+network for snow removal. IEEE Transactions on Image Processing27(6), 3064–
+3073 (2018) 3
+28. Loshchilov, I., Hutter, F.: Decoupled weight decay regularization. In: International
+Conferenceon LearningRepresentations(2019),https://openreview.net/forum?
+id=Bkg6RiCqY77
+29. Luo, Z., Gustafsson, F.K., Zhao, Z., Sjölund, J., Schön, T.B.: Controlling vision-
+language models for universal image restoration. arXiv preprint arXiv:2310.01018
+(2023) 3
+30. Ma, J., Cheng, T., Wang, G., Wang, X., Zhang, Q., Zhang, L.: Prores: Exploring
+degradation-aware visual prompt for universal image restoration. arXiv preprint
+arXiv:2306.13653 (2023) 3
+31. Ma, Y., Liu, X., Chen, X., Liu, W., Wu, C., Wu, Z., Pan, Z., Xie, Z., Zhang, H.,
+yu, X., Zhao, L., Wang, Y., Liu, J., Ruan, C.: Janusflow: Harmonizing autoregres-
+sion and rectified flow for unified multimodal understanding and generation. arXiv
+preprint arXiv:2411.07975 (2024) 4
+32. Nah, S., Kim, T.H., Lee, K.M.: Deep multi-scale convolutional neural network
+for dynamic scene deblurring. In: The IEEE Conference on Computer Vision and
+Pattern Recognition (CVPR) (July 2017) 3
+33. Potlapalli, V., Zamir, S.W., Khan, S., Khan, F.S.: PromptIR: Prompting for all-
+in-one blind image restoration. In: Adv. Neural Inform. Process. Syst. (2023) 2,
+3
+
+=== PAGE 15 ===
+Edit2Restore 15
+34. Qian, R., Tan, R.T., Yang, W., Su, J., Liu, J.: Attentive generative adversarial
+network for raindrop removal from a single image. In: The IEEE Conference on
+Computer Vision and Pattern Recognition (CVPR) (June 2018) 3
+35. Qin, X., Wang, Z., Bai, Y., Xie, X., Jia, H.: Ffa-net: Feature fusion attention
+network for single image dehazing. In: Proceedings of the AAAI Conference on
+Artificial Intelligence. vol. 34, pp. 11908–11915 (2020) 3
+36. Radford, A., Kim, J.W., Hallacy, C., Ramesh, A., Goh, G., Agarwal, S., Sastry, G.,
+Askell, A., Mishkin, P., Clark, J., et al.: Learning transferable visual models from
+natural language supervision. In: International Conference on Machine Learning
+(ICML). pp. 8748–8763 (2021) 5
+37. Raffel, C., Shazeer, N., Roberts, A., Lee, K., Narang, S., Matena, M., Zhou, Y., Li,
+W., Liu, P.J.: Exploring the limits of transfer learning with a unified text-to-text
+transformer. Journal of Machine Learning Research21(140), 1–67 (2020) 5
+38. Tian, Y., Han, J., Chen, H., Xi, Y., Ding, N., Hu, J., Xu, C., Wang, Y.: Instruct-
+ipt: All-in-one image processing transformer via weight modulation. arXiv preprint
+arXiv:2407.00676 (2024) 3
+39. Wang, J., Chan, K.C., Loy, C.C.: Exploring clip for assessing the look and feel of
+images. In: AAAI (2023) 7
+40. Wang, J., Yue, Z., Zhou, S., Chan, K.C.K., Loy, C.C.: Exploiting diffusion prior
+for real-world image super-resolution. arXiv preprint arXiv:2305.07015 (2024) 3
+41. Wang, Z., Cun, X., Bao, J., Zhou, W., Liu, J., Li, H.: Uformer: A general u-shaped
+transformer for image restoration. In: Proceedings of the IEEE/CVF Conference
+on Computer Vision and Pattern Recognition (CVPR). pp. 17683–17693 (June
+2022) 3
+42. Wei, C., Wang, W., Yang, W., Liu, J.: Deep retinex decomposition for low-light
+enhancement. In: British Machine Vision Conference. British Machine Vision As-
+sociation (2018) 3
+43. Wu, C., Li, J., Zhou, J., Lin, J., Gao, K., Yan, K., ming Yin, S., Bai, S., Xu, X.,
+Chen, Y., Chen, Y., Tang, Z., Zhang, Z., Wang, Z., Yang, A., Yu, B., Cheng, C.,
+Liu, D., Li, D., Zhang, H., Meng, H., Wei, H., Ni, J., Chen, K., Cao, K., Peng, L.,
+Qu, L., Wu, M., Wang, P., Yu, S., Wen, T., Feng, W., Xu, X., Wang, Y., Zhang,
+Y., Zhu, Y., Wu, Y., Cai, Y., Liu, Z.: Qwen-image technical report. arXiv preprint
+arXiv:2508.02324 (2025) 4
+44. Xiao,S.,Wang,Y.,Zhou,J.,Yuan,H.,Xing,X.,Yan,R.,Wang,S.,Huang,T.,Liu,
+Z.: Omnigen: Unified image generation. arXiv preprint arXiv:2409.11340 (2024) 4
+45. Zamir, S.W., Arora, A., Khan, S., Hayat, M., Khan, F.S., Yang, M.H.: Restormer:
+Efficient transformer for high-resolution image restoration. In: IEEE Conf. Com-
+put. Vis. Pattern Recog. pp. 5728–5739 (2022) 3
+46. Zamir, S.W., Arora, A., Khan, S., Hayat, M., Khan, F.S., Yang, M.H., Shao, L.:
+Multi-stage progressive image restoration. In: CVPR (2021) 3
+47. Zhang, K., Zuo, W., Chen, Y., Meng, D., Zhang, L.: Beyond a gaussian denoiser:
+Residual learning of deep cnn for image denoising. IEEE Transactions on Im-
+age Processing26(7), 3142–3155 (2017).https://doi.org/10.1109/TIP.2017.
+26622063
+48. Zhang, Y., Zhang, H., Chai, X., Cheng, Z., Xie, R., Song, L., Zhang, W.: Diff-
+restorer: Unleashing visual prompts for diffusion-based universal image restoration.
+arXiv preprint arXiv:2407.03636 (2024) 3
+49. Zhou, K., Yang, J., Loy, C.C., Liu, Z.: Learning to prompt for vision-language
+models. International Journal of Computer Vision (IJCV) (2022) 4
