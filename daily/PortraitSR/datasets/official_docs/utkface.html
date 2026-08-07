@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,maximum-scale=2">
+    <link rel="stylesheet" type="text/css" media="screen" href="/UTKFace/assets/css/style.css?v=28759e96ceb9eee9741d4d9d0134c96b3b33d8e3">
+
+<!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>UTKFace | Large Scale Face Dataset</title>
+<meta name="generator" content="Jekyll v3.9.0" />
+<meta property="og:title" content="UTKFace" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Large Scale Face Dataset" />
+<meta property="og:description" content="Large Scale Face Dataset" />
+<link rel="canonical" href="https://susanqq.github.io/UTKFace/" />
+<meta property="og:url" content="https://susanqq.github.io/UTKFace/" />
+<meta property="og:site_name" content="UTKFace" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="UTKFace" />
+<script type="application/ld+json">
+{"description":"Large Scale Face Dataset","url":"https://susanqq.github.io/UTKFace/","@type":"WebSite","headline":"UTKFace","name":"UTKFace","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+
+<!-- Setup Google Analytics -->
+
+
+
+<!-- You can set your favicon here -->
+<!-- link rel="shortcut icon" type="image/x-icon" href="/UTKFace/favicon.ico" -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          
+            <a id="forkme_banner" href="https://github.com/susanqq/UTKFace">View on GitHub</a>
+          
+
+          <h1 id="project_title">UTKFace</h1>
+          <h2 id="project_tagline">Large Scale Face Dataset </h2>
+
+          
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p><img src="/UTKFace/icon/logoWall2.jpg" alt="logo" /></p>
+
+<h2 id="introduction">Introduction</h2>
+
+<p>UTKFace dataset is a large-scale face dataset with long age span (range from 0 to 116 years old). The dataset consists of over 20,000 face images with annotations of age, gender, and ethnicity. The images cover large variation in pose, facial expression, illumination, occlusion, resolution, etc. This dataset could be used on a variety of tasks, e.g., face detection, age estimation, age progression/regression, landmark localization, etc. Some sample images are shown as following</p>
+
+<h2 id="highlights">Highlights</h2>
+
+<ul>
+  <li>consists of 20k+ face images in the wild (only single face in one image)</li>
+  <li>provides the correspondingly aligned and cropped faces</li>
+  <li>provides the corresponding landmarks (68 points)</li>
+  <li>images are labelled by age, gender, and ethnicity</li>
+</ul>
+
+<h2 id="samples">Samples</h2>
+<p><img src="/UTKFace/icon/samples.png" alt="samples" /></p>
+
+<h2 id="datasets">Datasets</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"><a href="https://drive.google.com/drive/folders/1HROmgviy4jUUUaCdvvrQ8PcqtNg2jn3G?usp=sharing">In-the-wild Faces</a></th>
+      <th style="text-align: center"><a href="https://drive.google.com/drive/folders/0BxYys69jI14kU0I1YUQyY1ZDRUE?usp=sharing">Aligned&amp;Cropped Faces</a></th>
+      <th style="text-align: center"><a href="https://drive.google.com/open?id=0BxYys69jI14kS1lmbW1jbkFHaW8">Landmarks (68 points)</a></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center"><img src="/UTKFace/icon/zip-file-128.png" alt="In-the-wild Faces" /></td>
+      <td style="text-align: center"><img src="/UTKFace/icon/zip-file-128.png" alt="Aligned&amp;Cropped Faces" /></td>
+      <td style="text-align: center"><img src="/UTKFace/icon/text-file-icone-9457-128.png" alt="Landmarks (68 points)" /></td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><a href="https://drive.google.com/drive/folders/1HROmgviy4jUUUaCdvvrQ8PcqtNg2jn3G?usp=sharing">ZIP File (1.3GB)</a></td>
+      <td style="text-align: center"><a href="https://drive.google.com/drive/folders/0BxYys69jI14kU0I1YUQyY1ZDRUE?usp=sharing">ZIP File (107MB)</a></td>
+      <td style="text-align: center"><a href="https://drive.google.com/open?id=0BxYys69jI14kS1lmbW1jbkFHaW8">TXT File (12MB)</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="labels">Labels</h2>
+
+<p>The labels of each face image is embedded in the file name, formated like <code class="language-plaintext highlighter-rouge">[age]_[gender]_[race]_[date&amp;time].jpg</code></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">[age]</code> is an integer from 0 to 116, indicating the age</li>
+  <li><code class="language-plaintext highlighter-rouge">[gender]</code> is either 0 (male) or 1 (female)</li>
+  <li><code class="language-plaintext highlighter-rouge">[race]</code> is an integer from 0 to 4, denoting White, Black, Asian, Indian, and Others (like Hispanic, Latino, Middle Eastern).</li>
+  <li><code class="language-plaintext highlighter-rouge">[date&amp;time]</code> is in the format of yyyymmddHHMMSSFFF, showing the date and time an image was collected to UTKFace</li>
+</ul>
+
+<h2 id="parse-landmarks">Parse Landmarks</h2>
+<p>In the folder <a href="https://drive.google.com/file/d/10I06TBSbQZ3XgwKinrt1kZzpmUKmc_iW/view?usp=sharing">readFaceLandmark</a>, a demo code <a href="https://drive.google.com/file/d/10I06TBSbQZ3XgwKinrt1kZzpmUKmc_iW/view?usp=sharing"><code class="language-plaintext highlighter-rouge">read_face_landmark.m</code></a>
+in Matlab is provided to parse the landmarks and plot landmarks on <code class="language-plaintext highlighter-rouge">Aligned&amp;Cropped Faces</code>. To run the demo, just type</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt;&gt; read_face_landmark
+</code></pre></div></div>
+
+<h2 id="license-claim">License Claim</h2>
+
+<ul>
+  <li>The UTKFace dataset is avaiable for non-commercial research purposes only.</li>
+  <li>The aligned and cropped images, as well as landmarks, are obtained by <a href="http://dlib.net/">Dlib</a>.</li>
+  <li>Please note that all the images are collected from the Internet which are not property of <a href="http://aicip.eecs.utk.edu/wiki/Main_Page">AICIP</a>. AICIP is not responsible for the content nor the meaning of these images.</li>
+  <li>The copyright belongs to the original owners. If any of the images belongs to you, please let us know and we will remove it from our dataset immediately.</li>
+  <li>The ground truth of age, gender and race are estimated through the <a href="https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/">DEX</a>  algorithm and double checked by a human annotator. If you find anything inaccurate, please let us know.
+    <h2 id="related-work">Related Work</h2>
+    <p><a href="https://arxiv.org/abs/1702.08423">Age Progression/Regression by Conditional Adversarial Autoencoder</a></p>
+  </li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@inproceedings{zhifei2017cvpr,
+  title={Age Progression/Regression by Conditional Adversarial Autoencoder},
+  author={Zhang, Zhifei, Song, Yang, and Qi, Hairong},
+  booktitle={IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+  year={2017},
+  organization={IEEE}
+}
+</code></pre></div></div>
+
+<h2 id="contact">Contact</h2>
+<p>Please contact <a href="http://web.eecs.utk.edu/~ysong18/">Yang Song</a> or <a href="https://zzutk.github.io/">Zhifei Zhang</a> for questions.</p>
+
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        
+        <p class="copyright">UTKFace maintained by <a href="https://github.com/susanqq">susanqq</a></p>
+        
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+  </body>
+</html>

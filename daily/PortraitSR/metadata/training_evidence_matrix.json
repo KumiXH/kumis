@@ -1,0 +1,300 @@
+[
+  {
+    "paper_key": "heads_up",
+    "title": "HeadsUp! High-Fidelity Portrait Image Super-Resolution",
+    "company_affiliation": ["Topaz Labs"],
+    "training_stages": [
+      {
+        "stage": "two-stage mixed-data training",
+        "steps": "40K + 110K",
+        "trainable_modules": "LoRA on the SD 2.1 VAE encoder and denoiser",
+        "frozen_modules": "VAE decoder",
+        "data_mix": "Stage 1 PortraitSR-4K:FFHQ:LSDIR:DIV2K = 0.15:0.05:1.7:0.3; Stage 2 = 1.5:0.5:1.7:0.3"
+      }
+    ],
+    "data_sources": ["PortraitSR-4K", "FFHQ", "LSDIR", "DIV2K"],
+    "data_construction": "PortraitSR-4K candidates come from LAION2B, Photo Concept Bucket and PD12M; minimum 3840x2160, aspect ratio 0.6-1.6, Q-Align quality/aesthetic filtering, inter-eye distance >=64 px, CVLFace pair similarity >=0.65. The paper reports 30K images, 27K train/3K test, 163K training reference pairs and 190 test pairs.",
+    "degradation": "Real-ESRGAN degradation pipeline",
+    "loss_terms": [
+      "global MSE reconstruction",
+      "global LPIPS",
+      "VSD inherited from OSEDiff",
+      "face fidelity loss",
+      "face LPIPS loss",
+      "identity loss",
+      "face adversarial loss"
+    ],
+    "loss_weights": "lambda_fid=1, lambda_face_LPIPS=0.8, lambda_id=4; remaining weights follow OSEDiff",
+    "optimizer_hyperparameters": "AdamW, learning rate 5e-5, LoRA rank 4, 1024x1024, reference dropout 0.2, 8xA100",
+    "source_pages": [4, 7, 16, 17],
+    "evidence_level": "A",
+    "source_pdf": "papers/02_portrait_scene/heads_up_2510.09924.pdf",
+    "source_text": "text/heads_up.txt"
+  },
+  {
+    "paper_key": "authface",
+    "title": "AuthFace: Towards Authentic Blind Face Restoration with Face-oriented Generative Diffusion Prior",
+    "company_affiliation": ["vivo Mobile Communication Co., Ltd", "Ant Group"],
+    "training_stages": [
+      {
+        "stage": "Stage I face-oriented prior tuning",
+        "trainable_modules": "full SDXL U-Net",
+        "frozen_modules": "not separately stated in the extracted main text",
+        "objective": "masked noise reconstruction plus negative-guidance loss"
+      },
+      {
+        "stage": "Stage II restoration conditioning",
+        "trainable_modules": "ControlNet and time-aware regional discriminators",
+        "frozen_modules": "Stage I denoising U-Net",
+        "objective": "noise MSE plus time-aware latent facial feature loss"
+      }
+    ],
+    "data_sources": ["1.5K professional portrait photographs above 8K", "FFHQ"],
+    "data_construction": "The 1.5K HQ portraits are manually curated and enriched with semantic and photography-oriented tags. FFHQ is resized from 1024x1024 to 512x512 for restoration training.",
+    "degradation": "synthetic blind face degradation used for the FFHQ restoration pairs; exact parameter ranges should be read from the paper/code before reproduction",
+    "loss_terms": ["masked noise reconstruction", "negative guidance", "noise MSE", "time-aware eye/mouth latent feature loss"],
+    "loss_weights": "L_stage1 = L_mask + lambda_cfg L_cfg; L_stage2 = L_noise + L_facial; numeric weights are not stated in the extracted implementation paragraph",
+    "optimizer_hyperparameters": "AdamW; Stage I lr 5e-7, batch 96, 20K iterations, 1024x1024; Stage II lr 2e-5, batch 48, 512x512; 4xA100",
+    "source_pages": [3, 4, 5, 6, 8],
+    "evidence_level": "A",
+    "source_pdf": "papers/01_single_face/authface_2410.09864.pdf",
+    "source_text": "text/authface.txt"
+  },
+  {
+    "paper_key": "tiger",
+    "title": "TIGER: Taming Identity, Geometry, and Generative Priors for High-Quality Face Video Restoration",
+    "company_affiliation": ["Xiaomi MiLM Plus"],
+    "training_stages": [
+      {
+        "stage": "Stage I geometry-identity latent mapping",
+        "trainable_modules": "DiT latent mapper",
+        "frozen_modules": "pretrained VAE decoder",
+        "objective": "latent MSE"
+      },
+      {
+        "stage": "Stage II decoder-coupled detail refinement",
+        "trainable_modules": "DiT mapper and VAE decoder",
+        "frozen_modules": "other pretrained components",
+        "objective": "lambda1 latent MSE + lambda2 LPIPS + lambda3 pixel MSE"
+      },
+      {
+        "stage": "Stage III adversarial distribution alignment",
+        "trainable_modules": "mapper and spatiotemporal discriminator",
+        "frozen_modules": "VAE decoder is frozen to reduce mode-collapse risk",
+        "objective": "Stage II losses plus lambda4 adversarial loss"
+      }
+    ],
+    "data_sources": ["OpenHumanVid", "CelebV-HQ", "VFHQ", "VoxCeleb2 real-world test set"],
+    "data_construction": "Video filtering uses motion amplitude, face clarity and face proportion. The paper retains 28,491 clips. References are sampled from frames and background-removed. Stage I uses all three training sources; Stages II-III use filtered VFHQ. The real benchmark contains 100 VoxCeleb2 videos with same-identity cross-scene reference photos.",
+    "degradation": "controllable synthetic video degradation; the paper additionally uses identity and geometry condition dropout for missing-prior robustness",
+    "loss_terms": ["latent MSE", "LPIPS", "pixel MSE", "spatiotemporal adversarial loss"],
+    "loss_weights": "The adopted setting shown in the paper ablation is lambda1=1.0, lambda2=2.0, lambda3=10.0, lambda4=0.2; the table also documents the identity-realism trade-off under alternative settings.",
+    "optimizer_hyperparameters": "Wan2.1-Fun-1.3B; DiT LoRA rank 384; VAE decoder full fine-tuning; Adam lr 1e-4; 10 epochs, 8 GPUs, batch 8, 512x512. Stage I uses 81-frame clips, Stages II-III use 21-frame clips. Identity and geometry streams receive stochastic conditional dropout.",
+    "source_pages": [5, 7, 8, 12],
+    "evidence_level": "A",
+    "source_pdf": "papers/04_video_face/tiger_2606.24336.pdf",
+    "source_text": "text/tiger.txt"
+  },
+  {
+    "paper_key": "restorerid",
+    "title": "RestorerID: Towards Tuning-Free Face Restoration with ID Preservation",
+    "company_affiliation": [],
+    "training_stages": [
+      {
+        "stage": "base restoration model",
+        "trainable_modules": "Stable Diffusion 1.5 restoration backbone",
+        "frozen_modules": "reference identity encoder",
+        "objective": "modified diffusion noise MSE"
+      },
+      {
+        "stage": "FIR-Adapter identity rebalancing",
+        "trainable_modules": "FIR-Adapter only",
+        "frozen_modules": "all other components",
+        "objective": "conditional diffusion noise MSE with LQ/reference dropout"
+      }
+    ],
+    "data_sources": ["FFHQ", "VGGFace2", "Celeb-Ref"],
+    "data_construction": "Base restoration uses FFHQ and VGGFace2. FIR-Adapter training selects 9,384 identities from VGGFace2 and Celeb-Ref, each with 5-40 images, followed by dataset cleaning.",
+    "degradation": "second-order blur-resize-noise-JPEG synthesis; sRGB is converted through an ISP model to RAW space before adding camera-like noise",
+    "loss_terms": ["modified diffusion noise MSE"],
+    "loss_weights": "ID-Scale=0.75 in Stage II; LQ and reference conditions are randomly dropped for classifier-free guidance",
+    "optimizer_hyperparameters": "AdamW, lr 5e-5, batch 16, 512x512, 2xNVIDIA GPUs; 60K base-model iterations + 30K FIR-Adapter iterations",
+    "source_pages": [4, 5, 7, 8],
+    "evidence_level": "A",
+    "source_pdf": "papers/03_reference_identity/restorerid_2411.14125.pdf",
+    "source_text": "text/restorerid.txt"
+  },
+  {
+    "paper_key": "iconface",
+    "title": "IConFace: Fine-Grained Identity Conditioning for Reference-Aware Face Restoration",
+    "company_affiliation": [],
+    "training_stages": [
+      {
+        "stage": "single restoration adaptation stage",
+        "trainable_modules": "rank-16 LoRA on FLUX.2 transformer plus identity projector and degraded-structure modules",
+        "frozen_modules": "VAE encoder, VAE decoder, text encoder and AdaFace identity model",
+        "objective": "flow matching plus reference and target identity cosine losses"
+      }
+    ],
+    "data_sources": ["FFHQ-Ref official identity split"],
+    "data_construction": "Identity-level official split and reference mappings are preserved. Clean targets are resized/center-cropped to 512x512; references are sampled independently and are not synthetically degraded. Training samples 0/1/2/3 references with probabilities 30/30/20/20.",
+    "degradation": "online 50% BSRGAN and 50% Real-ESRGAN; degradation strength buckets 0-3/4-8/9-16 sampled with probabilities 0.5/0.3/0.2",
+    "loss_terms": ["flow-matching velocity MSE", "reference AdaFace cosine loss", "ground-truth AdaFace cosine loss", "timestep-dependent identity weighting"],
+    "loss_weights": "identity targets use stop-gradient; high-noise timesteps receive lower identity-supervision weight",
+    "optimizer_hyperparameters": "4 GPUs, bf16, per-device batch 1, gradient accumulation 4, global batch 16, 12 epochs, AdamW weight decay 1e-4, 100-step warmup plus cosine decay; base lr 1e-5, LoRA lr 5e-7, identity-projector lr 3e-5",
+    "source_pages": [4, 10, 11],
+    "evidence_level": "A",
+    "source_pdf": "papers/03_reference_identity/iconface_2605.02814.pdf",
+    "source_text": "text/iconface.txt"
+  },
+  {
+    "paper_key": "osdface",
+    "title": "OSDFace: One-Step Diffusion Model for Face Restoration",
+    "company_affiliation": ["vivo Mobile Communication Co., Ltd"],
+    "training_stages": [
+      {
+        "stage": "Stage I visual representation embedding",
+        "trainable_modules": "HQ/LQ VQ dictionaries and association module",
+        "frozen_modules": "not applicable during dictionary learning",
+        "objective": "L1 + perceptual + adversarial + VQ + HQ/LQ association cross entropy"
+      },
+      {
+        "stage": "Stage II one-step diffusion restoration",
+        "trainable_modules": "one-step diffusion restoration modules and rank-16 U-Net LoRA",
+        "frozen_modules": "SD 2.1-base foundation components outside adapters",
+        "objective": "one-step restoration, facial identity loss and GAN distribution guidance"
+      }
+    ],
+    "data_sources": ["FFHQ and synthetic LQ/HQ face pairs described by the paper"],
+    "data_construction": "HQ and LQ visual dictionaries are learned separately, then associated with a cross-entropy objective whose coefficient is gradually enabled.",
+    "degradation": "blind face degradation described in the paper training setup",
+    "loss_terms": ["L1", "perceptual", "discriminative/GAN", "VQ commitment", "dictionary association cross entropy", "identity", "GAN distribution guidance"],
+    "loss_weights": "lambda_per=1.0, lambda_dis=0.8, VQ beta=0.25; association coefficient ramps from 0 to 1",
+    "optimizer_hyperparameters": "Stage I Adam lr 1.44e-4, batch 32; HQ dictionary 50 epochs, LQ dictionary 10 epochs, association 10 epochs, 8xA800. Stage II AdamW lr 1e-4, batch 2, U-Net LoRA rank 16.",
+    "source_pages": [4, 5, 6],
+    "evidence_level": "A",
+    "source_pdf": "papers/05_efficiency/osdface_2411.17163.pdf",
+    "source_text": "text/osdface.txt"
+  },
+  {
+    "paper_key": "hdrface",
+    "title": "HDRFace: Rethinking Face Restoration with High-Dimensional Representation",
+    "company_affiliation": ["vivo BlueImage Lab"],
+    "training_stages": [
+      {
+        "stage": "cross-backbone restoration training",
+        "trainable_modules": "SDFM conditioning path; SD 2.1 uses LoRA, Qwen-Image is fully fine-tuned",
+        "frozen_modules": "pretrained DINOv3-L feature extractor",
+        "objective": "GAN realism + ArcFace identity + perceptual + reconstruction"
+      }
+    ],
+    "data_sources": ["FFHQ 70K"],
+    "data_construction": "FFHQ is resized to 512x512 and degraded with the VQFR degradation pipeline.",
+    "degradation": "VQFR synthetic blind-face degradation",
+    "loss_terms": ["GAN loss", "ArcFace identity cosine loss", "perceptual loss", "MSE reconstruction loss"],
+    "loss_weights": "L_total = lambda_G L_G + lambda_ID L_ID + lambda_per L_per + lambda_rec L_rec; use paper/code for numeric weights",
+    "optimizer_hyperparameters": "SD 2.1: DINOv3-L, LoRA rank/alpha 16, 2xA100, batch 2, 100K iterations. Qwen-Image: full fine-tuning, batch 1, 10K iterations, 1xA100.",
+    "source_pages": [5, 6, 13, 14],
+    "evidence_level": "A",
+    "source_pdf": "papers/01_single_face/hdrface_2605.14821.pdf",
+    "source_text": "text/hdrface.txt"
+  },
+  {
+    "paper_key": "fadra",
+    "title": "FADRA: Frequency-Aware Diffusion with Residual Adaptation for Video Face Restoration",
+    "company_affiliation": [],
+    "training_stages": [
+      {
+        "stage": "video diffusion adaptation",
+        "trainable_modules": "LoRA and repeated residual adaptation head on Wan2.1-T2V-1.3B",
+        "frozen_modules": "most pretrained video diffusion parameters",
+        "objective": "flow matching plus frequency-aware latent loss"
+      }
+    ],
+    "data_sources": ["VFHQ", "HDTF"],
+    "data_construction": "Quality filtering retains 15,127 high-quality clips. Degradation parameters are shared within a clip to preserve temporal consistency.",
+    "degradation": "resize ratio U(1,8), Gaussian blur kernel 3-25 with sigma U(1.5,6), noise and compression",
+    "loss_terms": ["flow-matching velocity MSE", "8x8 latent DCT frequency-aware loss weighted by HVS/JPEG quantization tables"],
+    "loss_weights": "L = L_FM + L_freq; detailed coefficient should be taken from the released configuration",
+    "optimizer_hyperparameters": "2xA100, 10K iterations, batch 32, lr 1e-4, LoRA rank 128",
+    "source_pages": [4, 5, 6],
+    "evidence_level": "A",
+    "source_pdf": "papers/04_video_face/fadra_2607.06389.pdf",
+    "source_text": "text/fadra.txt"
+  },
+  {
+    "paper_key": "svfr",
+    "title": "SVFR: A Unified Framework for Generalized Video Face Restoration",
+    "company_affiliation": ["Tencent Youtu Lab"],
+    "training_stages": [
+      {
+        "stage": "joint multi-task video restoration",
+        "trainable_modules": "diffusion U-Net, task embedding, Unified Latent Regularization module and landmark predictor",
+        "frozen_modules": "pretrained supervision networks",
+        "objective": "diffusion noise MSE + cross-task latent regularization + landmark prior"
+      }
+    ],
+    "data_sources": ["VoxCeleb2", "CelebV-Text", "VFHQ"],
+    "data_construction": "ARNIQA filtering produces 20K high-quality clips. Blind restoration, colorization and inpainting variants are generated from common video sources.",
+    "degradation": "blur, noise, resize and video compression CRF for restoration; grayscale conversion for colorization; brush masks for inpainting",
+    "loss_terms": ["diffusion noise MSE", "Unified Latent Regularization contrastive loss", "68-point landmark prior loss"],
+    "loss_weights": "L = L_noise + lambda1 L_ULR + lambda2 L_prior; the ablation reports lambda1=0.01",
+    "optimizer_hyperparameters": "joint multi-task training on a Stable Video Diffusion backbone; consult the original config for full optimizer settings",
+    "source_pages": [4, 5, 6],
+    "evidence_level": "A",
+    "source_pdf": "papers/04_video_face/svfr_2501.01235.pdf",
+    "source_text": "text/svfr.txt"
+  },
+  {
+    "paper_key": "cfrnet",
+    "title": "CFRNet: Cycle-Consistent Fixed-Point Training for Real-Time Blind Face Restoration on Consumer Embedded NPUs",
+    "company_affiliation": [],
+    "training_stages": [
+      {
+        "stage": "cycle-consistent fixed-point training",
+        "trainable_modules": "2.0M-parameter ResNet-style restoration network and discriminators",
+        "frozen_modules": "pretrained VGG-19 and ArcFace supervision networks",
+        "objective": "progressive cycle supervision + idempotence + re-degradation cycle + global/local adversarial + component style + identity"
+      }
+    ],
+    "data_sources": ["FFHQ 70K"],
+    "data_construction": "FFHQ is resized to 256x256 with a fixed 90/5/5 identity-image split reported as 63K/3.5K/3.5K.",
+    "degradation": "GFPGAN-style Gaussian blur, downsampling, Gaussian noise and JPEG compression",
+    "loss_terms": ["progressive multi-cycle reconstruction/perceptual", "fixed-point idempotence", "re-degradation cycle", "global GAN", "eye/nose/mouth local GAN", "Gram style", "ArcFace identity"],
+    "loss_weights": "lambda_per=1, lambda_fp=0.5, lambda_cyc=0.5, lambda_adv=0.1, lambda_loc=1, lambda_fs=1, lambda_id=10",
+    "optimizer_hyperparameters": "lambda_fp ramps 0->0.5 during first 100K iterations; GAN warmup 5K then adversarial/component ramp 5K; Adam lr 2e-4, batch 16, 32 epochs plus lr x0.25 fine-tuning",
+    "source_pages": [3, 4, 6],
+    "evidence_level": "A",
+    "source_pdf": "papers/05_efficiency/cfrnet_2606.06850.pdf",
+    "source_text": "text/cfrnet.txt"
+  },
+  {
+    "paper_key": "latent_pmrf",
+    "title": "Latent Posterior-Mean Rectified Flow for Higher-Fidelity Perceptual Face Restoration",
+    "company_affiliation": [],
+    "training_stages": [
+      {
+        "stage": "Sim-VAE pretraining",
+        "trainable_modules": "VAE encoder/decoder",
+        "frozen_modules": "perceptual supervision network",
+        "objective": "L1 plus perceptual reconstruction and weak KL regularization"
+      },
+      {
+        "stage": "posterior-mean rectified-flow restoration",
+        "trainable_modules": "flow restoration model",
+        "frozen_modules": "trained Sim-VAE",
+        "objective": "posterior-mean rectified-flow objective"
+      }
+    ],
+    "data_sources": ["LSDIR", "FFHQ"],
+    "data_construction": "LSDIR is cropped to 512x512 and filtered with Q-Align >=3.5; FFHQ is resized to 512x512. Sim-VAE uses filtered LSDIR plus the first 10K FFHQ images.",
+    "degradation": "blind face degradation used by the PMRF training protocol",
+    "loss_terms": ["L1 reconstruction", "perceptual reconstruction", "KL regularization", "rectified-flow restoration objective"],
+    "loss_weights": "lambda_reg=1e-6; the strong VAE is trained without an adversarial loss",
+    "optimizer_hyperparameters": "Sim-VAE: 150K iterations, batch 64, Adam, 500-step warmup at 1e-5, cosine lr 1e-4->1e-6. Flow model: FFHQ, 400K iterations, batch 64.",
+    "source_pages": [4, 6],
+    "evidence_level": "A",
+    "source_pdf": "papers/01_single_face/latent_pmrf_2507.00447.pdf",
+    "source_text": "text/latent_pmrf.txt"
+  }
+]

@@ -1,0 +1,110 @@
+{
+  "key": "latent_pmrf",
+  "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\01_single_face\\latent_pmrf_2507.00447.pdf",
+  "page_count": 11,
+  "first_page_excerpt": "arXiv:2507.00447v1  [cs.CV]  1 Jul 2025\nLatent Posterior-Mean Rectified Flow for Higher-Fidelity\nPerceptual Face Restoration\nXin Luo, Menglin Zhang, Yunwei Lan, Tianyu Zhang, Rui Li, Chang Liu, Dong Liu\nUniversity of Science and Technology of China, Hefei, China\nxinluo@mail.ustc.edu.cn, dongeliu@ustc.edu.cn\nhttps://github.com/Luciennnnnnn/Latent-PMRF\nAbstract\nThe Perception-Distortion tradeoff (PD-tradeoff) theory\nsuggests that face restoration algorithms must balance per-\nceptual quality and fidelity. To achieve minimal distor-\ntion while maintaining perfect perceptual quality, Posterior-\nMean Rectified Flow (PMRF) proposes a flow based ap-\nproach where source distribution is minimum distortion es-\ntimations. Although PMRF is shown to be effective, its\npixel-space modeling approach limits its ability to align\nwith human perception, where human perception is defined\nas how humans distinguish between two image distribu-\ntions. In this work, we propose Latent-PMRF, which re-\nformulates PMRF in the latent space of a variational au-\ntoencoder (VAE), facilitating better alignment with human\nperception during optimization. By defining the source\ndistribution on latent representations of minimum distor-\ntion estimation, we bound the minimum distortion by the\nVAE’s reconstruction error. Moreover, we reveal the de-\nsign of VAE is crucial, and our proposed Sim-VAE sig-\nnificantly outperforms existing VAEs in both reconstruc-\ntion and restoration. Extensive experiments on blind face\nrestoration demonstrate the superiority of Latent-PMRF , of-\nfering an improved PD-tradeoff compared to existing meth-\nods, along with remarkable convergence efficiency, achiev-\ning a 5.79× speedup over PMRF in terms of FID. Our code\nwill be available as open-source.\n1. Introduction\nFace images are among the most common types of images,\nyet they often suffer from complex degradations during for-\nmation, recording, processing, and transmission [59]. Typ-\nical degradations, such as blur [70], noise [14], downsam-\npling [12, 39, 45], and JPEG compression [26], can signif-\nicantly degrade visual quality. Perceptual face restoration\naims to recover high-quality, visually pleasing face images\nfrom degraded inputs. The key challenge lies in enhancing\n5.79x Speedup\nFigure 1. Illustration of perception optimization efficiency in la-\ntent space. We train PMRF and Latent-PMRF with the same com-\npute budget. For V AEs with perceptual compression capabilities,\ndifferences in their latent space align better with human perception\nthan those in pixel space, making latent space modeling more ef-\nfective for perception optimization. Validation curves demonstrate\nthe superior perceptual quality achieved by Latent-PMRF, with a\n5.79× speedup over PMRF in terms of FID.\nperceptual quality while maintaining fidelity. Recent stud-\nies show that generative models, particularly diffusion mod-\nels [23, 37, 53, 58] and flow matching models [46, 73], offer\nstrong solutions for perceptual quality by modeling the dis-\ntribution of natural images. Although such posterior mod-\neling approaches can achieve perfect perceptual quality in\ntheory, they do not guarantee minimal distortion under per-\nfect perceptual quality constrain [2, 17, 46]. To minimize\ndistortion, Posterior-Mean Rectified Flow (PMRF) [46]\ntransports minimum distortion estimation to the target dis-\ntribution using a rectified flow model. This approach can\ntheoretically achieve minimal distortion [17, 46] under per-\nfect perceptual quality constrain.\nIn this work, we challenge the necessity of construct-\ning PMRF in the pixel space. While perceptual quality\nis formally defined as the statistical distance between the\ndistributions of reconstructed and original images [2], re-\n1",
+  "figure_candidates": [
+    {
+      "page": 1,
+      "caption": "Figure 1. Illustration of perception optimization efficiency in la-"
+    },
+    {
+      "page": 3,
+      "caption": "Figure 2. Training Framework of Latent-PMRF. We first es-"
+    },
+    {
+      "page": 4,
+      "caption": "Figure 3. Comparison of ResBlock designs between SD-V AE and"
+    },
+    {
+      "page": 4,
+      "caption": "Figure 4. Two examples of the latent representations. Using pixel-"
+    },
+    {
+      "page": 4,
+      "caption": "Figure 5. Illustration of the resizing layer design. Sim-V AE redis-"
+    },
+    {
+      "page": 6,
+      "caption": "Figure 6. Convergence Efficiency of Latent-PMRF.We train both PMRF and Latent-PMRF using Sim-V AE for 400k iterations on FFHQ"
+    },
+    {
+      "page": 7,
+      "caption": "Figure 7. Qualitative comparisons on CelebA-Test [60] benchmark. Our method produces visually appealing details while maintaining"
+    },
+    {
+      "page": 8,
+      "caption": "Figure 8. Comparisons on real-world datasets. Top: Qualitative results on the WIDER-Test [72] dataset. Bottom: Comparison on the"
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 2,
+      "caption": "Table 1. Comparison of V AEsin CelebA-Test [60]. We evalu-"
+    },
+    {
+      "page": 6,
+      "caption": "Table 2. Impact of V AE architectureson CelebA-Test [60]. All"
+    },
+    {
+      "page": 6,
+      "caption": "Table 3. Impact of Latent Channels on CelebA-Test [60]."
+    },
+    {
+      "page": 7,
+      "caption": "Table 4. Quantitative comparisons on CelebA-Test [60] benchmark. Our approach achieves the best PD-tradeoff, significantly reducing"
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      10
+    ],
+    "identity": [
+      5,
+      7,
+      8
+    ],
+    "portrait_detail": [
+      1,
+      5,
+      8,
+      11
+    ],
+    "efficiency": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      7,
+      8,
+      10
+    ],
+    "datasets": [
+      2,
+      5,
+      6,
+      7
+    ],
+    "limitations": [
+      4,
+      8
+    ]
+  },
+  "source_urls": [
+    {
+      "page": 1,
+      "url": "https://github.com/Luciennnnnnn/Latent-PMRF"
+    },
+    {
+      "page": 10,
+      "url": "https://github.com/"
+    }
+  ],
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\latent_pmrf.txt"
+}

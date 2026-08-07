@@ -1,0 +1,130 @@
+{
+  "key": "restorerid",
+  "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\03_reference_identity\\restorerid_2411.14125.pdf",
+  "page_count": 10,
+  "first_page_excerpt": "RestorerID: Towards Tuning-Free Face Restoration with ID Preservation\nJiacheng Ying1,† Mushui Liu1,† Zhe Wu1 Runming Zhang1\nZhu Yu1 Siming Fu1 Si-Yuan Cao1 Chao Wu1 Yunlong Yu1 Hui-Liang Shen1,∗\n1 Zhejiang University\n{yingjiacheng, lms, jeffw, runmin zhang}@zju.edu.cn\n{yu zhu, fusiming, cao siyuan, chao.wu, yuyunlong, shenhl }@zju.edu.cn\nIncreasing Degradation\nGround-Truth\nReference\nInputBase ModelFaceRestorer\nTuning-free Insertion\nID Preservation\nID Preservation\nIncreasing Degradation\nGround-Truth\nReference\nInputBase ModelFaceRestorer\nTuning-free Insertion\nID Preservation\nID Preservation\nIncreasing Degradation\nID Preservation\nID Preservation\nRestorerID Input\nBase Model\nGround-Truth\nReference\nTuning-free Insertion\nIncreasing Degradation\nID Preservation\nID Preservation\nRestorerID InputBase Model\nGround-Truth\nReference\nTuning-free Insertion\nCodeFormer\nCodeFormer\nFigure 1. As image degradation increases, the blind face restoration approach CodeFormer [45] can restore images but fails to preserve ID\nconsistency (see the second row). In contrast, OurRestorerID, incorporating reference ID priors, generates restored images with consistent\nID information (see the third row).\nAbstract\nBlind face restoration has made great progress in producing\nhigh-quality and lifelike images. Yet it remains challenging\nto preserve the ID information especially when the degra-\ndation is heavy. Current reference-guided face restoration\napproaches either require face alignment or personalized\ntest-tuning, which are unfaithful or time-consuming. In this\npaper, we propose a tuning-free method named RestorerID\nthat incorporates ID preservation during face restoration.\nRestorerID is a diffusion model-based method that restores\nlow-quality images with varying levels of degradation by\nusing a single reference image. To achieve this, we pro-\npose a unified framework to combine the ID injection with\nthe base blind face restoration model. In addition, we de-\nsign a novel Face ID Rebalancing Adapter (FIR-Adapter)\nto tackle the problems of content unconsistency and con-\ntours misalignment that are caused by information conflicts\nbetween the low-quality input and reference image. Fur-\nthermore, by employing an Adaptive ID-Scale Adjusting\n† Equal contribution. ∗ Corresponding author.\nstrategy, RestorerID can produce superior restored images\nacross various levels of degradation. Experimental results\non the Celeb-Ref dataset and real-world scenarios demon-\nstrate that RestorerID effectively delivers high-quality face\nrestoration with ID preservation, achieving a superior per-\nformance compared to the test-tuning approaches and other\nreference-guided ones. The code of RestorerID is avail-\nable at https : / / github . com / YingJiacheng /\nRestorerID.\n1. Introduction\nFace restoration [14, 15, 17, 28] aims to recover clear and\nhigh-quality (HQ) facial images from degraded inputs af-\nfected by blurring, pixelation, artifacts, JPEG compression,\nand other noise distortions. This task has important applica-\ntions across various fields, e.g., computational photography\n[40], old photo recovery [29].\nTo eliminate complex and unknown degradations in low-\nquality (LQ) images, blind face restoration approaches use\nGANs [33, 38], codebooks [45], and diffusion models [35]\n1\narXiv:2411.14125v1  [cs.CV]  21 Nov 2024",
+  "figure_candidates": [
+    {
+      "page": 1,
+      "caption": "Figure 1. As image degradation increases, the blind face restoration approach CodeFormer [45] can restore images but fails to preserve ID"
+    },
+    {
+      "page": 3,
+      "caption": "Figure 2. (a) Our RestorerID framework integrates LQ structural information and reference ID information into a unified diffusion UNet."
+    },
+    {
+      "page": 4,
+      "caption": "Figure 3. The outputs produced by the base model, base model + ID injection, and Our method. Blue, red, and green boxes highlight the"
+    },
+    {
+      "page": 5,
+      "caption": "Figure 4. The restored images under light and heavy degradation using increasing ID-Scale values and our adaptive adjusting strategy. Red"
+    },
+    {
+      "page": 5,
+      "caption": "Figure 5. The curves of the average ID similarity values with re-"
+    },
+    {
+      "page": 6,
+      "caption": "Figure 6. Qualitative comparison with state-of-the-art restoration models on Celeb-Ref dataset with heavy synthetic degradation."
+    },
+    {
+      "page": 7,
+      "caption": "Figure 7. Qualitative comparison with state-of-the-art restoration models on real-world images. Images are sourced from the Internet."
+    },
+    {
+      "page": 7,
+      "caption": "Figure 8. User study results. V oting rates of our RestorerID com-"
+    },
+    {
+      "page": 8,
+      "caption": "Figure 9. The qualitative results of ablation studies on the proposed components under light and heavy degradations. We incrementally"
+    },
+    {
+      "page": 8,
+      "caption": "Figure 10. The qualitative results of ablation study on the two-"
+    },
+    {
+      "page": 8,
+      "caption": "Fig. 9 illustrates the qualitative results of the ablation"
+    },
+    {
+      "page": 8,
+      "caption": "Fig. 10 illustrates the qualitative results of the ablation"
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 2,
+      "caption": "Table 1. An overview of previous works on face restoration, in"
+    },
+    {
+      "page": 6,
+      "caption": "Table 2. Quantitative comparison on light and heavy degradation levels. Red indicates the best and blue indicates the second best."
+    },
+    {
+      "page": 7,
+      "caption": "Table 3. Ablation study on the proposed components, includ-"
+    },
+    {
+      "page": 8,
+      "caption": "Table 4. Ablation study for our two-stage training strategy."
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      1,
+      2,
+      3,
+      8,
+      9
+    ],
+    "identity": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "portrait_detail": [
+      1,
+      2,
+      3,
+      4,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "efficiency": [
+      1,
+      2,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "datasets": [
+      1,
+      6,
+      9
+    ],
+    "limitations": [
+      2
+    ]
+  },
+  "source_urls": [
+    {
+      "page": 9,
+      "url": "https://cdn"
+    }
+  ],
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\restorerid.txt"
+}

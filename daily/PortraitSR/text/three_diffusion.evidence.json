@@ -1,0 +1,121 @@
+{
+  "key": "three_diffusion",
+  "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\01_single_face\\three_diffusion_2409.00991.pdf",
+  "page_count": 10,
+  "first_page_excerpt": "3D Priors-Guided Diffusion for Blind Face Restoration\nXiaobin Lu∗\nShenzhen Campus of Sun Yat-sen\nUniversity\nShenzhen, China\nYunnan Key Laboratory of Smart\nEducation\nKunming, China\nluxb@mail2.sysu.edu.cn\nXiaobin Hu∗\nTencent Youtu Lab\nShanghai, China\nxiaobinhu@tencent.com\nJun Luo\nUniversity of Chinese Academy of\nSciences\nBeijing, China\nluojun@iie.ac.cn\nBen Zhu\nTencent Cloud Architecture Platform\nShenzhen, China\nbenjaminzhu@tencent.com\nYaping Ruan\nTencent Cloud Architecture Platform\nShenzhen, China\npaulruan@tencent.com\nWenqi Ren†\nShenzhen Campus of Sun Yat-sen\nUniversity\nShenzhen, China\nrenwq3@mail.sysu.edu.cn\nLQGFPGANDiffBIRPSFRGAN\nVQFR Ours\nGan-based DPM-basedCNN-based\nDR2 + SPAR\nFigure 1: Comparison of our method with other blind face restoration methods. The left segment illustrates low-quality images (LQ), while the\ncenter showcases the outcomes of Generative Adversarial Networks (GANs) in the green rectangle [ 3, 45], results from a CNN-based model in\nthe blue region [ 16], and outcomes from the Diffusion Probability Model (DPM) in the red rectangle [ 31, 48]. Our approach excels in enhancing\nrestoration details significantly.\n∗Both authors contributed equally to this research.\n†Corresponding author.\nPermission to make digital or hard copies of all or part of this work for personal or\nclassroom use is granted without fee provided that copies are not made or distributed\nfor profit or commercial advantage and that copies bear this notice and the full citation\non the first page. Copyrights for components of this work owned by others than the\nauthor(s) must be honored. Abstracting with credit is permitted. To copy otherwise, or\nrepublish, to post on servers or to redistribute to lists, requires prior specific permission\nand/or a fee. Request permissions from permissions@acm.org.\nMM ’24, October 28-November 1, 2024, Melbourne, VIC, Australia\n© 2024 Copyright held by the owner/author(s). Publication rights licensed to ACM.\nACM ISBN 979-8-4007-0686-8/24/10. . . $15.00\nhttps://doi.org/10.1145/3664647.3681611\nABSTRACT\nBlind face restoration endeavors to restore a clear face image from\na degraded counterpart. Recent approaches employing Generative\nAdversarial Networks (GANs) as priors have demonstrated remark-\nable success in this field. However, these methods encounter chal-\nlenges in achieving a balance between realism and fidelity, particu-\nlarly in complex degradation scenarios. To inherit the exceptional re-\nalism generative ability of the diffusion model and also constrained\nby the identity-aware fidelity, we propose a novel diffusion-based\narXiv:2409.00991v2  [cs.CV]  12 Sep 2024",
+  "figure_candidates": [
+    {
+      "page": 1,
+      "caption": "Figure 1: Comparison of our method with other blind face restoration methods. The left segment illustrates low-quality images (LQ), while the"
+    },
+    {
+      "page": 2,
+      "caption": "Figure 2: Results on the Arcface identity score (IDS). The"
+    },
+    {
+      "page": 3,
+      "caption": "Figure 3: Comparison of reconstructing 3D faces from the"
+    },
+    {
+      "page": 4,
+      "caption": "Figure 4: The architecture of 3D priors embedded diffusion model. Top: Our framework consists of two parts: the 3D recon-"
+    },
+    {
+      "page": 6,
+      "caption": "Figure 5: Qualitative comparisons of blind face restoration methods on the CelebA-Test dataset[ 24]. Our method performs better in both"
+    },
+    {
+      "page": 7,
+      "caption": "Figure 6: Comparisons of blind face restoration methods on the real-world datasets. The results in the first row are from the"
+    },
+    {
+      "page": 7,
+      "caption": "Figure 7: Analysis of the weight in Scale Add Block."
+    },
+    {
+      "page": 8,
+      "caption": "Figure 8: Ablation study on the CelebA-Test dataset [ 24]. (a) without a facial 3D image as the guidance condition, (b) without"
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 6,
+      "caption": "Table 1: Quantitative evaluation of blind face restoration on CelebA-Test dataset [24] using 3000 randomly selected images."
+    },
+    {
+      "page": 7,
+      "caption": "Table 2: For the performance of blind face restoration, we conducted tests on the real datasets LFW-Test [ 22], WebPhoto [45],"
+    },
+    {
+      "page": 8,
+      "caption": "Table 3: The computational complexity comparison between"
+    },
+    {
+      "page": 8,
+      "caption": "Table 4: Ablation study on the CelebA-Test dataset."
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "identity": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "portrait_detail": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "efficiency": [
+      2,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "datasets": [
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "limitations": []
+  },
+  "source_urls": [
+    {
+      "page": 2,
+      "url": "https://doi.org/10.1145/3664647.3681611"
+    },
+    {
+      "page": 2,
+      "url": "https://github.com/838143396/3Diffusion"
+    },
+    {
+      "page": 9,
+      "url": "https://doi.org/10.1109/tip.2003.819861"
+    }
+  ],
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\three_diffusion.txt"
+}

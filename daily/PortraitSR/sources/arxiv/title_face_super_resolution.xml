@@ -1,0 +1,1193 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/oaFHfr/vlhjFSRcEPqzknwBpTVU</id>
+  <title>arXiv Query: search_query=ti:"face super resolution" OR ti:"face super-resolution"&amp;id_list=&amp;start=0&amp;max_results=150</title>
+  <updated>2026-08-06T07:21:34Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=ti:%22face+super+resolution%22+OR+ti:%22face+super-resolution%22&amp;start=0&amp;max_results=150&amp;id_list=" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>150</opensearch:itemsPerPage>
+  <opensearch:totalResults>45</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/1709.03196v2</id>
+    <title>Deep multi-frame face super-resolution</title>
+    <updated>2017-10-15T19:49:34Z</updated>
+    <link href="https://arxiv.org/abs/1709.03196v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/1709.03196v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Face verification and recognition problems have seen rapid progress in recent years, however recognition from small size images remains a challenging task that is inherently intertwined with the task of face super-resolution. Tackling this problem using multiple frames is an attractive idea, yet requires solving the alignment problem that is also challenging for low-resolution faces. Here we present a holistic system for multi-frame recognition, alignment, and superresolution of faces. Our neural network architecture restores the central frame of each input sequence additionally taking into account a number of adjacent frames and making use of sub-pixel movements. We present our results using the popular dataset for video face recognition (YouTube Faces). We show a notable improvement of identification score compared to several baselines including the one based on single-image super-resolution.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2017-09-10T23:16:26Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>E. Ustinova</name>
+    </author>
+    <author>
+      <name>V. Lempitsky</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/1705.02438v1</id>
+    <title>Face Super-Resolution Through Wasserstein GANs</title>
+    <updated>2017-05-06T03:48:02Z</updated>
+    <link href="https://arxiv.org/abs/1705.02438v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/1705.02438v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Generative adversarial networks (GANs) have received a tremendous amount of attention in the past few years, and have inspired applications addressing a wide range of problems. Despite its great potential, GANs are difficult to train. Recently, a series of papers (Arjovsky &amp; Bottou, 2017a; Arjovsky et al. 2017b; and Gulrajani et al. 2017) proposed using Wasserstein distance as the training objective and promised easy, stable GAN training across architectures with minimal hyperparameter tuning. In this paper, we compare the performance of Wasserstein distance with other training objectives on a variety of GAN architectures in the context of single image super-resolution. Our results agree that Wasserstein GAN with gradient penalty (WGAN-GP) provides stable and converging GAN training and that Wasserstein distance is an effective metric to gauge training progress.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2017-05-06T03:48:02Z</published>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Zhimin Chen</name>
+    </author>
+    <author>
+      <name>Yuguang Tong</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2209.12064v1</id>
+    <title>Face Super-Resolution Using Stochastic Differential Equations</title>
+    <updated>2022-09-24T18:26:06Z</updated>
+    <link href="https://arxiv.org/abs/2209.12064v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2209.12064v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Diffusion models have proven effective for various applications such as images, audio and graph generation. Other important applications are image super-resolution and the solution of inverse problems. More recently, some works have used stochastic differential equations (SDEs) to generalize diffusion models to continuous time. In this work, we introduce SDEs to generate super-resolution face images. To the best of our knowledge, this is the first time SDEs have been used for such an application. The proposed method provides an improved peak signal-to-noise ratio (PSNR), structural similarity index measure (SSIM), and consistency than the existing super-resolution methods based on diffusion models. In particular, we also assess the potential application of this method for the face recognition task. A generic facial feature extractor is used to compare the super-resolution images with the ground truth and superior results were obtained compared with other methods. Our code is publicly available at https://github.com/marcelowds/sr-sde</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-09-24T18:26:06Z</published>
+    <arxiv:comment>Accepted for presentation at the Conference on Graphics, Patterns and Images (SIBGRAPI) 2022</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Marcelo dos Santos</name>
+    </author>
+    <author>
+      <name>Rayson Laroca</name>
+    </author>
+    <author>
+      <name>Rafael O. Ribeiro</name>
+    </author>
+    <author>
+      <name>João Neves</name>
+    </author>
+    <author>
+      <name>Hugo Proença</name>
+    </author>
+    <author>
+      <name>David Menotti</name>
+    </author>
+    <arxiv:doi>10.1109/SIBGRAPI55357.2022.9991799</arxiv:doi>
+    <link rel="related" href="https://doi.org/10.1109/SIBGRAPI55357.2022.9991799" title="doi"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2012.01211v2</id>
+    <title>Learning Spatial Attention for Face Super-Resolution</title>
+    <updated>2020-12-04T12:33:42Z</updated>
+    <link href="https://arxiv.org/abs/2012.01211v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2012.01211v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>General image super-resolution techniques have difficulties in recovering detailed face structures when applying to low resolution face images. Recent deep learning based methods tailored for face images have achieved improved performance by jointly trained with additional task such as face parsing and landmark prediction. However, multi-task learning requires extra manually labeled data. Besides, most of the existing works can only generate relatively low resolution face images (e.g., $128\times128$), and their applications are therefore limited. In this paper, we introduce a novel SPatial Attention Residual Network (SPARNet) built on our newly proposed Face Attention Units (FAUs) for face super-resolution. Specifically, we introduce a spatial attention mechanism to the vanilla residual blocks. This enables the convolutional layers to adaptively bootstrap features related to the key face structures and pay less attention to those less feature-rich regions. This makes the training more effective and efficient as the key face structures only account for a very small portion of the face image. Visualization of the attention maps shows that our spatial attention network can capture the key face structures well even for very low resolution faces (e.g., $16\times16$). Quantitative comparisons on various kinds of metrics (including PSNR, SSIM, identity similarity, and landmark detection) demonstrate the superiority of our method over current state-of-the-arts. We further extend SPARNet with multi-scale discriminators, named as SPARNetHD, to produce high resolution results (i.e., $512\times512$). We show that SPARNetHD trained with synthetic data cannot only produce high quality and high resolution outputs for synthetically degraded face images, but also show good generalization ability to real world low quality face images.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2020-12-02T13:54:25Z</published>
+    <arxiv:comment>TIP 2020. Codes are available at https://github.com/chaofengc/Face-SPARNet</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Chaofeng Chen</name>
+    </author>
+    <author>
+      <name>Dihong Gong</name>
+    </author>
+    <author>
+      <name>Hao Wang</name>
+    </author>
+    <author>
+      <name>Zhifeng Li</name>
+    </author>
+    <author>
+      <name>Kwan-Yee K. Wong</name>
+    </author>
+    <arxiv:doi>10.1109/TIP.2020.3043093</arxiv:doi>
+    <link rel="related" href="https://doi.org/10.1109/TIP.2020.3043093" title="doi"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2207.07945v1</id>
+    <title>Stochastic Attribute Modeling for Face Super-Resolution</title>
+    <updated>2022-07-16T13:38:05Z</updated>
+    <link href="https://arxiv.org/abs/2207.07945v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2207.07945v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>When a high-resolution (HR) image is degraded into a low-resolution (LR) image, the image loses some of the existing information. Consequently, multiple HR images can correspond to the LR image. Most of the existing methods do not consider the uncertainty caused by the stochastic attribute, which can only be probabilistically inferred. Therefore, the predicted HR images are often blurry because the network tries to reflect all possibilities in a single output image. To overcome this limitation, this paper proposes a novel face super-resolution (SR) scheme to take into the uncertainty by stochastic modeling. Specifically, the information in LR images is separately encoded into deterministic and stochastic attributes. Furthermore, an Input Conditional Attribute Predictor is proposed and separately trained to predict the partially alive stochastic attributes from only the LR images. Extensive evaluation shows that the proposed method successfully reduces the uncertainty in the learning process and outperforms the existing state-of-the-art approaches.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-07-16T13:38:05Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Hanbyel Cho</name>
+    </author>
+    <author>
+      <name>Yekang Lee</name>
+    </author>
+    <author>
+      <name>Jaemyung Yu</name>
+    </author>
+    <author>
+      <name>Junmo Kim</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2002.06518v1</id>
+    <title>Facial Attribute Capsules for Noise Face Super Resolution</title>
+    <updated>2020-02-16T06:22:28Z</updated>
+    <link href="https://arxiv.org/abs/2002.06518v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2002.06518v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Existing face super-resolution (SR) methods mainly assume the input image to be noise-free. Their performance degrades drastically when applied to real-world scenarios where the input image is always contaminated by noise. In this paper, we propose a Facial Attribute Capsules Network (FACN) to deal with the problem of high-scale super-resolution of noisy face image. Capsule is a group of neurons whose activity vector models different properties of the same entity. Inspired by the concept of capsule, we propose an integrated representation model of facial information, which named Facial Attribute Capsule (FAC). In the SR processing, we first generated a group of FACs from the input LR face, and then reconstructed the HR face from this group of FACs. Aiming to effectively improve the robustness of FAC to noise, we generate FAC in semantic, probabilistic and facial attributes manners by means of integrated learning strategy. Each FAC can be divided into two sub-capsules: Semantic Capsule (SC) and Probabilistic Capsule (PC). Them describe an explicit facial attribute in detail from two aspects of semantic representation and probability distribution. The group of FACs model an image as a combination of facial attribute information in the semantic space and probabilistic space by an attribute-disentangling way. The diverse FACs could better combine the face prior information to generate the face images with fine-grained semantic attributes. Extensive benchmark experiments show that our method achieves superior hallucination results and outperforms state-of-the-art for very low resolution (LR) noise face image super resolution.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2020-02-16T06:22:28Z</published>
+    <arxiv:comment>To appear in AAAI 2020</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Jingwei Xin</name>
+    </author>
+    <author>
+      <name>Nannan Wang</name>
+    </author>
+    <author>
+      <name>Xinrui Jiang</name>
+    </author>
+    <author>
+      <name>Jie Li</name>
+    </author>
+    <author>
+      <name>Xinbo Gao</name>
+    </author>
+    <author>
+      <name>Zhifeng Li</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2101.03749v2</id>
+    <title>Deep Learning-based Face Super-Resolution: A Survey</title>
+    <updated>2021-09-01T07:00:33Z</updated>
+    <link href="https://arxiv.org/abs/2101.03749v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2101.03749v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Face super-resolution (FSR), also known as face hallucination, which is aimed at enhancing the resolution of low-resolution (LR) face images to generate high-resolution (HR) face images, is a domain-specific image super-resolution problem. Recently, FSR has received considerable attention and witnessed dazzling advances with the development of deep learning techniques. To date, few summaries of the studies on the deep learning-based FSR are available. In this survey, we present a comprehensive review of deep learning-based FSR methods in a systematic manner. First, we summarize the problem formulation of FSR and introduce popular assessment metrics and loss functions. Second, we elaborate on the facial characteristics and popular datasets used in FSR. Third, we roughly categorize existing methods according to the utilization of facial characteristics. In each category, we start with a general description of design principles, then present an overview of representative approaches, and then discuss the pros and cons among them. Fourth, we evaluate the performance of some state-of-the-art methods. Fifth, joint FSR and other tasks, and FSR-related applications are roughly introduced. Finally, we envision the prospects of further technological advancement in this field. A curated list of papers and resources to face super-resolution are available at \url{https://github.com/junjun-jiang/Face-Hallucination-Benchmark}</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2021-01-11T08:17:11Z</published>
+    <arxiv:comment>Accepted to ACM Computing Surveys</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Junjun Jiang</name>
+    </author>
+    <author>
+      <name>Chenyang Wang</name>
+    </author>
+    <author>
+      <name>Xianming Liu</name>
+    </author>
+    <author>
+      <name>Jiayi Ma</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/1910.08761v1</id>
+    <title>Component Attention Guided Face Super-Resolution Network: CAGFace</title>
+    <updated>2019-10-19T12:28:14Z</updated>
+    <link href="https://arxiv.org/abs/1910.08761v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/1910.08761v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>To make the best use of the underlying structure of faces, the collective information through face datasets and the intermediate estimates during the upsampling process, here we introduce a fully convolutional multi-stage neural network for 4$\times$ super-resolution for face images. We implicitly impose facial component-wise attention maps using a segmentation network to allow our network to focus on face-inherent patterns. Each stage of our network is composed of a stem layer, a residual backbone, and spatial upsampling layers. We recurrently apply stages to reconstruct an intermediate image, and then reuse its space-to-depth converted versions to bootstrap and enhance image quality progressively. Our experiments show that our face super-resolution method achieves quantitatively superior and perceptually pleasing results in comparison to state of the art.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2019-10-19T12:28:14Z</published>
+    <arxiv:comment>Submitted to WACV 2020</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Ratheesh Kalarot</name>
+    </author>
+    <author>
+      <name>Tao Li</name>
+    </author>
+    <author>
+      <name>Fatih Porikli</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2502.12570v1</id>
+    <title>GVTNet: Graph Vision Transformer For Face Super-Resolution</title>
+    <updated>2025-02-18T06:15:02Z</updated>
+    <link href="https://arxiv.org/abs/2502.12570v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2502.12570v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Recent advances in face super-resolution research have utilized the Transformer architecture. This method processes the input image into a series of small patches. However, because of the strong correlation between different facial components in facial images. When it comes to super-resolution of low-resolution images, existing algorithms cannot handle the relationships between patches well, resulting in distorted facial components in the super-resolution results. To solve the problem, we propose a transformer architecture based on graph neural networks called graph vision transformer network. We treat each patch as a graph node and establish an adjacency matrix based on the information between patches. In this way, the patch only interacts between neighboring patches, further processing the relationship of facial components. Quantitative and visualization experiments have underscored the superiority of our algorithm over state-of-the-art techniques. Through detailed comparisons, we have demonstrated that our algorithm possesses more advanced super-resolution capabilities, particularly in enhancing facial components. The PyTorch code is available at https://github.com/continueyang/GVTNet</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-02-18T06:15:02Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Chao Yang</name>
+    </author>
+    <author>
+      <name>Yong Fan</name>
+    </author>
+    <author>
+      <name>Cheng Lu</name>
+    </author>
+    <author>
+      <name>Minghao Yuan</name>
+    </author>
+    <author>
+      <name>Zhijing Yang</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2409.14385v1</id>
+    <title>Prior Knowledge Distillation Network for Face Super-Resolution</title>
+    <updated>2024-09-22T09:58:20Z</updated>
+    <link href="https://arxiv.org/abs/2409.14385v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2409.14385v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>The purpose of face super-resolution (FSR) is to reconstruct high-resolution (HR) face images from low-resolution (LR) inputs. With the continuous advancement of deep learning technologies, contemporary prior-guided FSR methods initially estimate facial priors and then use this information to assist in the super-resolution reconstruction process. However, ensuring the accuracy of prior estimation remains challenging, and straightforward cascading and convolutional operations often fail to fully leverage prior knowledge. Inaccurate or insufficiently utilized prior information inevitably degrades FSR performance. To address this issue, we propose a prior knowledge distillation network (PKDN) for FSR, which involves transferring prior information from the teacher network to the student network. This approach enables the network to learn priors during the training stage while relying solely on low-resolution facial images during the testing stage, thus mitigating the adverse effects of prior estimation inaccuracies. Additionally, we incorporate robust attention mechanisms to design a parsing map fusion block that effectively utilizes prior information. To prevent feature loss, we retain multi-scale features during the feature extraction stage and employ them in the subsequent super-resolution reconstruction process. Experimental results on benchmark datasets demonstrate that our PKDN approach surpasses existing FSR methods in generating high-quality face images.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-09-22T09:58:20Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Qiu Yang</name>
+    </author>
+    <author>
+      <name>Xiao Sun</name>
+    </author>
+    <author>
+      <name>Xin-yu Li</name>
+    </author>
+    <author>
+      <name>Feng-Qi Cui</name>
+    </author>
+    <author>
+      <name>Yu-Tong Guo</name>
+    </author>
+    <author>
+      <name>Shuang-Zhen Hu</name>
+    </author>
+    <author>
+      <name>Ping Luo</name>
+    </author>
+    <author>
+      <name>Si-Ying Li</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/1909.12780v3</id>
+    <title>Learning to Have an Ear for Face Super-Resolution</title>
+    <updated>2020-04-02T16:14:12Z</updated>
+    <link href="https://arxiv.org/abs/1909.12780v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/1909.12780v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>We propose a novel method to use both audio and a low-resolution image to perform extreme face super-resolution (a 16x increase of the input size). When the resolution of the input image is very low (e.g., 8x8 pixels), the loss of information is so dire that important details of the original identity have been lost and audio can aid the recovery of a plausible high-resolution image. In fact, audio carries information about facial attributes, such as gender and age. To combine the aural and visual modalities, we propose a method to first build the latent representations of a face from the lone audio track and then from the lone low-resolution image. We then train a network to fuse these two representations. We show experimentally that audio can assist in recovering attributes such as the gender, the age and the identity, and thus improve the correctness of the high-resolution image reconstruction process. Our procedure does not make use of human annotation and thus can be easily trained with existing video datasets. Moreover, we show that our model builds a factorized representation of images and audio as it allows one to mix low-resolution images and audio from different videos and to generate realistic faces with semantically meaningful combinations.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="eess.AS" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="eess.IV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2019-09-27T16:28:55Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Givi Meishvili</name>
+    </author>
+    <author>
+      <name>Simon Jenni</name>
+    </author>
+    <author>
+      <name>Paolo Favaro</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2007.09454v1</id>
+    <title>Face Super-Resolution Guided by 3D Facial Priors</title>
+    <updated>2020-07-18T15:26:07Z</updated>
+    <link href="https://arxiv.org/abs/2007.09454v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2007.09454v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>State-of-the-art face super-resolution methods employ deep convolutional neural networks to learn a mapping between low- and high- resolution facial patterns by exploring local appearance knowledge. However, most of these methods do not well exploit facial structures and identity information, and struggle to deal with facial images that exhibit large pose variations. In this paper, we propose a novel face super-resolution method that explicitly incorporates 3D facial priors which grasp the sharp facial structures. Our work is the first to explore 3D morphable knowledge based on the fusion of parametric descriptions of face attributes (e.g., identity, facial expression, texture, illumination, and face pose). Furthermore, the priors can easily be incorporated into any network and are extremely efficient in improving the performance and accelerating the convergence speed. Firstly, a 3D face rendering branch is set up to obtain 3D priors of salient facial structures and identity knowledge. Secondly, the Spatial Attention Module is used to better exploit this hierarchical information (i.e., intensity similarity, 3D facial structure, and identity content) for the super-resolution problem. Extensive experiments demonstrate that the proposed 3D priors achieve superior face super-resolution results over the state-of-the-arts.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="eess.IV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2020-07-18T15:26:07Z</published>
+    <arxiv:comment>Accepted as a spotlight paper, European Conference on Computer Vision 2020 (ECCV)</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Xiaobin Hu</name>
+    </author>
+    <author>
+      <name>Wenqi Ren</name>
+    </author>
+    <author>
+      <name>John LaMaster</name>
+    </author>
+    <author>
+      <name>Xiaochun Cao</name>
+    </author>
+    <author>
+      <name>Xiaoming Li</name>
+    </author>
+    <author>
+      <name>Zechao Li</name>
+    </author>
+    <author>
+      <name>Bjoern Menze</name>
+    </author>
+    <author>
+      <name>Wei Liu</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2008.11977v2</id>
+    <title>Edge and Identity Preserving Network for Face Super-Resolution</title>
+    <updated>2021-03-31T02:17:03Z</updated>
+    <link href="https://arxiv.org/abs/2008.11977v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2008.11977v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Face super-resolution (SR) has become an indispensable function in security solutions such as video surveillance and identification system, but the distortion in facial components is a great challenge in it. Most state-of-the-art methods have utilized facial priors with deep neural networks. These methods require extra labels, longer training time, and larger computation memory. In this paper, we propose a novel Edge and Identity Preserving Network for Face SR Network, named as EIPNet, to minimize the distortion by utilizing a lightweight edge block and identity information. We present an edge block to extract perceptual edge information, and concatenate it to the original feature maps in multiple scales. This structure progressively provides edge information in reconstruction to aggregate local and global structural information. Moreover, we define an identity loss function to preserve identification of SR images. The identity loss function compares feature distributions between SR images and their ground truth to recover identities in SR images. In addition, we provide a luminance-chrominance error (LCE) to separately infer brightness and color information in SR images. The LCE method not only reduces the dependency of color information by dividing brightness and color components but also enables our network to reflect differences between SR images and their ground truth in two color spaces of RGB and YUV. The proposed method facilitates the proposed SR network to elaborately restore facial components and generate high quality 8x scaled SR images with a lightweight network structure. Furthermore, our network is able to reconstruct an 128x128 SR image with 215 fps on a GTX 1080Ti GPU. Extensive experiments demonstrate that our network qualitatively and quantitatively outperforms state-of-the-art methods on two challenging datasets: CelebA and VGGFace2.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="eess.IV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2020-08-27T08:04:57Z</published>
+    <arxiv:comment>Neurocomputing'2021</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Jonghyun Kim</name>
+    </author>
+    <author>
+      <name>Gen Li</name>
+    </author>
+    <author>
+      <name>Inyong Yun</name>
+    </author>
+    <author>
+      <name>Cheolkon Jung</name>
+    </author>
+    <author>
+      <name>Joongkyu Kim</name>
+    </author>
+    <arxiv:doi>10.1016/j.neucom.2021.03.048</arxiv:doi>
+    <link rel="related" href="https://doi.org/10.1016/j.neucom.2021.03.048" title="doi"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2408.05205v1</id>
+    <title>Kalman-Inspired Feature Propagation for Video Face Super-Resolution</title>
+    <updated>2024-08-09T17:57:12Z</updated>
+    <link href="https://arxiv.org/abs/2408.05205v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2408.05205v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Despite the promising progress of face image super-resolution, video face super-resolution remains relatively under-explored. Existing approaches either adapt general video super-resolution networks to face datasets or apply established face image super-resolution models independently on individual video frames. These paradigms encounter challenges either in reconstructing facial details or maintaining temporal consistency. To address these issues, we introduce a novel framework called Kalman-inspired Feature Propagation (KEEP), designed to maintain a stable face prior over time. The Kalman filtering principles offer our method a recurrent ability to use the information from previously restored frames to guide and regulate the restoration process of the current frame. Extensive experiments demonstrate the effectiveness of our method in capturing facial details consistently across video frames. Code and video demo are available at https://jnjaby.github.io/projects/KEEP.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-08-09T17:57:12Z</published>
+    <arxiv:comment>Accepted by ECCV 2024. Project page: https://jnjaby.github.io/projects/KEEP/</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Ruicheng Feng</name>
+    </author>
+    <author>
+      <name>Chongyi Li</name>
+    </author>
+    <author>
+      <name>Chen Change Loy</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2009.07827v3</id>
+    <title>Multiple Exemplars-based Hallucinationfor Face Super-resolution and Editing</title>
+    <updated>2021-01-14T09:55:02Z</updated>
+    <link href="https://arxiv.org/abs/2009.07827v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2009.07827v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Given a really low-resolution input image of a face (say 16x16 or 8x8 pixels), the goal of this paper is to reconstruct a high-resolution version thereof. This, by itself, is an ill-posed problem, as the high-frequency information is missing in the low-resolution input and needs to be hallucinated, based on prior knowledge about the image content. Rather than relying on a generic face prior, in this paper, we explore the use of a set of exemplars, i.e. other high-resolution images of the same person. These guide the neural network as we condition the output on them. Multiple exemplars work better than a single one. To combine the information from multiple exemplars effectively, we introduce a pixel-wise weight generation module. Besides standard face super-resolution, our method allows to perform subtle face editing simply by replacing the exemplars with another set with different facial features. A user study is conducted and shows the super-resolved images can hardly be distinguished from real images on the CelebA dataset. A qualitative comparison indicates our model outperforms methods proposed in the literature on the CelebA and WebFace dataset.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2020-09-16T17:35:26Z</published>
+    <arxiv:comment>accepted in ACCV 2020</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Kaili Wang</name>
+    </author>
+    <author>
+      <name>Jose Oramas</name>
+    </author>
+    <author>
+      <name>Tinne Tuytelaars</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2508.10937v1</id>
+    <title>Personalized Face Super-Resolution with Identity Decoupling and Fitting</title>
+    <updated>2025-08-13T02:33:11Z</updated>
+    <link href="https://arxiv.org/abs/2508.10937v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2508.10937v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>In recent years, face super-resolution (FSR) methods have achieved remarkable progress, generally maintaining high image fidelity and identity (ID) consistency under standard settings. However, in extreme degradation scenarios (e.g., scale $&gt; 8\times$), critical attributes and ID information are often severely lost in the input image, making it difficult for conventional models to reconstruct realistic and ID-consistent faces. Existing methods tend to generate hallucinated faces under such conditions, producing restored images lacking authentic ID constraints. To address this challenge, we propose a novel FSR method with Identity Decoupling and Fitting (IDFSR), designed to enhance ID restoration under large scaling factors while mitigating hallucination effects. Our approach involves three key designs: 1) \textbf{Masking} the facial region in the low-resolution (LR) image to eliminate unreliable ID cues; 2) \textbf{Warping} a reference image to align with the LR input, providing style guidance; 3) Leveraging \textbf{ID embeddings} extracted from ground truth (GT) images for fine-grained ID modeling and personalized adaptation. We first pretrain a diffusion-based model to explicitly decouple style and ID by forcing it to reconstruct masked LR face regions using both style and identity embeddings. Subsequently, we freeze most network parameters and perform lightweight fine-tuning of the ID embedding using a small set of target ID images. This embedding encodes fine-grained facial attributes and precise ID information, significantly improving both ID consistency and perceptual quality. Extensive quantitative evaluations and visual comparisons demonstrate that the proposed IDFSR substantially outperforms existing approaches under extreme degradation, particularly achieving superior performance on ID consistency.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-08-13T02:33:11Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Jiarui Yang</name>
+    </author>
+    <author>
+      <name>Hang Guo</name>
+    </author>
+    <author>
+      <name>Wen Huang</name>
+    </author>
+    <author>
+      <name>Tao Dai</name>
+    </author>
+    <author>
+      <name>Shutao Xia</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2607.11025v1</id>
+    <title>Reference-Based Face Super-Resolution Using the Spatial Transformer</title>
+    <updated>2026-07-13T02:44:27Z</updated>
+    <link href="https://arxiv.org/abs/2607.11025v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2607.11025v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Face super-resolution is the task of increasing the resolution of an image containing a face thereby adding finer detail. It is a ubiquitous task in many computer vision applications and quite often the user isn't even aware that it is being performed. However, doing it with high fidelity is challenging as it is an ill-posed problem. In this paper we present a reference-based solution for face super-resolution that uses higher resolution reference images to aid in the task. We show an alignment module based on the spatial transformer that is considerably more stable than the popular deformable convolutions. We also show an aggregation function that can take good quality information from the reference images when available or suppress the function when such information is unavailable. Finally, we show that our relatively smaller model can achieve state of the art results on multiple datasets. The source code is available at https://github.com/varun-jois/FSRST.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-07-13T02:44:27Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Varun Ramesh Jois</name>
+    </author>
+    <author>
+      <name>Antonella DiLillo</name>
+    </author>
+    <author>
+      <name>James Storer</name>
+    </author>
+    <arxiv:doi>10.1007/978-981-96-0911-6_24</arxiv:doi>
+    <link rel="related" href="https://doi.org/10.1007/978-981-96-0911-6_24" title="doi"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/1908.08239v1</id>
+    <title>Progressive Face Super-Resolution via Attention to Facial Landmark</title>
+    <updated>2019-08-22T07:50:41Z</updated>
+    <link href="https://arxiv.org/abs/1908.08239v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/1908.08239v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Face Super-Resolution (SR) is a subfield of the SR domain that specifically targets the reconstruction of face images. The main challenge of face SR is to restore essential facial features without distortion. We propose a novel face SR method that generates photo-realistic 8x super-resolved face images with fully retained facial details. To that end, we adopt a progressive training method, which allows stable training by splitting the network into successive steps, each producing output with a progressively higher resolution. We also propose a novel facial attention loss and apply it at each step to focus on restoring facial attributes in greater details by multiplying the pixel difference and heatmap values. Lastly, we propose a compressed version of the state-of-the-art face alignment network (FAN) for landmark heatmap extraction. With the proposed FAN, we can extract the heatmaps suitable for face SR and also reduce the overall training time. Experimental results verify that our method outperforms state-of-the-art methods in both qualitative and quantitative measurements, especially in perceptual quality.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2019-08-22T07:50:41Z</published>
+    <arxiv:comment>BMVC 2019 Accepted</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Deokyun Kim</name>
+    </author>
+    <author>
+      <name>Minseon Kim</name>
+    </author>
+    <author>
+      <name>Gihyun Kwon</name>
+    </author>
+    <author>
+      <name>Dae-Shik Kim</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2002.06378v1</id>
+    <title>Video Face Super-Resolution with Motion-Adaptive Feedback Cell</title>
+    <updated>2020-02-15T13:14:10Z</updated>
+    <link href="https://arxiv.org/abs/2002.06378v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2002.06378v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Video super-resolution (VSR) methods have recently achieved a remarkable success due to the development of deep convolutional neural networks (CNN). Current state-of-the-art CNN methods usually treat the VSR problem as a large number of separate multi-frame super-resolution tasks, at which a batch of low resolution (LR) frames is utilized to generate a single high resolution (HR) frame, and running a slide window to select LR frames over the entire video would obtain a series of HR frames. However, duo to the complex temporal dependency between frames, with the number of LR input frames increase, the performance of the reconstructed HR frames become worse. The reason is in that these methods lack the ability to model complex temporal dependencies and hard to give an accurate motion estimation and compensation for VSR process. Which makes the performance degrade drastically when the motion in frames is complex. In this paper, we propose a Motion-Adaptive Feedback Cell (MAFC), a simple but effective block, which can efficiently capture the motion compensation and feed it back to the network in an adaptive way. Our approach efficiently utilizes the information of the inter-frame motion, the dependence of the network on motion estimation and compensation method can be avoid. In addition, benefiting from the excellent nature of MAFC, the network can achieve better performance in the case of extremely complex motion scenarios. Extensive evaluations and comparisons validate the strengths of our approach, and the experimental results demonstrated that the proposed framework is outperform the state-of-the-art methods.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2020-02-15T13:14:10Z</published>
+    <arxiv:comment>To appear in AAAI 2020</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Jingwei Xin</name>
+    </author>
+    <author>
+      <name>Nannan Wang</name>
+    </author>
+    <author>
+      <name>Jie Li</name>
+    </author>
+    <author>
+      <name>Xinbo Gao</name>
+    </author>
+    <author>
+      <name>Zhifeng Li</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2005.00306v2</id>
+    <title>PCA-SRGAN: Incremental Orthogonal Projection Discrimination for Face Super-resolution</title>
+    <updated>2020-08-28T10:26:21Z</updated>
+    <link href="https://arxiv.org/abs/2005.00306v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2005.00306v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Generative Adversarial Networks (GAN) have been employed for face super resolution but they bring distorted facial details easily and still have weakness on recovering realistic texture. To further improve the performance of GAN based models on super-resolving face images, we propose PCA-SRGAN which pays attention to the cumulative discrimination in the orthogonal projection space spanned by PCA projection matrix of face data. By feeding the principal component projections ranging from structure to details into the discriminator, the discrimination difficulty will be greatly alleviated and the generator can be enhanced to reconstruct clearer contour and finer texture, helpful to achieve the high perception and low distortion eventually. This incremental orthogonal projection discrimination has ensured a precise optimization procedure from coarse to fine and avoids the dependence on the perceptual regularization. We conduct experiments on CelebA and FFHQ face datasets. The qualitative visual effect and quantitative evaluation have demonstrated the overwhelming performance of our model over related works.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2020-05-01T10:40:57Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Hao Dou</name>
+    </author>
+    <author>
+      <name>Chen Chen</name>
+    </author>
+    <author>
+      <name>Xiyuan Hu</name>
+    </author>
+    <author>
+      <name>Zuxing Xuan</name>
+    </author>
+    <author>
+      <name>Zhisen Hu</name>
+    </author>
+    <author>
+      <name>Silong Peng</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2412.16552v1</id>
+    <title>Diffusion Prior Interpolation for Flexibility Real-World Face Super-Resolution</title>
+    <updated>2024-12-21T09:28:44Z</updated>
+    <link href="https://arxiv.org/abs/2412.16552v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2412.16552v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Diffusion models represent the state-of-the-art in generative modeling. Due to their high training costs, many works leverage pre-trained diffusion models' powerful representations for downstream tasks, such as face super-resolution (FSR), through fine-tuning or prior-based methods. However, relying solely on priors without supervised training makes it challenging to meet the pixel-level accuracy requirements of discrimination task. Although prior-based methods can achieve high fidelity and high-quality results, ensuring consistency remains a significant challenge. In this paper, we propose a masking strategy with strong and weak constraints and iterative refinement for real-world FSR, termed Diffusion Prior Interpolation (DPI). We introduce conditions and constraints on consistency by masking different sampling stages based on the structural characteristics of the face. Furthermore, we propose a condition Corrector (CRT) to establish a reciprocal posterior sampling process, enhancing FSR performance by mutual refinement of conditions and samples. DPI can balance consistency and diversity and can be seamlessly integrated into pre-trained models. In extensive experiments conducted on synthetic and real datasets, along with consistency validation in face recognition, DPI demonstrates superiority over SOTA FSR methods. The code is available at \url{https://github.com/JerryYann/DPI}.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-12-21T09:28:44Z</published>
+    <arxiv:comment>Accepted to AAAI25</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Jiarui Yang</name>
+    </author>
+    <author>
+      <name>Tao Dai</name>
+    </author>
+    <author>
+      <name>Yufei Zhu</name>
+    </author>
+    <author>
+      <name>Naiqi Li</name>
+    </author>
+    <author>
+      <name>Jinmin Li</name>
+    </author>
+    <author>
+      <name>Shutao Xia</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2409.00591v4</id>
+    <title>Attention-Guided Multi-scale Interaction Network for Face Super-Resolution</title>
+    <updated>2025-09-11T04:26:27Z</updated>
+    <link href="https://arxiv.org/abs/2409.00591v4" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2409.00591v4" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Recently, CNN and Transformer hybrid networks demonstrated excellent performance in face super-resolution (FSR) tasks. Since numerous features at different scales in hybrid networks, how to fuse these multiscale features and promote their complementarity is crucial for enhancing FSR. However, existing hybrid network-based FSR methods ignore this, only simply combining the Transformer and CNN. To address this issue, we propose an attention-guided Multiscale interaction network (AMINet), which incorporates local and global feature interactions, as well as encoder-decoder phase feature interactions. Specifically, we propose a Local and Global Feature Interaction Module (LGFI) to promote the fusion of global features and the local features extracted from different receptive fields by our Residual Depth Feature Extraction Module (RDFE). Additionally, we propose a Selective Kernel Attention Fusion Module (SKAF) to adaptively select fusions of different features within the LGFI and encoder-decoder phases. Our above design allows the free flow of multiscale features from within modules and between the encoder and decoder, which can promote the complementarity of different scale features to enhance FSR. Comprehensive experiments confirm that our method consistently performs well with less computational consumption and faster inference.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-09-01T02:53:24Z</published>
+    <arxiv:comment>accepted by IEEE Transactions on Systems, Man and Cybernetics:Systems (TSMC)</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Xujie Wan</name>
+    </author>
+    <author>
+      <name>Wenjie Li</name>
+    </author>
+    <author>
+      <name>Guangwei Gao</name>
+    </author>
+    <author>
+      <name>Huimin Lu</name>
+    </author>
+    <author>
+      <name>Jian Yang</name>
+    </author>
+    <author>
+      <name>Chia-Wen Lin</name>
+    </author>
+    <arxiv:doi>10.1109/TSMC.2025.3605649</arxiv:doi>
+    <link rel="related" href="https://doi.org/10.1109/TSMC.2025.3605649" title="doi"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2407.19768v2</id>
+    <title>Efficient Face Super-Resolution via Wavelet-based Feature Enhancement Network</title>
+    <updated>2024-07-30T12:07:57Z</updated>
+    <link href="https://arxiv.org/abs/2407.19768v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2407.19768v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Face super-resolution aims to reconstruct a high-resolution face image from a low-resolution face image. Previous methods typically employ an encoder-decoder structure to extract facial structural features, where the direct downsampling inevitably introduces distortions, especially to high-frequency features such as edges. To address this issue, we propose a wavelet-based feature enhancement network, which mitigates feature distortion by losslessly decomposing the input feature into high and low-frequency components using the wavelet transform and processing them separately. To improve the efficiency of facial feature extraction, a full domain Transformer is further proposed to enhance local, regional, and global facial features. Such designs allow our method to perform better without stacking many modules as previous methods did. Experiments show that our method effectively balances performance, model size, and speed. Code link: https://github.com/PRIS-CV/WFEN.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-07-29T08:03:33Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Wenjie Li</name>
+    </author>
+    <author>
+      <name>Heng Guo</name>
+    </author>
+    <author>
+      <name>Xuannan Liu</name>
+    </author>
+    <author>
+      <name>Kongming Liang</name>
+    </author>
+    <author>
+      <name>Jiani Hu</name>
+    </author>
+    <author>
+      <name>Zhanyu Ma</name>
+    </author>
+    <author>
+      <name>Jun Guo</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2506.14121v3</id>
+    <title>FADPNet: Frequency-Aware Dual-Path Network for Face Super-Resolution</title>
+    <updated>2026-07-20T09:59:19Z</updated>
+    <link href="https://arxiv.org/abs/2506.14121v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2506.14121v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Face super-resolution (FSR) under limited computational budgets remains challenging. Existing methods often treat all facial pixels equally, leading to suboptimal resource allocation and degraded performance. CNNs are sensitive to high-frequency facial features such as contours and outlines, while Mamba excels at capturing low-frequency attributes like facial color and texture with lower complexity than Transformers. Motivated by this, we propose FADPNet, a Frequency-Aware Dual-Path Network that decomposes facial features into low- and high-frequency components for dedicated processing. The low-frequency branch employs a Mamba-based Low-Frequency Enhancement Block (LFEB) that integrates state-space attention with squeeze-and-excitation to restore global interactions and emphasize informative channels. The high-frequency branch uses a CNN-based Depthwise Position-aware Attention (DPA) module to refine structural details, followed by a lightweight High-Frequency Refinement (HFR) module for further frequency-specific refinement. These designs enable FADPNet to achieve a strong balance between FSR quality and efficiency, outperforming existing methods. Codes will be available at https://github.com/IVIPLab/FADPNet.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-06-17T02:33:42Z</published>
+    <arxiv:comment>Accepted by IEEE Transactions on Multimedia</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Siyu Xu</name>
+    </author>
+    <author>
+      <name>Wenjie Li</name>
+    </author>
+    <author>
+      <name>Guangwei Gao</name>
+    </author>
+    <author>
+      <name>Jian Yang</name>
+    </author>
+    <author>
+      <name>Guo-Jun Qi</name>
+    </author>
+    <author>
+      <name>Chia-Wen Lin</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2406.00676v3</id>
+    <title>W-Net: A Facial Feature-Guided Face Super-Resolution Network</title>
+    <updated>2024-06-23T05:46:55Z</updated>
+    <link href="https://arxiv.org/abs/2406.00676v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2406.00676v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Face Super-Resolution (FSR) aims to recover high-resolution (HR) face images from low-resolution (LR) ones. Despite the progress made by convolutional neural networks in FSR, the results of existing approaches are not ideal due to their low reconstruction efficiency and insufficient utilization of prior information. Considering that faces are highly structured objects, effectively leveraging facial priors to improve FSR results is a worthwhile endeavor. This paper proposes a novel network architecture called W-Net to address this challenge. W-Net leverages meticulously designed Parsing Block to fully exploit the resolution potential of LR image. We use this parsing map as an attention prior, effectively integrating information from both the parsing map and LR images. Simultaneously, we perform multiple fusions in various dimensions through the W-shaped network structure combined with the LPF(LR-Parsing Map Fusion Module). Additionally, we utilize a facial parsing graph as a mask, assigning different weights and loss functions to key facial areas to balance the performance of our reconstructed facial images between perceptual quality and pixel accuracy. We conducted extensive comparative experiments, not only limited to conventional facial super-resolution metrics but also extending to downstream tasks such as facial recognition and facial keypoint detection. The experiments demonstrate that W-Net exhibits outstanding performance in quantitative metrics, visual quality, and downstream tasks.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-06-02T09:05:40Z</published>
+    <arxiv:comment>15 pages,9 figures</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Hao Liu</name>
+    </author>
+    <author>
+      <name>Yang Yang</name>
+    </author>
+    <author>
+      <name>Yunxia Liu</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2411.09293v1</id>
+    <title>LLV-FSR: Exploiting Large Language-Vision Prior for Face Super-resolution</title>
+    <updated>2024-11-14T09:12:18Z</updated>
+    <link href="https://arxiv.org/abs/2411.09293v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2411.09293v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Existing face super-resolution (FSR) methods have made significant advancements, but they primarily super-resolve face with limited visual information, original pixel-wise space in particular, commonly overlooking the pluralistic clues, like the higher-order depth and semantics, as well as non-visual inputs (text caption and description). Consequently, these methods struggle to produce a unified and meaningful representation from the input face. We suppose that introducing the language-vision pluralistic representation into unexplored potential embedding space could enhance FSR by encoding and exploiting the complementarity across language-vision prior. This motivates us to propose a new framework called LLV-FSR, which marries the power of large vision-language model and higher-order visual prior with the challenging task of FSR. Specifically, besides directly absorbing knowledge from original input, we introduce the pre-trained vision-language model to generate pluralistic priors, involving the image caption, descriptions, face semantic mask and depths. These priors are then employed to guide the more critical feature representation, facilitating realistic and high-quality face super-resolution. Experimental results demonstrate that our proposed framework significantly improves both the reconstruction quality and perceptual quality, surpassing the SOTA by 0.43dB in terms of PSNR on the MMCelebA-HQ dataset.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-11-14T09:12:18Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Chenyang Wang</name>
+    </author>
+    <author>
+      <name>Wenjie An</name>
+    </author>
+    <author>
+      <name>Kui Jiang</name>
+    </author>
+    <author>
+      <name>Xianming Liu</name>
+    </author>
+    <author>
+      <name>Junjun Jiang</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2210.06002v1</id>
+    <title>Face Super-Resolution with Progressive Embedding of Multi-scale Face Priors</title>
+    <updated>2022-10-12T08:16:52Z</updated>
+    <link href="https://arxiv.org/abs/2210.06002v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2210.06002v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>The face super-resolution (FSR) task is to reconstruct high-resolution face images from low-resolution inputs. Recent works have achieved success on this task by utilizing facial priors such as facial landmarks. Most existing methods pay more attention to global shape and structure information, but less to local texture information, which makes them cannot recover local details well. In this paper, we propose a novel recurrent convolutional network based framework for face super-resolution, which progressively introduces both global shape and local texture information. We take full advantage of the intermediate outputs of the recurrent network, and landmarks information and facial action units (AUs) information are extracted in the output of the first and second steps respectively, rather than low-resolution input. Moreover, we introduced AU classification results as a novel quantitative metric for facial details restoration. Extensive experiments show that our proposed method significantly outperforms state-of-the-art FSR methods in terms of image quality and facial details restoration.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-10-12T08:16:52Z</published>
+    <arxiv:comment>Accepted by IJCB 2022</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Chenggong Zhang</name>
+    </author>
+    <author>
+      <name>Zhilei Liu</name>
+    </author>
+    <arxiv:doi>10.1109/IJCB54206.2022.10007954</arxiv:doi>
+    <link rel="related" href="https://doi.org/10.1109/IJCB54206.2022.10007954" title="doi"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2607.28130v1</id>
+    <title>Collaborative Feature Aggregation for Face Super-Resolution and Robust Re-Identification</title>
+    <updated>2026-07-30T12:39:57Z</updated>
+    <link href="https://arxiv.org/abs/2607.28130v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2607.28130v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>We propose a novel collaborative approach for face super-resolution (SR) and robust person re-identification from sequential or multi-view facial images. Traditional SR methods often suffer from blurring and distortion in faces recovered from poor-quality images due to low resolution. Image- and video-based facial SR methods using facial landmarks or segmentation also have similar challenges. To overcome these limitations, we leverage multiple correlated facial observations, across time or viewpoints, by introducing a transformer-based collaborative feature aggregation method that unifies identity features from multi-sequence or multi-view data. This allows faces in multiple sequences of an individual to contribute to accurately estimating common facial features. Furthermore, we propose a cascade SR network to progressively restore the high-resolution image of the target's face with gradual facial feature unification. The unified identity representation is further utilized in person re-identification scenarios, enabling accurate matching even under severe image degradation. The exhaustive experimental results and comparisons show that our method outperforms other state-of-the-art methods, demonstrating consistent improvements in both face super-resolution and re-identification performance. Our work highlights the effectiveness of joint identity reconstruction and progressive image restoration from multiple facial inputs in enhancing downstream visual recognition tasks.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-07-30T12:39:57Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <arxiv:journal_ref>Multimedia Systems, vol. 31, no. 5, pp. 341, Aug. 2025</arxiv:journal_ref>
+    <author>
+      <name>Juheon Hwang</name>
+    </author>
+    <author>
+      <name>Taewan Kim</name>
+    </author>
+    <author>
+      <name>Jiwoo Kang</name>
+    </author>
+    <arxiv:doi>10.1007/s00530-025-01918-y</arxiv:doi>
+    <link rel="related" href="https://doi.org/10.1007/s00530-025-01918-y" title="doi"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2601.01406v3</id>
+    <title>SwinIFS: Landmark Guided Swin Transformer For Identity Preserving Face Super Resolution</title>
+    <updated>2026-07-11T00:23:14Z</updated>
+    <link href="https://arxiv.org/abs/2601.01406v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2601.01406v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Face super-resolution aims to recover high-quality facial images from severely degraded low-resolution inputs, but remains challenging due to the loss of fine structural details and identity-specific features. This work introduces SwinIFS, a landmark-guided super-resolution framework that integrates structural priors with hierarchical attention mechanisms to achieve identity-preserving reconstruction at both moderate and extreme upscaling factors. The method incorporates dense Gaussian heatmaps of key facial landmarks into the input representation, enabling the network to focus on semantically important facial regions from the earliest stages of processing. A compact Swin Transformer backbone is employed to capture long-range contextual information while preserving local geometry, allowing the model to restore subtle facial textures and maintain global structural consistency. Extensive experiments on the CelebA benchmark demonstrate that SwinIFS achieves superior perceptual quality, sharper reconstructions, and improved identity retention; it consistently produces more photorealistic results and exhibits strong performance even under $8\times$ magnification, where most methods fail to recover meaningful structure. SwinIFS also provides an advantageous balance between reconstruction accuracy and computational efficiency, making it suitable for real-world applications in facial enhancement, surveillance, and digital restoration. Our code, model weights, and results are available at https://github.com/Habiba123-stack/SwinIFS.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-01-04T07:04:46Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Habiba Kausar</name>
+    </author>
+    <author>
+      <name>Saeed Anwar</name>
+    </author>
+    <author>
+      <name>Omar Jamal Hammad</name>
+    </author>
+    <author>
+      <name>Ibrahim Radwan</name>
+    </author>
+    <author>
+      <name>Abdul Bais</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/1711.10703v1</id>
+    <title>FSRNet: End-to-End Learning Face Super-Resolution with Facial Priors</title>
+    <updated>2017-11-29T06:47:04Z</updated>
+    <link href="https://arxiv.org/abs/1711.10703v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/1711.10703v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Face Super-Resolution (SR) is a domain-specific super-resolution problem. The specific facial prior knowledge could be leveraged for better super-resolving face images. We present a novel deep end-to-end trainable Face Super-Resolution Network (FSRNet), which makes full use of the geometry prior, i.e., facial landmark heatmaps and parsing maps, to super-resolve very low-resolution (LR) face images without well-aligned requirement. Specifically, we first construct a coarse SR network to recover a coarse high-resolution (HR) image. Then, the coarse HR image is sent to two branches: a fine SR encoder and a prior information estimation network, which extracts the image features, and estimates landmark heatmaps/parsing maps respectively. Both image features and prior information are sent to a fine SR decoder to recover the HR image. To further generate realistic faces, we propose the Face Super-Resolution Generative Adversarial Network (FSRGAN) to incorporate the adversarial loss into FSRNet. Moreover, we introduce two related tasks, face alignment and parsing, as the new evaluation metrics for face SR, which address the inconsistency of classic metrics w.r.t. visual perception. Extensive benchmark experiments show that FSRNet and FSRGAN significantly outperforms state of the arts for very LR face SR, both quantitatively and qualitatively. Code will be made available upon publication.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2017-11-29T06:47:04Z</published>
+    <arxiv:comment>Chen and Tai contributed equally to this paper</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Yu Chen</name>
+    </author>
+    <author>
+      <name>Ying Tai</name>
+    </author>
+    <author>
+      <name>Xiaoming Liu</name>
+    </author>
+    <author>
+      <name>Chunhua Shen</name>
+    </author>
+    <author>
+      <name>Jian Yang</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/1912.10427v1</id>
+    <title>Joint Face Super-Resolution and Deblurring Using a Generative Adversarial Network</title>
+    <updated>2019-12-22T12:03:45Z</updated>
+    <link href="https://arxiv.org/abs/1912.10427v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/1912.10427v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Facial image super-resolution (SR) is an important preprocessing for facial image analysis, face recognition, and image-based 3D face reconstruction. Recent convolutional neural network (CNN) based method has shown excellent performance by learning mapping relation using pairs of low-resolution (LR) and high-resolution (HR) facial images. However, since the HR facial image reconstruction using CNN is conventionally aimed to increase the PSNR and SSIM metrics, the reconstructed HR image might not be realistic even with high scores. An adversarial framework is proposed in this study to reconstruct the HR facial image by simultaneously generating an HR image with and without blur. First, the spatial resolution of the LR facial image is increased by eight times using a five-layer CNN. Then, the encoder extracts the features of the up-scaled image. These features are finally sent to two branches (decoders) to generate an HR facial image with and without blur. In addition, local and global discriminators are combined to focus on the reconstruction of HR facial structures. Experiment results show that the proposed algorithm generates a realistic HR facial image. Furthermore, the proposed method can generate a variety of different facial images.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2019-12-22T12:03:45Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Jung Un Yun</name>
+    </author>
+    <author>
+      <name>In Kyu Park</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2408.15386v2</id>
+    <title>Multi-Feature Aggregation in Diffusion Models for Enhanced Face Super-Resolution</title>
+    <updated>2024-10-20T15:13:54Z</updated>
+    <link href="https://arxiv.org/abs/2408.15386v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2408.15386v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Super-resolution algorithms often struggle with images from surveillance environments due to adverse conditions such as unknown degradation, variations in pose, irregular illumination, and occlusions. However, acquiring multiple images, even of low quality, is possible with surveillance cameras. In this work, we develop an algorithm based on diffusion models that utilize a low-resolution image combined with features extracted from multiple low-quality images to generate a super-resolved image while minimizing distortions in the individual's identity. Unlike other algorithms, our approach recovers facial features without explicitly providing attribute information or without the need to calculate a gradient of a function during the reconstruction process. To the best of our knowledge, this is the first time multi-features combined with low-resolution images are used as conditioners to generate more reliable super-resolution images using stochastic differential equations. The FFHQ dataset was employed for training, resulting in state-of-the-art performance in facial recognition and verification metrics when evaluated on the CelebA and Quis-Campi datasets. Our code is publicly available at https://github.com/marcelowds/fasr</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-08-27T20:08:33Z</published>
+    <arxiv:comment>Accepted for presentation at the Conference on Graphics, Patterns and Images (SIBGRAPI) 2024</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Marcelo dos Santos</name>
+    </author>
+    <author>
+      <name>Rayson Laroca</name>
+    </author>
+    <author>
+      <name>Rafael O. Ribeiro</name>
+    </author>
+    <author>
+      <name>João C. Neves</name>
+    </author>
+    <author>
+      <name>David Menotti</name>
+    </author>
+    <arxiv:doi>10.1109/SIBGRAPI62404.2024.10716307</arxiv:doi>
+    <link rel="related" href="https://doi.org/10.1109/SIBGRAPI62404.2024.10716307" title="doi"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2205.03777v2</id>
+    <title>Semi-Cycled Generative Adversarial Networks for Real-World Face Super-Resolution</title>
+    <updated>2023-01-25T07:19:48Z</updated>
+    <link href="https://arxiv.org/abs/2205.03777v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2205.03777v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Real-world face super-resolution (SR) is a highly ill-posed image restoration task. The fully-cycled Cycle-GAN architecture is widely employed to achieve promising performance on face SR, but prone to produce artifacts upon challenging cases in real-world scenarios, since joint participation in the same degradation branch will impact final performance due to huge domain gap between real-world and synthetic LR ones obtained by generators. To better exploit the powerful generative capability of GAN for real-world face SR, in this paper, we establish two independent degradation branches in the forward and backward cycle-consistent reconstruction processes, respectively, while the two processes share the same restoration branch. Our Semi-Cycled Generative Adversarial Networks (SCGAN) is able to alleviate the adverse effects of the domain gap between the real-world LR face images and the synthetic LR ones, and to achieve accurate and robust face SR performance by the shared restoration branch regularized by both the forward and backward cycle-consistent learning processes. Experiments on two synthetic and two real-world datasets demonstrate that, our SCGAN outperforms the state-of-the-art methods on recovering the face structures/details and quantitative metrics for real-world face SR. The code will be publicly released at https://github.com/HaoHou-98/SCGAN.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-05-08T04:10:06Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Hao Hou</name>
+    </author>
+    <author>
+      <name>Jun Xu</name>
+    </author>
+    <author>
+      <name>Yingkun Hou</name>
+    </author>
+    <author>
+      <name>Xiaotao Hu</name>
+    </author>
+    <author>
+      <name>Benzheng Wei</name>
+    </author>
+    <author>
+      <name>Dinggang Shen</name>
+    </author>
+    <arxiv:doi>10.1109/TIP.2023.3240845</arxiv:doi>
+    <link rel="related" href="https://doi.org/10.1109/TIP.2023.3240845" title="doi"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2205.03409v1</id>
+    <title>VFHQ: A High-Quality Dataset and Benchmark for Video Face Super-Resolution</title>
+    <updated>2022-05-06T16:31:57Z</updated>
+    <link href="https://arxiv.org/abs/2205.03409v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2205.03409v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Most of the existing video face super-resolution (VFSR) methods are trained and evaluated on VoxCeleb1, which is designed specifically for speaker identification and the frames in this dataset are of low quality. As a consequence, the VFSR models trained on this dataset can not output visual-pleasing results. In this paper, we develop an automatic and scalable pipeline to collect a high-quality video face dataset (VFHQ), which contains over $16,000$ high-fidelity clips of diverse interview scenarios. To verify the necessity of VFHQ, we further conduct experiments and demonstrate that VFSR models trained on our VFHQ dataset can generate results with sharper edges and finer textures than those trained on VoxCeleb1. In addition, we show that the temporal information plays a pivotal role in eliminating video consistency issues as well as further improving visual performance. Based on VFHQ, by analyzing the benchmarking study of several state-of-the-art algorithms under bicubic and blind settings. See our project page: https://liangbinxie.github.io/projects/vfhq</summary>
+    <category term="eess.IV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.MM" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-05-06T16:31:57Z</published>
+    <arxiv:comment>Project webpage available at https://liangbinxie.github.io/projects/vfhq</arxiv:comment>
+    <arxiv:primary_category term="eess.IV"/>
+    <author>
+      <name>Liangbin Xie. Xintao Wang</name>
+    </author>
+    <author>
+      <name>Honglun Zhang</name>
+    </author>
+    <author>
+      <name>Chao Dong</name>
+    </author>
+    <author>
+      <name>Ying Shan</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2511.16341v1</id>
+    <title>Arbitrary-Resolution and Arbitrary-Scale Face Super-Resolution with Implicit Representation Networks</title>
+    <updated>2025-11-20T13:21:58Z</updated>
+    <link href="https://arxiv.org/abs/2511.16341v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2511.16341v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Face super-resolution (FSR) is a critical technique for enhancing low-resolution facial images and has significant implications for face-related tasks. However, existing FSR methods are limited by fixed up-sampling scales and sensitivity to input size variations. To address these limitations, this paper introduces an Arbitrary-Resolution and Arbitrary-Scale FSR method with implicit representation networks (ARASFSR), featuring three novel designs. First, ARASFSR employs 2D deep features, local relative coordinates, and up-sampling scale ratios to predict RGB values for each target pixel, allowing super-resolution at any up-sampling scale. Second, a local frequency estimation module captures high-frequency facial texture information to reduce the spectral bias effect. Lastly, a global coordinate modulation module guides FSR to leverage prior facial structure knowledge and achieve resolution adaptation effectively. Quantitative and qualitative evaluations demonstrate the robustness of ARASFSR over existing state-of-the-art methods while super-resolving facial images across various input sizes and up-sampling scales.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-11-20T13:21:58Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Yi Ting Tsai</name>
+    </author>
+    <author>
+      <name>Yu Wei Chen</name>
+    </author>
+    <author>
+      <name>Hong-Han Shuai</name>
+    </author>
+    <author>
+      <name>Ching-Chun Huang</name>
+    </author>
+    <arxiv:doi>10.1109/WACV57701.2024.00422</arxiv:doi>
+    <link rel="related" href="https://doi.org/10.1109/WACV57701.2024.00422" title="doi"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2003.13063v1</id>
+    <title>Deep Face Super-Resolution with Iterative Collaboration between Attentive Recovery and Landmark Estimation</title>
+    <updated>2020-03-29T16:04:48Z</updated>
+    <link href="https://arxiv.org/abs/2003.13063v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2003.13063v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Recent works based on deep learning and facial priors have succeeded in super-resolving severely degraded facial images. However, the prior knowledge is not fully exploited in existing methods, since facial priors such as landmark and component maps are always estimated by low-resolution or coarsely super-resolved images, which may be inaccurate and thus affect the recovery performance. In this paper, we propose a deep face super-resolution (FSR) method with iterative collaboration between two recurrent networks which focus on facial image recovery and landmark estimation respectively. In each recurrent step, the recovery branch utilizes the prior knowledge of landmarks to yield higher-quality images which facilitate more accurate landmark estimation in turn. Therefore, the iterative information interaction between two processes boosts the performance of each other progressively. Moreover, a new attentive fusion module is designed to strengthen the guidance of landmark maps, where facial components are generated individually and aggregated attentively for better restoration. Quantitative and qualitative experimental results show the proposed method significantly outperforms state-of-the-art FSR methods in recovering high-quality face images.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2020-03-29T16:04:48Z</published>
+    <arxiv:comment>Accepted to CVPR 2020</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Cheng Ma</name>
+    </author>
+    <author>
+      <name>Zhenyu Jiang</name>
+    </author>
+    <author>
+      <name>Yongming Rao</name>
+    </author>
+    <author>
+      <name>Jiwen Lu</name>
+    </author>
+    <author>
+      <name>Jie Zhou</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2103.13676v2</id>
+    <title>JDSR-GAN: Constructing An Efficient Joint Learning Network for Masked Face Super-Resolution</title>
+    <updated>2023-01-30T01:49:35Z</updated>
+    <link href="https://arxiv.org/abs/2103.13676v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2103.13676v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>With the growing importance of preventing the COVID-19 virus, face images obtained in most video surveillance scenarios are low resolution with mask simultaneously. However, most of the previous face super-resolution solutions can not handle both tasks in one model. In this work, we treat the mask occlusion as image noise and construct a joint and collaborative learning network, called JDSR-GAN, for the masked face super-resolution task. Given a low-quality face image with the mask as input, the role of the generator composed of a denoising module and super-resolution module is to acquire a high-quality high-resolution face image. The discriminator utilizes some carefully designed loss functions to ensure the quality of the recovered face images. Moreover, we incorporate the identity information and attention mechanism into our network for feasible correlated feature expression and informative feature learning. By jointly performing denoising and face super-resolution, the two tasks can complement each other and attain promising performance. Extensive qualitative and quantitative results show the superiority of our proposed JDSR-GAN over some comparable methods which perform the previous two tasks separately.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="eess.IV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2021-03-25T08:50:40Z</published>
+    <arxiv:comment>IEEE Transactions on Multimedia, 8 pages, 7 figures</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Guangwei Gao</name>
+    </author>
+    <author>
+      <name>Lei Tang</name>
+    </author>
+    <author>
+      <name>Fei Wu</name>
+    </author>
+    <author>
+      <name>Huimin Lu</name>
+    </author>
+    <author>
+      <name>Jian Yang</name>
+    </author>
+    <arxiv:doi>10.1109/TMM.2023.3240880</arxiv:doi>
+    <link rel="related" href="https://doi.org/10.1109/TMM.2023.3240880" title="doi"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2607.05702v1</id>
+    <title>Robust Face Super-Resolution and Recognition Through Multi-Feature Aggregation in Diffusion Models</title>
+    <updated>2026-07-06T23:49:55Z</updated>
+    <link href="https://arxiv.org/abs/2607.05702v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2607.05702v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Images acquired in surveillance environments often suffer from conditions such as low resolution, variations in pose, irregular illumination, and occlusions. Due to the low quality of these images, face recognition algorithms often struggle. This major limitation can be addressed by employing super-resolution techniques that enhance the details of the image. However, due to the high degree of difficulty of the problem, most super-resolution algorithms tend to cause distortions in the image and in the individual's identity. Thus, additional information must be incorporated into the processing to improve recognition robustness. In this regard, surveillance cameras can capture multiple images, even at low quality, and the data extracted from these images, such as consecutive video frames, can significantly enhance both super-resolution and facial recognition. In this work, we introduce FASR++, a diffusion-model-based super-resolution algorithm. It leverages a reference low-resolution image and features extracted from multiple auxiliary low-quality images to generate a super-resolved output, minimizing distortions in the individual's identity. Our approach recovers facial features without explicitly providing soft attributes or computing a function gradient to guide the reconstruction process. FASR++ generates high-quality images that can considerably improve performance in face recognition tasks when used as a pre-processing step. We validate our approach on two standard face recognition datasets and attain state-of-the-art results for verification, face recognition, and image quality metrics such as PSNR, SSIM, and LPIPS.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-07-06T23:49:55Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <arxiv:journal_ref>Journal of the Brazilian Computer Society, vol. 32, no. 1, pp. 1457-1470, 2026</arxiv:journal_ref>
+    <author>
+      <name>Marcelo dos Santos</name>
+    </author>
+    <author>
+      <name>Rayson Laroca</name>
+    </author>
+    <author>
+      <name>João Carlos Raposo Neves</name>
+    </author>
+    <author>
+      <name>David Menotti</name>
+    </author>
+    <arxiv:doi>10.5753/jbcs.2026.5884</arxiv:doi>
+    <link rel="related" href="https://doi.org/10.5753/jbcs.2026.5884" title="doi"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2112.10683v1</id>
+    <title>SelFSR: Self-Conditioned Face Super-Resolution in the Wild via Flow Field Degradation Network</title>
+    <updated>2021-12-20T17:04:00Z</updated>
+    <link href="https://arxiv.org/abs/2112.10683v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2112.10683v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>In spite of the success on benchmark datasets, most advanced face super-resolution models perform poorly in real scenarios since the remarkable domain gap between the real images and the synthesized training pairs. To tackle this problem, we propose a novel domain-adaptive degradation network for face super-resolution in the wild. This degradation network predicts a flow field along with an intermediate low resolution image. Then, the degraded counterpart is generated by warping the intermediate image. With the preference of capturing motion blur, such a model performs better at preserving identity consistency between the original images and the degraded. We further present the self-conditioned block for super-resolution network. This block takes the input image as a condition term to effectively utilize facial structure information, eliminating the reliance on explicit priors, e.g. facial landmarks or boundary. Our model achieves state-of-the-art performance on both CelebA and real-world face dataset. The former demonstrates the powerful generative ability of our proposed architecture while the latter shows great identity consistency and perceptual quality in real-world images.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="eess.IV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2021-12-20T17:04:00Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Xianfang Zeng</name>
+    </author>
+    <author>
+      <name>Jiangning Zhang</name>
+    </author>
+    <author>
+      <name>Liang Liu</name>
+    </author>
+    <author>
+      <name>Guangzhong Tian</name>
+    </author>
+    <author>
+      <name>Yong Liu</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2108.13584v2</id>
+    <title>From Less to More: Spectral Splitting and Aggregation Network for Hyperspectral Face Super-Resolution</title>
+    <updated>2022-04-12T15:08:30Z</updated>
+    <link href="https://arxiv.org/abs/2108.13584v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2108.13584v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>High-resolution (HR) hyperspectral face image plays an important role in face related computer vision tasks under uncontrolled conditions, such as low-light environment and spoofing attacks. However, the dense spectral bands of hyperspectral face images come at the cost of limited amount of photons reached a narrow spectral window on average, which greatly reduces the spatial resolution of hyperspectral face images. In this paper, we investigate how to adapt the deep learning techniques to hyperspectral face image super-resolution (HFSR), especially when the training samples are very limited. Benefiting from the amount of spectral bands, in which each band can be seen as an image, we present a spectral splitting and aggregation network (SSANet) for HFSR with limited training samples. In the shallow layers, we split the hyperspectral image into different spectral groups. Then, we gradually aggregate the neighbor bands at deeper layers to exploit spectral correlations. By this spectral splitting and aggregation strategy (SSAS), we can divide the original hyperspectral image into multiple samples (\emph{from less to more}) to support the efficient training of the network and effectively exploit the spectral correlations among spectrum. To cope with the challenge of small training sample size (S3) problem, we propose to expand the training samples by a self-representation model and symmetry-induced augmentation. Experiments show that SSANet can well model the joint correlations of spatial and spectral information. By expanding the training samples, SSANet can effectively alleviate the S3 problem.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2021-08-31T02:13:00Z</published>
+    <arxiv:comment>2022 IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (CVPRW)</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Junjun Jiang</name>
+    </author>
+    <author>
+      <name>Chenyang Wang</name>
+    </author>
+    <author>
+      <name>Xianming Liu</name>
+    </author>
+    <author>
+      <name>Kui Jiang</name>
+    </author>
+    <author>
+      <name>Jiayi Ma</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2109.08174v1</id>
+    <title>TANet: A new Paradigm for Global Face Super-resolution via Transformer-CNN Aggregation Network</title>
+    <updated>2021-09-16T18:15:07Z</updated>
+    <link href="https://arxiv.org/abs/2109.08174v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2109.08174v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Recently, face super-resolution (FSR) methods either feed whole face image into convolutional neural networks (CNNs) or utilize extra facial priors (e.g., facial parsing maps, facial landmarks) to focus on facial structure, thereby maintaining the consistency of the facial structure while restoring facial details. However, the limited receptive fields of CNNs and inaccurate facial priors will reduce the naturalness and fidelity of the reconstructed face. In this paper, we propose a novel paradigm based on the self-attention mechanism (i.e., the core of Transformer) to fully explore the representation capacity of the facial structure feature. Specifically, we design a Transformer-CNN aggregation network (TANet) consisting of two paths, in which one path uses CNNs responsible for restoring fine-grained facial details while the other utilizes a resource-friendly Transformer to capture global information by exploiting the long-distance visual relation modeling. By aggregating the features from the above two paths, the consistency of global facial structure and fidelity of local facial detail restoration are strengthened simultaneously. Experimental results of face reconstruction and recognition verify that the proposed method can significantly outperform the state-of-the-art methods.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2021-09-16T18:15:07Z</published>
+    <arxiv:comment>9 pages, 5 figures</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Yuanzhi Wang</name>
+    </author>
+    <author>
+      <name>Tao Lu</name>
+    </author>
+    <author>
+      <name>Yanduo Zhang</name>
+    </author>
+    <author>
+      <name>Junjun Jiang</name>
+    </author>
+    <author>
+      <name>Jiaming Wang</name>
+    </author>
+    <author>
+      <name>Zhongyuan Wang</name>
+    </author>
+    <author>
+      <name>Jiayi Ma</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2203.07319v1</id>
+    <title>GCFSR: a Generative and Controllable Face Super Resolution Method Without Facial and GAN Priors</title>
+    <updated>2022-03-14T17:22:19Z</updated>
+    <link href="https://arxiv.org/abs/2203.07319v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2203.07319v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Face image super resolution (face hallucination) usually relies on facial priors to restore realistic details and preserve identity information. Recent advances can achieve impressive results with the help of GAN prior. They either design complicated modules to modify the fixed GAN prior or adopt complex training strategies to finetune the generator. In this work, we propose a generative and controllable face SR framework, called GCFSR, which can reconstruct images with faithful identity information without any additional priors. Generally, GCFSR has an encoder-generator architecture. Two modules called style modulation and feature modulation are designed for the multi-factor SR task. The style modulation aims to generate realistic face details and the feature modulation dynamically fuses the multi-level encoded features and the generated ones conditioned on the upscaling factor. The simple and elegant architecture can be trained from scratch in an end-to-end manner. For small upscaling factors (&lt;=8), GCFSR can produce surprisingly good results with only adversarial loss. After adding L1 and perceptual losses, GCFSR can outperform state-of-the-art methods for large upscaling factors (16, 32, 64). During the test phase, we can modulate the generative strength via feature modulation by changing the conditional upscaling factor continuously to achieve various generative effects.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-03-14T17:22:19Z</published>
+    <arxiv:comment>Accepted by CVPR2022</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Jingwen He</name>
+    </author>
+    <author>
+      <name>Wu Shi</name>
+    </author>
+    <author>
+      <name>Kai Chen</name>
+    </author>
+    <author>
+      <name>Lean Fu</name>
+    </author>
+    <author>
+      <name>Chao Dong</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2605.14166v2</id>
+    <title>You Only Landmark Once: Lightweight U-Net Face Super Resolution with YOLO-World Landmark Heatmaps</title>
+    <updated>2026-06-05T15:19:08Z</updated>
+    <link href="https://arxiv.org/abs/2605.14166v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2605.14166v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Face image super-resolution aims to recover high-resolution facial images from severely degraded inputs. Under extreme upscaling factors, fine facial details are often lost, making accurate reconstruction challenging. Existing methods typically rely on heavy network architectures, adversarial training schemes, or separate alignment networks, increasing model complexity and computational cost. To address these issues, we propose a lightweight U-Net based-architecture designed to reconstructs $128{ \times }128$ facial images from severely degraded $16{ \times }16$ inputs, achieving an $8 \times $ magnification. A key contribution is a novel auxiliary-training-free supervision strategy that leverages heatmaps generated by YOLO-World, an open-vocabulary object detector, to localize key facial features such as eyes, nose, and mouth. These heatmaps are converted into spatial weights to form a heatmap-guided loss that emphasizes reconstruction errors in semantically important regions. Unlike prior methods that require dedicated landmark or alignment networks, our approach directly reuses detector outputs as supervision, maintaining an efficient training and inference pipeline. Experiments on the aligned CelebA dataset demonstrate that the proposed loss consistently improves quantitative metrics and produces sharper, more realistic reconstructions. Overall, our results show that lightweight networks can effectively exploit detection-driven priors for perceptually convincing extreme upscaling, without adversarial training or increased computational cost.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-05-13T22:41:23Z</published>
+    <arxiv:comment>Accepted for publication at IEEE AVSS 2026 (Notification date: June 5, 2026)</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Riccardo Carraro</name>
+    </author>
+    <author>
+      <name>Anna Briotto</name>
+    </author>
+    <author>
+      <name>Endi Hysa</name>
+    </author>
+    <author>
+      <name>Marco Fiorucci</name>
+    </author>
+    <author>
+      <name>Lamberto Ballan</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2405.04778v1</id>
+    <title>Teacher-Student Network for Real-World Face Super-Resolution with Progressive Embedding of Edge Information</title>
+    <updated>2024-05-08T02:48:52Z</updated>
+    <link href="https://arxiv.org/abs/2405.04778v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2405.04778v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Traditional face super-resolution (FSR) methods trained on synthetic datasets usually have poor generalization ability for real-world face images. Recent work has utilized complex degradation models or training networks to simulate the real degradation process, but this limits the performance of these methods due to the domain differences that still exist between the generated low-resolution images and the real low-resolution images. Moreover, because of the existence of a domain gap, the semantic feature information of the target domain may be affected when synthetic data and real data are utilized to train super-resolution models simultaneously. In this study, a real-world face super-resolution teacher-student model is proposed, which considers the domain gap between real and synthetic data and progressively includes diverse edge information by using the recurrent network's intermediate outputs. Extensive experiments demonstrate that our proposed approach surpasses state-of-the-art methods in obtaining high-quality face images for real-world FSR.</summary>
+    <category term="eess.IV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-05-08T02:48:52Z</published>
+    <arxiv:comment>Accepted by ICIP 2023</arxiv:comment>
+    <arxiv:primary_category term="eess.IV"/>
+    <author>
+      <name>Zhilei Liu</name>
+    </author>
+    <author>
+      <name>Chenggong Zhang</name>
+    </author>
+    <arxiv:doi>10.1109/ICIP49359.2023.10222600</arxiv:doi>
+    <link rel="related" href="https://doi.org/10.1109/ICIP49359.2023.10222600" title="doi"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/1903.10974v1</id>
+    <title>Verification of Very Low-Resolution Faces Using An Identity-Preserving Deep Face Super-Resolution Network</title>
+    <updated>2019-03-26T16:01:23Z</updated>
+    <link href="https://arxiv.org/abs/1903.10974v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/1903.10974v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Face super-resolution methods usually aim at producing visually appealing results rather than preserving distinctive features for further face identification. In this work, we propose a deep learning method for face verification on very low-resolution face images that involves identity-preserving face super-resolution. Our framework includes a super-resolution network and a feature extraction network. We train a VGG-based deep face recognition network (Parkhi et al. 2015) to be used as feature extractor. Our super-resolution network is trained to minimize the feature distance between the high resolution ground truth image and the super-resolved image, where features are extracted using our pre-trained feature extraction network. We carry out experiments on FRGC, Multi-PIE, LFW-a, and MegaFace datasets to evaluate our method in controlled and uncontrolled settings. The results show that the presented method outperforms conventional super-resolution methods in low-resolution face verification.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2019-03-26T16:01:23Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Esra Ataer-Cansizoglu</name>
+    </author>
+    <author>
+      <name>Michael Jones</name>
+    </author>
+    <author>
+      <name>Ziming Zhang</name>
+    </author>
+    <author>
+      <name>Alan Sullivan</name>
+    </author>
+  </entry>
+</feed>

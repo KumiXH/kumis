@@ -1,0 +1,249 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>CelebA Dataset</title>
+
+<!-- Meta tags for search engines to crawl -->
+<meta name="robots" content="index,follow">
+<meta name="description" content="CelebFaces Attributes Dataset (CelebA) is a large-scale face attributes dataset with more than 200K celebrity images, each with 40 attribute annotations. It has substantial pose variations and background clutter. CelebA has large diversities, large quantities, and rich annotations, including 10,177 number of identities, 202,599 number of face images, and 5 landmark locations, 40 binary attributes annotations per image. The dataset can be employed as the training and test sets for the following computer vision tasks: face attribute recognition, face detection, landmark (or facial part) localization, and face editing & synthesis.">
+<meta name="keywords" content="large-scale dataset; face attributes; computer vision; deep learning">
+<link rel="author" href="https://liuziwei7.github.io/">
+
+<!-- Fonts and stuff -->
+<link href="./CelebA/css" rel="stylesheet" type="text/css">
+<link rel="stylesheet" type="text/css" href="./CelebA/project.css" media="screen">
+<link rel="stylesheet" type="text/css" media="screen" href="./CelebA/iconize.css">
+<script async="" src="./CelebA/prettify.js"></script>
+
+
+<style id="style-1-cropbar-clipper">/* Copyright 2014 Evernote Corporation. All rights reserved. */
+.en-markup-crop-options {
+    top: 18px !important;
+    left: 50% !important;
+    margin-left: -100px !important;
+    width: 200px !important;
+    border: 2px rgba(255,255,255,.38) solid !important;
+    border-radius: 4px !important;
+}
+
+.en-markup-crop-options div div:first-of-type {
+    margin-left: 0px !important;
+}
+</style></head>
+
+<body>
+  <div id="content">
+    <div id="content-inner">
+      
+      <div class="section head">
+	<h1>Large-scale CelebFaces Attributes (CelebA) Dataset</h1>
+
+	<br>
+	
+	<div class="authors">
+	  <a href="https://liuziwei7.github.io/">Ziwei Liu</a>&nbsp;&nbsp;
+	  <a href="http://personal.ie.cuhk.edu.hk/~pluo/">Ping Luo</a>&nbsp;&nbsp;
+	  <a href="http://www.ee.cuhk.edu.hk/~xgwang/">Xiaogang Wang</a>&nbsp;&nbsp;
+	  <a href="http://www.ie.cuhk.edu.hk/people/xotang.shtml">Xiaoou Tang</a>
+	</div>
+
+	<div class="affiliations">
+	  <a href="http://mmlab.ie.cuhk.edu.hk/">Multimedia Laboratory, </a>
+	  <!-- <a href="http://www.ie.cuhk.edu.hk/">Department of Information Engineering, </a> -->
+	  <a href="http://www.cuhk.edu.hk/english/index.html">The Chinese University of Hong Kong</a>
+	</div>
+
+	<ul id="tabs">
+    	<li><a href="./CelebA.html" name="#tab1">Home</a></li>
+    	<li><a href="./CelebA/CelebAMask_HQ.html" name="#tab2">CelebAMask-HQ</a></li> 
+    	<li><a href="./CelebA/CelebA_Spoof.html" name="#tab3">CelebA-Spoof</a></li>
+    	<li><a href="./CelebA/CelebA_Dialog.html" name="#tab4">CelebA-Dialog</a></li>  
+	</ul> 
+      </div>
+
+      
+      <center><img src="./CelebA/intro.png" border="0" width="90%"></center>
+	  
+	  
+	  <div class="section news">
+	  
+	<h2>News</h2>
+	
+	<p><strong>2021-09-10</strong> Another related dataset, <a href="https://github.com/yumingj/Talk-to-Edit">CelebA-Dialog</a> has been released. <img src='./CelebA/new.jpg' width='28'> </p>
+
+	<p><strong>2020-07-10</strong> Two related datasets, <a href="https://github.com/switchablenorms/CelebAMask-HQ">CelebAMask-HQ</a> and <a href="https://github.com/Davidzhangyuanhan/CelebA-Spoof">CelebA-Spoof</a>, have been released. <img src='./CelebA/new.jpg' width='28'> </p>
+
+	<p><strong>2016-07-29</strong> If Dropbox is not accessible, please download the dataset using <a href="https://drive.google.com/drive/folders/0B7EVK8r0v71pWEZsZE9oNnFzTm8?resourcekey=0-5BR16BdXnb8hVj6CNHKzLg&usp=sharing">Google Drive</a> or <a href="https://pan.baidu.com/s/1CRxxhoQ97A5qbsKO7iaAJg">Baidu Drive</a> (password: rp0s).</p>
+
+     </div>
+
+<div class="section details">
+	<h2>Details</h2>
+    
+	<br>
+
+	<p><b>CelebFaces Attributes Dataset (CelebA)</b> is a large-scale face attributes dataset with more than <b>200K</b> celebrity images, each with <b>40</b> attribute annotations. The images in this dataset cover large pose variations and background clutter. CelebA has large diversities, large quantities, and rich annotations, including</p>
+
+	<ul>
+	<li><p><b>10,177</b> number of <b>identities</b>,</p>
+	</li>
+	<li><p><b>202,599</b> number of <b>face images</b>, and</p>
+	</li>
+	<li><p><b>5 landmark locations</b>, <b>40 binary attributes</b> annotations per image.</p>
+	</li>
+	</ul>
+	The dataset can be employed as the training and test sets for the following computer vision tasks: face attribute recognition, face recognition, face detection, landmark (or facial part) localization, and face editing & synthesis. 
+
+    </div>
+
+<br>
+
+<div class="section overview">
+	<h2>Sample Images</h2>
+	<br>
+	
+	<img src="./CelebA/overview.png" border="0" width="80%">
+
+      </div>
+
+<br>
+
+<div class="section download">
+	<h2>Downloads</h2>
+
+	  <ul>
+            <li class="grid">
+	      <div class="griditem">
+		<a href="https://drive.google.com/drive/folders/0B7EVK8r0v71pWEZsZE9oNnFzTm8?resourcekey=0-5BR16BdXnb8hVj6CNHKzLg&usp=sharing" target="_blank" class="imageLink"><img src="./CelebA/icon_zip.png"></a><br>
+		  In-The-Wild Images
+		</div>
+	      </li>
+	    <li class="grid">
+	      <div class="griditem">
+		<a href="https://drive.google.com/drive/folders/0B7EVK8r0v71pWEZsZE9oNnFzTm8?resourcekey=0-5BR16BdXnb8hVj6CNHKzLg&usp=sharing" target="_blank" class="imageLink"><img src="./CelebA/icon_zip.png"></a><br>
+		  Align&amp;Cropped Images
+		</div>
+	      </li>
+	    <li class="grid">
+	      <div class="griditem">
+		<a href="https://drive.google.com/drive/folders/0B7EVK8r0v71pWEZsZE9oNnFzTm8?resourcekey=0-5BR16BdXnb8hVj6CNHKzLg&usp=sharing" target="_blank" class="imageLink"><img src="./CelebA/icon_txt.png"></a><br>
+		  Landmarks Annotations
+		</div>
+	      </li>
+	  	<li class="grid">
+	      <div class="griditem">
+		<a href="https://drive.google.com/drive/folders/0B7EVK8r0v71pWEZsZE9oNnFzTm8?resourcekey=0-5BR16BdXnb8hVj6CNHKzLg&usp=sharing" target="_blank" class="imageLink"><img src="./CelebA/icon_txt.png"></a><br>
+		  Attributes Annotations
+		</div>
+	      </li>
+	    <li class="grid">
+	      <div class="griditem">
+		<a href="https://drive.google.com/drive/folders/0B7EVK8r0v71pWEZsZE9oNnFzTm8?resourcekey=0-5BR16BdXnb8hVj6CNHKzLg&usp=sharing" target="_blank" class="imageLink"><img src="./CelebA/icon_txt.png"></a><br>
+		  Identities Annotations
+		</div>
+	      </li>
+
+	    </ul>
+	    
+	    </div>
+	    
+<br>
+
+<div class="section download">
+	<h2>Evaluation</h2>
+
+	  <ul>
+            <li class="grid">
+	      <div class="griditem">
+		<a href="https://drive.google.com/drive/folders/0B7EVK8r0v71pWEZsZE9oNnFzTm8?resourcekey=0-5BR16BdXnb8hVj6CNHKzLg&usp=sharing" target="_blank" class="imageLink"><img src="./CelebA/icon_txt.png"></a><br>
+		  Train/Val/Test Partitions
+		</div>
+	      </li>
+
+	    </ul>
+	    
+	    <br>
+	    <br>
+		
+		If the above links are not accessable, you could download the dataset using <a href="http://pan.baidu.com/s/1eSNpdRG">Baidu Drive</a>.
+<br>
+	    For more details of the dataset, please refer to the paper "<a href="https://liuziwei7.github.io/projects/FaceAttributes.html">Deep Learning Face Attributes in the Wild</a>".
+
+	    </div>
+	    
+<br>
+
+<div class="section contact">
+	<h2>Agreement</h2>
+	<ul>
+	<li>The CelebA dataset is available for <b>non-commercial research purposes</b> only.</li>
+	<li>All images of the CelebA dataset are obtained from the Internet which are not property of MMLAB, The Chinese University of Hong Kong. The MMLAB is not responsible for the content nor the meaning of these images.</li>
+	<li>You agree <b>not to</b> reproduce, duplicate, copy, sell, trade, resell or exploit for any commercial purposes, any portion of the images and any portion of derived data.</li>
+	<li>You agree <b>not to</b> further copy, publish or distribute any portion of the CelebA dataset. Except, for internal use at a single site within the same organization it is allowed to make copies of the dataset.</li>
+	<li>The MMLAB reserves the right to terminate your access to the CelebA dataset at any time.</li>
+	<li>The face identities are released upon request for research purposes only. Please contact us for details.</li>
+	</ul>
+    </div>
+	
+<div class="section citation">
+	<h2>Citation</h2>
+	<div class="section bibtex">
+	<pre>@inproceedings{liu2015faceattributes,
+  title = {Deep Learning Face Attributes in the Wild},
+  author = {Liu, Ziwei and Luo, Ping and Wang, Xiaogang and Tang, Xiaoou},
+  booktitle = {Proceedings of International Conference on Computer Vision (ICCV)},
+  month = {December},
+  year = {2015} 
+}</pre>
+	  
+	</div>
+   	</div>
+	
+	
+	<div class="section download">
+	<h2>Related Datasets</h2>
+
+	  <ul>
+          
+          <li class="grid">
+	      <div class="griditem">
+		<a href="https://drive.google.com/drive/folders/0B7EVK8r0v71pQ3NzdzRhVUhSams?resourcekey=0-Kpdd6Vctf-AdJYfS55VULA&usp=sharing" target="_blank" class="imageLink"><img src="./CelebA/icon_zip.png"></a><br>
+		  <a href="https://drive.google.com/drive/folders/0B7EVK8r0v71pQ3NzdzRhVUhSams?resourcekey=0-Kpdd6Vctf-AdJYfS55VULA&usp=sharing">LFWA+ Dataset</a>
+		</div>
+	      </li>
+
+	      <li class="grid">
+	      <div class="griditem">
+		<a href="https://github.com/switchablenorms/CelebAMask-HQ" target="_blank" class="imageLink"><img src="./CelebA/celebamask_hq.jpg"></a><br>
+		  <a href="https://github.com/switchablenorms/CelebAMask-HQ">CelebAMask-HQ Dataset</a>
+		</div>
+	      </li>
+
+	      <li class="grid">
+	      <div class="griditem">
+		<a href="https://github.com/Davidzhangyuanhan/CelebA-Spoof" target="_blank" class="imageLink"><img src="./CelebA/celeba_spoof.jpg"></a><br>
+		  <a href="https://github.com/Davidzhangyuanhan/CelebA-Spoof">CelebA-Spoof Dataset</a>
+		</div>
+	      </li>
+
+	      <li class="grid">
+	      <div class="griditem">
+		<a href="https://github.com/yumingj/Talk-to-Edit" target="_blank" class="imageLink"><img src="./CelebA/celeba_dialog.jpg"></a><br>
+		  <a href="https://github.com/yumingj/Talk-to-Edit">CelebA-Dialog Dataset</a>
+		</div>
+	      </li>
+
+	    </ul>
+
+	    </div>
+
+<br>
+	
+<div class="section contact">
+	<h2>Contact</h2>
+	
+	<br>
+
+	Please contact <a href="https://liuziwei7.github.io/">Ziwei Liu</a> and <a href="http://personal.ie.cuhk.edu.hk/~pluo/">Ping Luo</a> for questions about the dataset.
+    </div>
+
+</div></div></body></html>

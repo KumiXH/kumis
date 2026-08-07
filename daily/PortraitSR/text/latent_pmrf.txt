@@ -1,0 +1,1073 @@
+=== PAGE 1 ===
+arXiv:2507.00447v1  [cs.CV]  1 Jul 2025
+Latent Posterior-Mean Rectified Flow for Higher-Fidelity
+Perceptual Face Restoration
+Xin Luo, Menglin Zhang, Yunwei Lan, Tianyu Zhang, Rui Li, Chang Liu, Dong Liu
+University of Science and Technology of China, Hefei, China
+xinluo@mail.ustc.edu.cn, dongeliu@ustc.edu.cn
+https://github.com/Luciennnnnnn/Latent-PMRF
+Abstract
+The Perception-Distortion tradeoff (PD-tradeoff) theory
+suggests that face restoration algorithms must balance per-
+ceptual quality and fidelity. To achieve minimal distor-
+tion while maintaining perfect perceptual quality, Posterior-
+Mean Rectified Flow (PMRF) proposes a flow based ap-
+proach where source distribution is minimum distortion es-
+timations. Although PMRF is shown to be effective, its
+pixel-space modeling approach limits its ability to align
+with human perception, where human perception is defined
+as how humans distinguish between two image distribu-
+tions. In this work, we propose Latent-PMRF, which re-
+formulates PMRF in the latent space of a variational au-
+toencoder (VAE), facilitating better alignment with human
+perception during optimization. By defining the source
+distribution on latent representations of minimum distor-
+tion estimation, we bound the minimum distortion by the
+VAE’s reconstruction error. Moreover, we reveal the de-
+sign of VAE is crucial, and our proposed Sim-VAE sig-
+nificantly outperforms existing VAEs in both reconstruc-
+tion and restoration. Extensive experiments on blind face
+restoration demonstrate the superiority of Latent-PMRF , of-
+fering an improved PD-tradeoff compared to existing meth-
+ods, along with remarkable convergence efficiency, achiev-
+ing a 5.79× speedup over PMRF in terms of FID. Our code
+will be available as open-source.
+1. Introduction
+Face images are among the most common types of images,
+yet they often suffer from complex degradations during for-
+mation, recording, processing, and transmission [59]. Typ-
+ical degradations, such as blur [70], noise [14], downsam-
+pling [12, 39, 45], and JPEG compression [26], can signif-
+icantly degrade visual quality. Perceptual face restoration
+aims to recover high-quality, visually pleasing face images
+from degraded inputs. The key challenge lies in enhancing
+5.79x Speedup
+Figure 1. Illustration of perception optimization efficiency in la-
+tent space. We train PMRF and Latent-PMRF with the same com-
+pute budget. For V AEs with perceptual compression capabilities,
+differences in their latent space align better with human perception
+than those in pixel space, making latent space modeling more ef-
+fective for perception optimization. Validation curves demonstrate
+the superior perceptual quality achieved by Latent-PMRF, with a
+5.79× speedup over PMRF in terms of FID.
+perceptual quality while maintaining fidelity. Recent stud-
+ies show that generative models, particularly diffusion mod-
+els [23, 37, 53, 58] and flow matching models [46, 73], offer
+strong solutions for perceptual quality by modeling the dis-
+tribution of natural images. Although such posterior mod-
+eling approaches can achieve perfect perceptual quality in
+theory, they do not guarantee minimal distortion under per-
+fect perceptual quality constrain [2, 17, 46]. To minimize
+distortion, Posterior-Mean Rectified Flow (PMRF) [46]
+transports minimum distortion estimation to the target dis-
+tribution using a rectified flow model. This approach can
+theoretically achieve minimal distortion [17, 46] under per-
+fect perceptual quality constrain.
+In this work, we challenge the necessity of construct-
+ing PMRF in the pixel space. While perceptual quality
+is formally defined as the statistical distance between the
+distributions of reconstructed and original images [2], re-
+1
+
+=== PAGE 2 ===
+searchers have found that distances in feature space bet-
+ter correlate with human perception [22, 33, 52, 55, 71].
+For instance, the most commonly used metric for evalu-
+ating image generation models is Fr ´echet Inception Dis-
+tance (FID) [22], which measuring distribution difference
+within the feature space of the InceptionNet [55]. Addition-
+ally, many Generative Adversarial Networks (GANs) [19]
+define discriminators in the feature spaces of pre-trained
+networks, such as EfficientNet [52] and CLIP [33]. These
+findings suggest that measuring distribution distances in
+feature space is an effective approach. Motivated by this,
+we propose reformulating PMRF in the latent space of a
+variational autoencoder (V AE) [31], where perceptual qual-
+ity can be optimized more efficiently, as shown in Figure 1.
+While the idea appears straightforward, its optimality in
+terms of distortion requires careful analysis. Analogous to
+PMRF, we consider two distinct source distributions: (1) the
+posterior mean of latent representations, and (2) the latent
+representations of posterior mean. We show that the sec-
+ond approach offers several advantages and is preferable.
+Most notably, it achieves minimal distortion bounded by the
+V AE’s reconstruction error, which is not guaranteed by the
+first approach.
+Overall, our Latent-PMRF can be understood as a recti-
+fied flow model [43] in latent space, where the source distri-
+bution consists of the latent representations of the posterior
+mean and the target distribution consists of the latent rep-
+resentations of high-quality (HQ) images. While extensive
+research has explored latent space models for restoration
+tasks [20, 40, 42, 58, 63, 68, 73], a fundamental question
+remains: are the commonly used V AEs sufficient for im-
+age restoration? We reveal that the V AEs employed in Sta-
+ble Diffusion (SD) [50], SDXL [48], and FLUX [16] are
+suboptimal for this task, as shown in Table 1. Unlike im-
+age generation, where increasing latent dimensionality of-
+ten complicates optimization, restoration tasks benefit from
+a more informative latent space, as it reduces reconstruction
+error and thus lowers the minimal distortion bound.
+To address this, we proposeSim-V AE, a simplified vari-
+ant of SD-V AE, incorporating loss enhancements and ar-
+chitectural improvements that significantly improve both
+the V AE’s reconstruction ability and the restoration perfor-
+mance of the final model. Our contributions are summa-
+rized as follows:
+• Latent-PMRF achieves better alignment with human per-
+ception during optimization, resulting in a5.79× speedup
+over PMRF in terms of FID.
+• The source distribution design of Latent-PMRF bounds
+the minimum distortion to the V AE’s reconstruction error,
+and our improved Sim-V AE significantly boosts restora-
+tion performance when integrated with Latent-PMRF.
+• Extensive experiments show that our Latent-PMRF
+achieves an improved PD-tradeoff and produces visually
+Table 1. Comparison of V AEsin CelebA-Test [60]. We evalu-
+ate the reconstruction performance of various V AEs and their ef-
+fectiveness as latent spaces for Latent-PMRF. Notably, our Sim-
+V AE demonstrates significantly improved reconstruction capabili-
+ties and enhances the performance of Latent-PMRF in restoration.
+V AE Reconstruction Restoration
+PSNR↑ LPIPS↓ FID↓ PSNR↑ LPIPS↓ FID↓
+SD1.5-V AE f8c4 30.463 0.044 6.937 25.875 0.23112.462
+SD-XL-V AE f8c4 32.396 0.039 5.13626.481 0.263 12.247
+FLUX-V AE f8c16 38.7630.008 0.611 26.152 0.245 15.999
+Sim-V AEf8c32 42.712 0.007 0.431 26.382 0.223 11.331
+appealing results with high consistency to the inputs.
+2. Background
+2.1. Rectified Flow
+Rectified Flow [1, 41, 43] is a generative modeling approach
+that constructs a probability path (pt)0≤t≤1 from a source
+distribution p0 to a target distributionp1. Sampling involves
+drawing X0 ∼ p0 and solving an Ordinary Differential
+Equation (ODE) defined by a velocity fieldvt, which guides
+the transformation:
+d
+dt ψt(x) = vt (ψt(x)) , ψ 0(x) = x. (1)
+The velocity field vt is parameterized by a neural net-
+work vθ
+t and trained via regression to match the conditional
+velocity field:
+vt (xt | x0, x1) = x1 − x0, (2)
+where Xt follows a linear interpolation between X0 ∼
+p0 and X1 ∼ p1. The training objective is to minimize the
+Conditional Flow Matching (CFM) loss:
+LCFM (θ) = Et,Xt,X0,X1
+vθ
+t (Xt) − (x1 − x0)
+2
+. (3)
+2.2. Posterior-Mean Rectified Flow
+Let y denote a low-quality (LQ) image, which is a realiza-
+tion of a random vector Y with probability density func-
+tion pY , and let x denote a high-quality image, which is a
+realization of a random vector X with probability density
+function pX. Posterior-Mean Rectified Flow (PMRF) is an
+image restoration framework designed to minimize distor-
+tion while preserving perceptual quality. PMRF achieves
+minimum distortion through two key stages:
+1. Posterior Mean Estimation: A regression model is
+trained to estimate the posterior mean ˆx = E[X|Y = y]
+given a LQ image y. This initial estimation step is theo-
+retically optimal for minimizing the expected distortion be-
+tween the predicted and true high-quality images.
+2
+
+=== PAGE 3 ===
+𝜀
+z!
+z"𝑣"#𝑣
+𝑓$𝑦≅𝔼𝑋|𝑌=𝑦
+𝑥
+	𝜀
+z%
+ℒ=𝑧%−𝑧!−𝑣"# 𝑧"&&
+𝑡
+1−𝑡𝑡~𝑈𝑛𝑖𝑓𝑜𝑟𝑚(0,1)
+Figure 2. Training Framework of Latent-PMRF. We first es-
+timate the posterior mean E [X|Y = y] from low-quality input y
+using a pretrained estimator fϕ (·). The posterior mean and the
+high-quality input x are then encoded into latent representations
+z0 and z1. A flow network vθ
+t (·) is trained to predict velocity field
+along their linear interpolation: zt = (1 − t) z0 + tz1.
+2. Rectified Flow: Subsequently, a rectified flow model
+transforms the posterior mean estimation to match the true
+high-quality data distribution. This is achieved by learning
+a velocity field vθ
+t (·) that guides the transformation through
+time t, enabling the model to recover fine details and natural
+variations present in the true data distribution.
+The synergy between posterior mean estimation and
+flow-based modeling enables PMRF to achieve superior
+performance in image restoration tasks. By combining
+a distortion-optimal initial estimate with learned continu-
+ous transformations, PMRF successfully reconstructs high-
+fidelity images that are both perceptually pleasing and faith-
+ful to the original content.
+3. Latent Posterior-Mean Rectified Flow
+In this section, we introduce Latent Posterior-Mean Rec-
+tified Flow (Latent-PMRF), which extends PMRF to op-
+erate in the latent space of a V AE. We first illustrate why
+operating in the latent space leads to more efficient opti-
+mization of perceptual quality. Then, we analyze the choice
+of source distribution to ensure minimal distortion. Finally,
+we present the complete training and sampling procedures
+for Latent-PMRF.
+3.1. Efficient Perceptual Quality Optimization
+Let E and D denote the encoder and decoder of a V AE, re-
+spectively. The high-quality latent representations is then
+defined as Z = E(X). Since rectified flow aims to trans-
+form samples from a source distribution to match a target
+distribution, it is natural to use Z = E(X) as our target
+distribution in the latent space.
+Operating in the latent space is particularly advanta-
+geous for optimizing perceptual quality, as supported by
+several established practices in the field. First, perceptual
+metrics like LPIPS [71], FID [22] typically measure dif-
+ferences in feature space of pretrained networks. Second,
+GAN-based image generation methods [33, 52] success-
+fully employ feature-space discriminators for improved vi-
+sual quality. Furthermore, state-of-the-art diffusion mod-
+els [16, 34, 48, 50] increasingly operate in V AE latent space,
+demonstrating the effectiveness of latent-space learning for
+perceptual quality optimization.
+3.2. Posterior-Mean Latent Estimation
+PMRF achieves minimum distortion while preserving per-
+ceptual quality by defining the source distribution as pos-
+terior mean estimations, which are inherently optimal in
+terms of distortion. The choice of source distribution thus
+determines the lower bound of distortion that the final
+model can achieve.
+When extending this concept to the latent space, we
+have two natural options for the source distribution: (1)
+The posterior mean of latent representations: E[E(X)|Y ],
+and (2) The latent representations of the posterior mean:
+E(E[X|Y ]). We argue that option (2) is preferable as the
+source distribution. To demonstrate this, we analyze how
+closely the decoded image of source samples approximates
+the posterior mean ˆx = E[X|Y = y] for a given low-quality
+image y. This comparison can be formalized through the
+squared errors:
+Option (1): ∥D(E[E(X)|Y = y]) − ˆx∥2
+Option (2): ∥D(E(E[X|Y = y])) − ˆx∥2 (4)
+For option (2), the squared error is zero as long as the
+V AE achieves perfect reconstruction,i.e., D (E (X)) = X
+for any possible input X. In contrast, option (1) imposes an
+additional constraint: the encoder E or decoder D must be
+a linear function—a condition that is not satisfied in deep
+neural network-based V AEs. Therefore, we adopt option
+(2) for our source distribution.
+A key advantage of this option is that the distortion is
+bounded by the reconstruction capability of the V AE: better
+V AE reconstruction leads to lower distortion. This property
+partially explains why Latent-PMRF benefit from higher la-
+tent dimensions. Furthermore, this approach offers practical
+advantages: instead of training a dedicated model to predict
+the posterior mean of latents, we can utilize existing pre-
+trained models designed to estimate the posterior mean of
+images—a well-established task in the field.
+3.3. Training and Sampling Procedure
+We summarize our framework in Figure 2. Given an input
+LQ image y, we first estimate its corresponding posterior
+mean ˆx = E [X|Y = y]. This estimate is then encoded into
+latent code z0 = E (ˆx) ∈ Rd/h using a pretrained V AE
+encoder, where h is the downsampling rate of the encoder.
+In latent space, the objective is to estimate a probability path
+that transforms z0 into the target latent distribution z1 =
+E (x). The velocity network is optimized in the compact
+3
+
+=== PAGE 4 ===
+GNSiLUConvGN
+ConvSiLU
+Conv(a) SD-VA E ’s  ResBlock(b) Sim-VA E ’s  ResBlockConvSiLU
+LNConv
+Figure 3. Comparison of ResBlock designs between SD-V AE and
+Sim-V AE. Sim-V AE simplifies the ResBlock architecture by re-
+moving redundant components.
+(a) Group Norm
+ (b) Layer Norm
+ (c) Group Norm
+ (d) Layer Norm
+Figure 4. Two examples of the latent representations. Using pixel-
+wise layer normalization instead of group normalization allows the
+model to learn more balanced feature maps.
+latent space, employing the same objective as vanilla flow
+matching with constant velocity:
+θ∗ = argmin
+θ
+Et,zt
+hvθ
+t (zt) − (z1 − z0)
+2
+2
+i
+. (5)
+For the sampling process, we solve the ODE starting
+from the posterior mean latent z0 to obtain the HQ latent
+z1 using the Euler solver for 25 steps. The desired sample
+is then decoded by a pretrained V AE decoderD to produce
+the output image D(z1).
+4. Improved Variational Autoencoder
+In this section, we describe the design of Sim-V AE. For the
+Latent-PMRF model, the V AE not only defines the upper
+bound for restoration performance but also affects the op-
+timization of flow model. We first outline several architec-
+tural improvements aimed at enhancing both the reconstruc-
+tion ability of the V AE and the distortion lower bound of
+Latent-PMRF. Next, We overview our training loss, where
+we propose eliminating the adversarial loss when V AE is
+strong enough, simplifying the training procedure.
+4.1. Architecture Improvements
+Our V AE architecture builds upon the classical VQ-
+GAN [15], which has been widely adopted in numerous
+influential works [16, 34, 48, 50]. We refer to this archi-
+tecture as SD-V AE, reflecting its widespread adoption since
+Stable Diffusion. The encoder and decoder share a symmet-
+ric architecture, so we focus on describing the encoder, as
+the decoder follows an analogous structure in reverse.
+Simplified ResBlock: Inspired by recent efficient con-
+vnet designs [4, 44], we propose a simplified Res-
+Block [21] (Figure 3) that uses only one activation function
+Conv
+Conv
+(a) SD-V AE’s
+Encoder
+Conv
+Conv
+(b) Sim-V AE’s
+Encoder
+Conv
+Conv
+(c) SD-V AE’s
+Decoder
+Conv
+Conv
+(d) Sim-V AE’s
+Decoder
+Figure 5. Illustration of the resizing layer design. Sim-V AE redis-
+tributes computation to ensure that channel dimension adjustments
+occur immediately with resolution changes.
+and one normalization layer per block, improving efficiency
+without sacrificing performance.
+Pixel-wise Layer Norm: The SD-V AE has been shown to
+produce imbalanced feature representations, where certain
+regions in intermediate feature maps exhibiting dispropor-
+tionately high magnitudes [13, 51], as illustrated in Fig-
+ure 4. While these local outliers in the feature maps serve
+to preserve global information [13], they may complicate
+latent diffusion model training. Inspired by [29, 51], we
+propose replacing group normalization [65] with pixel-wise
+layer normalization [4, 36], which normalizes each spatial
+location independently and promotes more balanced feature
+representations.
+Removing Self-Attention in Middle Layers: SD-V AE
+uses self-attention [56] in middle layers to capture global
+context, but this introduces a key limitation: resolution gen-
+eralization issues. V AEs are usually trained on fixed low-
+resolution inputs, and global operators like self-attention
+often struggle to maintain performance across different res-
+olutions during inference [18, 49]. While fine-tuning on
+high-resolution data is a common solution [3, 51], it com-
+plicates training with additional optimization stages. To ad-
+dress this, we propose a simple modification: replacing self-
+attention with standard 3 × 3 convolutional layers, which
+offer better generalization across different resolutions.
+Redistribute Parameters between Resizing Layers: In
+SD-V AE, resizing layers are responsible handling stage
+transitions, but the original design separates resolution
+changes from channel adjustments (Figure 5a): resizing lay-
+ers maintain channel dimensions, while later convolutional
+layer handle channel modifications. This creates bottle-
+necks during downsampling and retains inefficiently high-
+dimensional features during upsampling. We propose inte-
+grating channel adjustments directly into the resizing lay-
+ers—expanding channels during downsampling and reduc-
+ing them during upsampling. This change improves infor-
+mation preservation and computational efficiency without
+increasing parameter count or complexity.
+4
+
+=== PAGE 5 ===
+4.2. Training Loss
+The training objective for autoencoders typically com-
+prises three components [15]: a reconstruction loss
+Lrecon(D(E(x)), x) that measures the similarity between
+input and reconstructed images, a regularization term
+Lreg(E(x)) that constrains the latent space, and an adver-
+sarial loss [19] Ladv that encourages photorealistic recon-
+structions by discriminating between real imagesx and their
+reconstructions D(E(x)). We observe that with sufficient
+model capacity, the adversarial loss becomes unnecessary
+without compromising performance. Thus, the training loss
+simplifies to:
+Ltrain = Lrecon + λreg Lreg (6)
+The reconstruction loss Lrecon combines ℓ1 distance
+with perceptual loss [27], following the weighting scheme
+of Real-ESRGAN [61]. For regularization, we use the
+Kullback-Leibler (KL) divergence as Lreg, with λreg set to
+10−6 as in [50].
+5. Related Work
+Generative Models in Latent Space.Diffusion-based gen-
+erative models [10, 23] achieve impressive image synthe-
+sis but are computationally expensive, particularly for high-
+resolution images. Latent Diffusion [50] mitigates this by
+learning distributions in a pretrained V AE’s latent space, re-
+taining only perceptually important information to enhance
+efficiency and scalability. Large-scale text-to-image mod-
+els [16, 48, 50] follow this paradigm, with V AE design play-
+ing a crucial role. Esser et al . [16] show that increasing
+latent channels improves performance but requires larger
+generative models—for instance, even FLUX (12B param-
+eters) [34] is limited to 16 latent channels. However, our
+Latent-PMRF framework greatly benefits from more pow-
+erful V AE, since a stronger V AE enrich source distribution
+with more information, thus alleviating the burden on the
+restoration process.
+Blind Face Restoration. Blind face restoration aims to
+recover high-quality facial details from images degraded
+by unknown and complex factors while maintaining fi-
+delity. From a training objective perspective, existing meth-
+ods mainly fall into two categories: (1) GAN-based ap-
+proaches [20, 42, 60, 63] optimize a weighted combination
+of distortion losses (e.g., L1, L2) and perceptual losses (e.g.,
+adversarial loss [19], perceptual loss [27]), where the trade-
+off between fidelity and perceptual quality is controlled by
+loss weighting [2, 35]. (2) Posterior sampling-based meth-
+ods [5, 40, 46, 67, 68, 73], particularly diffusion models,
+model the conditional posterior distribution of HQ images
+given degraded inputs. While these methods theoretically
+ensure superior perceptual quality, they often lead to subop-
+timal distortion [46].
+PMRF [46] is the first approach to ensure optimal distor-
+tion under a perfect perceptual quality constraint. It first
+predicts the posterior mean (minimum distortion estima-
+tion) and then transports it to the HQ image distribution.
+However, we argue that distribution discrepancy in pixel
+space does not faithfully align with human perception. To
+address this, we propose constructing PMRF in the latent
+space of a V AE, which better optimizes perceptual quality.
+Furthermore, we design the source distribution to preserve
+PMRF’s distortion-minimum properties in latent space.
+Concurrent works. ELIR [7] independently extends
+PMRF to the latent space of V AE. However, their focus is
+on improving testing-time efficiency via Consistency Flow
+Matching [66], while our aim is to enhance optimization ef-
+ficiency for perceptual quality. Furthermore, they use the
+posterior mean of latent representations as the source dis-
+tribution, which, as discussed in Section 3.2, is subopti-
+mal. This choice leads to significant fidelity degradation in
+their model, whereas our Latent-PMRF preserves the high
+fidelity of PMRF.
+6. Experiments
+6.1. Experiment Setup
+Datasets. We use two primary datasets: LSDIR [38], con-
+taining 84,991 high-quality natural images, and FFHQ [28],
+which has 70,000 high-quality face images. For preprocess-
+ing, we crop LSDIR images into512×512 patches and filter
+them using Q-Align [64] with a minimum score threshold of
+3.5. FFHQ images are resized to 512 × 512.
+Implementation Details. Sim-V AE is trained on a com-
+bination of the filtered LSDIR dataset and the first 10,000
+images from FFHQ, using 256 × 256 image patches for
+150,000 iterations with a batch size of 64. The Adam op-
+timizer [32] with default parameters and a cosine learning
+rate schedule is used, decaying from 10−4 to 10−6 after a
+500-step warmup at 10−5. We set the latent channel to 32,
+unless specified otherwise.
+Following PMRF, We utilize the posterior mean predic-
+tor trained by [67], and adopt HDiT [8] as velocity model
+of Latent-PMRF. The patch size is set to 1, and the trans-
+former blocks are arranged as 2, 4, and 6 from high to low
+resolution. Depth-wise convolutions [6] are incorporated
+into both the attention and feed-forward layers. Training is
+performed on FFHQ for 400,000 iterations with a batch size
+of 64. LQ images are synthesized following [46, 60]. We
+use the Adam optimizer [32] withβ1 = 0.9, β2 = 0.95, and
+a fixed learning rate of 5 × 10−4.
+Evaluation Metrics. We evaluate our methods using a
+range of metrics grouped into four categories:
+1. Reconstruction Fidelity: PSNR and MS-SSIM [62] as-
+sess reconstruction accuracy. For face restoration, we
+also include identity-related metrics like Deg (ArcFace
+5
+
+=== PAGE 6 ===
+40 80 120 160 200 240 280 320 360 400
+Training steps (thousands)
+0.232
+0.234
+0.236
+0.238
+0.240
+0.242
+0.244
+0.246LPIPS
+Validation Curves with Different Learning Spaces
+Latent-PMRF
+PMRF
+(a)
+5.33x Speedup (b)
+40 80 120 160 200 240 280 320 360 400
+Training steps (thousands)
+67
+68
+69
+70
+71
+72
+73MUSIQ
+Validation Curves with Different Learning Spaces
+Latent-PMRF
+PMRF (c)
+40 80 120 160 200 240 280 320 360 400
+Training steps (thousands)
+0.50
+0.52
+0.54
+0.56
+0.58CLIP-IQA
+Validation Curves with Different Learning Spaces
+Latent-PMRF
+PMRF (d)
+Figure 6. Convergence Efficiency of Latent-PMRF.We train both PMRF and Latent-PMRF using Sim-V AE for 400k iterations on FFHQ
+with a batch size of 64. Latent-PMRF significantly accelerates convergence, achieving a 5.33× speedup in DISTS. It also outperforms
+PMRF in LPIPS, MUSIQ and CLIP-IQA, achieving scores that PMRF cannot achieve within training. Furthermore, Latent-PMRF demon-
+strates strong performance even early in training, highlighting the importance of optimizing in a well-structured latent space.
+Table 2. Impact of V AE architectureson CelebA-Test [60]. All
+V AEs use 32 channels. The results show that Sim-V AE signif-
+icantly outperforms SD-V AE in both reconstruction and restora-
+tion tasks. Replacing 3 × 3 convolutions with self-attention causes
+training instability, making results unavailable.
+V AE Reconstruction RestorationPSNR↑ LPIPS↓ MMDDINOv2↓ PSNR↑ LPIPS↓ MMDDINOv2↓
+Sim-V AE42.7129 0.00730.0511 26.38230.2236 0.8770- layernorm43.0518 0.00630.0619 26.1698 0.2270 0.8928- 3 × 3 conv N/A N/A N/A N/A N/A N/A- interpolate 42.97660.0075 0.0556 26.24650.2245 0.8817SD-V AE 40.3979 0.0145 0.0986 25.26460.2224 0.8938
+embedding angle [9]) and landmark distance LMD [67].
+2. Perceptual Similarity: LPIPS [71] and DISTS [11] mea-
+sure perceptual similarity between two images.
+3. Non-Reference Metrics: CLIP-IQA [57], MUSIQ [30]
+and Q-Align [64] assess image quality without ground
+truth.
+4. Statistical Distance: In addition to the commonly used
+FID [22] for measuring distributional differences, we
+also consider FID DINOv2 [54] and MMD DINOv2 [25].
+These metrics improve alignment with human percep-
+tion using DINOv2 [47] features, while MMDDINOv2 fur-
+ther enhances sample efficiency using Maximum Mean
+Discrepancy (MMD) with an RBF kernel.
+6.2. Convergence Efficiency of Latent-PMRF
+In this section, we demonstrate that constructing the PMRF
+in the latent space of Sim-V AE facilitates perception op-
+timization, thus significantly accelerates convergence. As
+shown in Figure 1 and Figure 6, Latent-PMRF acceler-
+ates convergence by 5.79× in terms of FID and 5.33×
+in terms of DISTS. It also achieves significantly better
+LPIPS, MUSIQ and CLIP-IQA scores, outperforming stan-
+dard PMRF, which fails to reach similar performance within
+400k training steps. The improved convergence efficiency
+of Latent-PMRF allows us to achieve strong results using
+relatively fewer computational resources during training.
+6.3. Improving Latent-PMRF with Better V AE
+Effects of Architecture Design. As illustrated in Section 4,
+we propose a series of architectural modifications aimed
+Table 3. Impact of Latent Channels on CelebA-Test [60].
+Latent-PMRF benefits from richer latent representations, with 32
+channels achieving a good balance across various metrics.
+Channel Reconstruction RestorationPSNR↑ LPIPS↓ MMDDINOv2↓ PSNR↑ LPIPS↓ Q-Align↑ MMDDINOv2↓
+16 37.9034 0.0261 0.0966 26.44120.21914.1006 0.891824 40.8142 0.0116 0.0603 26.3911 0.2251 4.19340.865732 42.71290.0073 0.0511 26.3823 0.22364.2934 0.877048 45.0554 0.0033 0.0485 26.46000.22644.3055 0.8863
+at improving the learning ability of the V AE and boosting
+restoration of Latent-PMRF. In this section, we demonstrate
+the practical implications of these modifications through
+controlled experiments. As shown in Table 2, we progres-
+sively remove various modifications to assess their impact
+on the reconstruction ability of the V AE and the restoration
+performance of Latent-PMRF trained on it. From the sec-
+ond row of the table, we observe that while replacing layer
+normalization with group normalization improves V AE fi-
+delity, it degrades distributional faithfulness, and more im-
+portantly, severely hampers the restoration performance of
+Latent-PMRF. This suggests that group normalization nega-
+tively influences the learning of smooth features. The fourth
+row shows that using non-optimal resizing layers leads to
+poorer reconstruction and, consequently, worse restoration
+performance. Finally, when all modifications are removed,
+we obtain SD-V AE, which, while achieving good LPIPS in
+restoration, performs poorly in all other aspects.
+Impact of Latent Channels. It is well known that increas-
+ing latent channels enhances the latent space representation
+and improves the V AE’s reconstruction ability. However,
+the effect of latent channels on the restoration performance
+of Latent-PMRF remains unclear. As shown in Table 3,
+Latent-PMRF benefits from a richer latent space, with Q-
+Align scores consistently improving as the number of latent
+channels increases. We find that 32 channels strike a good
+balance across various metrics, so we set the default to 32.
+6.4. Comparisons with State-of-the-Art Methods
+We primarily compare our method with PMRF [46], as
+our goal is to construct it in the latent space. Addition-
+ally, we compare with traditional approaches such as GFP-
+6
+
+=== PAGE 7 ===
+Table 4. Quantitative comparisons on CelebA-Test [60] benchmark. Our approach achieves the best PD-tradeoff, significantly reducing
+distortion while preserving top-tier perceptual quality. PMRF∗ denotes PMRF trained under the same compute budget as ours. Runtime is
+measured on NVIDIA A100. #Params (M) is reported as A + B, where A represents trainable parameters and B denotes frozen parameters.
+Method PSNR ↑ MS-SSIM↑ LPIPS↓ DISTS↓ Deg.↓ LMD↓ MUSIQ↑ Q-Align↑ FID↓ FIDDINOv2↓ MMDDINOv2↓ Runtime(s) #Params(M)
+GFP-GAN [60] 24.9861 0.8640 0.2407 0.1720 34.5372 2.4509 75.29404.700914.8021 223.0202 1.1638 0.0218 86.4RestoreFormer [63] 24.6157 0.8443 0.2416 0.1639 30.9218 1.9389 73.8584 4.5320 13.4083 152.1276 1.0003 0.0402 72.7CodeFormer [42] 25.1464 0.8589 0.2271 0.1700 35.7124 2.138975.55464.5835 15.3959 184.0517 1.1041 0.0349 94.1VQFR [20] 23.7626 0.8278 0.2391 0.1683 40.9100 3.0436 73.8407 4.5285 13.6547 199.7024 1.1287 0.0621 83.5
+DifFace [67] 24.7964 0.8233 0.2723 0.1679 44.1442 2.7230 69.0060 4.0769 13.5138 184.1844 1.0441 3.7054 159.7 + 15.7DiffBIR (v2) [40] 25.3946 0.8668 0.2654 0.1911 31.2931 1.564676.16594.878220.9181 156.9969 1.0692 6.3952 363.1 + 1319.3ResShift [68] 26.0359 0.8734 0.2464 0.1692 32.2866 1.8718 67.9784 4.2413 19.1850 167.3501 1.0534 0.6230 118.9 + 77.0
+FlowIE [73] 24.8349 0.8505 0.2312 0.1585 32.2254 1.7757 74.1167 4.6108 17.5334 164.6910 1.0733 0.3877 398.6 + 1319.3PMRF [46] 26.33210.8740 0.22320.147629.45041.513870.4967 4.222710.722596.8752 0.7214 0.5247 159.8 + 15.7PMRF∗ 26.6431 0.8729 0.2407 0.1596 28.9294 1.3799 64.9143 3.7261 15.1663 140.6601 0.8578Latent-PMRF (Ours)26.38870.8789 0.22070.157629.09611.521773.1496 4.332510.9447110.4742 0.8108 0.5745 151.2 + 106.8
+LQGFP-GANRestoreFormerDifFaceFlowIEResShiftPMRFLatent-PMRFGT
+Figure 7. Qualitative comparisons on CelebA-Test [60] benchmark. Our method produces visually appealing details while maintaining
+exceptionally high face identity preservation.
+GAN [60], RestoreFormer [63], CodeFormer [42], and
+VQFR [20], as well as recent diffusion-based methods like
+DifFace [67], ResShift [68, 69], and DiffBIR [40]. For a
+fair comparison, we reproduce ResShift using their official
+code but exclude the LPIPS loss used in their journal ver-
+sion. While we could incorporate this additional loss term,
+we omit it as it is not the focus of our work and requires
+computationally expensive V AE decoding during training.
+We also include FlowIE [73], which also utilizes flow mod-
+els. Notably, both DiffBIR and FlowIE leverage facial pri-
+ors from large-scale Stable Diffusion [50], whereas other
+methods use relatively smaller models.
+Results on Synthetic Dataset. We evaluate our method
+on the CelebA-Test benchmark [60]. As shown in Ta-
+ble 4, PMRF and Latent-PMRF strike the best balance be-
+tween distortion and perceptual quality. Specifically, only
+PMRF and Latent-PMRF achieve a PSNR above 26.3 dB
+and demonstrate superior face identity preservation, as eval-
+uated by Deg. and LMD. In terms of statistical distance,
+PMRF, and our method learn more accurate distributions,
+outperforming others in FID, FID DINOv2 and MMD DINOv2.
+Notably, methods leveraging pretrained facial priors, such
+as GFP-GAN, DiffBIR, and FlowIE, achieve higher non-
+reference metric scores but tend to produce faces with lower
+faithfulness. In contrast, Latent-PMRF retains the high fi-
+delity of PMRF while surpassing it in non-reference met-
+rics. Moreover, Latent-PMRF demonstrates improved con-
+vergence properties—when the compute budget is reduced
+to match ours (scaling down from a batch size 256 and 3850
+epochs [46]), PMRF experiences a significant performance
+drop. Overall, Latent-PMRF not only outperforms other
+methods but also converges much faster than PMRF.
+We also present visual results in Figure 7. Compared to
+PMRF, our results generally exhibit better perceptual qual-
+7
+
+=== PAGE 8 ===
+!" #$%&#'( )*+,-.*$-./*. 012$34* $5-678 )*+9:12, %;)$ !"#$%#&'()*
+40 45 50
+FID ←
+0.03
+0.04
+0.05← IndRMSE
+LFW
+80 85 90 95 100
+FID ←
+0.03
+0.04
+0.05← IndRMSE
+WebPhoto
+35 40 45 50
+FID ←
+0.04
+0.05← IndRMSE
+WIDER
+GFPGAN
+RestoreFormer
+CodeFormer
+VQFR
+DifFace
+DiffBIR
+FlowIE
+ResShift
+PMRF
+Latent-PMRF (Ours)
+Figure 8. Comparisons on real-world datasets. Top: Qualitative results on the WIDER-Test [72] dataset. Bottom: Comparison on the
+”distortion”-perception plane (IndRMSE vs. FID), where IndRMSE represents the RMSE of each method [46]. Our method outperforms
+all others in IndRMSE, while achieving perceptual quality on par with the state-of-the-art.
+ity, which is reflected in the higher non-reference metrics
+we achieve. In contrast to other methods, which suffer from
+lower fidelity to the ground truth and consequently degrade
+face identity, our method preserves fine facial details while
+maintaining strong perceptual quality.
+Results on Real-world Datasets. We evaluate the gen-
+eralizability of Latent-PMRF on real-world datasets, in-
+cluding LFW [24, 60], WebPhoto [60], and WIDER [72].
+Since these datasets lack ground truth, we follow Ohayonet
+al. [46] and use a pretrained posterior-mean estimator as a
+proxy for fidelity measurement. As shown in Figure 8, both
+Latent-PMRF and PMRF significantly outperform other
+methods in terms of fidelity, as indicated by IndRMSE.
+In terms of perceptual quality, Latent-PMRF outperforms
+PMRF on LFW and WIDER, while maintaining compara-
+ble performance to other methods. Overall, Latent-PMRF
+achieves a better perception-distortion tradeoff, offering
+comparable perceptual quality with superior distortion re-
+duction. Visually, RestoreFormer produces poorly struc-
+tured images, and FlowIE with the Stable Diffusion back-
+bone shows artifacts with overly sharp details. In contrast,
+our method generates visually appealing images that remain
+consistent with the input.
+7. Conclusion and Limitations
+We propose Latent-PMRF, which retains the minimal dis-
+tortion property of PMRF while achieving better perceptual
+quality optimization. Our theoretical analysis shows that the
+latent representation of the posterior mean achieves a mini-
+mum distortion determined by the V AE’s reconstruction er-
+ror. Based on this insight, we introduce our Sim-V AE, with
+a series of modifications to enhance the reconstruction ca-
+pability of the V AE, leading to a notable performance boost
+for Latent-PMRF. Latent-PMRF demonstrates remarkable
+convergence efficiency, achieving a 5.79× speedup over
+PMRF in FID convergence. Furthermore, Latent-PMRF ex-
+hibits a better PD-tradeoff compared to existing methods
+in blind face restoration, with improved perceptual qual-
+ity compared to PMRF. Although Latent-PMRF achieves
+strong performance, we observe a slight decrease in test
+speed compared to PMRF (see Table 4). This is because,
+while the velocity prediction in the latent space is faster, the
+encoding and decoding processes of the V AE are inherently
+slow. Improving the efficiency of the V AE could be a po-
+tential area for further enhancement.
+8
+
+=== PAGE 9 ===
+References
+[1] Michael Samuel Albergo and Eric Vanden-Eijnden. Build-
+ing normalizing flows with stochastic interpolants. In ICLR,
+2023. 2
+[2] Yochai Blau and Tomer Michaeli. The perception-distortion
+tradeoff. In Proceedings of the IEEE conference on computer
+vision and pattern recognition, pages 6228–6237, 2018. 1, 5
+[3] Junyu Chen, Han Cai, Junsong Chen, Enze Xie, Shang Yang,
+Haotian Tang, Muyang Li, and Song Han. Deep compression
+autoencoder for efficient high-resolution diffusion models.
+In ICLR, 2025. 4
+[4] Liangyu Chen, Xiaojie Chu, Xiangyu Zhang, and Jian Sun.
+Simple baselines for image restoration. In European confer-
+ence on computer vision, pages 17–33. Springer, 2022. 4
+[5] Xiaoxu Chen, Jingfan Tan, Tao Wang, Kaihao Zhang, Wen-
+han Luo, and Xiaochun Cao. Towards real-world blind face
+restoration with generative diffusion prior. IEEE Transac-
+tions on Circuits and Systems for Video Technology , 2024.
+5
+[6] Franc ¸ois Chollet. Xception: Deep learning with depthwise
+separable convolutions. In Proceedings of the IEEE con-
+ference on computer vision and pattern recognition , pages
+1251–1258, 2017. 5
+[7] Elad Cohen, Idan Achituve, Idit Diamant, Arnon Netzer, and
+Hai Victor Habi. Efficient image restoration via latent con-
+sistency flow matching. arXiv preprint arXiv:2502.03500 ,
+2025. 5
+[8] Katherine Crowson, Stefan Andreas Baumann, Alex Birch,
+Tanishq Mathew Abraham, Daniel Z Kaplan, and Enrico
+Shippole. Scalable high-resolution pixel-space image syn-
+thesis with hourglass diffusion transformers. In Forty-first
+International Conference on Machine Learning, 2024. 5
+[9] Jiankang Deng, Jia Guo, Niannan Xue, and Stefanos
+Zafeiriou. Arcface: Additive angular margin loss for deep
+face recognition. In Proceedings of the IEEE/CVF con-
+ference on computer vision and pattern recognition , pages
+4690–4699, 2019. 6
+[10] Prafulla Dhariwal and Alexander Nichol. Diffusion models
+beat gans on image synthesis. Advances in neural informa-
+tion processing systems, 34:8780–8794, 2021. 5
+[11] Keyan Ding, Kede Ma, Shiqi Wang, and Eero P Simoncelli.
+Image quality assessment: Unifying structure and texture
+similarity. IEEE transactions on pattern analysis and ma-
+chine intelligence, 44(5):2567–2581, 2020. 6
+[12] Chao Dong, Chen Change Loy, Kaiming He, and Xiaoou
+Tang. Learning a deep convolutional network for image
+super-resolution. In Computer Vision–ECCV 2014: 13th
+European Conference, Zurich, Switzerland, September 6-12,
+2014, Proceedings, Part IV 13 , pages 184–199. Springer,
+2014. 1
+[13] drhead. The vae used for stable diffusion 1.x/2.x and
+other models (kl-f8) has a critical flaw. https :
+/ / www . reddit . com / r / StableDiffusion /
+comments / 1ag5h5s / the _ vae _ used _ for _
+stable _ diffusion _ 1x2x _ and _ other / ?utm _
+source=share&utm_medium=web3x&utm_name=
+web3xcss & utm _ term = 1 & utm _ content = share _
+button, 2024. Accessed: 2025-02-07. 4
+[14] Michael Elad, Bahjat Kawar, and Gregory Vaksman. Image
+denoising: The deep learning revolution and beyond—a sur-
+vey paper. SIAM Journal on Imaging Sciences, 16(3):1594–
+1654, 2023. 1
+[15] Patrick Esser, Robin Rombach, and Bjorn Ommer. Taming
+transformers for high-resolution image synthesis. In Pro-
+ceedings of the IEEE/CVF conference on computer vision
+and pattern recognition, pages 12873–12883, 2021. 4, 5
+[16] Patrick Esser, Sumith Kulal, Andreas Blattmann, Rahim
+Entezari, Jonas M ¨uller, Harry Saini, Yam Levi, Dominik
+Lorenz, Axel Sauer, Frederic Boesel, et al. Scaling recti-
+fied flow transformers for high-resolution image synthesis.
+In Forty-first International Conference on Machine Learn-
+ing, 2024. 2, 3, 4, 5
+[17] Dror Freirich, Tomer Michaeli, and Ron Meir. A theory
+of the distortion-perception tradeoff in wasserstein space.
+Advances in Neural Information Processing Systems , 34:
+25661–25672, 2021. 1
+[18] Peng Gao, Le Zhuo, Dongyang Liu, Ruoyi Du, Xu Luo,
+Longtian Qiu, Yuhang Zhang, Rongjie Huang, Shijie Geng,
+Renrui Zhang, Junlin Xie, Wenqi Shao, Zhengkai Jiang,
+Tianshuo Yang, Weicai Ye, Tong He, Jingwen He, Junjun
+He, Yu Qiao, and Hongsheng Li. Lumina-t2x: Scalable flow-
+based large diffusion transformer for flexible resolution gen-
+eration. In ICLR, 2025. 4
+[19] Ian Goodfellow, Jean Pouget-Abadie, Mehdi Mirza, Bing
+Xu, David Warde-Farley, Sherjil Ozair, Aaron Courville, and
+Yoshua Bengio. Generative adversarial networks. Commu-
+nications of the ACM, 63(11):139–144, 2020. 2, 5
+[20] Yuchao Gu, Xintao Wang, Liangbin Xie, Chao Dong, Gen
+Li, Ying Shan, and Ming-Ming Cheng. Vqfr: Blind face
+restoration with vector-quantized dictionary and parallel de-
+coder. In European Conference on Computer Vision, pages
+126–143. Springer, 2022. 2, 5, 7
+[21] Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun.
+Deep residual learning for image recognition. In Proceed-
+ings of the IEEE conference on computer vision and pattern
+recognition, pages 770–778, 2016. 4
+[22] Martin Heusel, Hubert Ramsauer, Thomas Unterthiner,
+Bernhard Nessler, and Sepp Hochreiter. Gans trained by a
+two time-scale update rule converge to a local nash equilib-
+rium. Advances in neural information processing systems ,
+30, 2017. 2, 3, 6
+[23] Jonathan Ho, Ajay Jain, and Pieter Abbeel. Denoising dif-
+fusion probabilistic models. Advances in neural information
+processing systems, 33:6840–6851, 2020. 1, 5
+[24] Gary B Huang, Marwan Mattar, Tamara Berg, and Eric
+Learned-Miller. Labeled faces in the wild: A database
+forstudying face recognition in unconstrained environments.
+In Workshop on faces in’Real-Life’Images: detection, align-
+ment, and recognition, 2008. 8
+[25] Sadeep Jayasumana, Srikumar Ramalingam, Andreas Veit,
+Daniel Glasner, Ayan Chakrabarti, and Sanjiv Kumar. Re-
+thinking fid: Towards a better evaluation metric for image
+generation. In Proceedings of the IEEE/CVF Conference
+9
+
+=== PAGE 10 ===
+on Computer Vision and Pattern Recognition , pages 9307–
+9315, 2024. 6
+[26] Jiaxi Jiang, Kai Zhang, and Radu Timofte. Towards flex-
+ible blind jpeg artifacts removal. In Proceedings of the
+IEEE/CVF International Conference on Computer Vision ,
+pages 4997–5006, 2021. 1
+[27] Justin Johnson, Alexandre Alahi, and Li Fei-Fei. Percep-
+tual losses for real-time style transfer and super-resolution.
+In Computer Vision–ECCV 2016: 14th European Confer-
+ence, Amsterdam, The Netherlands, October 11-14, 2016,
+Proceedings, Part II 14, pages 694–711. Springer, 2016. 5
+[28] Tero Karras, Samuli Laine, and Timo Aila. A style-based
+generator architecture for generative adversarial networks.
+In Proceedings of the IEEE/CVF conference on computer vi-
+sion and pattern recognition, pages 4401–4410, 2019. 5
+[29] Tero Karras, Samuli Laine, Miika Aittala, Janne Hellsten,
+Jaakko Lehtinen, and Timo Aila. Analyzing and improv-
+ing the image quality of stylegan. In Proceedings of
+the IEEE/CVF conference on computer vision and pattern
+recognition, pages 8110–8119, 2020. 4
+[30] Junjie Ke, Qifei Wang, Yilin Wang, Peyman Milanfar, and
+Feng Yang. Musiq: Multi-scale image quality transformer.
+In Proceedings of the IEEE/CVF international conference on
+computer vision, pages 5148–5157, 2021. 6
+[31] Diederik P Kingma. Auto-encoding variational bayes. In
+ICLR, 2014. 2
+[32] Diederik P Kingma and Jimmy Ba. Adam: A method for
+stochastic optimization. In ICLR, 2015. 5
+[33] Nupur Kumari, Richard Zhang, Eli Shechtman, and Jun-Yan
+Zhu. Ensembling off-the-shelf models for gan training. In
+Proceedings of the IEEE/CVF conference on computer vi-
+sion and pattern recognition, pages 10651–10662, 2022. 2,
+3
+[34] Black Forest Labs. Flux. https://github.com/
+black- forest- labs/flux, 2024. Accessed: 2025-
+02-07. 3, 4, 5
+[35] Christian Ledig, Lucas Theis, Ferenc Husz´ar, Jose Caballero,
+Andrew Cunningham, Alejandro Acosta, Andrew Aitken,
+Alykhan Tejani, Johannes Totz, Zehan Wang, et al. Photo-
+realistic single image super-resolution using a generative ad-
+versarial network. In Proceedings of the IEEE conference on
+computer vision and pattern recognition, pages 4681–4690,
+2017. 5
+[36] Jimmy Lei Ba, Jamie Ryan Kiros, and Geoffrey E Hinton.
+Layer normalization. In NeurIPS, 2016. 4
+[37] Haoying Li, Yifan Yang, Meng Chang, Shiqi Chen, Huajun
+Feng, Zhihai Xu, Qi Li, and Yueting Chen. Srdiff: Single
+image super-resolution with diffusion probabilistic models.
+Neurocomputing, 479:47–59, 2022. 1
+[38] Yawei Li, Kai Zhang, Jingyun Liang, Jiezhang Cao, Ce Liu,
+Rui Gong, Yulun Zhang, Hao Tang, Yun Liu, Denis Deman-
+dolx, et al. Lsdir: A large scale dataset for image restoration.
+In Proceedings of the IEEE/CVF Conference on Computer
+Vision and Pattern Recognition, pages 1775–1787, 2023. 5
+[39] Jingyun Liang, Jiezhang Cao, Guolei Sun, Kai Zhang, Luc
+Van Gool, and Radu Timofte. Swinir: Image restoration us-
+ing swin transformer. InProceedings of the IEEE/CVF inter-
+national conference on computer vision , pages 1833–1844,
+2021. 1
+[40] Xinqi Lin, Jingwen He, Ziyan Chen, Zhaoyang Lyu, Bo Dai,
+Fanghua Yu, Yu Qiao, Wanli Ouyang, and Chao Dong. Diff-
+bir: Toward blind image restoration with generative diffusion
+prior. In European Conference on Computer Vision , pages
+430–448. Springer, 2024. 2, 5, 7
+[41] Yaron Lipman, Ricky T. Q. Chen, Heli Ben-Hamu, Maxim-
+ilian Nickel, and Matthew Le. Flow matching for genera-
+tive modeling. In The Eleventh International Conference on
+Learning Representations, 2023. 2
+[42] Guangming Liu, Xin Zhou, Jianmin Pang, Feng Yue, Wenfu
+Liu, and Junchao Wang. Codeformer: A gnn-nested trans-
+former model for binary code similarity detection. Electron-
+ics, 12(7):1722, 2023. 2, 5, 7
+[43] Xingchao Liu, Chengyue Gong, and qiang liu. Flow straight
+and fast: Learning to generate and transfer data with rectified
+flow. In The Eleventh International Conference on Learning
+Representations, 2023. 2
+[44] Zhuang Liu, Hanzi Mao, Chao-Yuan Wu, Christoph Feicht-
+enhofer, Trevor Darrell, and Saining Xie. A convnet for the
+2020s. In Proceedings of the IEEE/CVF conference on com-
+puter vision and pattern recognition , pages 11976–11986,
+2022. 4
+[45] Xin Luo, Yunan Zhu, Shunxin Xu, and Dong Liu. On the
+effectiveness of spectral discriminators for perceptual qual-
+ity improvement. In Proceedings of the IEEE/CVF Interna-
+tional Conference on Computer Vision, pages 13243–13253,
+2023. 1
+[46] Guy Ohayon, Tomer Michaeli, and Michael Elad. Posterior-
+mean rectified flow: Towards minimum MSE photo-realistic
+image restoration. In The Thirteenth International Confer-
+ence on Learning Representations, 2025. 1, 5, 6, 7, 8
+[47] Maxime Oquab, Timoth ´ee Darcet, Th ´eo Moutakanni, Huy
+V o, Marc Szafraniec, Vasil Khalidov, Pierre Fernandez,
+Daniel Haziza, Francisco Massa, Alaaeldin El-Nouby, et al.
+Dinov2: Learning robust visual features without supervision.
+arXiv preprint arXiv:2304.07193, 2023. 6
+[48] Dustin Podell, Zion English, Kyle Lacey, Andreas
+Blattmann, Tim Dockhorn, Jonas M ¨uller, Joe Penna, and
+Robin Rombach. SDXL: Improving latent diffusion models
+for high-resolution image synthesis. In The Twelfth Interna-
+tional Conference on Learning Representations, 2024. 2, 3,
+4, 5
+[49] Ofir Press, Noah Smith, and Mike Lewis. Train short, test
+long: Attention with linear biases enables input length ex-
+trapolation. In ICLR, 2022. 4
+[50] Robin Rombach, Andreas Blattmann, Dominik Lorenz,
+Patrick Esser, and Bj ¨orn Ommer. High-resolution image
+synthesis with latent diffusion models. In Proceedings of
+the IEEE/CVF conference on computer vision and pattern
+recognition, pages 10684–10695, 2022. 2, 3, 4, 5, 7
+[51] Seyedmorteza Sadat, Jakob Buhmann, Derek Bradley, Otmar
+Hilliges, and Romann M. Weber. LiteV AE: Lightweight and
+efficient variational autoencoders for latent diffusion models.
+In The Thirty-eighth Annual Conference on Neural Informa-
+tion Processing Systems, 2024. 4
+10
+
+=== PAGE 11 ===
+[52] Axel Sauer, Kashyap Chitta, Jens M ¨uller, and Andreas
+Geiger. Projected gans converge faster. Advances in Neural
+Information Processing Systems, 34:17480–17492, 2021. 2,
+3
+[53] Jascha Sohl-Dickstein, Eric Weiss, Niru Maheswaranathan,
+and Surya Ganguli. Deep unsupervised learning using
+nonequilibrium thermodynamics. In International confer-
+ence on machine learning, pages 2256–2265. PMLR, 2015.
+1
+[54] George Stein, Jesse Cresswell, Rasa Hosseinzadeh, Yi Sui,
+Brendan Ross, Valentin Villecroze, Zhaoyan Liu, Anthony L
+Caterini, Eric Taylor, and Gabriel Loaiza-Ganem. Exposing
+flaws of generative model evaluation metrics and their unfair
+treatment of diffusion models. Advances in Neural Informa-
+tion Processing Systems, 36, 2024. 6
+[55] Christian Szegedy, Wei Liu, Yangqing Jia, Pierre Sermanet,
+Scott Reed, Dragomir Anguelov, Dumitru Erhan, Vincent
+Vanhoucke, and Andrew Rabinovich. Going deeper with
+convolutions. In Proceedings of the IEEE conference on
+computer vision and pattern recognition , pages 1–9, 2015.
+2
+[56] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszko-
+reit, Llion Jones, Aidan N Gomez, Łukasz Kaiser, and Illia
+Polosukhin. Attention is all you need. Advances in neural
+information processing systems, 30, 2017. 4
+[57] Jianyi Wang, Kelvin CK Chan, and Chen Change Loy. Ex-
+ploring clip for assessing the look and feel of images. InPro-
+ceedings of the AAAI conference on artificial intelligence ,
+pages 2555–2563, 2023. 6
+[58] Jianyi Wang, Zongsheng Yue, Shangchen Zhou, Kelvin CK
+Chan, and Chen Change Loy. Exploiting diffusion prior for
+real-world image super-resolution. International Journal of
+Computer Vision, 132(12):5929–5949, 2024. 1, 2
+[59] Tao Wang, Kaihao Zhang, Xuanxi Chen, Wenhan Luo,
+Jiankang Deng, Tong Lu, Xiaochun Cao, Wei Liu, Hong-
+dong Li, and Stefanos Zafeiriou. A survey of deep face
+restoration: Denoise, super-resolution, deblur, artifact re-
+moval. arXiv preprint arXiv:2211.02831, 2022. 1
+[60] Xintao Wang, Yu Li, Honglun Zhang, and Ying Shan. To-
+wards real-world blind face restoration with generative fa-
+cial prior. In Proceedings of the IEEE/CVF conference on
+computer vision and pattern recognition, pages 9168–9178,
+2021. 2, 5, 6, 7, 8
+[61] Xintao Wang, Liangbin Xie, Chao Dong, and Ying Shan.
+Real-esrgan: Training real-world blind super-resolution with
+pure synthetic data. In Proceedings of the IEEE/CVF inter-
+national conference on computer vision , pages 1905–1914,
+2021. 5
+[62] Zhou Wang, Eero P Simoncelli, and Alan C Bovik. Mul-
+tiscale structural similarity for image quality assessment. In
+The Thrity-Seventh Asilomar Conference on Signals, Systems
+& Computers, 2003, pages 1398–1402. Ieee, 2003. 5
+[63] Zhouxia Wang, Jiawei Zhang, Runjian Chen, Wenping
+Wang, and Ping Luo. Restoreformer: High-quality blind face
+restoration from undegraded key-value pairs. InProceedings
+of the IEEE/CVF conference on computer vision and pattern
+recognition, pages 17512–17521, 2022. 2, 5, 7
+[64] Haoning Wu, Zicheng Zhang, Weixia Zhang, Chaofeng
+Chen, Liang Liao, Chunyi Li, Yixuan Gao, Annan Wang,
+Erli Zhang, Wenxiu Sun, Qiong Yan, Xiongkuo Min, Guang-
+tao Zhai, and Weisi Lin. Q-align: Teaching LMMs for visual
+scoring via discrete text-defined levels. InProceedings of the
+41st International Conference on Machine Learning , pages
+54015–54029. PMLR, 2024. 5, 6
+[65] Yuxin Wu and Kaiming He. Group normalization. In Pro-
+ceedings of the European conference on computer vision
+(ECCV), pages 3–19, 2018. 4
+[66] Ling Yang, Zixiang Zhang, Zhilong Zhang, Xingchao Liu,
+Minkai Xu, Wentao Zhang, Chenlin Meng, Stefano Er-
+mon, and Bin Cui. Consistency flow matching: Defin-
+ing straight flows with velocity consistency. arXiv preprint
+arXiv:2407.02398, 2024. 5
+[67] Zongsheng Yue and Chen Change Loy. Difface: Blind face
+restoration with diffused error contraction. IEEE Transac-
+tions on Pattern Analysis and Machine Intelligence, 2024. 5,
+6, 7
+[68] Zongsheng Yue, Jianyi Wang, and Chen Change Loy.
+Resshift: Efficient diffusion model for image super-
+resolution by residual shifting. In Thirty-seventh Conference
+on Neural Information Processing Systems, 2023. 2, 5, 7
+[69] Zongsheng Yue, Jianyi Wang, and Chen Change Loy. Effi-
+cient diffusion model for image restoration by residual shift-
+ing. IEEE Transactions on Pattern Analysis and Machine
+Intelligence, 47(1):116–130, 2025. 7
+[70] Kaihao Zhang, Wenqi Ren, Wenhan Luo, Wei-Sheng Lai,
+Bj¨orn Stenger, Ming-Hsuan Yang, and Hongdong Li. Deep
+image deblurring: A survey. International Journal of Com-
+puter Vision, 130(9):2103–2130, 2022. 1
+[71] Richard Zhang, Phillip Isola, Alexei A Efros, Eli Shecht-
+man, and Oliver Wang. The unreasonable effectiveness of
+deep features as a perceptual metric. In Proceedings of the
+IEEE conference on computer vision and pattern recogni-
+tion, pages 586–595, 2018. 2, 3, 6
+[72] Shangchen Zhou, Kelvin Chan, Chongyi Li, and
+Chen Change Loy. Towards robust blind face restora-
+tion with codebook lookup transformer. Advances in Neural
+Information Processing Systems, 35:30599–30611, 2022. 8
+[73] Yixuan Zhu, Wenliang Zhao, Ao Li, Yansong Tang, Jie
+Zhou, and Jiwen Lu. Flowie: Efficient image enhancement
+via rectified flow. In Proceedings of the IEEE/CVF Con-
+ference on Computer Vision and Pattern Recognition, pages
+13–22, 2024. 1, 2, 5, 7
+11

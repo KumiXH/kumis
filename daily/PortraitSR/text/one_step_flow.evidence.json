@@ -1,0 +1,64 @@
+{
+  "key": "one_step_flow",
+  "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\05_efficiency\\one_step_flow_2603.03648.pdf",
+  "page_count": 6,
+  "first_page_excerpt": "1\nLinearized Coupling Flow with Shortcut Constraints\nfor One-Step Face Restoration\nXiaohui Sun, Hanlin Wu ,Member, IEEE\nAbstract—Face restoration can be formulated as a continuous-\ntime transformation between image distributions via Flow Match-\ning (FM). However, standard FM typically employs independent\ncoupling, ignoring the statistical correlation between low-quality\n(LQ) and high-quality (HQ) data. This leads to intersecting\ntrajectories and high velocity-field curvature, requiring multi-\nstep integration. We propose Shortcut-constrained Coupling Flow\nfor Face Restoration (SCFlowFR) to address these challenges.\nBy establishing a data-dependent coupling, we explicitly model\nthe LQ–HQ dependency to minimize path crossovers and pro-\nmote near-linear probability flow. Furthermore, we employ a\nconditional mean estimator to refine the source distribution’s\nanchor, effectively tightening the transport cost and stabilizing\nthe velocity field. To ensure stable one-step inference, a shortcut\nconstraint is introduced to supervise average velocities over\narbitrary intervals, mitigating discretization bias in large-step\nupdates. SCFlowFR achieves state-of-the-art one-step restoration,\nproviding a superior trade-off between perceptual fidelity and\ncomputational efficiency.\nIndex Terms—Data-dependent coupling, face restoration, flow\nmatching, shortcut constraints.\nI. INTRODUCTION\nF\nACE restoration, a classical ill-posed inverse problem,\nseeks to reconstruct high-quality (HQ) facial images from\ncorrupted low-quality (LQ) observations. It is fundamental\nto various signal processing applications, including biometric\nidentification and video communication [1], [2]. While recent\ngenerative paradigms have significantly advanced restoration\nfidelity, a critical trade-off persists between reconstruction\nquality and efficiency [3], [4].\nDiffusion Models (DMs) formulate restoration as a gradual\nrefinement process [5], [6], [7], achieving impressive percep-\ntual quality and fidelity by integrating a stochastic differential\nequation (SDE) [8]. However, their iterative nature requires\ndozens of sampling steps, leading to high inference latency that\nhinders real-time signal processing. Recently, Flow Matching\n(FM) [9], [10] has emerged as an efficient deterministic\nalternative. FM learns a time-dependent velocity fieldv θ\nthat satisfies the continuity equation, defining an ordinary\ndifferential equation (ODE) to transport a source distribution\nρ0 to the target HQ distributionρ 1.\nDespite its potential, standard FM-based restoration [11],\n[12] typically assumes anindependent coupling, where source\nsamples (e.g., Gaussian noise) and target HQ images are\nThis work was supported in part by the National Natural Science Foun-\ndation of China under Grant 62401064, and in part by the Fundamental\nResearch Funds for the Central Universities under Grant 2024JJ040 and Grant\n2024TD001.(Corresponding author: Hanlin Wu.)\nThe authors are with the School of Information Science and Technol-\nogy, Beijing Foreign Studies University, Beijing 100089, China (e-mail:\nhlwu@bfsu.edu.cn).\nHQHQLQ\n(c)\nLQHQnoise\n(a) (d)(b)\nHQnoise\n𝜌𝜌0 𝜌𝜌1 𝜌𝜌0 𝜌𝜌1 𝜌𝜌0 𝜌𝜌1 𝜌𝜌0 𝜌𝜌1\n( ,, )tv xt tθ ∆\n'( , ', )tvxt tθ ∆\n( , ,2 )tv xt tθ ∆\n⊥⊥ coupled coupled\nFig. 1. (a) Intersecting paths in independent coupling. (b) Resulting curved\nvelocity field in vanilla FM. (c) Straighter trajectories via data-dependent\ncoupling. (d) One-step sampling via shortcut-constrained average velocity.\npaired without considering the observed LQ signal. From a\nstatistical perspective, this ignores the inherent conditional\ndependency between the LQ input and the HQ ground truth.\nAs illustrated in Fig. 1 (a), independent pairing yields inter-\nsecting interpolation paths. Since the resulting ODE flow\nis deterministic and non-intersecting, the model is forced\nto learn a highly non-linear velocity field with significant\ntrajectory curvature (Fig. 1 (b)). In such curved dynamics, the\napproximation of the instantaneous derivative during one-step\ninference is highly susceptible to discretization errors, leading\nto degraded fidelity [13], [14].\nTo address the challenges of non-linear transport and in-\ntegration instability, we propose Shortcut-constrained Cou-\npling Flow for Face Restoration (SCFlowFR). Our frame-\nwork optimizes the transport dynamics through three key\ninnovations. First, we establish adata-dependent coupling\nthat reformulates the transport as a conditional process. By\nleveraging the mutual information between the LQ and HQ\ndomains, we minimize path crossovers and promote near-linear\nprobability flow (Fig. 1 (c)). Second, we utilize aconditional\nmean estimationas a Bayesian-like prior to anchor the source\ndistribution. This strategy effectively minimizes the expected\nsquared displacement (transport cost) and stabilizes the learned\nvelocity field. Third, we integrate ashortcut constraintthat\nsupervises the model to predict the average velocity over\narbitrary time intervals rather than the instantaneous derivative.\nThis enables the model to implicitly compensate for residual\ncurvature, ensuring stable and accurate one-step inference even\nunder complex degradations (Fig. 1 (d)).\nThe main contributions can be summarized as follows:\n1) We propose a novel FM framework that establishes a\ndata-dependent coupling, explicitly modeling the LQ–HQ\ndependency to linearize the transport trajectory.\n2) We employ aconditional mean estimatorthat refines\nthe source distribution’s center, thereby tightening the\ntransport cost bound and reducing velocity field variance.\n3) We introduce ashortcut constraintthat supervises av-\nerage velocities over arbitrary time intervals, enabling\narXiv:2603.03648v2  [cs.CV]  8 Apr 2026",
+  "figure_candidates": [
+    {
+      "page": 1,
+      "caption": "Fig. 1. (a) Intersecting paths in independent coupling. (b) Resulting curved"
+    },
+    {
+      "page": 2,
+      "caption": "Fig. 2. Overview of SCFlowFR. We construct a coupled LQ–HQ transport path (left), conditioning the velocity fieldv θ on a coarse estimatecfromτ ϕ. A"
+    },
+    {
+      "page": 4,
+      "caption": "Fig. 3. Qualitative comparisons on the CelebA-Test dataset."
+    },
+    {
+      "page": 6,
+      "caption": "Fig. 4. Qualitative comparisons on three wild datasets. From top to bottom:"
+    }
+  ],
+  "table_candidates": [],
+  "keyword_pages": {
+    "architecture": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "identity": [
+      5
+    ],
+    "portrait_detail": [
+      1,
+      2,
+      4,
+      5,
+      6
+    ],
+    "efficiency": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "datasets": [
+      3,
+      4,
+      6
+    ],
+    "limitations": []
+  },
+  "source_urls": [
+    {
+      "page": 5,
+      "url": "https://github.com/madebyollin/taesd"
+    }
+  ],
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\one_step_flow.txt"
+}

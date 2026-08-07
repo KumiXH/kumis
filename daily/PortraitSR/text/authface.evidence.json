@@ -1,0 +1,123 @@
+{
+  "key": "authface",
+  "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\01_single_face\\authface_2410.09864.pdf",
+  "page_count": 10,
+  "first_page_excerpt": "AuthFace: Towards Authentic Blind Face Restoration with\nFace-oriented Generative Diffusion Prior\nGuoqiang Liang∗\nHong Kong University of Science and\nTechnology (Guangzhou)\nGuangzhou, China\ngliang041@connect.hkust-gz.edu.cn\nQingnan Fan†\nvivo Mobile Communication Co., Ltd\nHangzhou, China\nfqnchina@gmail.com\nBingtao Fu\nAnt Group\nHangzhou, China\nbingtaofu93@gmail.com\nJinwei Chen\nvivo Mobile Communication Co., Ltd\nHangzhou, China\njinwei.chen@vivo.com\nHong Gu\nvivo Mobile Communication Co., Ltd\nHangzhou, China\nguhong@vivo.com\nLin Wang†\nNanyang Technological University\nSingapore\nlinwang@ntu.edu.sg\nAbstract\nBlind face restoration (BFR) is a fundamental and challenging prob-\nlem in computer vision. To faithfully restore high-quality (HQ)\nphotos from poor-quality ones, recent research endeavors predom-\ninantly rely on facial image priors from the powerful pretrained\ntext-to-image (T2I) diffusion models. However, such priors often\nlead to the incorrect generation of non-facial features and insuf-\nficient facial details, thus rendering them less practical for real-\nworld applications. In this paper, we propose a novel framework,\nnamelyAuthFacethat achieves highly authentic face restoration\nresults by exploring a face-oriented generative diffusion prior. To\nlearn such a prior, we first collect a dataset of1.5Khigh-quality\nimages, with resolutions exceeding 8K, captured by professional\nphotographers. Based on the dataset, we then introduce a novel face-\noriented restoration-tuning pipeline that fine-tunes a pretrained\nT2I model. The photography-guided annotation system and facial\nprior refinements fully explore the potential of these high-quality\nphotographic images. In this way, the potent natural image pri-\nors from pretrained T2I diffusion models can be subtly harnessed,\nspecifically enhancing their capability in facial detail restoration.\nMoreover, to minimize artifacts in critical facial areas, such as\neyes and mouth, we propose a time-aware latent facial feature\nloss to learn the authentic face restoration process. Extensive exper-\niments on the synthetic and real-world BFR datasets demonstrate\nthe superiority of our approach. Code and models are available at\nhttps://github.com/EthanLiang99/AuthFace.\nCCS Concepts\n•Computing methodologies→Computer vision tasks.\n∗Work done during internship at vivo. †Corresponding authors.\nPermission to make digital or hard copies of all or part of this work for personal or\nclassroom use is granted without fee provided that copies are not made or distributed\nfor profit or commercial advantage and that copies bear this notice and the full citation\non the first page. Copyrights for components of this work owned by others than the\nauthor(s) must be honored. Abstracting with credit is permitted. To copy otherwise, or\nrepublish, to post on servers or to redistribute to lists, requires prior specific permission\nand/or a fee. Request permissions from permissions@acm.org.\nMM ’25, Dublin, Ireland.\n©2025 Copyright held by the owner/author(s). Publication rights licensed to ACM.\nACM ISBN 979-8-4007-2035-2/2025/10\nhttps://doi.org/10.1145/3746027.3755165\nKeywords\nText-to-image Diffusion Model; Blind Face Restoration\nACM Reference Format:\nGuoqiang Liang, Qingnan Fan†, Bingtao Fu, Jinwei Chen, Hong Gu, and Lin\nWang†. 2025. AuthFace: Towards Authentic Blind Face Restoration with\nFace-oriented Generative Diffusion Prior. InProceedings of the 33rd ACM\nInternational Conference on Multimedia (MM ’25), October 27–31, 2025, Dublin,\nIreland.ACM, New York, NY, USA, 10 pages. https://doi.org/10.1145/3746027.\n3755165\n1 Introduction\nFace images captured in natural settings often exhibit various forms\nof degradation, including compression, blur, and noise [ 52, 59].\nCapturing high-quality (HQ) face images is crucial, as humans\nare highly sensitive to subtle facial details. Blind face restoration\n(BFR) aims to reconstruct HQ images from degraded inputs and\nhas rapidly progressed in recent years due to significant research\ninterest. However, BFR remains an ill-posed problem due to the\nunknown degradation and the loss of valuable information resulting\nfrom these complex conditions [74].\nSufficient prior information is critical for HQ reconstruction.\nResearchers have used geometric and reference priors from sources\nlike [4, 6, 9, 12, 20, 24, 27–29, 35, 40, 45, 63, 67, 75] to guide face\nrestoration. These priors, however, are limited by their sensitiv-\nity to degradation and inability to capture fine facial details, and\ncan even result in corrupted texture details due to incorrect prior\ninformation [34]. With advancements in generative models, such\nas StyleGAN [22] and VQVAE [39], recent works [5, 6, 27, 28, 30,\n49, 52, 54, 56–58, 62, 74] have leveraged pretrained networks to\nderive facial priors, achieving superior results compared to earlier\nmethods. Nonetheless, these approaches still face significant per-\nformance declines in handling unseen cases. Denoising diffusion\nprobabilistic models (DDPMs) [17] have shown promise as an al-\nternative to generative adversarial networks (GANs) [46] in image\ngeneration. Some approaches [ 59, 68] use pretrained DDPMs to\ndiffuse and then denoise degraded inputs. However, their practical\napplication is hindered by the loss of original identity and detailed\nfacial features [36], with pretrained DDPMs also facing limitations\nin representational capacity.\narXiv:2410.09864v2  [cs.CV]  6 Mar 2026",
+  "figure_candidates": [
+    {
+      "page": 2,
+      "caption": "Figure 1: Compared to CodeFormer [ 74] and DiffBIR [31], our method more effectively captures and renders fine-grained facial"
+    },
+    {
+      "page": 3,
+      "caption": "Figure 2: (a) A HQ face image with its paired tags generated through photography-guided image annotation. Specifically, we"
+    },
+    {
+      "page": 3,
+      "caption": "Fig. 2 (a)). In line with our established criteria, we collect a curated"
+    },
+    {
+      "page": 4,
+      "caption": "Figure 3: An overview of our framework consisting Stage I & II. Denoising UNet, carried over from Stage I, maintains its facial"
+    },
+    {
+      "page": 5,
+      "caption": "Fig. 3 illustrates the structure of stage II. Given the fine-tuned"
+    },
+    {
+      "page": 6,
+      "caption": "Figure 4: Qualitative results on CelebA-Test dataset. Red box areas highlight the detailed skin texture achieved by our method."
+    },
+    {
+      "page": 7,
+      "caption": "Figure 5: Qualitative results are presented on LFW-Test [52], WebPhoto-Test [52], and WIDER-Test [74]. Zoom in for details."
+    },
+    {
+      "page": 8,
+      "caption": "Figure 6: Visualization of ablation results. Zoom in for more details."
+    },
+    {
+      "page": 8,
+      "caption": "Fig. 6) and eyelashes (red box), which align the great improvemnt on"
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 7,
+      "caption": "Table 1: Quantitative results for blind face restoration on both synthetic and real-world datasets. The best result is highlighted"
+    },
+    {
+      "page": 8,
+      "caption": "Table 2: Ablation studies of variant generative diffusion prior"
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "identity": [
+      1,
+      3
+    ],
+    "portrait_detail": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "efficiency": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "datasets": [
+      6,
+      7,
+      8,
+      10
+    ],
+    "limitations": [
+      1,
+      2,
+      8
+    ]
+  },
+  "source_urls": [
+    {
+      "page": 1,
+      "url": "https://github.com/EthanLiang99/AuthFace"
+    },
+    {
+      "page": 1,
+      "url": "https://doi.org/10.1145/3746027.3755165"
+    },
+    {
+      "page": 1,
+      "url": "https://doi.org/10.1145/3746027"
+    },
+    {
+      "page": 9,
+      "url": "https://cdn"
+    },
+    {
+      "page": 10,
+      "url": "https://stability.ai/stable-diffusion-2"
+    }
+  ],
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\authface.txt"
+}

@@ -1,0 +1,102 @@
+{
+  "key": "fadra",
+  "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\04_video_face\\fadra_2607.06389.pdf",
+  "page_count": 13,
+  "first_page_excerpt": "1\nFADRA: Frequency-Aware Diffusion with Residual Adaptation for\nVideo Face Restoration\nJin Jiang 1 Jia Wang2 Panwen Hu3 Weiran Zhao1 Shengcai Liao 1†\n1UAEU 2OUC 3MBZUAI\nAbstract—Video face restoration (VFR) aims to recover high-\nquality and temporally consistent facial details from severely de-\ngraded video sequences; however, existing methods still struggle\nto balance spatial fidelity and temporal coherence under complex\ndegradations. To address this, we propose FADRA, a frequency-\naware diffusion framework with iterative residual adaptation\nspecifically tailored for robust VFR. We first leverage the strong\ntemporal consistency of a pre-trained text-to-video diffusion\nmodel and introduce lightweight LoRA adapters together with\na Low-Quality (LQ) Pixel-Alignment Feature Fusion module to\nefficiently adapt the frozen generative prior to the VFR task. To\nfurther adapt the frozen diffusion backbone to the downstream\nVFR task beyond LoRA-based adaptation, we introduce a Re-\npeated Residual Adaptation Head (RRAH) for step-wise residual\nrefinement after the diffusion backbone. To make this refinement\nexplicitly guided by the degraded observation, RRAH further\ntakes the LQ latent together with the current velocity prediction\nas input, allowing the model to repeatedly revisit LQ cues and\npredict residual updates at each flow-matching step. This LQ-\nguided repeated residual adaptation helps recover fine facial\ndetails while preserving the inherent temporal priors of the pre-\ntrained model. Furthermore, to ensure the structural integrity of\nperceptually important details, we introduce a Frequency-Aware\nLoss that provides explicit supervision across multiple spectral\nbands, emphasizing visually sensitive frequency components that\nare crucial for perceptual quality and prone to temporal jittering.\nExtensive experiments demonstrate that FADRA recovers better\nfacial structures and produces more temporally consistent videos\nthan state-of-the-art methods, leading to clear gains in both\nquantitative metrics and visual perception.\nIndex Terms—Video face restoration, Diffusion models,\nFrequency-aware loss, Temporal consistency, Repeated residual\nadaptation.\nI. INTRODUCTION\nVideo face restoration (VFR) aims to recover high-quality\nand temporally consistent facial details from severely degraded\nvideo sequences. Despite recent progress, VFR remains highly\nchallenging due to the need to simultaneously reconstruct\nfine-grained facial structures and maintain temporal coherence\nacross frames under complex degradations such as blur, noise,\nand compression artifacts [1]–[4]. The problem becomes even\nJin Jiang, Weiran Zhao, and Shengcai Liao are with the College of\nInformation Technology (CIT), United Arab Emirates University (UAEU),\nAl Ain, Abu Dhabi, United Arab Emirates.\nJia Wang is with the State Key Laboratory of Physical Oceanography and\nthe Faculty of Information Science and Engineering, Ocean University of\nChina (OUC), Shandong, 266100, China.\nPanwen Hu is with the Computer Vision Department, Mohamed bin Zayed\nUniversity of Artificial Intelligence (MBZUAI), Abu Dhabi, United Arab\nEmirates.\n†Corresponding author: Shengcai Liao (email: scliao@ieee.org).\n…SVFRFVD:66.80\n…OursFVD:38.97\n…PGTFormerFVD:73.52\n…KEEPFVD: 154.73\n…DiffBIRFVD: 53.35\nExisting Methods:•Over-smoothing•Flicker•Temporal Inconsistency\nOurs:•Sharp Details•Stable ResultsTemporally Stable\nInconsistent Over Time\nHigher FVDLower Quality\nBest QualityBest FVD 38.97\nFig. 1. Visual comparison with state-of-the-art methods on video frames.\nExisting methods often produce over-smoothed facial details and temporally\ninconsistent restorations, leading to flickering artifacts and higher FVD scores.\nIn contrast, FADRA restores sharper eye details and maintains a stable\nappearance across frames, achieving the best FVD on the VFHQ test set.\nmore difficult when the input videos exhibit large pose varia-\ntions or expressive facial motions.\nExisting VFR approaches [5]–[7] typically follow either\nframe-wise restoration or temporal aggregation paradigms.\nFrame-based methods process each frame independently and\nthus may achieve reasonable spatial quality, but they often\nsuffer from noticeable temporal flickering and identity drift.\nIn contrast, video-based models aggregate information over\ntime to improve consistency, yet they often oversmooth high-\nfrequency facial details, e.g., eyes, mouth, and teeth, that are\ncrucial for perceptual quality.\nRecently, diffusion models have demonstrated remarkable\nperformance on image and video restoration tasks [8]–[11]\nthanks to their strong generative priors and ability to model\ncomplex data distributions. However, standard diffusion [12],\n[13] or flow-matching frameworks [14] typically predict noise\nor velocity conditioned on the current state, but lack an explicit\nmechanism to make full use of the low-quality input cues\nthroughout the trajectory. Once early predictions underutilize\nor misinterpret these cues, the model may fail to recover subtle\nfacial structures, particularly under severe degradations. More-\nover, existing diffusion-based restoration methods [15], [16]\nmainly rely on pixel-space or latent-space losses that implicitly\ntreat different frequency components equally. Such uniform\nsupervision is suboptimal for facial restoration, where high-\nfrequency structures and textures carry important perceptual\ncues and are especially prone to temporal jittering [17].\nTo address the above issues, we propose FADRA, a\nfrequency-aware diffusion framework with iterative residual\nadaptation specifically tailored for robust VFR. We first lever-\narXiv:2607.06389v1  [cs.CV]  7 Jul 2026",
+  "figure_candidates": [
+    {
+      "page": 1,
+      "caption": "Fig. 1. Visual comparison with state-of-the-art methods on video frames."
+    },
+    {
+      "page": 3,
+      "caption": "Fig. 2. Overview of the proposed FADRA framework. During training, low-quality (LQ) and high-quality (HQ) videos are both encoded into the latent space"
+    },
+    {
+      "page": 4,
+      "caption": "Fig. 3. Illustration of the LQ-guided “re-examination” mechanism in the Repeated Residual Adaptation Head (RRAH)."
+    },
+    {
+      "page": 7,
+      "caption": "Fig. 4. Visual comparison of restoration results from different methods on the VFHQ test set. For two image-based methods, RestoreFormer++ [5] and"
+    },
+    {
+      "page": 8,
+      "caption": "Fig. 5. Visual comparison of restoration results from different methods on examples from CelebV-HQ test set. For two image-based methods, RestoreFormer++"
+    },
+    {
+      "page": 9,
+      "caption": "Fig. 6. Visual comparison of restoration results from different methods on real movies. For two image-based methods, RestoreFormer++ and DiffBIR, we"
+    },
+    {
+      "page": 11,
+      "caption": "Fig. 7. Visualization of latent-space error and frequency statistics between ground-truth and predicted latents. MSE: mean squared error; MAE: mean absolute"
+    }
+  ],
+  "table_candidates": [],
+  "keyword_pages": {
+    "architecture": [
+      1,
+      2,
+      3,
+      5,
+      6,
+      10,
+      12
+    ],
+    "identity": [
+      1,
+      2,
+      3,
+      5,
+      6,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "portrait_detail": [
+      1,
+      2,
+      3,
+      4,
+      6,
+      8,
+      12,
+      13
+    ],
+    "efficiency": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13
+    ],
+    "datasets": [
+      1,
+      2,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      13
+    ],
+    "limitations": [
+      2
+    ]
+  },
+  "source_urls": [],
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\fadra.txt"
+}

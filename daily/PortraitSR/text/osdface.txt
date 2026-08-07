@@ -1,0 +1,1545 @@
+=== PAGE 1 ===
+OSDFace: One-Step Diffusion Model for Face Restoration
+Jingkai Wang1*, Jue Gong 1*, Lin Zhang 1, Zheng Chen 1
+Xing Liu2, Hong Gu 2, Yutong Liu 1†, Yulun Zhang 1†, Xiaokang Yang 1
+1Shanghai Jiao Tong University, 2vivo Mobile Communication Co., Ltd
+Abstract
+Diffusion models have demonstrated impressive perfor-
+mance in face restoration. Yet, their multi-step inference
+process remains computationally intensive, limiting their
+applicability in real-world scenarios. Moreover, existing
+methods often struggle to generate face images that are har-
+monious, realistic, and consistent with the subject’s identity.
+In this work, we propose OSDFace, a novel one-step diffu-
+sion model for face restoration. Specifically, we propose
+a visual representation embedder (VRE) to better capture
+prior information and understand the input face. In VRE,
+low-quality faces are processed by a visual tokenizer and
+subsequently embedded with a vector-quantized dictionary
+to generate visual prompts. Additionally, we incorporate a
+facial identity loss derived from face recognition to further
+ensure identity consistency. We further employ a generative
+adversarial network (GAN) as a guidance model to encour-
+age distribution alignment between the restored face and
+the ground truth. Experimental results demonstrate that
+OSDFace surpasses current state-of-the-art (SOTA) meth-
+ods in both visual quality and quantitative metrics, gen-
+erating high-fidelity, natural face images with high iden-
+tity consistency. The code and model will be released at
+https://github.com/jkwang28/OSDFace.
+1. Introduction
+Face restoration aims to restore high-quality (HQ) face im-
+ages from degraded low-quality (LQ) inputs caused by com-
+plex degradation processes. Blur, noise, downsampling, and
+JPEG compression are common degradation types that can
+significantly affect the quality of face images, leading to
+an ill-posed problem. Recent advancements focus on lever-
+aging CNN-based methods and Transformer-based meth-
+ods [51, 58, 61, 74] to restore HQ face images, and have
+shown remarkable performance. However, due to the severe
+degradation of face images, generative models with strong
+prior knowledge exhibit irreplaceable advantages.
+Generative adversarial networks (GANs) [14] and dif-
+*Equal contribution.
+†Corresponding authors.
+HQ (512×512) LQ (512 ×512) PGDiff [64] DifFace [70]
+MACs (T) / Time (s) / # Steps 481.0 / 85.8 / 1,000 18.68 / 7.05 / 250
+DiffBIR [32] OSEDiff [59] OSEDiff* [59] OSDFace (ours)
+189.2 / 9.03 / 50 2.269 / 0.13 / 1 2.269 / 0.13 / 1 2.132 / 0.10 / 1
+Figure 1. Visual samples of diffusion-based face restoration meth-
+ods. We provide multiply-accumulate operations (MACs), time,
+and number of timesteps during inference. Our OSDFace achieves
+a more natural and faithful visual result than other ones.
+fusion models [18, 46, 47] have gained considerable at-
+tention for generating high-fidelity images with percep-
+tual details. Many efforts, such as DifFace [70] and Diff-
+BIR [32], have also been applied to restoring HQ face im-
+ages [3, 6, 7, 36, 38, 49, 54, 64, 66]. However, GANs are
+challenging to train and may encounter issues such as mode
+collapse and training instability. Conversely, diffusion mod-
+els produce promising results but require multiple forward
+passes during inference, leading to increased computational
+cost and longer inference time.
+To speed up the diffusion inference, one-step diffusion
+(OSD) models [28, 59] have emerged as a promising re-
+search topic. Benefiting from the recently developed gen-
+erative diffusion models, especially large-scale pretrained
+text-to-image (T2I) models [40, 41], OSD models [28, 59]
+enjoy the powerful restoration capability and fast inference
+speed. It is anticipated that OSD models could be highly
+competitive in face restoration practical applications.
+As shown in Fig. 1, most diffusion-based face restora-
+tion methods can effectively recover basic facial features
+such as eyes, mouth, and contour. However, details, such as
+realistic-looking hair and complex backgrounds, often re-
+main unharmonious. The primary issue lies in the insuf-
+ficient incorporation of face priors [62]. Some diffusion-
+based methods [7, 32, 70] rely solely on the diffusion
+1
+arXiv:2411.17163v2  [cs.CV]  23 Apr 2025
+
+=== PAGE 2 ===
+LPIPS
+FID(HQ)
+NIQE
+MUSIQ
+Deg.
+LMD
+FID(FFHQ)
+DISTS
+LPIPS RestoreFormer++
+VQFR
+CodeFormer
+DAEFR
+PGDiff
+DifFace
+DiffBIR
+OSEDiff*
+OSDFace
+Figure 2. Performance comparison on the CelebA-Test. Those
+metrics which smaller scores indicate better image quality, are
+inverted and normalized for display. OSDFace achieves leading
+scores on most metrics with only one diffusion step.
+model without considering face priors, resulting in unrealis-
+tic restorations. Other methods [49, 64] attempt to use face
+priors, but either limit the generative capabilities or cause
+information reduction. On the other hand, existing general
+OSD image restoration models, such as OSEDiff [59], are
+not specifically designed for facial features. OSEDiff em-
+ploys image-to-tag prior and works well for natural images.
+However, it meets challenges when applied to faces, as hu-
+mans are highly sensitive to facial features, and even minor
+inconsistencies or unrealistic details are easily noticeable.
+Thus, it is worthwhile to investigate how to design a
+prior capturer and apply it to OSD model. One key is-
+sue is that designing priors to capture rich facial features
+is challenging. Vector-quantized (VQ) prior-based meth-
+ods, such as CodeFormer [74] and DAEFR [51], effectively
+leverage codebooks trained in HQ data as priors for face
+restoration. These models perform well in generating facial
+features. However, the face images often lack fine details
+and display unreal backgrounds because they are generated
+by the codebook items directly. Furthermore, incorporat-
+ing priors into diffusion models for face restoration is also a
+critical focus. Numerous efforts have been undertaken to in-
+corporate face priors. For example, PGDiff [64] employs a
+face prior by pretraining a VQ-based restorer and using it as
+a target to guide the diffusion model. Due to limitations im-
+posed by the target model, such a configuration inhibits the
+generative capabilities. In addition, CLRFace [49] passes
+denoised latent vectors to a pretrained codebook and a sub-
+sequent decoder. Relying on direct image generation with a
+fixed-size codebook limits the diversity of results.
+To alleviate the limitations, we propose a novel method,
+OSDFace, for face restoration. Firstly, OSDFace is an OSD
+model that leverages the powerful image restoration capa-
+bilities of diffusion models, as shown in Fig. 2, while offer-
+ing a fast inference speed (about 0.1s for a 512×512 image).
+Secondly, our OSDFace integrates a visual representation
+embedder (VRE) to extract rich facial information directly
+from LQ inputs. Our proposed VRE consists of two com-
+ponents: a visual tokenizer and a VQ embedder. The vi-
+sual tokenizer contains a V AE encoder and a VQ dictionary
+matching function. Trained on LQ data, it could efficiently
+capture information from LQ faces. In the same LQ seman-
+tic space, the VQ embedder performs a dictionary lookup of
+feature categories to obtain the visual prompt inO(1) time.
+Thirdly, to better keep a consistent identity, we incorporate
+a facial identity loss derived from face recognition into our
+training process. This approach significantly reduces the
+distance between the generated faces and the ground truth
+in the compact deep feature space. Besides, we employ a
+GAN discriminator as a guidance model, which encourages
+the distribution alignment between the generated faces and
+the ground truth. The alignment enables the model suitable
+for faces in complex environments.
+Our contributions can be summarized as follows.
+• We propose OSDFace, a novel and effective one-step dif-
+fusion model for face restoration. This is the first attempt
+to utilize one-step diffusion for restoring faces.
+• We design the visual representation embedder (VRE). Us-
+ing LQ dictionary, VRE captures rich prior from LQ im-
+ages for a deeper understanding of visual content.
+• We customize a comprehensive method for realistic face
+alignment, incorporating facial identity loss for identity
+consistency and GAN loss for distribution alignment.
+• Our OSDFace achieves significant SOTA face restoration
+performance, excelling in visual quality and quantitative
+metrics with reduced computational costs.
+2. Related Work
+2.1. Face Restoration
+Face restoration aims to recover high-quality (HQ) faces
+from low-quality (LQ) inputs affected by complex degrada-
+tions. A key challenge for researchers is how to grasp face
+prior efficiently and effectively. Statistical priors are widely
+used in traditional image processing techniques. Recently,
+with the development of deep learning, researchers have be-
+gun to explore more advanced learning-based methods.
+Geometric priors [8, 26, 44, 69], while useful, are lim-
+ited by the degree of degradation in low-quality images, re-
+stricting their ability to recover high-quality details. Refer-
+ence priors [11, 29–31] aim to supplement missing informa-
+tion using the corresponding high-quality reference images.
+However, obtaining references that match the target data is
+often impractical. Generative priors [15, 35, 52, 54, 63]
+from pretrained models are widely used for face restora-
+tion. These priors are typically incorporated into encoder-
+decoder networks through iterative latent optimization or
+direct latent encoding to enhance fidelity. This approach
+has demonstrated stronger restoration potential compared to
+2
+
+=== PAGE 3 ===
+𝑸𝑸𝐻𝐻= {argmin
+𝑐𝑐 ∈ ℂ𝐻𝐻
+𝑧𝑧𝐻𝐻,𝑘𝑘− 𝑐𝑐2}𝑘𝑘=1
+𝐾𝐾
+ℒassoc
+𝐼𝐼𝐿𝐿
+𝐼𝐼𝐻𝐻
+VAE
+Encoder
+UNet
+𝐾𝐾𝑉𝑉
+LQ
+Encoder
+2
+4
+1
+7
+9
+1
+6
+5
+VAE
+Decoder
+̂𝐼𝐼𝐻𝐻
+̂𝑧𝑧𝐻𝐻 𝑧𝑧𝐻𝐻
+Discriminator
+ℒID
+ℒMSE ℒEA−DISTS
+Visual Tokenizer VQ
+Embedder
+Trainable
+Frozen
+UNet Training
+GAN Training
+HQ
+Encoder
+LQ
+Encoder
+HQ
+Decoder
+5
+9
+3
+1
+8
+4
+6
+𝑸𝑸𝐿𝐿= {argmin
+𝑐𝑐 ∈ ℂ𝐿𝐿
+𝑧𝑧𝐿𝐿,𝑘𝑘− 𝑐𝑐2}𝑘𝑘=1
+𝐾𝐾
+0
+4
+6
+3
+7
+9
+0
+9
+1
+VRE (Stage 1) Pipeline (Stage 2)
+HQ Dict
+𝑧𝑧𝐿𝐿
+LQ
+Decoder
+LQ Dict
+LQ Dict
+𝑝𝑝𝐿𝐿
+𝐸𝐸𝐿𝐿
+𝐸𝐸𝐻𝐻 𝐷𝐷𝐻𝐻
+𝐷𝐷𝐿𝐿
+𝐸𝐸𝐿𝐿
+𝐸𝐸𝜃𝜃
+𝐷𝐷𝜃𝜃
+Figure 3. Training framework of OSDFace. First, to establish a visual representation embedder (VRE), we train the autoencoder and VQ
+dictionary for HQ and LQ face domains using self-reconstruction and feature association lossLassoc. Then, we use the VRE containing LQ
+encoder and dictionary to embed the LQ face IL, producing the visual prompt embedding pL. Next, the LQ image IL along with pL are
+inputed into the generatorGθto yield the predicted HQ face ˆIH: ˆIH =Gθ(IL; VRE(IL)). The generatorGθincorporates the pretrained
+V AE and UNet from Stable Diffusion, with only the UNet fine-tuned via LoRA. Additionally, a series of feature alignment losses are
+applied to ensure the generation of harmonious and coherent face images. The generator and discriminator are trained alternately.
+earlier methods. Recently, diffusion priors [13, 24, 55, 64]
+have gained attention with advancements in diffusion mod-
+els. The degraded images are generated from intermediate
+outputs at each diffusion iteration. In parallel, VQ prior-
+based methods [16, 51, 58, 74] have shown great promise,
+achieving impressive results in face restoration. They typ-
+ically reconstruct images by matching features extracted
+from LQ inputs to items in a codebook, and then directly
+output the restored images. However, the limited capac-
+ity of VQ priors often leads to blurry backgrounds and un-
+precise details. Therefore, how to leverage face prior infor-
+mation more effectively remains a crucial problem.
+2.2. Diffusion Models
+Diffusion models, known for powerful generative capacity,
+transform random noise into structured data through itera-
+tive denoising processes. Moreover, diffusion models have
+achieved promising results in image restoration recently,
+showing strong performance in image-to-image tasks using
+efficient guidance strategies [7, 32, 36, 38, 49, 70]. How-
+ever, some models possess highly complex structures [7,
+49]. Most of them require numerous iterative steps, limiting
+their popularization for real-world applications.
+Reducing the inference steps of diffusion models is crit-
+ical to accelerating generation speeds and reducing com-
+putational costs. Yet, further reduction often results in a
+significant performance drop, making it crucial to balance
+inference speed with model capability. Most one-step dif-
+fusion (OSD) methods employ distillation to learn from a
+teacher model, ensuring the quality of the generated im-
+ages [56, 59, 67, 68]. D 3SR [28] achieves promising re-
+sults with OSD, free from the limitations of model distilla-
+tion. However, all models are designed primarily for natural
+image restoration and lack strong generalization for face-
+specific tasks. It is essential to incorporate prior knowledge
+specific to human faces to enhance the applicability of OSD
+models in face restoration. Consequently, the models could
+generate more realistic and high-fidelity face images.
+3. Method
+We aim to extract as many features as possible from low-
+quality (LQ) source images. These features are used as
+prompts to guide the diffusion model in generating realis-
+tic faces that closely resemble the individuals in the original
+images. To accomplish this, we propose an innovative one-
+step diffusion model (see Fig. 3) focused on face restora-
+tion. This model enhances the realism of the generated faces
+while preserving the characteristics of LQ images.
+3.1. One-Step Diffusion (OSD) Model
+Latent diffusion models [40] are structured around both for-
+ward and reverse operations. During the forward diffusion
+phase, Gaussian noise with a variance βt ∈(0, 1) is in-
+crementally added to the latent vector z at each timestep,
+resulting inzt =√¯αtz +√1−¯αtε,whereε∼N(0,I ).
+Here,αt is defined as1−βt, and ¯αt denotes the cumulative
+product ofαs up to timestept: ¯αt =∏t
+s=1αs.
+3
+
+=== PAGE 4 ===
+In the reverse phase, the clean latent vector ˆz0 can be
+estimated directly using the predicted noise ˆε:
+ˆz0 = zt−√1−¯αt ˆε√¯αt
+. (1)
+The predicted noise ˆεcould be formally expressed as
+εθ(zt;p,t ), wherep denotes prompt embedding.
+As illustrated in Fig. 3, we first employ the encoder Eθ
+to map the low-quality (LQ) imageIL into the latent space,
+yielding zL = Eθ(IL). Next, we perform one denoising
+step to obtain the predicted noise ˆε, allowing us to compute
+the predicted high-quality (HQ) latent vector ˆzH:
+ˆzH = zL−√1−¯αTLεθ(zL;p,TL)√¯αTL
+, (2)
+whereεθdenotes the denoising network parameterized by
+θ, andTL is the diffusion timestep.
+Unlike one-step T2I diffusion models [48, 68], the UNet
+input in OSDFace is not entirely Gaussian noise. Therefore,
+we predefine a parameter TL∈[0,T ] and feed it into the
+UNet, where T represents the total diffusion timesteps (in
+Stable Diffusion, T is set to 1,000). Finally, we use the
+decoderDθto reconstruct the HQ face ˆIH from ˆzH:
+ˆIH =Dθ(ˆzH). (3)
+Denoting the entire generator asG, the overall computa-
+tion procedure can be represented as:
+ˆIH =Gθ(IL;p). (4)
+3.2. Stage 1. Visual Representation Embedder
+Previous studies have emphasized the critical importance of
+understanding input images and integrating face prior into
+models. To incorporate priors, we first train a feature extrac-
+tion module, i.e., visual representation embedder (VRE), in
+stage 1 for LQ inputs. In stage 2, we utilize the pretrained
+VRE to guide the diffusion model, allowing it to leverage
+prior knowledge from the input image more effectively.
+We design a variational autoencoder (V AE) with a
+vector-quantized (VQ) dictionary [12, 37] for effective fea-
+ture extraction. The architecture consists of the VRE and
+a V AE decoder utilized exclusively during the first training
+stage. Through self-reconstruction training, the VRE builds
+a dictionary of image categories as priors, enabling it to act
+as a multi-class embedder using the VQ dictionary.
+Given a low-quality (LQ) face IL∈RH×W×3, the en-
+coder EL processes the image, obtaining a set of feature
+vector{zL,k ∈Rd}K
+k=1. Then, each feature zL is trans-
+formed through a matching mechanism, generating a token
+q ∈N that corresponds to an item in the learnable low-
+quality VQ dictionary CL ={cq∈Rd}N
+q=1.
+Visual Tokenizer . Tokenization is the process of dividing
+the input face into smaller units, i.e., tokens. In our frame-
+work, the visual tokenizer maps the input face to categories
+in the low-quality VQ dictionary:
+M◦EL : RH×W×3→NK. (5)
+LQ att 120 att 173 enc 407 enc 470
+HQ Learnable DAPE [60] VRE (w/o assoc) VRE (w/ assoc)
+Figure 4. Attention maps of VRE and visual comparison of prompt
+embedding generation. We use CelebA-Test 0262 as an example.
+For an LQ face denoted asIL, we apply the V AE encoder
+EL followed by the matching functionM to obtain the to-
+ken set QL =M(EL(IL)). The token set QL represents
+the predicted categories corresponding to LQ face.
+VQ Embedder . The VQ embedder processes the token set
+by retrieving the corresponding items from the VQ dictio-
+nary. Specifically, for each image tokenq at positionk, the
+embedder usesq as an index to access the dictionary item:
+zk = dict(q), q ∈QL, (6)
+wherezk represents thek-th element of the visual prompt.
+Unlike using image-to-tag models [39, 73] to gener-
+ate tags as textual prompts, VRE directly tokenizes each
+face and converts the tokens into embeddings. This ap-
+proach eliminates the information loss during the image-
+tag-embedding process. As illustrated in Fig. 4, VRE shows
+a strong recovery capacity. To study the working mecha-
+nism of VRE, we visualize the weight matrix of the final
+self-attention layer and the latent vector output by the VRE
+encoder. They are labeled as “att” and “enc” in the figure
+captions, respectively. The visualizations clearly indicate
+that the VRE focuses on both facial and nonfacial features.
+In summary, we can embed the LQ face IL using VRE to
+obtain the visual promptpL = VRE(IL).
+We construct two VQ dictionaries corresponding to the
+HQ and LQ image categories and train VQV AE using vec-
+tor quantization [37] with self-reconstruction. Following
+VQGAN [12], we use GAN loss to promote extracting
+real-world features over noise. However, the LQ encoder
+sometimes focuses on meaningless categories due to strong
+degradation. Thus, we employ an alignment training strat-
+egy inspired by the CLIP model [39] to align the categories
+between LQ and HQ faces. By enhancing the diagonal cor-
+relation within VQ dictionaries, we could guide the LQ en-
+coder to align its attention with the HQ encoder.
+Training Objectives. We divide the loss functions into two
+parts. The first is a series of losses designed specifically
+for training the VQ dictionary, and the second is for asso-
+ciation. Following previous works [16, 57, 74], we incor-
+porate four types of losses during training. Three of them
+4
+
+=== PAGE 5 ===
+are image restoration losses, i.e., absolute differences L1,
+perceptual function Lper [21, 72], and discriminative loss
+Ldis [20]). Since the VQ is non-differentiable, we adopt a
+classic quantization lossLVQ [2, 12, 37] additionally.
+L1 =∥Ih−Irec
+h ∥1,Lper =∥Φ(Ih)−Φ(Irec
+h )∥2
+2,
+Ldis = [logD(Ih) + log(1−D(Irec
+h ))],
+LVQ =∥sg(Zh)−Zc
+h∥2
+2 +β∥Zh−sg(Zc
+h)∥2
+2.
+(7)
+Here, Φ(·) represents the feature extractor of VGG19
+[45], D is a patch-based discriminator [20], and sg (·) de-
+notes the stop-gradient operation.βis set to 0.25.
+The combined lossLVQ is then defined as
+LVQ =L1 +λper·Lper +λdis·Ldis +LVQ, (8)
+where we setλper = 1.0 andλdis = 0.8 in this setup.
+Furthermore, we employ the cross-entropy loss intro-
+duced by DAEFR [51] to enhance the correlation between
+the HQ and LQ features. The similarity matrix Massoc ∈
+RK×K is constructed from the encoded featurezH andzL.
+We define the similarity score along the HQ axis of Massoc
+as ph
+i,j, and along the LQ axis as pl
+i,j. The cross-entropy
+losses are then defined as
+LH
+CE =−1
+K
+K∑
+i=1
+K∑
+j=1
+yi,j log(ph
+i,j),
+LL
+CE =−1
+K
+K∑
+i=1
+K∑
+j=1
+yi,j log(pl
+i,j),
+(9)
+whereyi,j represents the ground truth label. The final target
+for the feature association component is then defined as
+Lassoc =
+(
+LH
+CE +LL
+CE
+)
+/2. (10)
+The overall loss function for training the VRE at this
+stage can be expressed as
+Ltotal =LVQ +λassoc·Lassoc, (11)
+where λassoc is set to 0 for the initial epochs, and subse-
+quently adjusted to 1 for the remaining epochs.
+3.3. Stage 2. Realistic Face Alignment
+Face restoration presents unique challenges and higher de-
+mands than general image restoration, as humans are ex-
+ceptionally familiar with and sensitive to faces. Even minor
+inconsistencies or unnatural details in a generated face im-
+age are immediately noticeable (see Fig. 1), often resulting
+in an unrealistic appearance overall.
+To ensure highly realistic face restoration, we design a
+series of losses aimed at guiding the model to generate glob-
+ally harmonious and locally coherent face images. These
+carefully crafted losses play a key role in achieving high fi-
+delity and visual authenticity. The overall loss function for
+the generator is defined as
+Lgen =λdis·LG(zH, ˆzH) +λID·LID(IH, ˆIH)
++λper·LEA-DISTS(IH, ˆIH) + MSE(IH, ˆIH).
+(12)
+Facial Identity Loss. A key challenge in face restoration is
+how to match each LQ face to a real, unique face portrait.
+However, during reconstruction, the model often struggles
+to render ambiguous features, leading to disharmonious fa-
+cial attributes in the generated images. Inspired by advance-
+ments in face recognition tasks [33, 42, 50], we introduce
+a facial identity loss, specifically designed for face restora-
+tion. This loss leverages a pretrained face recognition model
+to measure feature similarity between the generated face
+and the target HQ image. The facial identity loss helps to
+enhance both the overall harmony of the generated face and
+the precise alignment of facial features.
+We utilize a pretrained ArcFace model [9] to encode both
+the generated and HQ faces into identity embeddings (IDs).
+The cosine similarity between these IDs is then computed
+and used as a loss to guide model training. Denote the facial
+feature extraction model asF. The facial identity loss LID
+can be defined as follows
+LID = 1−cos
+(
+F(IH),F(ˆIH)
+)
+. (13)
+Perceptual Loss. Although LPIPS [72] is widely used for
+perceptual evaluation, it can sometimes introduce visible ar-
+tifacts, especially in diffusion models. To alleviate this is-
+sue, we use DISTS [10] to better capture texture details.
+During the reconstruction of LQ faces, DISTS preserves
+texture details more effectively while maintaining percep-
+tual similarity, particularly in areas like hair and skin.
+In addition, the accurate generation of edge details is es-
+sential for achieving perceived sharpness in face restoration.
+Thus, following the practice in D3SR [28], we introduce an
+edge-aware DISTS (EA-DISTS) as our perceptual loss
+LEA-DISTS(ˆIH,IH) =LDISTS(ˆIH,IH)
++LDISTS(S(ˆIH),S(IH)),
+(14)
+whereS(·) is the Sobel operator.
+GAN Loss. OSD models face challenges in generating
+stable images, due to their limited computational capac-
+ity. Previous studies [56, 59] typically employ distillation
+techniques to transfer knowledge from multi-step diffusion
+models. However, these methods are restricted by the per-
+formance limitations of the teacher models.
+As an alternative, we use a discriminative network to en-
+hance the realism of generated faces. This approach pro-
+vides greater flexibility and improves computational effi-
+ciency. The adversarial loss, used to update both the gener-
+atorGθand discriminatorDθ, is defined as
+LG =−Et [logDθ(F(ˆzH,t ))], (15)
+LD =−Et [log (1−Dθ(F(ˆzH,t )))]
+−Et [logDθ(F (zH,t ))], (16)
+wherezH is the latent vector of HQ face, andF(·,t ) denotes
+the forward diffusion process at timestept∈[0,T ].
+5
+
+=== PAGE 6 ===
+HQ - 0051 LQ - 0051 RF++ [58] VQFR [16] CodeFormer [74] DAEFR [51] PGDiff [64] DifFace [70] DiffBIR [32] OSEDiff* [59] OSDFace (ours)
+HQ - 0054 LQ - 0054 RF++ [58] VQFR [16] CodeFormer [74] DAEFR [51] PGDiff [64] DifFace [70] DiffBIR [32] OSEDiff* [59] OSDFace (ours)
+HQ - 0067 LQ - 0067 RF++ [58] VQFR [16] CodeFormer [74] DAEFR [51] PGDiff [64] DifFace [70] DiffBIR [32] OSEDiff* [59] OSDFace (ours)
+Figure 5. Visual comparison of the synthetic CelebA-Test dataset in challenging cases. Please zoom in for a better view.
+Types Methods LPIPS↓ DISTS↓MUSIQ↑NIQE↓ Deg.↓ LMD↓FID(FFHQ)↓FID(HQ)↓
+Non-
+Diffusion
+RestoreFormer++ [58] 0.4535 0.2301 72.3612 3.9524 70.5083 8.8019 57.3723 72.7880
+VQFR [16] 0.3390 0.2131 73.2969 4.8374 62.2595 5.7297 58.1044 24.9093
+CodeFormer [74] 0.3412 0.2151 75.9432 4.5157 62.1972 5.3819 62.0280 26.8595
+DAEFR [51] 0.3580 0.2146 74.9853 4.4161 62.8184 5.6332 52.0341 26.0458
+Multi-Step
+Diffusion
+PGDiff [64] (s=1,000) 0.3866 0.1949 69.5676 4.0010 71.5996 7.3109 44.6258 26.3694
+DifFace [70] (s=250) 0.3469 0.2126 66.7451 4.6381 63.4511 5.4759 49.8075 22.2370
+DiffBIR [32] (s=50) 0.3740 0.2340 75.6360 6.2801 61.0238 5.1042 71.7767 32.5109
+One-Step
+Diffusion
+OSEDiff [59] (s=1) 0.3306 0.2170 71.4674 5.1241 67.3904 6.4141 73.4843 37.2103
+OSEDiff* [59] (s=1) 0.3496 0.2200 69.9807 5.3280 67.4026 7.4082 81.3624 37.1309
+OSDFace (ours, s=1) 0.3365 0.1773 75.6398 3.8840 60.0708 5.2867 45.4150 17.0617
+Table 1. Quantitative comparison on the synthetic CelebA-Test dataset with non-diffusion, multi-step diffu-
+sion, and one-step diffusion methods. The best and second best results are colored with red and blue.
+LQ OSDFace
+LQ OSDFace
+Figure 6. Zero-shot results
+of real-world cartoons.
+4. Experiments
+4.1. Experimental Settings
+Training Datasets. Our model is trained on FFHQ [23]
+and its retouched version [43], containing 70,000 different
+high-quality face images. Images are resized to 512 ×512
+pixels. Synthetic training data is generated using a dual-
+stage degradation model, with parameters following Wave-
+Face [36]. This dual-stage degradation process closely
+aligns the synthetic data with real-world degradation sce-
+narios, handling both mild and severe degradations.
+Testing Datasets. We evaluate our method on the syn-
+thetic dataset CelebA-Test [22] from DAEFR [51] and three
+widely used real-world datasets: Wider-Test [74], LFW-
+Test [19], and WebPhoto-Test [54], following the settings
+in previous literature [16, 58, 74]. These datasets exhibit di-
+verse and complex degradations. For example, the degrada-
+tions in LFW-Test are relatively slight and regular, whereas
+those in Wider-Test are stronger.
+Metrics. For the Synthetic Dataset, we employ LPIPS [72]
+and DISTS [10] as reference-based perceptual quality mea-
+sures, together with MUSIQ [25] and NIQE [71] as no-
+reference image quality measures. To evaluate the distribu-
+tion similarity between the ground truth and restored faces,
+we calculate FID [17] with both FFHQ and CelebA-Test
+HQ, showing the ability to recover “real” faces and HQ im-
+ages. Following previous works [16, 51, 54], we use the em-
+bedding angle of ArcFace [9], namely “Deg.”, and landmark
+distance, namely “LMD”, as additional identity and fidelity
+metrics. For the Real-world Datasets , we employ non-
+reference metrics, including FID (with FFHQ as reference),
+as well as CLIPIQA [53], MANIQA [65], MUSIQ [25], and
+NIQE [71]. We utilize the evaluation codes provided by py-
+iqa [5] and VQFR [16] for all metrics.
+Implementation Details. In the first stage, we train the
+VRE using the Adam optimizer [27] with a learning rate
+of 1.44×10−4 and a batch size of 32. In our implementa-
+tion, the input face image has dimensions of 512×512, and
+the quantized feature map has dimensions of 256×512 af-
+ter flattening. The VQ dictionaries contain N=1, 024 code
+items, each with a channel size of 512. The HQ and LQ dic-
+tionaries are trained for 50 and 10 epochs, respectively. The
+association parameterλassoc is initially set to 0, followed by
+an additional 10 epochs with λassoc=1. The VRE is trained
+on 8 NVIDIA A800 GPUs.
+In the second stage, our OSDFace is trained by the
+AdamW optimizer [34], with learning rate 1×10−4 and
+batch size 2 for both the generator and discriminator. The
+LoRA rank in the UNet is set to 16. The SD 2.1-base [1]
+serves as the pretrained OSD model, with the VRE used to
+construct the prompt embeddings. The setting of the dis-
+criminator is followed by D3SR [28], and the generator and
+discriminator are trained alternately. Training is performed
+for 150K iterations on 2 NVIDIA A6000 GPUs.
+6
+
+=== PAGE 7 ===
+Wider 0011 RF++ [58] VQFR [16] CodeFormer [74] DAEFR [51] PGDiff [64] DifFace [70] DiffBIR [32] OSEDiff* [59] OSDFace (ours)
+Wider 0025 RF++ [58] VQFR [16] CodeFormer [74] DAEFR [51] PGDiff [64] DifFace [70] DiffBIR [32] OSEDiff* [59] OSDFace (ours)
+WebPhoto 00043 RF++ [58] VQFR [16] CodeFormer [74] DAEFR [51] PGDiff [64] DifFace [70] DiffBIR [32] OSEDiff* [59] OSDFace (ours)
+WebPhoto 10017 RF++ [58] VQFR [16] CodeFormer [74] DAEFR [51] PGDiff [64] DifFace [70] DiffBIR [32] OSEDiff* [59] OSDFace (ours)
+LFW A. Bynes RF++ [58] VQFR [16] CodeFormer [74] DAEFR [51] PGDiff [64] DifFace [70] DiffBIR [32] OSEDiff* [59] OSDFace (ours)
+LFW Chok T.G. RF++ [58] VQFR [16] CodeFormer [74] DAEFR [51] PGDiff [64] DifFace [70] DiffBIR [32] OSEDiff* [59] OSDFace (ours)
+Figure 7. Visual comparison of the real-world datasets in challenging cases. Please zoom in for a better view.
+Wider-Test LFW-Test WebPhoto-TestMethods C-IQA↑M-IQA↑MUSIQ↑NIQE↓FID↓C-IQA↑M-IQA↑MUSIQ↑NIQE↓FID↓C-IQA↑M-IQA↑MUSIQ↑NIQE↓FID↓
+RestoreFormer++ [58] 0.7159 0.4767 71.332 3.7231 45.398 0.7024 0.5108 72.250 3.8434 50.253 0.6950 0.4902 71.484 4.0202 75.071
+VQFR [16] 0.7069 0.5044 71.417 4.0357 37.866 0.7098 0.5339 74.385 3.8356 49.800 0.6769 0.4909 70.906 4.6095 84.776
+CodeFormer [74] 0.6986 0.4958 73.406 4.1188 38.765 0.6890 0.5266 75.484 4.4377 52.341 0.6918 0.5034 74.001 4.6273 83.197
+DAEFR [51] 0.6975 0.5205 74.143 3.5701 36.701 0.6964 0.5420 75.838 3.4788 47.527 0.6696 0.4934 72.698 3.9333 75.474
+PGDiff [64] (s=1,000) 0.5824 0.4531 68.135 3.9315 35.862 0.5975 0.4858 71.244 4.0112 41.209 0.5653 0.4460 68.599 3.9930 86.954
+DifFace [70] (s=250) 0.5924 0.4299 64.907 4.2380 37.099 0.6075 0.4577 69.617 3.9016 46.127 0.5737 0.4189 65.116 4.2474 79.556
+DiffBIR [32] (s=50) 0.8084 0.6625 75.321 5.5903 35.343 0.7948 0.6735 76.421 5.6782 40.320 0.7441 0.5839 72.272 6.0093 91.834
+OSEDiff [59] (s=1) 0.6298 0.4951 70.559 4.9388 50.274 0.6326 0.5037 73.401 4.7196 57.800 0.6457 0.5108 72.593 5.2611 117.510
+OSEDiff* [59] (s=1) 0.6193 0.4752 69.101 5.0869 47.883 0.6186 0.4879 71.707 4.8002 51.048 0.6254 0.4823 69.816 5.3253 109.236
+OSDFace (ours, s=1) 0.7284 0.5229 74.601 3.7741 34.648 0.7203 0.5493 75.354 3.8710 44.629 0.7106 0.5162 73.935 3.9864 84.597
+Table 2. Quantitative comparison on real-world datasets. C-IQA stands for CLIPIQA, and M-IQA stands for MANIQA. The best and
+second best results are colored with red and blue. OSEDiff* is retrained on FFHQ dataset for reference.
+Compared State-of-the-Art (SOTA) Methods. We com-
+pare OSDFace with several SOTA methods, including
+RestoreFormer++ [58], VQFR [16], CodeFormer [74],
+DAEFR [51], PGDiff [64], DifFace [70] and DiffBIR [32].
+We also provide the current SOTA OSD model OSED-
+iff [59], and retrain it on FFHQ [23], namely OSEDiff*.
+4.2. Performance on Synthetic Data
+Quantitative Results. The results in Tab. 1 demonstrate
+that OSDFace outperforms other methods in Deg., indicat-
+ing better alignment with the ID features of HQ images. It
+also achieves higher scores on LPIPS and DISTS, highlight-
+ing superior perceptual coherence and detail preservation.
+Performance in FID(HQ) shows that OSDFace effectively
+recovers the distribution of the original HQ dataset.
+Qualitative Results. Visual comparisons in Fig. 5 illus-
+trate that our method closely resembles real images. OS-
+DFace enhances realism in elements such as earrings, eye-
+lashes, eyebrows, hair strands, and subtle skin textures. Our
+approach restores hair most naturally, avoiding additional
+streaks or other regular textures, and maintains consistent
+hair color without random changes.
+7
+
+=== PAGE 8 ===
+Methods PGDiff [64] DifFace [70] DiffBIR [32] OSEDiff [59] OSDFace
+Step 1,000 250 50 1 1
+Time (s) 85.81 7.05 9.03 0.13 0.10
+Param (M) 176.4 175.4 3,042 1,302 978.4
+MACs (G) 480,997 18,682 189,208 2,269 2,132
+Table 3. Complexity comparison during inference. All models are
+tested with an input image size of 512×512.
+Methods C-IQA↑M-IQA↑MUSIQ↑NIQE↓ FID↓
+Learnable 0.6714 0.5312 75.0339 4.0855 45.4041
+DAPE [60] 0.6863 0.5622 74.8107 4.3801 45.9380
+VRE (w/o assoc) 0.6791 0.5180 75.2328 3.8228 44.3360
+VRE (w/ assoc) 0.6946 0.5356 75.2911 3.8793 41.9502
+Table 4. Ablation study of prompt embedding generation. The best
+and second best results are colored with red and blue, respectively.
+4.3. Performance on Real-world Data
+Quantitative Results. In Tab. 2, we can see that OSDFace
+performs significantly better than another OSD method
+across all metrics. OSDFace outperforms non-diffusion
+models in most metrics. For multi-step diffusion models,
+we generally surpass PGDiff and DifFace. For DiffBIR, we
+maintain a small gap and even exceed it in certain metrics.
+Qualitative Results. Figure 7 visualizes representative im-
+ages in three real-world datasets. Existing face restora-
+tion methods often emphasize facial features while over-
+looking the precise reconstruction of facial accessories like
+glasses, hair, hats, headwear, and background details. Some
+methods, especially DiffBIR [32], are over-smoothing and
+lack fine facial textures. OSDFace naturally and clearly
+restores multiple faces within a single image, showing its
+effectiveness for unaligned faces. OSDFace ensures high-
+fidelity restoration with balanced and consistent visual qual-
+ity throughout the image. We also test its zero-shot ability
+on cartoon images in Fig. 6, using Anime Face Dataset [4].
+4.4. Complexity Analysis.
+Table 3 provides a detailed comparison of model complex-
+ity, including number of steps, inference time, parame-
+ter number, and multiply-accumulate operations (MACs)
+during inference. All evaluations are carried out on an
+NVIDIA A6000 GPU for consistency. First, by relying on
+one-step diffusion process, OSDFace significantly outper-
+forms multi-step diffusion models in both inference time
+and MACs, demonstrating remarkable efficiency. Further-
+more, OSDFace maintains an advantage over other OSD
+model. We do not incorporate text encoders (e.g., the DAPE
+used by OSEDiff [59]), nor do we introduce additional
+modules that increase Stable Diffusion model complexity
+(e.g., the ControlNet used by DiffBIR [32]). Instead, we uti-
+lize a more efficient image encoder, VRE. Consequently,
+OSDFace achieves the lowest MACs count and fastest in-
+ference speed among all evaluated diffusion-based meth-
+ods. Compared to the other OSD model, OSEDiff [59],
+OSDFace demonstrates a 25% reduction in parameters and
+a 23% improvement in inference speed.
+LIDLEA-DISTSLGLEA-LPIPS C-IQA↑M-IQA↑MUSIQ↑NIQE↓FID↓
+✓ ✓ 0.6724 0.5243 74.5986 4.0190 41.7842
+✓ ✓ 0.6710 0.5387 74.1060 4.3223 55.1016
+✓ ✓ ✓ 0.6674 0.5470 75.2021 4.1484 46.1684
+✓ ✓ 0.6590 0.5081 75.2336 3.9857 45.7834
+✓ ✓ ✓ 0.6946 0.5356 75.2911 3.8793 41.9502
+Table 5. Ablation studies on different components. The best and
+second best results are colored with red and blue, respectively.
+4.5. Ablation Studies
+Visual Representation Embedder (VRE). We evaluated
+the impact of various prompt embedding generation meth-
+ods on the training of OSDFace, including VRE, learnable
+prompt embeddings, and Degradation-Aware Prompt Ex-
+tractor (DAPE) [60]. As shown in Tab. 4, the experimen-
+tal results indicate that our method using VRE outperforms
+others across most metrics. As shown in Fig. 4, using VRE
+significantly enhances the facial details and the coherence
+of non-facial areas in the generated faces.
+Furthermore, we trained the VRE using two approaches:
+with and without the HQ-LQ feature association loss, fur-
+ther validating the effectiveness of our method. As shown
+in the last two rows of Tab. 4, training with association loss
+achieves superior performance. This demonstrates that our
+VRE can extract valuable information from LQ images to
+guide face restoration effectively. Notably, with the in-
+clusion of the feature association loss, the VRE gains the
+ability to identify and reconstruct certain HQ-like categories
+from LQ inputs, enhancing face restoration quality.
+Realistic Face Alignment Loss. For the series of losses
+used in training the OSDFace, such as facial identity loss,
+EA-DISTS, and adversarial loss, we conducted extensive
+ablation studies. Additionally, we introduce the EA-LPIPS
+loss, defined similarly to EA-DISTS in Sec. 3.3. This loss
+first processes the image with the Sobel operator, followed
+by calculating the LPIPS loss. As shown in Tab. 5, the
+losses we utilized significantly contribute to model perfor-
+mance, with most metrics reaching the best scores.
+5. Conclusion
+We propose OSDFace, a high-speed diffusion model that
+enhances face image quality in one step. Our method
+bridges the gap between the powerful generative capabili-
+ties of text-to-image diffusion models and the specific re-
+quirements of face restoration. By introducing a visual
+prompt consistent with the model’s original conditional in-
+put, we effectively utilize prior information from the low-
+quality faces themselves. This enables the model to gen-
+erate more realistic and high-fidelity face images. Our ap-
+proach not only addresses the limitations of previous meth-
+ods but also sets a new direction for incorporating visual
+priors into diffusion models for face restoration. Extensive
+experiments demonstrate that OSDFace achieves superior
+performance compared to recent state-of-the-art methods.
+8
+
+=== PAGE 9 ===
+Acknowledgments
+We thank the reviewers for their valuable feedback. This
+work was supported by the Shanghai Municipal Science
+and Technology Major Project (2021SHZDZX0102) and
+the Fundamental Research Funds for the Central Univer-
+sities. Additionally, this work was supported in part by
+NSFC grant 2024YFC3017100, YDZX20253100004004,
+62302299, Shanghai Science and Technology Development
+Funds under Grant 23YF1420500, and Huawei Explore X
+funds. Special thanks to Jianze Li for his technical support.
+References
+[1] Stability AI. stabilityai/stable-diffusion-2-1-base. [On-
+line]. Available: https : / / huggingface . co /
+stabilityai / stable - diffusion - 2 - 1 - base,
+2022. 6
+[2] Yoshua Bengio, Nicholas L ´eonard, and Aaron Courville.
+Estimating or propagating gradients through stochastic
+neurons for conditional computation. arXiv preprint
+arXiv:1308.3432, 2013. 5
+[3] Kelvin CK Chan, Xintao Wang, Xiangyu Xu, Jinwei Gu, and
+Chen Change Loy. Glean: Generative latent bank for large-
+factor image super-resolution. In CVPR, 2021. 1
+[4] Brian Chao. Anime Face Dataset: a collection of high-
+quality anime faces., 2019. 8
+[5] Chaofeng Chen and Jiadi Mo. IQA-PyTorch: Pytorch
+toolbox for image quality assessment. [Online]. Avail-
+able: https : / / github . com / chaofengc / IQA -
+PyTorch, 2022. 6
+[6] Chaofeng Chen, Xiaoming Li, Yang Lingbo, Xianhui Lin,
+Lei Zhang, and Kwan-Yee K. Wong. Progressive semantic-
+aware style transformation for blind face restoration. In
+CVPR, 2021. 1
+[7] Xiaoxu Chen, Jingfan Tan, Tao Wang, Kaihao Zhang, Wen-
+han Luo, and Xiaocun Cao. Towards real-world blind face
+restoration with generative diffusion prior. arXiv preprint
+arXiv:2312.15736, 2023. 1, 3
+[8] Yu Chen, Ying Tai, Xiaoming Liu, Chunhua Shen, and Jian
+Yang. Fsrnet: End-to-end learning face super-resolution with
+facial priors. In CVPR, 2018. 2
+[9] Jiankang Deng, Jia Guo, Xue Niannan, and Stefanos
+Zafeiriou. ArcFace: Additive angular margin loss for deep
+face recognition. In CVPR, 2019. 5, 6
+[10] Keyan Ding, Kede Ma, Shiqi Wang, and Eero P Simoncelli.
+Image quality assessment: Unifying structure and texture
+similarity. IEEE TPAMI, 2020. 5, 6
+[11] Berk Dogan, Shuhang Gu, and Radu Timofte. Exemplar
+guided face image super-resolution without facial landmarks.
+In CVPRW, 2019. 2
+[12] Patrick Esser, Robin Rombach, and Bjorn Ommer. Taming
+transformers for high-resolution image synthesis. In CVPR,
+2021. 4, 5
+[13] Ben Fei, Zhaoyang Lyu, Liang Pan, Junzhe Zhang, Weidong
+Yang, Tianyue Luo, Bo Zhang, and Bo Dai. Generative dif-
+fusion prior for unified image restoration and enhancement.
+In CVPR, 2023. 3
+[14] Ian J. Goodfellow, Jean Pouget-Abadie, Mehdi Mirza, Bing
+Xu, David Warde-Farley, Sherjil Ozair, Aaron Courville, and
+Yoshua Bengio. Generative adversarial nets. In NeurIPS,
+2014. 1
+[15] Jinjin Gu, Yujun Shen, and Bolei Zhou. Image processing
+using multi-code gan prior. In CVPR, 2020. 2
+[16] Yuchao Gu, Xintao Wang, Liangbin Xie, Chao Dong, Gen
+Li, Ying Shan, and Ming-Ming Cheng. VQFR: Blind face
+restoration with vector-quantized dictionary and parallel de-
+coder. In ECCV, 2022. 3, 4, 6, 7
+[17] Martin Heusel, Hubert Ramsauer, Thomas Unterthiner,
+Bernhard Nessler, and Sepp Hochreiter. Gans trained by a
+two time-scale update rule converge to a local nash equilib-
+rium. In NeurIPS, 2017. 6
+[18] Jonathan Ho, Ajay Jain, and Pieter Abbeel. Denoising diffu-
+sion probabilistic models. In NeurIPS, 2020. 1
+[19] Gary B. Huang, Marwan Mattar, Tamara Berg, and Eric
+Learned-Miller. Labeled Faces in the Wild: A Database
+forStudying Face Recognition in Unconstrained Environ-
+ments. In Workshop on Faces in ’Real-Life’ Images: De-
+tection, Alignment, and Recognition, 2008. 6
+[20] Phillip Isola, Jun-Yan Zhu, Tinghui Zhou, and Alexei A.
+Efros. Image-to-image translation with conditional adver-
+sarial networks. In CVPR, 2017. 5
+[21] Justin Johnson, Alexandre Alahi, and Li Fei-Fei. Perceptual
+losses for real-time style transfer and super-resolution. In
+ECCV, 2016. 5
+[22] Tero Karras, Timo Aila, Samuli Laine, and Jaakko Lehtinen.
+Progressive growing of GANs for improved quality, stability,
+and variation. In ICLR, 2018. 6
+[23] Tero Karras, Samuli Laine, and Timo Aila. A style-based
+generator architecture for generative adversarial networks. In
+CVPR, 2019. 6, 7
+[24] Bahjat Kawar, Michael Elad, Stefano Ermon, and Jiaming
+Song. Denoising diffusion restoration models. In NeurIPS,
+2022. 3
+[25] Junjie Ke, Qifei Wang, Yilin Wang, Peyman Milanfar, and
+Feng Yang. MUSIQ: Multi-scale Image Quality Trans-
+former . In ICCV, 2021. 6
+[26] Deokyun Kim, Minseon Kim, Gihyun Kwon, and Dae-Shik
+Kim. Progressive face super-resolution via attention to facial
+landmark. In BMVC, 2019. 2
+[27] Diederik P Kingma and Jimmy Ba. Adam: A method for
+stochastic optimization. In ICLR, 2015. 6
+[28] Jianze Li, Jiezhang Cao, Zichen Zou, Xiongfei Su, Xin
+Yuan, Yulun Zhang, Yong Guo, and Xiaokang Yang. Un-
+leashing the power of one-step diffusion based image super-
+resolution via a large-scale diffusion discriminator. arXiv
+preprint arXiv:2410.04224, 2024. 1, 3, 5, 6
+[29] Xiaoming Li, Ming Liu, Yuting Ye, Wangmeng Zuo, Liang
+Lin, and Ruigang Yang. Learning warped guidance for blind
+face restoration. In ECCV, 2018. 2
+[30] Xiaoming Li, Chaofeng Chen, Shangchen Zhou, Xianhui
+Lin, Wangmeng Zuo, and Lei Zhang. Blind face restora-
+tion via deep multi-scale component dictionaries. In ECCV,
+2020.
+9
+
+=== PAGE 10 ===
+[31] Xiaoming Li, Wenyu Li, Dongwei Ren, Hongzhi Zhang,
+Meng Wang, and Wangmeng Zuo. Enhanced blind face
+restoration with multi-exemplar images and adaptive spatial
+feature fusion. In CVPR, 2020. 2
+[32] Xinqi Lin, Jingwen He, Ziyan Chen, Zhaoyang Lyu, Bo Dai,
+Fanghua Yu, Wanli Ouyang, Yu Qiao, and Chao Dong. Diff-
+BIR: Towards blind image restoration with generative diffu-
+sion prior. In ECCV, 2024. 1, 3, 6, 7, 8
+[33] Weiyang Liu, Yandong Wen, Zhiding Yu, Ming Li, Bhiksha
+Raj, and Le Song. SphereFace: Deep hypersphere embed-
+ding for face recognition. In CVPR, 2017. 5
+[34] Ilya Loshchilov and Frank Hutter. Decoupled weight decay
+regularization. In ICLR, 2019. 6
+[35] Sachit Menon, Alexandru Damian, Shijia Hu, Nikhil Ravi,
+and Cynthia Rudin. Pulse: Self-supervised photo upsam-
+pling via latent space exploration of generative models. In
+CVPR, 2020. 2
+[36] Yunqi Miao, Jiankang Deng, and Jungong Han. Waveface:
+Authentic face restoration with efficient frequency recovery.
+In CVPR, 2024. 1, 3, 6
+[37] Aaron Van Den Oord, Oriol Vinyals, et al. Neural discrete
+representation learning. In NeurIPS, 2017. 4, 5
+[38] Xinmin Qiu, Congying Han, Zicheng Zhang, Bonan Li,
+Tiande Guo, and Xuecheng Nie. Diffbfr: Bootstrapping dif-
+fusion model for blind face restoration. In ACM MM, 2023.
+1, 3
+[39] A. Radford, J. Kim, C. Hallacy, A. Ramesh, G. Goh, S. Agar-
+wal, A. Sastry, A. Askell, D. Mishkin, D. Clark, and G.
+Krueger. Learning transferable visual models from natural
+language supervision. In ICML, 2021. 4
+[40] Robin Rombach, Andreas Blattmann, Dominik Lorenz,
+Patrick Esser, and Bjorn Ommer. High-Resolution Image
+Synthesis with Latent Diffusion Models . In CVPR, 2022. 1,
+3
+[41] Chitwan Saharia, William Chan, Saurabh Saxena, Lala
+Lit, Jay Whang, Emily Denton, Seyed Kamyar Seyed
+Ghasemipour, Burcu Karagol Ayan, S. Sara Mahdavi,
+Raphael Gontijo-Lopes, Tim Salimans, Jonathan Ho, David J
+Fleet, and Mohammad Norouzi. Photorealistic text-to-image
+diffusion models with deep language understanding. In
+NeurIPS, 2022. 1
+[42] Florian Schroff, Dmitry Kalenichenko, and James Philbin.
+FaceNet: A unified embedding for face recognition and clus-
+tering. In CVPR, 2015. 5
+[43] Alireza Shafaei, James J. Little, and Mark Schmidt. AutoRe-
+touch: Automatic professional face retouching. In WACV,
+2021. 6
+[44] Ziyi Shen, Wei-Sheng Lai, Tingfa Xu, Jan Kautz, and Ming-
+Hsuan Yang. Deep semantic face deblurring. InCVPR, 2018.
+2
+[45] Karen Simonyan and Andrew Zisserman. Very deep convo-
+lutional networks for large-scale image recognition. InICLR,
+2015. 5
+[46] Jiaming Song, Chenlin Meng, and Stefano Ermon. Denois-
+ing diffusion implicit models. In ICLR, 2021. 1
+[47] Yang Song, Jascha Sohl-Dickstein, Diederik P Kingma, Ab-
+hishek Kumar, Stefano Ermon, and Ben Poole. Score-based
+generative modeling through stochastic differential equa-
+tions. In ICLR, 2021. 1
+[48] Yang Song, Prafulla Dhariwal, Mark Chen, and Ilya
+Sutskever. Consistency models. In ICML, 2023. 4
+[49] Maitreya Suin and Rama Chellappa. CLR-Face: Conditional
+latent refinement for blind face restoration using score-based
+diffusion models. In IJCAI, 2024. 1, 2, 3
+[50] Yaniv Taigman, Ming Yang, Marc’Aurelio Ranzato, and Lior
+Wolf. DeepFace: Closing the gap to human-level perfor-
+mance in face verification. In CVPR, 2014. 5
+[51] Yu-Ju Tsai, Yu-Lun Liu, Lu Qi, Kelvin CK Chan, and Ming-
+Hsuan Yang. Dual associated encoder for face restoration. In
+ICLR, 2024. 1, 2, 3, 5, 6, 7
+[52] Ziyu Wan, Bo Zhang, Dongdong Chen, Pan Zhang, Dong
+Chen, Jing Liao, and Fang Wen. Bringing old photos back to
+life. In CVPR, 2020. 2
+[53] Jianyi Wang, Kelvin CK Chan, and Chen Change Loy. Ex-
+ploring clip for assessing the look and feel of images. In
+AAAI, 2023. 6
+[54] Xintao Wang, Yu Li, Honglun Zhang, and Ying Shan. To-
+wards real-world blind face restoration with generative facial
+prior. In CVPR, 2021. 1, 2, 6
+[55] Yinhuai Wang, Jiwen Yu, and Jian Zhang. Zero-shot image
+restoration using denoising diffusion null-space model. In
+ICLR, 2023. 3
+[56] Yufei Wang, Wenhan Yang, Xinyuan Chen, Yaohui Wang,
+Lanqing Guo, Lap-Pui Chau, Ziwei Liu, Yu Qiao, Alex C
+Kot, and Bihan Wen. Sinsr: diffusion-based image super-
+resolution in a single step. In CVPR, 2024. 3, 5
+[57] Zhouxia Wang, Jiawei Zhang, Runjian Chen, Wenping
+Wang, and Ping Luo. Restoreformer: High-quality blind
+face restoration from undegraded key-value pairs. In CVPR,
+2022. 4
+[58] Zhouxia Wang, Jiawei Zhang, Tianshui Chen, Wenping
+Wang, and Ping Luo. Restoreformer++: Towards real-
+world blind face restoration from undegraded key-value
+pairs. IEEE TPAMI, 2023. 1, 3, 6, 7
+[59] Rongyuan Wu, Lingchen Sun, Zhiyuan Ma, and Lei Zhang.
+One-step effective diffusion network for real-world image
+super-resolution. In NeurIPS, 2024. 1, 2, 3, 5, 6, 7, 8
+[60] Rongyuan Wu, Tao Yang, Lingchen Sun, Zhengqiang Zhang,
+Shuai Li, and Lei Zhang. SeeSR: Towards semantics-aware
+real-world image super-resolution. In CVPR, 2024. 4, 8
+[61] Lianxin Xie, Csbingbing Zheng, Wen Xue, Le Jiang, Cheng
+Liu, Si Wu, and Hau San Wong. Learning degradation-
+unaware representation with prior-based latent transforma-
+tions for blind face restoration. In CVPR, 2024. 1
+[62] Yichao Yan, Zanwei Zhou, Zi Wang, Jingnan Gao, and Xi-
+aokang Yang. DialogueNeRF: towards realistic avatar face-
+to-face conversation video generation. Visual Intelligence,
+2024. 1
+[63] Lingbo Yang, Shanshe Wang, Siwei Ma, Wen Gao, Chang
+Liu, Pan Wang, and Peiran Ren. Hifacegan: Face renovation
+via collaborative suppression and replenishment. In ACM
+MM, 2020. 2
+[64] Peiqing Yang, Shangchen Zhou, Qingyi Tao, and
+Chen Change Loy. PGDiff: Guiding diffusion models
+10
+
+=== PAGE 11 ===
+for versatile face restoration via partial guidance. In
+NeurIPS, 2023. 1, 2, 3, 6, 7, 8
+[65] Sidi Yang, Tianhe Wu, Shuwei Shi, Shanshan Lao, Yuan
+Gong, Mingdeng Cao, Jiahao Wang, and Yujiu Yang.
+MANIQA: Multi-dimension attention network for no-
+reference image quality assessment. In CVPRW, 2022. 6
+[66] Tao Yang, Peiran Ren, Xuansong Xie, and Lei Zhang. Gan
+prior embedded network for blind face restoration in the
+wild. In CVPR, 2021. 1
+[67] Tianwei Yin, Micha ¨el Gharbi, Taesung Park, Richard Zhang,
+Eli Shechtman, Fredo Durand, and William T Freeman. Im-
+proved distribution matching distillation for fast image syn-
+thesis. In NeurIPS, 2024. 3
+[68] Tianwei Yin, Micha ¨el Gharbi, Richard Zhang, Eli Shecht-
+man, Fr´edo Durand, William T Freeman, and Taesung Park.
+One-step diffusion with distribution matching distillation. In
+CVPR, 2024. 3, 4
+[69] Xin Yu, Basura Fernando, Richard Hartley, and Fatih Porikli.
+Super-resolving very low-resolution face images with sup-
+plementary attributes. In CVPR, 2018. 2
+[70] Zongsheng Yue and Chen Change Loy. DifFace: Blind Face
+Restoration with Diffused Error Contraction . IEEE TPAMI,
+2024. 1, 3, 6, 7, 8
+[71] Lin Zhang, Lei Zhang, and Alan C. Bovik. A feature-
+enriched completely blind image quality evaluator. IEEE
+TIP, 2015. 6
+[72] Richard Zhang, Phillip Isola, Alexei A. Efros, Eli Shecht-
+man, and Oliver Wang. The unreasonable effectiveness of
+deep features as a perceptual metric. In CVPR, 2018. 5, 6
+[73] Youcai Zhang, Xinyu Huang, Jinyu Ma, Zhaoyang Li,
+Zhaochuan Luo, Yanchun Xie, Yuzhuo Qin, Tong Luo,
+Yaqian Li, Shilong Liu, Yandong Guo, and Lei Zhang. Rec-
+ognize Anything: A strong image tagging model. In CVPR,
+2024. 4
+[74] Shangchen Zhou, Kelvin C.K. Chan, Chongyi Li, and
+Chen Change Loy. Towards robust blind face restoration
+with codebook lookup transformer. In NeurIPS, 2022. 1,
+2, 3, 4, 6, 7
+11
+
+=== PAGE 12 ===
+OSDFace: One-Step Diffusion Model for Face Restoration
+Supplementary Material
+Jingkai Wang1*, Jue Gong 1*, Lin Zhang 1, Zheng Chen 1
+Xing Liu2, Hong Gu 2, Yutong Liu 1†, Yulun Zhang 1†, Xiaokang Yang 1
+1Shanghai Jiao Tong University, 2vivo Mobile Communication Co., Ltd
+A. Overall
+This supplementary material provides additional results to
+support the main manuscript. First, in Section B, we ana-
+lyze the parameter size of VRE and inference time. Next, in
+Section C, we present experiments that integrate VRE into
+OSEDiff [9]. These experiments demonstrate VRE’s strong
+image understanding capabilities. In Section D, we validate
+our method on downstream face recognition tasks. The results
+show that our method outperforms others when used as a pre-
+processing step. Additionally, we analysis the limitation and
+future work in Section E. Finally, in Section F, we provide
+more visual comparisons with state-of-the-art methods.
+B. Parameters and Inference Time
+Table 1 clearly shows that OSDFace achieves high inference
+speed and low computational cost compared to other one-step
+diffusion models. The VRE prompt embedder in OSDFace
+significantly reduces the parameter count and MACs. This
+reduction is notable when compared to the prompt embedder
+used in OSEDiff [9], i.e., DAPE [10] with CLIP text encoder.
+Additionally, generating text embeddings from input im-
+ages does not conflict with generating latent vectors through
+a V AE encoder. Therefore, we can introduce a parallel mech-
+anism that could speed up both OSEDiff [9] and OSDFace.
+Using parallel acceleration, our OSDFace could further re-
+duce inference time by 14% on top of its fast performance.
+All tests are conducted on an NVIDIA A6000 GPU.
+C. Integrating VRE into OSEDiff
+The existing representative one-step diffusion (OSD) im-
+age restoration model, OSEDiff [9], does not focus on face
+restoration tasks. In order to assess its applicability to face
+restoration, we retrained it using the same dataset and experi-
+mental settings as OSDFace, resulting in OSEDiff*. Further-
+more, we integrated the proposed VRE into OSEDiff*, creat-
+ing the enhanced model OSEDiff*+VRE.
+As shown in Tab. 2, Tab. 3, and Fig. 1, OSEDiff*+VRE
+*Equal contribution.
+†Corresponding authors.
+Wider 0504 OSEDiff OSEDiff* OSEDiff*+VRE
+LFW D. Brazile OSEDiff OSEDiff* OSEDiff*+VRE
+WebPhoto 10038 OSEDiff OSEDiff* OSEDiff*+VRE
+Figure 1. Visual comparisons of various versions of OSEDiff [9].
+OSEDiff*+VRE shows enhanced visual quality.
+Prompt Embedder Inference Time (ms)Methods Param (M) MACs (G) Serialized Parallelized
+OSEDiff [9] 353.41 141.45 130.75 125.54
+OSDFace (ours) 28.63 99.47 119.00 102.83
+Table 1. Complexity comparison during inference. “parallelized”
+refers to the parallel execution of the prompt embedder and V AE
+encoder, while “serialized” denotes a fully sequential execution ap-
+proach. We provide the number of parameters (Param), multiply-
+accumulate operations (MACs), and time during inference. All mod-
+els are evaluated with 512×512 input image.
+performs well in both quantitative metrics and visual qual-
+ity. The incorporation of VRE significantly reduces informa-
+tion loss during the image-text-embedding process, ensuring
+more accurate data representation. Visual results indicate that
+OSEDiff*+VRE prevents common issues like gender mis-
+classification and unwanted artifacts. Additionally, it reli-
+ably captures subtle facial expressions from the input images.
+Besides, the IQA metrics demonstrate a competitive advan-
+tage by consistently reducing the distribution differences from
+the reference data. These experimental results demonstrate
+that our proposed VRE substantially enhances face restora-
+tion performance, particularly when applied to OSD models.
+1
+arXiv:2411.17163v2  [cs.CV]  23 Apr 2025
+
+=== PAGE 13 ===
+Wider-Test LFW-Test WebPhoto-TestMethods C-IQA↑ M-IQA↑ MUSIQ↑ NIQE↓ FID↓ C-IQA↑ M-IQA↑ MUSIQ↑ NIQE↓ FID↓ C-IQA↑ M-IQA↑ MUSIQ↑ NIQE↓ FID↓
+OSEDiff [9] 0.6298 0.4951 70.559 4.9388 50.274 0.6326 0.5037 73.401 4.7196 57.800 0.6457 0.5108 72.593 5.2611 117.510
+OSEDiff* 0.6193 0.4752 69.101 5.0869 47.883 0.6186 0.4879 71.707 4.8002 51.048 0.6254 0.4823 69.816 5.3253 109.236
+OSEDiff*+VRE 0.6637 0.4834 68.259 5.0490 41.490 0.6608 0.5015 70.826 4.8956 46.911 0.6410 0.4646 66.912 5.5233 95.566
+OSDFace (ours) 0.7284 0.5229 74.601 3.7741 34.648 0.7203 0.5493 75.354 3.8710 44.629 0.7106 0.5162 73.935 3.9864 84.597
+Table 2. Quantitative comparison on real-world datasets with one-step diffusion methods. C-IQA stands for CLIPIQA, and M-IQA stands
+for MANIQA. The best and second best results are colored with red and blue, respectively.
+Methods LPIPS↓ DISTS↓ MUSIQ↑ NIQE↓ Deg.↓ LMD↓ FID(FFHQ)↓FID(HQ)↓
+OSEDiff [9] 0.3306 0.2170 71.467 5.1241 67.390 6.4141 73.484 37.210
+OSEDiff* 0.3496 0.2200 69.981 5.3280 67.403 7.4082 81.362 37.131
+OSEDiff*+VRE 0.3368 0.2420 69.089 5.3241 63.758 6.5365 67.785 36.356
+OSDFace (ours) 0.3365 0.1773 75.640 3.8840 60.071 5.2867 45.415 17.062
+Table 3. Quantitative comparison on the synthetic CelebA-Test dataset with one-step diffu-
+sion methods. The best and second best results are colored with red and blue, respectively.
+Figure 2. Visualization of the atmospheric tur-
+bulence [1] range from 20,000 to 40,000.
+D. Validation on Face Recognition
+Face restoration, as a fundamental low-level vision task, could
+enhance downstream face recognition tasks to achieve bet-
+ter performance. We use the LFW [4] dataset as a bench-
+mark for comparison, which includes 3,000 positive pairs and
+3,000 negative pairs. Following DAEFR [7], we evaluate the
+face recognition accuracy using the ArcFace [2] model un-
+der different degradation levels. Specifically, we employ un-
+seen atmospheric turbulence degradation [1] to simulate di-
+verse degradation levels, with propagation lengths ranging
+from 20,000 to 40,000, as illustrated in Fig. 2.
+The experimental results in Fig. 3 demonstrate the superior
+performance of our method across various degradation levels.
+As degradation severity increases, our method significantly
+improves precision at the same recall level. The ROC curve
+shows that OSDFace makes fewer errors at specific true posi-
+tive rates. Besides, OSDFace widens the gap between positive
+and negative predictions, thereby improving classifier perfor-
+mance. These findings indicate that our method provides sub-
+stantial enhancements to downstream face recognition tasks.
+E. Limitations and Future Work
+We briefly analyze the limitations and future work. (1) Color
+shift: OSDFace sometimes over-enhances contrast or satura-
+tion in less degraded regions, causing color shifts in restored
+face images. Although AdaIN [5] can fix this during infer-
+ence, we aim for an end-to-end, color shift-free restoration.
+Future work will explore content-aware color regularization
+to improve color preservation. (2) Texture in complex re-
+gions: OSDFace struggles with realistic skin textures and fine
+details in complex regions like limbs or fingers. This arises
+from the model’s focus on face features, with limited train-
+ing data for non-facial parts with similar skin textures. Fu-
+ture work will explore semantic information extraction and
+domain-specific priors to improve the handling of these areas.
+(3) Generalization to low-degradation images: OSDFace was
+not trained on minimal degradation images, but still shows
+some generalization. However, finer skin texture restoration
+remains a focus, requiring higher resolution input and output
+faces, HD training data, and texture-sensitive architectures.
+F. Additional Visual Comparisons
+These comparisons demonstrate that our proposed OSDFace
+generates high-quality faces and effectively preserves identi-
+ties, even with severely degraded input images. Compared to
+other methods, OSDFace more accurately recovers finer de-
+tails and produces more realistic faces. To illustrate these ad-
+vantages further, we select various representative images with
+unique characteristics, which can be regarded as different face
+categories. These images are briefly analyzed below.
+Synthetic dataset. Visualized results are presented in Fig. 4,
+Fig. 5, and Fig. 6. Compared to other methods, OSDFace
+produces more natural-looking restorations with greater de-
+tail. This is especially evident in the hair, whether long, short,
+straight, or curly. Additionally, our method effectively re-
+stores occluded regions, such as an arm covering the mouth
+or bangs obscuring the eyes. For profile views, OSDFace
+naturally recovers facial contours. In some ground truth im-
+ages with blurred backgrounds, OSDFace performs well, even
+achieving higher quality and greater detail than the original
+HQ images. In scenarios with complex backgrounds, many
+VQ-based methods, such as VQFR [3], CodeFormer [13],
+and DAEFR [7], fail to restore natural backgrounds. These
+methods often produce wallpaper-like outputs, exhibit color
+distortions, or even blend the person’s clothing with the back-
+ground. In contrast, OSDFace, which combines VQ Dict and
+diffusion model, successfully generates harmonious faces.
+Real-world dataset. More visual comparisons on real-world
+datasets are shown in Fig. 7, Fig. 8, Fig. 9, and Fig. 10. Our
+OSDFace demonstrates strong capabilities in detail genera-
+tion and boundary distinction. Some images contain multiple
+closely positioned faces, such as image 0026 in the Wider-
+Test and Damon Stoudamire in the LFW-Test. Our method
+successfully restores each individual face. In Wider 0003,
+only OSDFace successfully generates complete glasses and
+clearly separates the arm from the face. For faces with vary-
+ing skin tones, our method consistently maintains the realism
+of the images. Furthermore, our approach accurately restores
+facial accessories, including patterns on hats (Wider 0026),
+bandages (Daniel Osorno in LFW-Test), and earrings (Wider
+0173). In old photo restoration scenarios, our OSDFace also
+effectively handles unknown degradations.
+2
+
+=== PAGE 14 ===
+References
+[1] Nicholas Chimitt and Stanley H Chan. Simulating anisopla-
+natic turbulence by sampling intermodal and spatially corre-
+lated zernike coefficients. Optical Engineering, 2020. 2
+[2] Jiankang Deng, Jia Guo, Xue Niannan, and Stefanos Zafeiriou.
+ArcFace: Additive angular margin loss for deep face recogni-
+tion. In CVPR, 2019. 2, 4
+[3] Yuchao Gu, Xintao Wang, Liangbin Xie, Chao Dong, Gen Li,
+Ying Shan, and Ming-Ming Cheng. VQFR: Blind face restora-
+tion with vector-quantized dictionary and parallel decoder. In
+ECCV, 2022. 2, 5, 6, 7, 8, 9, 10, 11
+[4] Gary B. Huang, Marwan Mattar, Tamara Berg, and Eric
+Learned-Miller. Labeled Faces in the Wild: A Database
+forStudying Face Recognition in Unconstrained Environments.
+In Workshop on Faces in ’Real-Life’ Images: Detection, Align-
+ment, and Recognition, 2008. 2, 4
+[5] Xun Huang and Serge Belongie. Arbitrary style transfer in real-
+time with adaptive instance normalization. In ICCV, 2017. 2
+[6] Xinqi Lin, Jingwen He, Ziyan Chen, Zhaoyang Lyu, Bo Dai,
+Fanghua Yu, Wanli Ouyang, Yu Qiao, and Chao Dong. Diff-
+BIR: Towards blind image restoration with generative diffusion
+prior. In ECCV, 2024. 5, 6, 7, 8, 9, 10, 11
+[7] Yu-Ju Tsai, Yu-Lun Liu, Lu Qi, Kelvin CK Chan, and Ming-
+Hsuan Yang. Dual associated encoder for face restoration. In
+ICLR, 2024. 2, 5, 6, 7, 8, 9, 10, 11
+[8] Zhouxia Wang, Jiawei Zhang, Tianshui Chen, Wenping Wang,
+and Ping Luo. Restoreformer++: Towards real-world blind
+face restoration from undegraded key-value pairs. IEEE
+TPAMI, 2023. 5, 6, 7, 8, 9, 10, 11
+[9] Rongyuan Wu, Lingchen Sun, Zhiyuan Ma, and Lei Zhang.
+One-step effective diffusion network for real-world image
+super-resolution. In NeurIPS, 2024. 1, 2, 5, 6, 7, 8, 9, 10,
+11
+[10] Rongyuan Wu, Tao Yang, Lingchen Sun, Zhengqiang Zhang,
+Shuai Li, and Lei Zhang. SeeSR: Towards semantics-aware
+real-world image super-resolution. In CVPR, 2024. 1
+[11] Peiqing Yang, Shangchen Zhou, Qingyi Tao, and Chen Change
+Loy. PGDiff: Guiding diffusion models for versatile face
+restoration via partial guidance. In NeurIPS, 2023. 5, 6, 7,
+8, 9, 10, 11
+[12] Zongsheng Yue and Chen Change Loy. DifFace: Blind Face
+Restoration with Diffused Error Contraction . IEEE TPAMI,
+2024. 5, 6, 7, 8, 9, 10, 11
+[13] Shangchen Zhou, Kelvin C.K. Chan, Chongyi Li, and
+Chen Change Loy. Towards robust blind face restoration with
+codebook lookup transformer. In NeurIPS, 2022. 2, 5, 6, 7, 8,
+9, 10, 11
+3
+
+=== PAGE 15 ===
+0.0 0.2 0.4 0.6 0.8 1.0
+Recall
+0.5
+0.6
+0.7
+0.8
+0.9
+1.0Precision
+PR curve for 20,000
+w/o FR
+DAEFR
+DiffBIR
+OSEDiff*
+OSDFace
+0.0 0.2 0.4 0.6 0.8 1.0
+False Positive Rate
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0True Positive Rate
+ROC curve for 20,000
+w/o FR
+DAEFR
+DiffBIR
+OSEDiff*
+OSDFace
+w/o FR DAEFR DiffBIR OSEDiff*OSDFace
+Method
+0.00
+0.05
+0.10
+0.15
+0.20Mean Distance
+Mean sample distance for 20,000
+w/o FR
+DAEFR
+DiffBIR
+OSEDiff*
+OSDFace
+0.0 0.2 0.4 0.6 0.8 1.0
+Threshold
+0.0
+0.1
+0.2
+0.3
+0.4
+0.5
+0.6
+0.7
+0.8F1 Score
+F1 curve for 20,000
+w/o FR
+DAEFR
+DiffBIR
+OSEDiff*
+OSDFace
+0.0 0.2 0.4 0.6 0.8 1.0
+Recall
+0.5
+0.6
+0.7
+0.8
+0.9
+1.0Precision
+PR curve for 30,000
+w/o FR
+DAEFR
+DiffBIR
+OSEDiff*
+OSDFace
+0.0 0.2 0.4 0.6 0.8 1.0
+False Positive Rate
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0True Positive Rate
+ROC curve for 30,000
+w/o FR
+DAEFR
+DiffBIR
+OSEDiff*
+OSDFace
+w/o FR DAEFR DiffBIR OSEDiff*OSDFace
+Method
+0.00
+0.02
+0.04
+0.06
+0.08
+0.10
+0.12
+0.14Mean Distance
+Mean sample distance for 30,000
+w/o FR
+DAEFR
+DiffBIR
+OSEDiff*
+OSDFace
+0.0 0.2 0.4 0.6 0.8 1.0
+Threshold
+0.0
+0.1
+0.2
+0.3
+0.4
+0.5
+0.6
+0.7F1 Score
+F1 curve for 30,000
+w/o FR
+DAEFR
+DiffBIR
+OSEDiff*
+OSDFace
+0.0 0.2 0.4 0.6 0.8 1.0
+Recall
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0Precision
+PR curve for 40,000
+w/o FR
+DAEFR
+DiffBIR
+OSEDiff*
+OSDFace
+0.0 0.2 0.4 0.6 0.8 1.0
+False Positive Rate
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0True Positive Rate
+ROC curve for 40,000
+w/o FR
+DAEFR
+DiffBIR
+OSEDiff*
+OSDFace
+w/o FR DAEFR DiffBIR OSEDiff*OSDFace
+Method
+0.00
+0.02
+0.04
+0.06
+0.08
+0.10Mean Distance
+Mean sample distance for 40,000
+w/o FR
+DAEFR
+DiffBIR
+OSEDiff*
+OSDFace
+0.0 0.2 0.4 0.6 0.8 1.0
+Threshold
+0.0
+0.1
+0.2
+0.3
+0.4
+0.5
+0.6
+0.7F1 Score
+F1 curve for 40,000
+w/o FR
+DAEFR
+DiffBIR
+OSEDiff*
+OSDFace
+Figure 3. Quantitative results on the LFW dataset [4] for face recognition using the official ArcFace [2] MS1MV3 R50 model. The evaluated
+metrics include precision-recall (PR) curves, receiver operating characteristic (ROC) curves, F1 scores, and mean sample distance histograms.
+The mean sample distance is defined as the difference between the average cosine similarity of predicted positive pairs and predicted negative
+pairs. “w/o FR” refers to the absence of the face restoration process. Atmospheric turbulence parameters range from 20,000 to 40,000.
+4
+
+=== PAGE 16 ===
+HQ - CelebA 0063 RestoreFormer++ [8] VQFR [3] CodeFormer [13] DAEFR [7] PGDiff [11]
+LQ - CelebA 0063 DifFace [12] DiffBIR [6] OSEDiff [9] OSEDiff* [9] OSDFace (ours)
+HQ - CelebA 0064 RestoreFormer++ [8] VQFR [3] CodeFormer [13] DAEFR [7] PGDiff [11]
+LQ - CelebA 0064 DifFace [12] DiffBIR [6] OSEDiff [9] OSEDiff* [9] OSDFace (ours)
+HQ - CelebA 0080 RestoreFormer++ [8] VQFR [3] CodeFormer [13] DAEFR [7] PGDiff [11]
+LQ - CelebA 0080 DifFace [12] DiffBIR [6] OSEDiff [9] OSEDiff* [9] OSDFace (ours)
+Figure 4. More visual comparison of the synthetic CelebA-Test dataset in challenging cases. Please zoom in for a better view.
+5
+
+=== PAGE 17 ===
+HQ - CelebA 0124 RestoreFormer++ [8] VQFR [3] CodeFormer [13] DAEFR [7] PGDiff [11]
+LQ - CelebA 0124 DifFace [12] DiffBIR [6] OSEDiff [9] OSEDiff* [9] OSDFace (ours)
+HQ - CelebA 0125 RestoreFormer++ [8] VQFR [3] CodeFormer [13] DAEFR [7] PGDiff [11]
+LQ - CelebA 0125 DifFace [12] DiffBIR [6] OSEDiff [9] OSEDiff* [9] OSDFace (ours)
+HQ - CelebA 0186 RestoreFormer++ [8] VQFR [3] CodeFormer [13] DAEFR [7] PGDiff [11]
+LQ - CelebA 0186 DifFace [12] DiffBIR [6] OSEDiff [9] OSEDiff* [9] OSDFace (ours)
+Figure 5. More visual comparison of the synthetic CelebA-Test dataset in challenging cases. Please zoom in for a better view.
+6
+
+=== PAGE 18 ===
+HQ - CelebA 0323 RestoreFormer++ [8] VQFR [3] CodeFormer [13] DAEFR [7] PGDiff [11]
+LQ - CelebA 0323 DifFace [12] DiffBIR [6] OSEDiff [9] OSEDiff* [9] OSDFace (ours)
+HQ - CelebA 0448 RestoreFormer++ [8] VQFR [3] CodeFormer [13] DAEFR [7] PGDiff [11]
+LQ - CelebA 0448 DifFace [12] DiffBIR [6] OSEDiff [9] OSEDiff* [9] OSDFace (ours)
+HQ - CelebA 0509 RestoreFormer++ [8] VQFR [3] CodeFormer [13] DAEFR [7] PGDiff [11]
+LQ - CelebA 0509 DifFace [12] DiffBIR [6] OSEDiff [9] OSEDiff* [9] OSDFace (ours)
+Figure 6. More visual comparison of the synthetic CelebA-Test dataset in challenging cases. Please zoom in for a better view.
+7
+
+=== PAGE 19 ===
+Wider 0003 RestoreFormer++ [8] VQFR [3] CodeFormer [13] DAEFR [7]
+PGDiff [11] DifFace [12] DiffBIR [6] OSEDiff* [9] OSDFace (ours)
+Wider 0026 RestoreFormer++ [8] VQFR [3] CodeFormer [13] DAEFR [7]
+PGDiff [11] DifFace [12] DiffBIR [6] OSEDiff* [9] OSDFace (ours)
+Wider 0047 RestoreFormer++ [8] VQFR [3] CodeFormer [13] DAEFR [7]
+PGDiff [11] DifFace [12] DiffBIR [6] OSEDiff* [9] OSDFace (ours)
+Figure 7. More visual comparison of the real-world Wider-Test dataset in challenging cases. Please zoom in for a better view.
+8
+
+=== PAGE 20 ===
+LFW Anna Faris RestoreFormer++ [8] VQFR [3] CodeFormer [13] DAEFR [7]
+PGDiff [11] DifFace [12] DiffBIR [6] OSEDiff* [9] OSDFace (ours)
+LFW Damon Stoudamire RestoreFormer++ [8] VQFR [3] CodeFormer [13] DAEFR [7]
+PGDiff [11] DifFace [12] DiffBIR [6] OSEDiff* [9] OSDFace (ours)
+LFW Daniel Osorno RestoreFormer++ [8] VQFR [3] CodeFormer [13] DAEFR [7]
+PGDiff [11] DifFace [12] DiffBIR [6] OSEDiff* [9] OSDFace (ours)
+Figure 8. More visual comparison of the real-world LFW-Test dataset in challenging cases. Please zoom in for a better view.
+9
+
+=== PAGE 21 ===
+WebPhoto 00058 RestoreFormer++ [8] VQFR [3] CodeFormer [13] DAEFR [7]
+PGDiff [11] DifFace [12] DiffBIR [6] OSEDiff* [9] OSDFace (ours)
+WebPhoto 00079 RestoreFormer++ [8] VQFR [3] CodeFormer [13] DAEFR [7]
+PGDiff [11] DifFace [12] DiffBIR [6] OSEDiff* [9] OSDFace (ours)
+WebPhoto 00101 RestoreFormer++ [8] VQFR [3] CodeFormer [13] DAEFR [7]
+PGDiff [11] DifFace [12] DiffBIR [6] OSEDiff* [9] OSDFace (ours)
+Figure 9. More visual comparison of the real-world WebPhoto-Test dataset in challenging cases. Please zoom in for a better view.
+10
+
+=== PAGE 22 ===
+Wider 0173 RestoreFormer++ [8] VQFR [3] CodeFormer [13] DAEFR [7]
+PGDiff [11] DifFace [12] DiffBIR [6] OSEDiff* [9] OSDFace (ours)
+WebPhoto 00109 RestoreFormer++ [8] VQFR [3] CodeFormer [13] DAEFR [7]
+PGDiff [11] DifFace [12] DiffBIR [6] OSEDiff* [9] OSDFace (ours)
+WebPhoto 10015 RestoreFormer++ [8] VQFR [3] CodeFormer [13] DAEFR [7]
+PGDiff [11] DifFace [12] DiffBIR [6] OSEDiff* [9] OSDFace (ours)
+Figure 10. More visual comparison of the real-world datasets in challenging cases. Please zoom in for a better view.
+11

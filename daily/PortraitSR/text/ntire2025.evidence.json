@@ -1,0 +1,118 @@
+{
+  "key": "ntire2025",
+  "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\06_benchmarks_baselines\\ntire2025_2504.14600.pdf",
+  "page_count": 12,
+  "first_page_excerpt": "arXiv:2504.14600v1  [cs.CV]  20 Apr 2025\nNTIRE 2025 Challenge on Real-World Face Restoration: Methods and Results\nZheng Chen* Jingkai Wang* Kai Liu* Jue Gong* Lei Sun* Zongwei Wu*\nRadu Timofte* Yulun Zhang*† Jianxing Zhang Jinlong Wu Jun Wang Zheng Xie\nHakjae Jeon Suejin Han Hyung-Ju Chun Hyunhee Park Zhicun Yin\nJunjie Chen Ming Liu Xiaoming Li Chao Zhou Wangmeng Zuo Weixia Zhang\nDingquan Li Kede Ma Yun Zhang Zhuofan Zheng Yuyue Liu Shizhen Tang\nZihao Zhang Yi Ning Hao Jiang Wenjie An Kangmeng Yu Chenyang Wang\nKui Jiang Xianming Liu Junjun Jiang Yingfu Zhang Gang He Siqi Wang\nKepeng Xu Zhenyang Liu Changxin Zhou Shanlan Shen Yubo Duan\nYiang Chen Jin Guo Mengru Yang Jen-Wei Lee Chia-Ming Lee\nChih-Chung Hsu Hu Peng Chunming He\nAbstract\nThis paper provides a review of the NTIRE 2025 challenge\non real-world face restoration, highlighting the proposed\nsolutions and the resulting outcomes. The challenge focuses\non generating natural, realistic outputs while maintaining\nidentity consistency. Its goal is to advance state-of-the-art\nsolutions for perceptual quality and realism, without im-\nposing constraints on computational resources or training\ndata. The track of the challenge evaluates performance us-\ning a weighted image quality assessment (IQA) score and\nemploys the AdaFace model as an identity checker. The\ncompetition attracted 141 registrants, with 13 teams sub-\nmitting valid models, and ultimately, 10 teams achieved a\nvalid score in the final ranking. This collaborative effort ad-\nvances the performance of real-world face restoration while\noffering an in-depth overview of the latest trends in the field.\n1. Introduction\nFace restoration aims to recover high-quality (HQ) face im-\nages from low-quality (LQ) inputs that are degraded by\nblur, noise, compression, and other distortions. The sig-\nnificant loss of information makes the problem highly ill-\nposed. With the continuous advancement of portrait pho-\ntography technology, people have higher expectations for\n*Zheng Chen, Jingkai Wang, Kai Liu, Jue Gong, Lei Sun, Zong-\nwei Wu, Radu Timofte, and Yulun Zhang are the challenge organiz-\ners, while the other authors participated in the challenge. Section B\nin the supplementary materials contains the authors’ teams and affilia-\ntions. NTIRE 2025 webpage: https://cvlai.net/ntire/2025 .\nCode: https://github.com/zhengchen1999/NTIRE2025_\nRealWorld_Face_Restoration.\n†Corresponding author: Yulun Zhang. yulun100@gmail.com\nthe detail and fidelity of face images. Therefore, there\nis an urgent need to ensure that the restored image ap-\npears natural and realistic. Recent developments in deep\nlearning have greatly improved face restoration. Modern\napproaches using CNNs, Transformers [56, 66, 71, 84],\nGANs [1, 2, 63, 75] and Diffusion Models [4, 35, 38, 42, 50,\n55, 62, 67, 69, 73, 78], have shown superior performance.\nOne of the main challenges faced by researchers is the\neffective capture of face priors. While statistical priors have\nbeen commonly employed in traditional image processing\napproaches, the rise of neural networks has led to the ex-\nploration of more learning-based methods. Geometric-prior\nmethods [5, 24, 47, 77] are particularly useful for provid-\ning explicit facial structure information. However, for faces\nwith less severe degradation, people prefer the output to\nbe as realistic as possible, even with skin textures that can\nonly be captured by high-performance cameras. Therefore,\nin addition to semantic guidance, texture information for\nrestoring facial details is also important.\nMany recent studies [16, 56, 66, 71, 84] have explored\nthe use of Transformer models to integrate face priors.\nCodeFormer [84] and DAEFR [56], as two notable exam-\nples, utilize codebooks trained on HQ data as face priors.\nThese models perform well at preserving facial information,\nyet are also limited in handling face and background transi-\ntions in those severely degraded images.\nAs for those severely degraded images, the model’s\ngenerative capability becomes crucial. Many GAN-based\nmethods [1, 2, 63, 75] can effectively restore facial de-\ntails. It’s worth mentioning that GFPGAN [63] not only\nbuilds an effective model, but also provides many bench-\nmark datasets for the computer vision community. In recent\nyears, diffusion-based methods have emerged [4, 35, 38, 42,",
+  "figure_candidates": [
+    {
+      "page": 5,
+      "caption": "Figure 1. Team AllForFace. Basic idea."
+    },
+    {
+      "page": 5,
+      "caption": "Figure 2. Team AllForFace. Fidelity mode structure."
+    },
+    {
+      "page": 5,
+      "caption": "Figure 3. Team AllForFace. Naturalness model."
+    },
+    {
+      "page": 6,
+      "caption": "Figure 4. Team IIL."
+    },
+    {
+      "page": 6,
+      "caption": "Figure 5. Team PISA-MAP."
+    },
+    {
+      "page": 7,
+      "caption": "Figure 6. Team MiPortrait."
+    },
+    {
+      "page": 8,
+      "caption": "Figure 7. Team AIIA."
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 3,
+      "caption": "Table 1 presents the final rankings and results of the teams."
+    },
+    {
+      "page": 4,
+      "caption": "Table 1. Results of NTIRE 2025 Real-world Face Restoration Challenge. The testing was conducted on the test dataset, consisting of 450"
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      1,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "identity": [
+      1,
+      2,
+      3,
+      5,
+      7,
+      8
+    ],
+    "portrait_detail": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "efficiency": [
+      1,
+      2,
+      3,
+      5,
+      6,
+      7,
+      8,
+      9,
+      11
+    ],
+    "datasets": [
+      2,
+      3,
+      4,
+      7,
+      8
+    ],
+    "limitations": []
+  },
+  "source_urls": [
+    {
+      "page": 1,
+      "url": "https://cvlai.net/ntire/2025"
+    },
+    {
+      "page": 1,
+      "url": "https://github.com/zhengchen1999/NTIRE2025_"
+    },
+    {
+      "page": 2,
+      "url": "https://www.cvlai.net/ntire/2025/"
+    },
+    {
+      "page": 3,
+      "url": "https://github"
+    }
+  ],
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\ntire2025.txt"
+}

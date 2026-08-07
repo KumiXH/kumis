@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html class="no-js">
+    <head>
+        <meta charset="utf-8">
+        <title>IMDB-WIKI - 500k+ face images with age and gender labels</title>
+        <link rel="stylesheet" href="static/css/bootstrap.min.css">
+        <style>
+            body {
+		        padding-top: 20px;
+		        padding-bottom: 40px;
+		      }
+		      hr {
+		           border: 1px solid #999999;
+		      }
+		      .container {
+		        margin: 0 auto;
+		        max-width: 700px;
+		      }
+		      img {margin:.7em 0 .7em 0;}
+        </style>
+    </head>
+    <body>
+      <div class="container">
+      <div class="masthead">
+        <h1>IMDB-WIKI &ndash; 500k+ face images with age and gender labels</h1>
+        <p><a href="">Rasmus Rothe</a>, 
+           <a href="http://www.vision.ee.ethz.ch/~timofter">Radu Timofte</a>, 
+	   <a href="http://www.vision.ee.ethz.ch/en">Luc Van Gool</a>
+        </p>
+      </div> 
+      <hr/>
+      
+	  <div class="row"><div class="col-md-12">
+			<h3>DEX: Deep EXpectation of apparent age from a single image</h3>
+               <p style="text-align: center"><span><i>Looking at People Workshop</i></br>
+ <i>International Conference on Computer Vision (ICCV), 2015</i> </br>
+							  ∗ Winner of <a href="http://gesture.chalearn.org" target="_blank">LAP challenge</a> on apparent age estimation<br/>
+								∗ NVIDIA ChaLearn LAP 2015 Best Paper Award
+								</span></p>
+   </div></div>
+			
+
+      <div class="row"><div class="col-md-12"><img src="static/img/pipeline.png" class="img-rounded img-responsive" /></div></div>
+      <div class="row">
+        <div class="col-xs-12">
+            <p class="text-justify">
+							In this paper we tackle the estimation of apparent age in still face images with deep learning. Our convolutional neural networks (CNNs) use the VGG-16 architecture and
+are pretrained on ImageNet for image classification. In addition, due to the limited number of apparent age annotated images, we explore the benefit of finetuning over crawled Internet face images with available age. We crawled 0.5 million images of celebrities from IMDb and Wikipedia that we make public on this website. This is the largest public dataset for age prediction to date. We pose the age regression problem as a deep classification problem followed by a softmax expected value refinement and show improvements over direct regression training of CNNs. Our proposed method, Deep EXpectation (DEX) of apparent age, first detects the face in the test image and then extracts the CNN predictions from an ensemble of 20 networks on the cropped face. The CNNs of DEX were finetuned on the crawled images and then on the provided images with apparent age annotations. DEX does not use explicit facial landmarks. Our DEX is the winner (1st place) of the ChaLearn LAP 2015 challenge on apparent age estimation with more than 115 registered teams, significantly outperforming the human reference.
+<br>
+Our models for age estimation are in use on our website <a href="http://howhot.io" target="_blank">howhot.io</a> which went viral around the internet and was covered extensively in social media and the press (<a href="http://techcrunch.com/2016/01/11/blinq-dating-app-uses-ai-to-judge-hotness/" target="_blank">Techcrunch</a>, <a href="https://news.ycombinator.com/item?id=10844127" target="_blank">Hackernews</a>, <a href="http://reddit.com/r/InternetIsBeautiful/comments/3zkesv/a_website_made_by_zurich_university_to_tell_you/" target="_blank">Reddit #1</a>, <a href="http://www.standard.co.uk/lifestyle/london-life/wondering-exactly-how-hot-your-profile-picture-is-new-dating-app-blinq-will-tell-you-a3150761.html" target="_blank">Evening Standard</a>, <a href="http://www.spiegel.de/netzwelt/web/bild-1070898-941698.html" target="_blank">Spiegel</a>).
+
+            </p>
+            <a class="btn btn-default" href="https://data.vision.ee.ethz.ch/cvl/publications/papers/proceedings/eth_biwi_01229.pdf"><span class="glyphicon glyphicon-file"></span> PDF</a>
+</div> 
+</div>
+          <div class="row"><div class="col-md-12">
+
+
+                        <h3>Deep expectation of real and apparent age from a single image without facial landmarks</h3>  
+               <p style="text-align: center"><span><i>International Journal of Computer Vision (IJCV), 2016</i> </span></p>
+
+
+   </div></div>
+
+        
+      <div class="row">
+        <div class="col-xs-12">
+            <p class="text-justify">                      
+            In this paper we propose a deep learning solution to age estimation from a single face image without the use of facial landmarks and introduce the IMDB-WIKI dataset, the largest public dataset of face images with age and gender labels. If the real age estimation research spans over decades, the study of apparent age estimation or the age as perceived by other humans from a face image is a recent endeavor. We tackle both tasks with our convolutional neural networks (CNNs) of VGG-16 architecture which are pre-trained on ImageNet for image classification. We pose the age estimation problem as a deep classification problem followed by a softmax expected value refinement. The key factors of our solution are: deep learned models from large data, robust face alignment, and expected value formulation for age regression. We validate our methods on standard benchmarks and achieve state-of-the-art results for both real and apparent age estimation.
+</p>
+       
+     <a class="btn btn-default" href="https://data.vision.ee.ethz.ch/cvl/publications/papers/articles/eth_biwi_01299.pdf"><span class="glyphicon glyphicon-file"></span> PDF</a>
+	
+
+    </div>
+    </div><!-- row -->
+
+    <h2>The IMDB-WIKI dataset</h2>
+    <div class="row">
+<div class="col-md-12">
+            <p class="text-justify">
+To the best of our knowledge this is the largest publicly available dataset of face images with gender and age labels for training. We provide pretrained models for both age and gender prediction.<p></div>
+        <div class="col-md-12"><img src="static/img/imdb-wiki-teaser.png" class="img-rounded img-responsive" /></div>
+        <div class="col-md-8 col-md-offset-2"><img src="static/img/dataset_dist.png" class="img-rounded img-responsive" /></div>
+        <div class="col-md-12">
+    <h3>Description</h3>
+            <p class="text-justify">
+Since the publicly available face image datasets are often of small to medium size, rarely exceeding tens of thousands of images, and often without
+age information we decided to collect a large dataset of celebrities. For this purpose, we took the list of the most popular 100,000 actors as listed on the IMDb website and (automatically) crawled from their profiles date of birth, name, gender and all images related to that person. 
+Additionally we crawled all profile images from pages of people from Wikipedia with the same meta information.
+We removed the images without timestamp (the date when the photo was taken). 
+Assuming that the images with single faces are likely to show the actor and that the timestamp and date of birth are correct, we were able to assign to each such image the biological (real) age. Of course, we can not vouch for the accuracy of the assigned age information. Besides wrong timestamps, many images are stills from movies - movies that can have extended production times. In total we obtained 460,723 face images from 20,284 celebrities from IMDb and 62,328 from Wikipedia, thus 523,051 in total.
+<br><br>
+As some of the images (especially from IMDb) contain several people we only use the photos where the second strongest face detection is below a threshold. For the network to be equally discriminative for all ages, we equalize the age distribution for training. For more details please the see the paper.
+            </p>
+    <h3>Usage</h3>
+            <p class="text-justify">
+For both the IMDb and Wikipedia images we provide a separate <i>.mat</i> file which can be loaded with Matlab containing all the meta information. The format is as follows:
+							<ul>
+										<li><b>dob: </b>date of birth (Matlab serial date number)</li>
+				            <li><b>photo_taken: </b>year when the photo was taken</li>
+				         <li><b>full_path: </b>path to file</li>
+				            <li><b>gender: </b>0 for female and 1 for male, <i>NaN</i> if unknown</li>
+				              <li><b>name: </b>name of the celebrity</li>
+				     <li><b>face_location: </b>location of the face. To crop the face in Matlab run <pre>img(face_location(2):face_location(4),face_location(1):face_location(3),:))</pre></li>
+				        <li><b>face_score: </b>detector score (the higher the better). <i>Inf</i> implies that no face was found in the image and the <i>face_location</i> then just returns the entire image</li>
+				 <li><b>second_face_score: </b>detector score of the face with the second highest score. This is useful to ignore images with more than one face. <i>second_face_score</i> is <i>NaN</i> if no second face was detected.</li>
+				       <li><b>celeb_names (IMDB only): </b>list of all celebrity names</li>
+				          <li><b>celeb_id (IMDB only): </b>index of celebrity name</li>
+							</ul>
+The age of a person can be calculated based on the date of birth and the time when the photo was taken (note that we assume that the photo was taken in the middle of the year): 
+<pre>[age,~]=datevec(datenum(wiki.photo_taken,7,1)-wiki.dob); </pre>
+
+            </p>
+    <h3>Download images and metadata</h3>
+            <p class="text-justify">
+Here you can download the raw images and the metadata. We also provide a version with the cropped faces (with 40% margin). This version is much smaller.
+<p class="text-warning">We noticed that some of the images from Wikipedia are broken. We plan to fix this issue in the future. For now please just ignore those images.</p>
+<p class="text-warning">We were informed that some standard tools such as WinZip corrupt the files in the .tar archives. We invite you to use 7-zip to obtain uncorrupted files (especially for the <i>wiki.mat</i> file in <i>wiki_crop.tar</i>).</p>
+</p>
+		<h4>IMDB</h4>
+            <div>
+
+            <a id="download_button" class="btn btn-default" href="static/imdb_0.tar" ><span class="glyphicon glyphicon-download-alt"></span> Download images part 0 (27 GB)</a>
+					<a href="static/imdb_0_md5sum.txt" target="_blank">md5sum</a><br>
+            <a id="download_button" class="btn btn-default" href="static/imdb_1.tar" ><span class="glyphicon glyphicon-download-alt"></span> Download images part 1 (26 GB)</a>
+					<a href="static/imdb_1_md5sum.txt" target="_blank">md5sum</a><br>
+            <a id="download_button" class="btn btn-default" href="static/imdb_2.tar" ><span class="glyphicon glyphicon-download-alt"></span> Download images part 2 (28 GB)</a>
+<a href="static/imdb_2_md5sum.txt" target="_blank">md5sum</a><br>
+            <a id="download_button" class="btn btn-default" href="static/imdb_3.tar" ><span class="glyphicon glyphicon-download-alt"></span> Download images part 3 (29 GB)</a>
+<a href="static/imdb_3_md5sum.txt" target="_blank">md5sum</a><br>
+            <a id="download_button" class="btn btn-default" href="static/imdb_4.tar" ><span class="glyphicon glyphicon-download-alt"></span> Download images part 4 (26 GB)</a>
+<a href="static/imdb_4_md5sum.txt" target="_blank">md5sum</a><br>
+            <a id="download_button" class="btn btn-default" href="static/imdb_5.tar" ><span class="glyphicon glyphicon-download-alt"></span> Download images part 5 (29 GB)</a>
+<a href="static/imdb_5_md5sum.txt" target="_blank">md5sum</a><br>
+            <a id="download_button" class="btn btn-default" href="static/imdb_6.tar" ><span class="glyphicon glyphicon-download-alt"></span> Download images part 6 (27 GB)</a>
+<a href="static/imdb_6_md5sum.txt" target="_blank">md5sum</a><br>
+            <a id="download_button" class="btn btn-default" href="static/imdb_7.tar" ><span class="glyphicon glyphicon-download-alt"></span> Download images part 7 (27 GB)</a>
+<a href="static/imdb_7_md5sum.txt" target="_blank">md5sum</a><br>
+            <a id="download_button" class="btn btn-default" href="static/imdb_8.tar" ><span class="glyphicon glyphicon-download-alt"></span> Download images part 8 (26 GB)</a>
+<a href="static/imdb_8_md5sum.txt" target="_blank">md5sum</a><br>
+            <a id="download_button" class="btn btn-default" href="static/imdb_9.tar" ><span class="glyphicon glyphicon-download-alt"></span> Download images part 9 (24 GB)</a>
+<a href="static/imdb_9_md5sum.txt" target="_blank">md5sum</a><br>
+            <a id="download_button" class="btn btn-default" href="static/imdb_meta.tar" ><span class="glyphicon glyphicon-download-alt"></span> Download images meta data</a>
+<a href="static/imdb_meta_md5sum.txt" target="_blank">md5sum</a><br>
+            <a id="download_button" class="btn btn-default" href="static/imdb_crop.tar" ><span class="glyphicon glyphicon-download-alt"></span> <b>Download faces only (7 GB)</b></a>
+<a href="static/imdb_crop_md5sum.txt" target="_blank">md5sum</a><br>
+            </div>
+		<h4>WIKI</h4>
+            <div>
+            <a id="download_button" class="btn btn-default" href="static/wiki.tar.gz" ><span class="glyphicon glyphicon-download-alt"></span> Download images and meta data (3 GB)</b></a>
+					<a href="static/wiki_md5sum.txt" target="_blank">md5sum</a><br>
+            <a id="download_button" class="btn btn-default" href="static/wiki_crop.tar" ><span class="glyphicon glyphicon-download-alt"></span> <b>Download faces only (1 GB)</b></a>
+<a href="static/wiki_crop_md5sum.txt" target="_blank">md5sum</a><br>
+            </div>
+
+
+
+
+		<h4>Code for extracting face with margin</h4>
+            <p class="text-justify">
+This code allows the user to extract the face with a margin. For our pretrained models we used 40% margin of its width and height on all four sides (the default settings). At the top of the script there is sample code for extracting all face images with margin. 
+						</p>
+            <div>
+            <a id="download_button" class="btn btn-default" href="static/extractSubImage.m" ><span class="glyphicon glyphicon-download-alt"></span>Download extractSubImage.m</a>
+            </div>
+		<h3>Download Caffe models</h3>
+            <p class="text-justify">
+In this section we provide pretrained models for Caffe. For all models we used 40% of margin around the face obtained from the <a href="http://markusmathias.bitbucket.org/2014_eccv_face_detection/" target="_blank">Mathias et al.</a> face detector. For age estimation the output layer has 101 neurons (0-100 years, one for each year). To obtain the predicted age, you need to take the expected value over the softmax-normalized output probabilities. For gender prediction the output layers has 2 neurons (0 for female, 1 for male).
+				</p>
+
+<p class="text-info">Note:  we used the <a href="http://caffe.berkeleyvision.org/gathered/examples/imagenet.html">Imagenet mean</a> when training the models.</p>
+    <h4>Real age estimation trained on IMDB-WIKI</h4>
+            <p class="text-justify">
+				This model was trained on the IMDB-WIKI dataset. The age distrubtion is equalized and it was used as a pretraining for the ChaLearn apparent age estimation challenge.
+						</p>
+            <div>
+            <a id="download_button" class="btn btn-default" href="static/dex_imdb_wiki.caffemodel" ><span class="glyphicon glyphicon-download-alt"></span> Download .caffemodel (0.5 GB)</a>
+            </div>
+	<br>
+            <div>
+            <a id="download_button" class="btn btn-default" href="static/age.prototxt" ><span class="glyphicon glyphicon-download-alt"></span>Download age.prototxt (Testing)</a>
+            </div>
+            <div>
+            <a id="download_button" class="btn btn-default" href="static/age_train.prototxt" ><span class="glyphicon glyphicon-download-alt"></span>Download age_train.prototxt (Training)</a>
+            </div>
+    <h4>Apparent age estimation trained on LAP dataset</h4>
+               <p class="text-justify"><i> ∗ Winner of <a href="http://gesture.chalearn.org" target="_blank">LAP challenge</a> on apparent age estimation</i></p>
+  <p class="text-justify">
+				This model is a fine-tuned version of the previous model. The model was fine-tuned on the dataset of the <a href="http://gesture.chalearn.org" target="_blank">ChaLearn apparent age estimation challenge</a>. An ensemble of these models led to 1st place at the challenge (115 teams).
+						</p>
+                      <div>
+            <a id="download_button" class="btn btn-default" href="static/dex_chalearn_iccv2015.caffemodel" ><span class="glyphicon glyphicon-download-alt"></span> Download .caffemodel (0.5 GB)</a>
+            </div>
+	<br>
+            <div>
+            <a id="download_button" class="btn btn-default" href="static/age.prototxt" ><span class="glyphicon glyphicon-download-alt"></span>Download age.prototxt (Testing)</a>
+            </div>
+   					<div>
+            <a id="download_button" class="btn btn-default" href="static/age_train.prototxt" ><span class="glyphicon glyphicon-download-alt"></span>Download age_train.prototxt (Training)</a>
+            </div>
+  <h4>Gender prediction</h4>
+  <p class="text-justify">
+				This model predicts the gender of a person.
+						</p>
+                      <div>
+            <a id="download_button" class="btn btn-default" href="static/gender.caffemodel" ><span class="glyphicon glyphicon-download-alt"></span> Download .caffemodel (0.5 GB)</a>
+            </div>
+	<br>
+            <div>
+            <a id="download_button" class="btn btn-default" href="static/gender.prototxt" ><span class="glyphicon glyphicon-download-alt"></span>Download gender.prototxt (Testing)</a>
+            </div>
+   <div>
+            <a id="download_button" class="btn btn-default" href="static/gender_train.prototxt" ><span class="glyphicon glyphicon-download-alt"></span>Download gender_train.prototxt (Training)</a>
+            </div>
+
+	    </div>
+    </div><!-- row -->
+
+    <h2>Citation</h2>
+  <p class="text-justify">
+				Please add a reference if you are using the dataset or the pretrained models.
+						</p>
+    <pre>
+@article{Rothe-IJCV-2018,
+  author = {Rasmus Rothe and Radu Timofte and Luc Van Gool},
+  title = {Deep expectation of real and apparent age from a single image without facial landmarks},
+  journal = {International Journal of Computer Vision},
+  volume={126},
+  number={2-4},
+  pages={144--157},
+  year={2018},
+  publisher={Springer}
+}
+</pre>
+    <pre>
+@InProceedings{Rothe-ICCVW-2015,
+  author = {Rasmus Rothe and Radu Timofte and Luc Van Gool},
+  title = {DEX: Deep EXpectation of apparent age from a single image},
+  booktitle = {IEEE International Conference on Computer Vision Workshops (ICCVW)},
+  year = {2015},
+  month = {December},
+}
+</pre>
+
+<h2>License</h2>
+            <p class="text-danger"> Please notice that this dataset is made available for academic research purpose only. All the images are collected from the Internet, and the copyright belongs to the original owners. If any of the images belongs to you and you would like it removed, please kindly inform <a href="mailto:radu.timofte@vision.ee.ethz.ch">us</a>, we will remove it from our dataset immediately.</p>
+
+        </div> <!-- /container -->
+    </body>
+</html>
+

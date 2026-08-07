@@ -1,0 +1,327 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/UP2PNK9f97KFszr5lE+12R+Yx/4</id>
+  <title>arXiv Query: search_query=all:"reference based" AND all:"face restoration"&amp;id_list=&amp;start=0&amp;max_results=150</title>
+  <updated>2026-08-06T07:22:22Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=all:%22reference+based%22+AND+all:%22face+restoration%22&amp;start=0&amp;max_results=150&amp;id_list=" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>150</opensearch:itemsPerPage>
+  <opensearch:totalResults>10</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/2603.22701v1</id>
+    <title>TimeWeaver: Age-Consistent Reference-Based Face Restoration with Identity Preservation</title>
+    <updated>2026-03-24T01:48:27Z</updated>
+    <link href="https://arxiv.org/abs/2603.22701v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2603.22701v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Recent progress in face restoration has shifted from visual fidelity to identity fidelity, driving a transition from reference-free to reference-based paradigms that condition restoration on reference images of the same person. However, these methods assume the reference and degraded input are age-aligned. When only cross-age references are available, as in historical restoration or missing-person retrieval, they fail to maintain age fidelity. To address this limitation, we propose TimeWeaver, the first reference-based face restoration framework supporting cross-age references. Given arbitrary reference images and a target-age prompt, TimeWeaver produces restorations with both identity fidelity and age consistency. Specifically, we decouple identity and age conditioning across training and inference. During training, the model learns an age-robust identity representation by fusing a global identity embedding with age-suppressed facial tokens via a transformer-based ID-Fusion module. During inference, two training-free techniques, Age-Aware Gradient Guidance and Token-Targeted Attention Boost, steer sampling toward desired age semantics, enabling precise adherence to the target-age prompt. Extensive experiments show that TimeWeaver surpasses existing methods in visual quality, identity preservation, and age consistency.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-03-24T01:48:27Z</published>
+    <arxiv:comment>This is an improved version based on arXiv:2603.18645</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Teer Song</name>
+    </author>
+    <author>
+      <name>Yue Zhang</name>
+    </author>
+    <author>
+      <name>Yu Tian</name>
+    </author>
+    <author>
+      <name>Ziyang Wang</name>
+    </author>
+    <author>
+      <name>Xianlin Zhang</name>
+    </author>
+    <author>
+      <name>Guixuan Zhang</name>
+    </author>
+    <author>
+      <name>Xuan Liu</name>
+    </author>
+    <author>
+      <name>Xueming Li</name>
+    </author>
+    <author>
+      <name>Yasen Zhang</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2603.18645v1</id>
+    <title>MeInTime: Bridging Age Gap in Identity-Preserving Face Restoration</title>
+    <updated>2026-03-19T09:11:07Z</updated>
+    <link href="https://arxiv.org/abs/2603.18645v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2603.18645v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>To better preserve an individual's identity, face restoration has evolved from reference-free to reference-based approaches, which leverage high-quality reference images of the same identity to enhance identity fidelity in the restored outputs. However, most existing methods implicitly assume that the reference and degraded input are age-aligned, limiting their effectiveness in real-world scenarios where only cross-age references are available, such as historical photo restoration. This paper proposes MeInTime, a diffusion-based face restoration method that extends reference-based restoration from same-age to cross-age settings. Given one or few reference images along with an age prompt corresponding to the degraded input, MeInTime achieves faithful restoration with both identity fidelity and age consistency. Specifically, we decouple the modeling of identity and age conditions. During training, we focus solely on effectively injecting identity features through a newly introduced attention mechanism and introduce Gated Residual Fusion modules to facilitate the integration between degraded features and identity representations. At inference, we propose Age-Aware Gradient Guidance, a training-free sampling strategy, using an age-driven direction to iteratively nudge the identity-aware denoising latent toward the desired age semantic manifold. Extensive experiments demonstrate that MeInTime outperforms existing face restoration methods in both identity preservation and age consistency. Our code is available at: https://github.com/teer4/MeInTime</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-03-19T09:11:07Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Teer Song</name>
+    </author>
+    <author>
+      <name>Yue Zhang</name>
+    </author>
+    <author>
+      <name>Yu Tian</name>
+    </author>
+    <author>
+      <name>Ziyang Wang</name>
+    </author>
+    <author>
+      <name>Xianlin Zhang</name>
+    </author>
+    <author>
+      <name>Guixuan Zhang</name>
+    </author>
+    <author>
+      <name>Xuan Liu</name>
+    </author>
+    <author>
+      <name>Xueming Li</name>
+    </author>
+    <author>
+      <name>Yasen Zhang</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2402.18811v1</id>
+    <title>BFRFormer: Transformer-based generator for Real-World Blind Face Restoration</title>
+    <updated>2024-02-29T02:31:54Z</updated>
+    <link href="https://arxiv.org/abs/2402.18811v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2402.18811v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Blind face restoration is a challenging task due to the unknown and complex degradation. Although face prior-based methods and reference-based methods have recently demonstrated high-quality results, the restored images tend to contain over-smoothed results and lose identity-preserved details when the degradation is severe. It is observed that this is attributed to short-range dependencies, the intrinsic limitation of convolutional neural networks. To model long-range dependencies, we propose a Transformer-based blind face restoration method, named BFRFormer, to reconstruct images with more identity-preserved details in an end-to-end manner. In BFRFormer, to remove blocking artifacts, the wavelet discriminator and aggregated attention module are developed, and spectral normalization and balanced consistency regulation are adaptively applied to address the training instability and over-fitting problem, respectively. Extensive experiments show that our method outperforms state-of-the-art methods on a synthetic dataset and four real-world datasets. The source code, Casia-Test dataset, and pre-trained models are released at https://github.com/s8Znk/BFRFormer.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-02-29T02:31:54Z</published>
+    <arxiv:comment>Accepted by ICASSP 2024</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Guojing Ge</name>
+    </author>
+    <author>
+      <name>Qi Song</name>
+    </author>
+    <author>
+      <name>Guibo Zhu</name>
+    </author>
+    <author>
+      <name>Yuting Zhang</name>
+    </author>
+    <author>
+      <name>Jinglu Chen</name>
+    </author>
+    <author>
+      <name>Miao Xin</name>
+    </author>
+    <author>
+      <name>Ming Tang</name>
+    </author>
+    <author>
+      <name>Jinqiao Wang</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2505.21905v1</id>
+    <title>Reference-Guided Identity Preserving Face Restoration</title>
+    <updated>2025-05-28T02:46:34Z</updated>
+    <link href="https://arxiv.org/abs/2505.21905v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2505.21905v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Preserving face identity is a critical yet persistent challenge in diffusion-based image restoration. While reference faces offer a path forward, existing reference-based methods often fail to fully exploit their potential. This paper introduces a novel approach that maximizes reference face utility for improved face restoration and identity preservation. Our method makes three key contributions: 1) Composite Context, a comprehensive representation that fuses multi-level (high- and low-level) information from the reference face, offering richer guidance than prior singular representations. 2) Hard Example Identity Loss, a novel loss function that leverages the reference face to address the identity learning inefficiencies found in the existing identity loss. 3) A training-free method to adapt the model to multi-reference inputs during inference. The proposed method demonstrably restores high-quality faces and achieves state-of-the-art identity preserving restoration on benchmarks such as FFHQ-Ref and CelebA-Ref-Test, consistently outperforming previous work.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.MM" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-05-28T02:46:34Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Mo Zhou</name>
+    </author>
+    <author>
+      <name>Keren Ye</name>
+    </author>
+    <author>
+      <name>Viraj Shah</name>
+    </author>
+    <author>
+      <name>Kangfu Mei</name>
+    </author>
+    <author>
+      <name>Mauricio Delbracio</name>
+    </author>
+    <author>
+      <name>Peyman Milanfar</name>
+    </author>
+    <author>
+      <name>Vishal M. Patel</name>
+    </author>
+    <author>
+      <name>Hossein Talebi</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2401.06978v1</id>
+    <title>ENTED: Enhanced Neural Texture Extraction and Distribution for Reference-based Blind Face Restoration</title>
+    <updated>2024-01-13T04:54:59Z</updated>
+    <link href="https://arxiv.org/abs/2401.06978v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2401.06978v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>We present ENTED, a new framework for blind face restoration that aims to restore high-quality and realistic portrait images. Our method involves repairing a single degraded input image using a high-quality reference image. We utilize a texture extraction and distribution framework to transfer high-quality texture features between the degraded input and reference image. However, the StyleGAN-like architecture in our framework requires high-quality latent codes to generate realistic images. The latent code extracted from the degraded input image often contains corrupted features, making it difficult to align the semantic information from the input with the high-quality textures from the reference. To overcome this challenge, we employ two special techniques. The first technique, inspired by vector quantization, replaces corrupted semantic features with high-quality code words. The second technique generates style codes that carry photorealistic texture information from a more informative latent space developed using the high-quality features in the reference image's manifold. Extensive experiments conducted on synthetic and real-world datasets demonstrate that our method produces results with more realistic contextual details and outperforms state-of-the-art methods. A thorough ablation study confirms the effectiveness of each proposed module.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-01-13T04:54:59Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Yuen-Fui Lau</name>
+    </author>
+    <author>
+      <name>Tianjia Zhang</name>
+    </author>
+    <author>
+      <name>Zhefan Rao</name>
+    </author>
+    <author>
+      <name>Qifeng Chen</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2008.00418v1</id>
+    <title>Blind Face Restoration via Deep Multi-scale Component Dictionaries</title>
+    <updated>2020-08-02T07:02:07Z</updated>
+    <link href="https://arxiv.org/abs/2008.00418v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2008.00418v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Recent reference-based face restoration methods have received considerable attention due to their great capability in recovering high-frequency details on real low-quality images. However, most of these methods require a high-quality reference image of the same identity, making them only applicable in limited scenes. To address this issue, this paper suggests a deep face dictionary network (termed as DFDNet) to guide the restoration process of degraded observations. To begin with, we use K-means to generate deep dictionaries for perceptually significant face components (\ie, left/right eyes, nose and mouth) from high-quality images. Next, with the degraded input, we match and select the most similar component features from their corresponding dictionaries and transfer the high-quality details to the input via the proposed dictionary feature transfer (DFT) block. In particular, component AdaIN is leveraged to eliminate the style diversity between the input and dictionary features (\eg, illumination), and a confidence score is proposed to adaptively fuse the dictionary feature to the input. Finally, multi-scale dictionaries are adopted in a progressive manner to enable the coarse-to-fine restoration. Experiments show that our proposed method can achieve plausible performance in both quantitative and qualitative evaluation, and more importantly, can generate realistic and promising results on real degraded images without requiring an identity-belonging reference. The source code and models are available at \url{https://github.com/csxmli2016/DFDNet}.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2020-08-02T07:02:07Z</published>
+    <arxiv:comment>In ECCV 2020. Code is available at: https://github.com/csxmli2016/DFDNet</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Xiaoming Li</name>
+    </author>
+    <author>
+      <name>Chaofeng Chen</name>
+    </author>
+    <author>
+      <name>Shangchen Zhou</name>
+    </author>
+    <author>
+      <name>Xianhui Lin</name>
+    </author>
+    <author>
+      <name>Wangmeng Zuo</name>
+    </author>
+    <author>
+      <name>Lei Zhang</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2412.05043v1</id>
+    <title>ReF-LDM: A Latent Diffusion Model for Reference-based Face Image Restoration</title>
+    <updated>2024-12-06T13:49:10Z</updated>
+    <link href="https://arxiv.org/abs/2412.05043v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2412.05043v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>While recent works on blind face image restoration have successfully produced impressive high-quality (HQ) images with abundant details from low-quality (LQ) input images, the generated content may not accurately reflect the real appearance of a person. To address this problem, incorporating well-shot personal images as additional reference inputs could be a promising strategy. Inspired by the recent success of the Latent Diffusion Model (LDM), we propose ReF-LDM, an adaptation of LDM designed to generate HQ face images conditioned on one LQ image and multiple HQ reference images. Our model integrates an effective and efficient mechanism, CacheKV, to leverage the reference images during the generation process. Additionally, we design a timestep-scaled identity loss, enabling our LDM-based model to focus on learning the discriminating features of human faces. Lastly, we construct FFHQ-Ref, a dataset consisting of 20,405 high-quality (HQ) face images with corresponding reference images, which can serve as both training and evaluation data for reference-based face restoration models.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="eess.IV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-12-06T13:49:10Z</published>
+    <arxiv:comment>NeurIPS 2024, project page https://chiweihsiao.github.io/refldm.github.io/</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Chi-Wei Hsiao</name>
+    </author>
+    <author>
+      <name>Yu-Lun Liu</name>
+    </author>
+    <author>
+      <name>Cheng-Kun Yang</name>
+    </author>
+    <author>
+      <name>Sheng-Po Kuo</name>
+    </author>
+    <author>
+      <name>Kevin Jou</name>
+    </author>
+    <author>
+      <name>Chia-Ping Chen</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2605.02814v2</id>
+    <title>IConFace: Fine-Grained Identity Conditioning for Reference-Aware Face Restoration</title>
+    <updated>2026-08-05T13:50:31Z</updated>
+    <link href="https://arxiv.org/abs/2605.02814v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2605.02814v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Severe face degradation can remove person-specific evidence, making restoration underdetermined. A generative prior may recover a sharp, plausible face yet miss localized traits that persist across images of the same person. Same-identity references supply this missing evidence, while the degraded observation anchors target structure. We propose \textbf{IConFace}, a fine-grained identity-conditioned framework that optionally conditions restoration on up to three same-identity references. Its hybrid concat backbone retains degraded and reference observations as dense visual tokens, preserving localized reference evidence. An identity pathway provides compact multi-reference guidance, while a degraded-structure pathway injects full-field and local-residual memories to reinforce target-aligned structure. We also introduce a human-audited benchmark that measures whether persistent localized identity details survive restoration. IConFace achieves leading reference compatibility, especially under severe degradation, and the highest observed preservation rate on this benchmark. Without references, it achieves leading learned perceptual quality across five blind-restoration benchmarks. Joint reference-based and paired-target evaluations show that reference-supported identity recovery and exact target agreement are complementary.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-05-04T16:49:51Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Axi Niu</name>
+    </author>
+    <author>
+      <name>Jinyang Zhang</name>
+    </author>
+    <author>
+      <name>Senyan Qing</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2603.16570v2</id>
+    <title>Face2Scene: Using Facial Degradation as an Oracle for Diffusion-Based Scene Restoration</title>
+    <updated>2026-04-08T21:35:12Z</updated>
+    <link href="https://arxiv.org/abs/2603.16570v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2603.16570v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Recent advances in image restoration have enabled high-fidelity recovery of faces from degraded inputs using reference-based face restoration models (Ref-FR). However, such methods focus solely on facial regions, neglecting degradation across the full scene, including body and background, which limits practical usability. Meanwhile, full-scene restorers often ignore degradation cues entirely, leading to underdetermined predictions and visual artifacts. In this work, we propose Face2Scene, a two-stage restoration framework that leverages the face as a perceptual oracle to estimate degradation and guide the restoration of the entire image. Given a degraded image and one or more identity references, we first apply a Ref-FR model to reconstruct high-quality facial details. From the restored-degraded face pair, we extract a face-derived degradation code that captures degradation attributes (e.g., noise, blur, compression), which is then transformed into multi-scale degradation-aware tokens. These tokens condition a diffusion model to restore the full scene in a single step, including the body and background. Extensive experiments demonstrate the superior effectiveness of the proposed method compared to state-of-the-art methods.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-03-17T14:27:24Z</published>
+    <arxiv:comment>Accepted at CVPR 2026</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Amirhossein Kazerouni</name>
+    </author>
+    <author>
+      <name>Maitreya Suin</name>
+    </author>
+    <author>
+      <name>Tristan Aumentado-Armstrong</name>
+    </author>
+    <author>
+      <name>Sina Honari</name>
+    </author>
+    <author>
+      <name>Amanpreet Walia</name>
+    </author>
+    <author>
+      <name>Iqbal Mohomed</name>
+    </author>
+    <author>
+      <name>Konstantinos G. Derpanis</name>
+    </author>
+    <author>
+      <name>Babak Taati</name>
+    </author>
+    <author>
+      <name>Alex Levinshtein</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2510.09924v1</id>
+    <title>HeadsUp! High-Fidelity Portrait Image Super-Resolution</title>
+    <updated>2025-10-10T23:48:50Z</updated>
+    <link href="https://arxiv.org/abs/2510.09924v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2510.09924v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Portrait pictures, which typically feature both human subjects and natural backgrounds, are one of the most prevalent forms of photography on social media. Existing image super-resolution (ISR) techniques generally focus either on generic real-world images or strictly aligned facial images (i.e., face super-resolution). In practice, separate models are blended to handle portrait photos: the face specialist model handles the face region, and the general model processes the rest. However, these blending approaches inevitably introduce blending or boundary artifacts around the facial regions due to different model training recipes, while human perception is particularly sensitive to facial fidelity. To overcome these limitations, we study the portrait image supersolution (PortraitISR) problem, and propose HeadsUp, a single-step diffusion model that is capable of seamlessly restoring and upscaling portrait images in an end-to-end manner. Specifically, we build our model on top of a single-step diffusion model and develop a face supervision mechanism to guide the model in focusing on the facial region. We then integrate a reference-based mechanism to help with identity restoration, reducing face ambiguity in low-quality face restoration. Additionally, we have built a high-quality 4K portrait image ISR dataset dubbed PortraitSR-4K, to support model training and benchmarking for portrait images. Extensive experiments show that HeadsUp achieves state-of-the-art performance on the PortraitISR task while maintaining comparable or higher performance on both general image and aligned face datasets.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-10-10T23:48:50Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Renjie Li</name>
+    </author>
+    <author>
+      <name>Zihao Zhu</name>
+    </author>
+    <author>
+      <name>Xiaoyu Wang</name>
+    </author>
+    <author>
+      <name>Zhengzhong Tu</name>
+    </author>
+  </entry>
+</feed>

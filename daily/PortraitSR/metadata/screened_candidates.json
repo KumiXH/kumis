@@ -1,0 +1,1963 @@
+[
+  {
+    "query": [
+      "face detail restoration diffusion transformer"
+    ],
+    "openalex_id": "https://openalex.org/W7167855120",
+    "doi": null,
+    "title": "FADRA: Frequency-Aware Diffusion with Residual Adaptation for Video Face Restoration",
+    "publication_date": "2026-07-07",
+    "year": 2026,
+    "type": "preprint",
+    "venue": "arXiv (Cornell University)",
+    "cited_by_count": 0,
+    "authors": [
+      "J Jiang",
+      "Jia Wang",
+      "Panwen Hu",
+      "Weiran Zhao",
+      "Shengcai Liao"
+    ],
+    "institutions": [],
+    "abstract": "Video face restoration (VFR) aims to recover high-quality and temporally consistent facial details from severely degraded video sequences; however, existing methods still struggle to balance spatial fidelity and temporal coherence under complex degradations. To address this, we propose FADRA, a frequency-aware diffusion framework with iterative residual adaptation specifically tailored for robust VFR. We first leverage the strong temporal consistency of a pre-trained text-to-video diffusion model and introduce lightweight LoRA adapters together with a Low-Quality (LQ) Pixel-Alignment Feature Fusion module to efficiently adapt the frozen generative prior to the VFR task. To further adapt the frozen diffusion backbone to the downstream VFR task beyond LoRA-based adaptation, we introduce a Repeated Residual Adaptation Head (RRAH) for step-wise residual refinement after the diffusion backbone. To make this refinement explicitly guided by the degraded observation, RRAH further takes the LQ latent together with the current velocity prediction as input, allowing the model to repeatedly revisit LQ cues and predict residual updates at each flow-matching step. This LQ-guided repeated residual adaptation helps recover fine facial details while preserving the inherent temporal priors of the pre-trained model. Furthermore, to ensure the structural integrity of perceptually important details, we introduce a Frequency-Aware Loss that provides explicit supervision across multiple spectral bands, emphasizing visually sensitive frequency components that are crucial for perceptual quality and prone to temporal jittering. Extensive experiments demonstrate that FADRA recovers better facial structures and produces more temporally consistent videos than state-of-the-art methods, leading to clear gains in both quantitative metrics and visual perception.",
+    "landing_page_url": "https://arxiv.org/abs/2607.06389",
+    "pdf_url": "https://arxiv.org/pdf/2607.06389",
+    "is_oa": true,
+    "screen_score": 57,
+    "screen_reasons": [
+      "face restoration",
+      "facial detail",
+      "video face restoration"
+    ]
+  },
+  {
+    "query": [
+      "portrait super resolution"
+    ],
+    "openalex_id": "https://openalex.org/W7171749251",
+    "doi": null,
+    "title": "ID-V2V: Identity-Preserving Video Restylization",
+    "publication_date": "2026-07-24",
+    "year": 2026,
+    "type": "preprint",
+    "venue": "arXiv (Cornell University)",
+    "cited_by_count": 0,
+    "authors": [
+      "Yuancheng Xu",
+      "Mingming He",
+      "Pablo Salamanca",
+      "Li Ma",
+      "Yash Kant",
+      "Emmett Steven",
+      "Paul Debevec",
+      "Ning Yu"
+    ],
+    "institutions": [],
+    "abstract": "In visual storytelling, human performances are central to creative intent and narrative meaning. However, preserving human identity and performance while enabling flexible visual edits remains challenging for generative video models. We formalize this challenge as identity-preserving video restylization, which propagates scene, lighting, and style changes specified by an edited keyframe across a source video, while preserving facial likeness and performance, including expressions, eye gaze, and lip synchronization. A key obstacle is the absence of paired training data, as identity-preserving restylized video pairs are rare in real-world settings. To address this, we propose a decoupling of source-grounded identity preservation and edit-driven video synthesis. Our key insight is that facial appearance and expression should remain invariant, with illumination being the primary permissible variation. We therefore cast identity preservation as a video relighting problem, while modeling visual edit propagation as controlled video synthesis guided by the edited keyframe. Building on this formulation, we introduce ID-V2V, a video-to-video generative framework integrating complementary control signals: relit facial regions and facial normal maps tightly constrain facial likeness and performance, while edited keyframes and depth sequences enable flexible and temporally coherent generation. This design enables constructing training pairs from a single video, eliminating the need for scarce paired data. Extensive experiments demonstrate that ID-V2V significantly outperforms existing methods in preserving facial likeness and fine-grained facial performance, supports both single- and multi-subject scenarios, and delivers high visual quality, highlighting its potential as a human-centric tool for real-world content production. The code is available at: https://github.com/Eyeline-Labs/ID-V2V.",
+    "landing_page_url": "https://arxiv.org/abs/2607.22830",
+    "pdf_url": "https://arxiv.org/pdf/2607.22830",
+    "is_oa": true,
+    "screen_score": 26,
+    "screen_reasons": [
+      "identity-preserving"
+    ]
+  },
+  {
+    "query": [
+      "face hallucination diffusion"
+    ],
+    "openalex_id": "https://openalex.org/W7171957214",
+    "doi": "https://doi.org/10.1016/j.patcog.2026.114574",
+    "title": "Uncertainty-aware multimodal affective data fusion for personalized mental health dialogue",
+    "publication_date": "2026-07-31",
+    "year": 2026,
+    "type": "article",
+    "venue": "Pattern Recognition",
+    "cited_by_count": 0,
+    "authors": [
+      "Xianxun Zhu",
+      "Erik Cambria",
+      "Hui CHEN"
+    ],
+    "institutions": [
+      "Macquarie University",
+      "Nanyang Technological University",
+      "Shanghai University"
+    ],
+    "abstract": "Personalized affective dialogue systems are critical for mental health applications, where responses must be emotionally appropriate and tailored to individual users. However, most existing large language model (LLM) based approaches rely on deterministic personalization, ignore uncertainty in affective understanding, and are difficult to deploy under privacy constraints. In this paper, we propose PALLM, a personalized affective large language modeling framework designed for privacy-preserving mental health dialogue. PALLM decouples personalization into two complementary components: a deterministic personalization layer that captures stable user preferences, and a Bayesian affective representation layer that models dynamic emotional states and uncertainty. By restricting uncertainty modeling to affective representations rather than full LLM parameters, PALLM achieves efficient and scalable personalization under federated learning. Extensive experiments on EmpatheticDialogues and a real-world mental health conversation dataset show that PALLM improves affective alignment and robustness compared with non-personalized and partially personalized baselines.",
+    "landing_page_url": "https://doi.org/10.1016/j.patcog.2026.114574",
+    "pdf_url": "https://www.sciencedirect.com/science/article/pii/S0031320326015384/pdf",
+    "is_oa": true,
+    "screen_score": 22,
+    "screen_reasons": [
+      "personalized"
+    ]
+  },
+  {
+    "query": [
+      "portrait super resolution"
+    ],
+    "openalex_id": "https://openalex.org/W7171749696",
+    "doi": null,
+    "title": "ViDS: Video Diffusion Shader using 3D Face Tracking",
+    "publication_date": "2026-07-27",
+    "year": 2026,
+    "type": "preprint",
+    "venue": "arXiv (Cornell University)",
+    "cited_by_count": 0,
+    "authors": [
+      "Wenbo Ji",
+      "Davide Davoli",
+      "Zhe Chen",
+      "Liam Schoneveld",
+      "Matthias Nießner",
+      "Jiapeng Tang"
+    ],
+    "institutions": [],
+    "abstract": "We introduce ViDS, a Video Diffusion Shader that leverages 3D face tracking for expressive and identity-preserving portrait animation. We first reconstruct the identity-specific 3DMM mesh from the reference image, and then animate it using expression and pose parameters from a driving video. Leveraging dense geometric cues from 3DMM normal maps, we employ a video diffusion model as a neural shader to synthesize lifelike portrait animations while preserving the appearance and identity of the reference image. We find that more accurate 3DMM tracking enables finer-grained expression control. We also introduce an autoregressive diffusion sampling process that extends generation beyond the model's native window while reducing discontinuities between adjacent clips. Compared with prior diffusion-based approaches for portrait animation that rely on landmark-based conditioning or implicit motion latents, our method achieves more detailed and consistent expression and pose control while faithfully preserving identity and appearance. Detailed ablation studies validate the effectiveness of our design choices. Project page: https://fusheng-ji.github.io/ViDS/",
+    "landing_page_url": "https://arxiv.org/abs/2607.24124",
+    "pdf_url": "https://arxiv.org/pdf/2607.24124",
+    "is_oa": true,
+    "screen_score": 22,
+    "screen_reasons": [
+      "identity-preserving"
+    ]
+  },
+  {
+    "query": [
+      "portrait super resolution"
+    ],
+    "openalex_id": "https://openalex.org/W7164614888",
+    "doi": null,
+    "title": "AnchorEdit: Maintaining Temporal Consistency in Multi-turn Image Editing via Causal Memory",
+    "publication_date": "2026-06-10",
+    "year": 2026,
+    "type": "preprint",
+    "venue": "arXiv (Cornell University)",
+    "cited_by_count": 0,
+    "authors": [
+      "Hang Xu",
+      "Xiaoxiao Ma",
+      "G L Zhang",
+      "Yu Hu",
+      "Siming Fu",
+      "Jie Huang",
+      "吕松 Lü Song",
+      "Haoyang Huang",
+      "Nan Duan",
+      "Feng Zhao"
+    ],
+    "institutions": [],
+    "abstract": "Multi-turn image editing is essential for iterative design, yet current models often struggle with identity drift and error accumulation over successive steps. While existing research leverages video priors for consistency, their reliance on bidirectional attention is fundamentally misaligned with the causal, sequential nature of interactive editing. In this paper, we propose AnchorEdit, the first autoregressive (AR) diffusion-based framework designed specifically for high-resolution, long-term multi-turn editing. AnchorEdit bridges the gap between video priors and causal inference through a three-stage training curriculum: identity-preserving sing-turn pretraining, causal AR forcing fine-tuning with a novel self-rollout strategy to mitigate exposure bias, and consistency distillation for efficient 4-step generation. During inference, we introduce a memory mechanism to anchor the initial subject identity and ensure stable extrapolation across extended editing trajectories. To evaluate performance, we provide a new high-resolution multi-turn editing benchmark designed to stress-test long-horizon stability. Extensive experiments demonstrate that AnchorEdit achieves state-of-the-art results, maintaining exceptional subject fidelity and instruction following even over 10+ interaction rounds.",
+    "landing_page_url": "https://arxiv.org/abs/2606.11751",
+    "pdf_url": "https://arxiv.org/pdf/2606.11751",
+    "is_oa": true,
+    "screen_score": 20,
+    "screen_reasons": [
+      "identity-preserving"
+    ]
+  },
+  {
+    "query": [
+      "face hallucination diffusion"
+    ],
+    "openalex_id": "https://openalex.org/W7170989642",
+    "doi": null,
+    "title": "Personalized Recommendation Tool Learning via Autonomous Language Agents",
+    "publication_date": "2026-07-22",
+    "year": 2026,
+    "type": "preprint",
+    "venue": "arXiv (Cornell University)",
+    "cited_by_count": 0,
+    "authors": [
+      "Mingdai Yang",
+      "Zhiwei Liu",
+      "Weizhi Zhang",
+      "Yibo Wang",
+      "H H Peng",
+      "Yu P"
+    ],
+    "institutions": [],
+    "abstract": "Although large language models (LLMs) have recently gained traction in recommender systems due to their strong reasoning capabilities and extensive world knowledge, previous LLM-based agents suffer from hallucination and context-length limitations, and thus are not suitable for full-ranking recommendation tasks. To circumvent these limitations through architectural design rather than modifying the LLM itself, we propose an agent-based recommendation framework, memory-based $\\textbf{P}$ersonalized $\\textbf{R}$ecommendation $\\textbf{T}$ool learning via autonomous language $\\textbf{A}$gents (PRTA), in which an LLM acts as a central planner interacting with multiple recommendation models as tools. The LLM-based agent is responsible for high-level reasoning and personalized tool selection, while traditional recommendation models perform full-ranking scoring, leveraging their scalability in modeling behavioral patterns. To support personalized tool selection, we design reflection mechanisms that enable the agent to evaluate and compare tools for each user based on user profiles and candidate ranked lists. Extensive experiments across three public datasets demonstrate the superiority of \\modelname over traditional recommendation and LLM-based baselines in improving full-ranking recommendation performance.",
+    "landing_page_url": "https://arxiv.org/abs/2607.19739",
+    "pdf_url": "https://arxiv.org/pdf/2607.19739",
+    "is_oa": true,
+    "screen_score": 18,
+    "screen_reasons": [
+      "personalized"
+    ]
+  },
+  {
+    "query": [
+      "portrait image restoration"
+    ],
+    "openalex_id": "https://openalex.org/W7171403828",
+    "doi": "https://doi.org/10.31435/ijitss.3(51).2026.5948",
+    "title": "ARTIFICIAL INTELLIGENCE FOR PERSONALIZED POST-STROKE REHABILITATION: SOCIAL, ETHICAL, AND CLINICAL IMPLICATIONS",
+    "publication_date": "2026-07-27",
+    "year": 2026,
+    "type": "article",
+    "venue": "International Journal of Innovative Technologies in Social Science",
+    "cited_by_count": 0,
+    "authors": [
+      "Zuzanna Jankowska",
+      "Natalia Nałęcz"
+    ],
+    "institutions": [
+      "Nicolaus Copernicus University"
+    ],
+    "abstract": "Objectives: Stroke is one of the leading causes of mortality and long-term disability worldwide. Recent advances in artificial intelligence (AI) have created new possibilities for improving the individualization and effectiveness of post-stroke rehabilitation. This narrative review aims to summarize current applications of AI in post-stroke rehabilitation and to discuss associated opportunities and limitations. Methods: A narrative review was conducted using PubMed and Google Scholar databases. The analysis focused on stroke, post-stroke rehabilitation, and the use of AI in the rehabilitation process. Publications from 2000 and early 2026 were included. Key Findings: The reviewed literature indicates that AI-based technologies may support stroke rehabilitation through improved treatment personalization, outcome prediction, continuous patient monitoring, and remote delivery of therapy. Machine learning algorithms, AI-enabled wearable devices, and computer vision techniques facilitate more detailed function assessment of motor and cognitive performance. In addition robotic rehabilitation systems, virtual and augmented reality environments may enhance patient engagement and support functional recovery. However, clinical implementation remains limited due to insufficient validation in large randomized trials, lack of standardization, data privacy issues, ethical and regulatory concerns, and unequal access to advanced technologies. Conclusions: AI has the potential to contribute to more personalized and data-driven approaches in post-stroke rehabilitation. Nevertheless, its integration into routine clinical practice requires further high-quality clinical studies, interdisciplinary collaboration, and the development of ethical and regulatory frameworks to ensure safe and effective implementation.",
+    "landing_page_url": "https://doi.org/10.31435/ijitss.3(51).2026.5948",
+    "pdf_url": "https://rspublisher.org/index.php/ijitss/article/download/5948/4535",
+    "is_oa": true,
+    "screen_score": 18,
+    "screen_reasons": [
+      "personalized"
+    ]
+  },
+  {
+    "query": [
+      "personalized face restoration"
+    ],
+    "openalex_id": "https://openalex.org/W7171857798",
+    "doi": "https://doi.org/10.1016/j.nxmate.2026.102968",
+    "title": "Personalized bioactive 3D printed scaffolds for bone and cartilage repair: Engineering strategies toward clinical precision regeneration",
+    "publication_date": "2026-07-30",
+    "year": 2026,
+    "type": "article",
+    "venue": "Next Materials",
+    "cited_by_count": 0,
+    "authors": [
+      "H S Praveen",
+      "Prasiddhi Naik",
+      "B.S. Bhavya",
+      "H.S. Sudarshan",
+      "Prakash Goudanavar, School of Pharmacy, RV University Mysuru"
+    ],
+    "institutions": [
+      "Rajiv Gandhi University of Health Sciences",
+      "University of Mysore"
+    ],
+    "abstract": "Purpose Three-dimensional (3D) printing has become a game changer in regenerative medicine because it can create patient-specific bioactive scaffolds for the repair of bone and cartilage. This work aimed to investigate the design principles, materials, and functionalization means behind developing 3D-printed scaffolds that can try to mimic the hierarchical architecture and biological characteristics of native osteochondral tissues. Methods A thorough review of currently available 3D printing processes, including fused deposition modeling (FDM), stereolithography (SLA), selective laser sintering (SLS), extrusion-based, and inkjet bioprinting, was conducted. The review focused on natural polymers (collagen, gelatin, chitosan, and alginate), biodegradable synthetic polymers (PLA, PCL, PLGA), and bioactive ceramics (hydroxyapatite, β-tricalcium phosphate, bioactive glass) for scaffold fabrication. The biological functionalization of scaffolds through techniques involving growth factors, peptides, stem cells, and antimicrobial agents was discussed for promoting osteogenesis, chondrogenesis, vascularization, and immunomodulation. Results Composite scaffolds made with a combination of natural and synthetic materials have shown increases in mechanical strength, biocompatibility, and osteoconductivity. Prefclinical in vivo studies have shown greater efficacy for bone and cartilage regeneration, and early trials have confirmed feasibility for translation. The combination of artificial intelligence (AI) and digital twin technology will allow for predictive modeling and optimization of scaffold architecture and patient-specific modeling. Nonetheless, obstacles remain that prevent effective large-scale production, government approval, long-term safety and effectiveness, and affordability. Conclusions 3D-bioprinted bioactive scaffolds represent remarkable potential for customized regenerative medicine applications, offering patient-specific, multifunctional, and clinically adaptable strategies for osteochondral defect repair. Future directions will focus on standardized construction protocols, developing robust regulatory pathways, and initiating extensive clinical validation to support appropriate clinical translation.",
+    "landing_page_url": "https://doi.org/10.1016/j.nxmate.2026.102968",
+    "pdf_url": "https://www.sciencedirect.com/science/article/pii/S2949822826013857/pdf",
+    "is_oa": true,
+    "screen_score": 18,
+    "screen_reasons": [
+      "personalized"
+    ]
+  },
+  {
+    "query": [
+      "face detail restoration diffusion transformer",
+      "portrait image restoration",
+      "portrait super resolution"
+    ],
+    "openalex_id": "https://openalex.org/W7171267870",
+    "doi": null,
+    "title": "Adaptive Identity Anchoring: Closed-Loop Keyframe Placement for Synthetic Paired Supervision in Video Face Swapping",
+    "publication_date": "2026-07-23",
+    "year": 2026,
+    "type": "preprint",
+    "venue": "arXiv (Cornell University)",
+    "cited_by_count": 0,
+    "authors": [
+      "L. B. Robbins"
+    ],
+    "institutions": [],
+    "abstract": "Video face swapping has no natural paired supervision: no real footage exists of one person's face performing another person's video. The strongest current answer, DreamID-V's SyncID-Pipe, mints pairs by replacing the identity in exactly two frames of a real clip -- the first and the last -- and regenerating the rest from a pose sequence alone. Pose carries no appearance evidence of the swapped-in identity, so over long clips, occlusions, and extreme pose excursions the synthesized identity has a long unanchored span on which to drift; no published ablation examines anchor count or placement. We propose Adaptive Identity Anchoring (AIA): (i) generalize the synthesizer to arbitrary anchor sets, architecturally natural for diffusion-forcing-style transformers where conditioning on a frame is clamping its tokens to zero noise; (ii) place anchors by a closed feedback loop that scores every generated frame against the real reference identity and inserts an image-face-swapped anchor at the worst-scoring frame until the pair passes a threshold or exhausts a budget; (iii) reuse the loop's verdict as an automatic data filter. A second pathology, the beauty-filter look of over-smoothed skin, has the same root cause: micro-texture, like identity, is priced by none of the pipeline's objectives. We therefore pair AIA with Reality-Referenced Texture Restoration: matched re-graining from each real frame's non-face regions, band-split transfer of sub-identity micro-texture from the real footage, and a second, spectral acceptance channel refereed by the footage's own spectrum. Identity-anchor density, we argue, is a controllable quality dial, and we specify falsifiable experiments -- drift-versus-gap curves, uniform-versus-adaptive placement at matched budgets, student training on AIA-minted data, and texture ablations with a human beauty-filter study -- that would validate or refute the proposal.",
+    "landing_page_url": "https://arxiv.org/abs/2607.21434",
+    "pdf_url": "https://arxiv.org/pdf/2607.21434",
+    "is_oa": true,
+    "screen_score": 17,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "face hallucination diffusion"
+    ],
+    "openalex_id": "https://openalex.org/W7171893954",
+    "doi": "https://doi.org/10.3389/fpsyg.2026.1808268",
+    "title": "Artificial intelligence dependency in college students: a critical narrative review",
+    "publication_date": "2026-07-30",
+    "year": 2026,
+    "type": "review",
+    "venue": "Frontiers in Psychology",
+    "cited_by_count": 0,
+    "authors": [
+      "Xuehua He",
+      "Shan Li",
+      "Ren Cha",
+      "Li Wang",
+      "Yunxia Shen",
+      "Ruijuan Wu",
+      "Lili Wu",
+      "Xiaoyan Gong",
+      "Jingbang Liu"
+    ],
+    "institutions": [
+      "Sir Run Run Shaw Hospital",
+      "Zhejiang University"
+    ],
+    "abstract": "The rapid diffusion of generative artificial intelligence (GenAI), particularly large language model (LLM) applications, has fundamentally reshaped university students’ learning, problem-solving, and socio-emotional practices. Alongside clear benefits in efficiency and personalized support, concerns are emerging about AI dependency, understood here as an emerging, non-diagnostic educational-psychological construct rather than a formal clinical disorder. This critical narrative review synthesizes evidence from the past decade on AI dependency among college students, focusing on conceptualizations, theoretical frameworks, prevalence and demographic variations, measurement tools, determinants, intervention strategies, and research gaps. Across studies, an “ask-AI-first” pattern appears increasingly common, although frequency of use should not be equated with maladaptive dependency. The central concern is not AI use itself but patterns of cognitive delegation, emotional reliance, and reduced self-regulation that may be associated with weaker independent engagement, academic-integrity risks, and distress when AI is unavailable. The literature also reveals substantial fragmentation in assessment, although several emerging tools demonstrate promising psychometric properties. Determinants appear multi-level, involving individual vulnerabilities, academic pressure, contextual norms, and technological affordances. Current recommendations emphasize promoting augmentation over automation, strengthening AI literacy and critical evaluation skills, redesigning assessments to preserve cognitive engagement, and implementing supportive interventions for at-risk students. Future research should prioritize longitudinal, cross-cultural, and multi-method designs to clarify developmental trajectories, thresholds for maladaptation, and evidence-based intervention pathways.",
+    "landing_page_url": "https://doi.org/10.3389/fpsyg.2026.1808268",
+    "pdf_url": "https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2026.1808268/pdf",
+    "is_oa": true,
+    "screen_score": 16,
+    "screen_reasons": [
+      "personalized"
+    ]
+  },
+  {
+    "query": [
+      "portrait super resolution"
+    ],
+    "openalex_id": "https://openalex.org/W7171272594",
+    "doi": null,
+    "title": "CEE-NeRF: dynamic neural radiance fields with contrastive enhanced expression representation for 4D face reconstruction",
+    "publication_date": "2026-07-16",
+    "year": 2026,
+    "type": "article",
+    "venue": "ENLIGHTEN (Jurnal Bimbingan dan Konseling Islam)",
+    "cited_by_count": 0,
+    "authors": [
+      "H F Yu",
+      "H F Yu",
+      "Rachael Jack",
+      "Yiming Wang",
+      "Philippe schyns"
+    ],
+    "institutions": [],
+    "abstract": "The reconstruction of photorealistic 4D faces from monocular video holds significant importance for applications such as virtual reality and digital human-robot interaction. However, achieving reconstructions with structurally reasonable facial geometry and natural expressions remains challenging. Existing approaches typically combine dynamic neural radiance fields (NeRFs) with low-dimensional parametric models, such as 3D morphable model (3DMM), for facial reconstruction and expression control. Nevertheless, 3DMM-based expression features often lack the ability to preserve high-frequency details and subtle individual variations. To address this issue, we propose CEENeRF, a novel framework that integrates geometry-aware 3DMM features with high-level semantic features through contrastive learning for complementary feature fusion. This design enhances the representation of fine-grained facial details while mitigating expression artifacts. In addition, unlike previous studies, we propose reformulating monocular 4D face reconstruction as a multimodal learning problem and replacing the conventional multilayer perceptron used in NeRF with a mixture-of-experts Transformer, which enables modality-specific expert processing for accurate density and color estimation. This multimodal framework is also highly extensible and can be easily adapted to additional modalities. Extensive experiments demonstrate that CEE-NeRF achieves high-fidelity reconstructions from challenging monocular videos, consistently outperforming state-of-the-art approaches in rendering quality.",
+    "landing_page_url": "https://eprints.gla.ac.uk/view/author/83329.html>,",
+    "pdf_url": "https://eprints.gla.ac.uk/390878/2/390878.pdf",
+    "is_oa": true,
+    "screen_score": 16,
+    "screen_reasons": [
+      "facial detail"
+    ]
+  },
+  {
+    "query": [
+      "portrait super resolution"
+    ],
+    "openalex_id": "https://openalex.org/W7167380947",
+    "doi": null,
+    "title": "Multi-Resolution Flow Matching: Training-Free Diffusion Acceleration via Staged Sampling",
+    "publication_date": "2026-07-02",
+    "year": 2026,
+    "type": "preprint",
+    "venue": "arXiv (Cornell University)",
+    "cited_by_count": 0,
+    "authors": [
+      "Xingyu Zheng",
+      "Xianglong Liu",
+      "Yan Ding",
+      "Weilun Feng",
+      "Junqing Lin",
+      "Jinyang Guo",
+      "Haotong Qin"
+    ],
+    "institutions": [],
+    "abstract": "Hardware-agnostic strategies for accelerating text-to-image diffusion, such as timestep distillation and feature caching, can reduce inference time without custom kernels or system-level optimization. Among them, multi-resolution generation strategies have recently received broad attention, attaining more than 5x speedup without any training. However, the design of performing upsampling in the latent space, together with the selective modification of partial regions, causes these methods to exhibit noticeable blurring or artifacts. To this end, we propose MrFlow, a training-free multi-resolution acceleration strategy for pretrained flow-matching models built upon a staged low-to-high-resolution pipeline. MrFlow first rapidly generates the main structure at low resolution, then performs super-resolution in the pixel space using a lightweight pretrained GAN-based model, subsequently injects low-strength noise to enable high-frequency resampling, and finally refines the details at high resolution. Quantitative and qualitative results on FLUX.1-dev and Qwen-Image show that MrFlow exploits the quadratic token reduction and reduced step requirement of low-resolution sampling to achieve 10x end-to-end acceleration while keeping OneIG within a 1% gap relative to that before acceleration, significantly surpassing other training-free acceleration strategies, and requiring no training or runtime dynamic identification whatsoever. MrFlow can further be directly combined orthogonally with pre-trained timestep distillation strategies, achieving even higher generation acceleration of up to 25x.",
+    "landing_page_url": "https://arxiv.org/abs/2607.01642",
+    "pdf_url": "https://arxiv.org/pdf/2607.01642",
+    "is_oa": true,
+    "screen_score": 16,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "portrait super resolution"
+    ],
+    "openalex_id": "https://openalex.org/W7164973241",
+    "doi": null,
+    "title": "Avatar V: Scaling Video-Reference Avatar Video Generation",
+    "publication_date": "2026-06-11",
+    "year": 2026,
+    "type": "preprint",
+    "venue": "arXiv (Cornell University)",
+    "cited_by_count": 0,
+    "authors": [
+      "Benjamin Liang",
+      "Ce Chen",
+      "Desmond Lin",
+      "Ivan Somov",
+      "Jiajun Zhao",
+      "Jiewei Yuan",
+      "Jingfeng Zhang",
+      "Junhao Huang",
+      "Nik Nolte",
+      "Pedram Haqiqi",
+      "P Wang",
+      "Rong Yan",
+      "Rui Zhang",
+      "Sam Prokopchuk",
+      "Sivan Wang",
+      "Viktor Goriachko",
+      "Yukun Ren",
+      "Yuanming Li",
+      "Yutao Chen",
+      "Zhenhui Ye",
+      "Zhibin Hong",
+      "Zilong Nie",
+      "Zujin Guo"
+    ],
+    "institutions": [],
+    "abstract": "Generating avatar videos that are not merely visually similar to a target individual but behaviorally recognizable, faithfully reproducing their talking rhythm, gestural tendencies, and expression dynamics, remains an open challenge. Existing methods predominantly condition on single static images, which provide insufficient identity information and cannot capture dynamic motion traits, while standard pixel-level objectives underserve the perceptually critical facial regions that determine avatar fidelity. We present Avatar V, a production-scale framework that addresses these limitations through video-reference-conditioned identity modeling. Rather than compressing identity into fixed-size embeddings, the model conditions directly on the full token sequence of a reference video, learning to reproduce both static identity attributes (facial geometry, skin texture) and dynamic behavioral patterns (talking rhythm, micro-expressions) through attention over the reference context. We introduce Sparse Reference Attention, an asymmetric mechanism achieving linear-complexity conditioning on arbitrarily long references; a motion representation stream enabling closed-loop talking style transfer; and an identity-aware super-resolution refiner inheriting the full reference conditioning. These are supported by a data engine curating 100M+ training clips from 50M raw videos, and a five-stage training pipeline with flow matching pre-training, personality fine-tuning, two-phase distillation (>10x acceleration), and RLHF alignment, deployed across thousands of GPUs. Avatar V generates 1080p videos of unlimited duration, achieving state-of-the-art identity preservation, lip synchronization, and generation quality on our cross-scene benchmark, consistently outperforming leading systems including Seedance 2.0, Kling O3 Pro, Veo 3.1, and OmniHuman 1.5 in both automated metrics and human evaluation.",
+    "landing_page_url": "https://arxiv.org/abs/2606.13872",
+    "pdf_url": "https://arxiv.org/pdf/2606.13872",
+    "is_oa": true,
+    "screen_score": 16,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "face detail restoration diffusion transformer"
+    ],
+    "openalex_id": "https://openalex.org/W7172287590",
+    "doi": "https://doi.org/10.70917/ijcisim-2026-3984",
+    "title": "Application of Image Enhancement Techniques in Facial Recognition System",
+    "publication_date": "2026-07-29",
+    "year": 2026,
+    "type": "article",
+    "venue": "International Journal of Computer Information Systems and Industrial Management Applications",
+    "cited_by_count": 0,
+    "authors": [
+      "M. Kirubakaran",
+      "A S Aneeshkumar"
+    ],
+    "institutions": [
+      "Department of Biotechnology"
+    ],
+    "abstract": "Face recognition becomes an important biometric implementation in any surveillance, access control, forensic and intelligent security system applications. Despite of technical advances in deep learning models, recognition accuracy normally affected by facial pose, illumination, occlusion, expression, aging factors and limited availability of labelled dataset. These challenges reduce the robustness of face recognition models in real world environments [1][2][3]. Recent researches demonstrated that the super-resolution techniques based on Generative Adversarial Networks (GANs) reconstruct high-quality facial images very effectively from low-resolution input images. It supports to improve feature representation and face recognition [4][5]. Therefore, this research motivated from this advancement and proposes an Adaptive Super-Resolution Generative Adversarial Network (Adaptive SRGAN) for face recognition. It integrates adaptive learning with image super resolution to reconstruct identity preserving high resolution facial images by employing adaptive learning rate optimization, dynamic loss weighting, attention guided feature enhancement and identity preserving loss functions. However, it enhances reconstruction quality by preserving discriminative facial characteristics [6]. The proposed model is expected to achieve higher Peak Signal to Noise Ratio (PSNR), Structural Similarity Index Measure (SSIM), recognition accuracy, precision, recall, and F1-score while reducing false acceptance and false rejection rates. Simultaneously, Adaptive SRGAN delivers a robust and scalable solution for improving face recognition systems.",
+    "landing_page_url": "https://doi.org/10.70917/ijcisim-2026-3984",
+    "pdf_url": "https://cspub-ijcisim.org/index.php/ijcisim/article/download/3984/3215",
+    "is_oa": true,
+    "screen_score": 16,
+    "screen_reasons": [
+      "identity preserving"
+    ]
+  },
+  {
+    "query": [
+      "face hallucination diffusion"
+    ],
+    "openalex_id": "https://openalex.org/W7171980312",
+    "doi": "https://doi.org/10.2196/93779",
+    "title": "Human-Centered AI in Sleep Health Management: Scoping Review of Stakeholder Perspectives and Co-Design Practices",
+    "publication_date": "2026-07-31",
+    "year": 2026,
+    "type": "article",
+    "venue": "Journal of Medical Internet Research",
+    "cited_by_count": 0,
+    "authors": [
+      "Dacheng Dai",
+      "Fangfang Xie",
+      "Jiahe Cui",
+      "Siyu Wang",
+      "Junhao Cai",
+      "Fei Yao",
+      "Guimao Wang"
+    ],
+    "institutions": [
+      "Shanghai Traditional Chinese Medicine Hospital",
+      "Shanghai University of Traditional Chinese Medicine"
+    ],
+    "abstract": "Background: Sleep disorders represent a significant public health burden associated with cardiovascular and neurocognitive morbidities. While AI technologies offer potential for personalized sleep medicine, clinical integration remains limited. This translational disparity is often attributed to a lack of human-centered design, specifically insufficient stakeholder engagement in the development and implementation of these technologies. Current research frequently prioritizes algorithmic performance over usability and patient trust. Objective: This scoping review systematically maps the extent and nature of human-centered AI (HCAI) research within sleep medicine across different AI modalities, evaluating how diverse stakeholders are involved in the design, validation, and implementation of AI tools, including patients, clinicians, and technologists. Methods: Following the PRISMA-ScR (Preferred Reporting Items for Systematic Reviews and Meta-Analyses extension for Scoping Reviews) guidelines, we searched 8 databases (PubMed, Web of Science, Embase, Scopus, IEEE Xplore, ACM Digital Library, APA PsycINFO, and CINAHL) for literature published up to June 18, 2026. We identified primary research describing the design, development, or evaluation of AI technologies for sleep health with explicit human-centered components. Included studies (n=34) were categorized based on AI technology type and the method of stakeholder engagement. Data were extracted and synthesized using a thematic analysis approach. Results: Based on the included studies, the analysis reveals an uneven distribution of research focus across technological domains as descriptive patterns rather than definitive trends. Research on generative AI (GenAI) is predominantly restricted to downstream expert auditing of output accuracy (comprising 7/11, 64% of GenAI studies), with a noticeable gap in upstream participatory design involving patients. Conversely, deep learning research primarily focuses on technical explainable AI methods to address algorithmic opacity for clinicians, yet lacks progression to real-world clinical implementation. Mobile health and wearable technologies (17/34, 50%) demonstrate the most balanced HCAI ecosystem, evidencing a complete translational cycle from upstream co-design to downstream clinical implementation. Furthermore, an emerging trend is observed where AI is evolving from an automated diagnostic tool into an interactive therapeutic agent, with recent studies indicating that lay users may perceive responses from large language models as more empathetic than those from physicians. Conclusions: Lacking formal quality appraisal, our findings reflect research activity patterns rather than confirmed clinical effectiveness. Nevertheless, this scoping review innovatively applies the HCAI framework to the sleep AI lifecycle. Unlike existing reviews prioritizing algorithmic performance metrics over usability, clinical workflow integration, and patient trust, this study systematically maps these essential sociotechnical factors. It contributes to the field by revealing distinct methodological disparities and the urgent need for upstream participatory design, particularly for GenAI. In the real world, establishing standardized protocols for human-AI interaction, ensuring algorithmic transparency, and addressing demographic biases are essential to foster the clinical trust required for effective AI adoption.",
+    "landing_page_url": "https://doi.org/10.2196/93779",
+    "pdf_url": null,
+    "is_oa": true,
+    "screen_score": 15,
+    "screen_reasons": [
+      "personalized"
+    ]
+  },
+  {
+    "query": [
+      "personalized face restoration",
+      "reference based face restoration"
+    ],
+    "openalex_id": "https://openalex.org/W7172411381",
+    "doi": "https://doi.org/10.3389/fpubh.2026.1888001",
+    "title": "Digital health solutions for chronic disease physical activity management: wearable devices, artificial intelligence, and public health implementation",
+    "publication_date": "2026-08-04",
+    "year": 2026,
+    "type": "article",
+    "venue": "Frontiers in Public Health",
+    "cited_by_count": 0,
+    "authors": [
+      "Lara Yang",
+      "Xiaofeng Wang"
+    ],
+    "institutions": [
+      "Jilin University"
+    ],
+    "abstract": "Physical inactivity and sedentary behavior are major modifiable risk factors in chronic disease management, yet conventional clinic-based follow-up is poorly suited to capture real-world behavioral dynamics or deliver timely personalized support. Wearable devices provide longitudinal data on steps, activity intensity, sedentary time, sleep, heart rate, and selected physiological signals, while artificial intelligence (AI) may support feedback personalization, risk prediction, dynamic goal setting, and remote coordination. This review synthesizes evidence on wearable- and AI-supported physical activity management across diabetes, obesity, cardiovascular disease, chronic respiratory disease, cancer survivorship, and older-adult multimorbidity. Current evidence most consistently supports improvements in behavioral outcomes, including steps, physical activity levels, self-monitoring, and in some cases sedentary behavior. Evidence for functional and intermediate clinical outcomes is promising but heterogeneous, while evidence for long-term clinical endpoints, cost-effectiveness, and health-system integration remains less definitive. AI-specific evidence remains comparatively early, heterogeneous, and often feasibility-oriented, so claims about AI-enabled benefit require cautious interpretation. The review argues that wearable devices and AI should not replace clinical care, but should be understood as components of digital public health closed loops that connect continuous sensing, personalized behavioral support, clinical actionability, governance, and equity. Future research should move beyond isolated devices or apps toward validating explainable, actionable, equitable, and sustainable digital intervention pathways in real chronic disease populations and health systems.",
+    "landing_page_url": "https://doi.org/10.3389/fpubh.2026.1888001",
+    "pdf_url": "https://www.frontiersin.org/journals/public-health/articles/10.3389/fpubh.2026.1888001/pdf",
+    "is_oa": true,
+    "screen_score": 15,
+    "screen_reasons": [
+      "personalized"
+    ]
+  },
+  {
+    "query": [
+      "face detail restoration diffusion transformer"
+    ],
+    "openalex_id": "https://openalex.org/W7171749269",
+    "doi": null,
+    "title": "Restoration Flow Matching-Based Channel Refinement and Equalization Correction for MIMO Semantic Communications",
+    "publication_date": "2026-07-26",
+    "year": 2026,
+    "type": "preprint",
+    "venue": "arXiv (Cornell University)",
+    "cited_by_count": 0,
+    "authors": [
+      "Wenkai Liu",
+      "Nan Ma",
+      "Jianqiao Chen",
+      "Xiaodong Xu",
+      "Meixia Tao",
+      "Ping Zhang"
+    ],
+    "institutions": [],
+    "abstract": "In multiple-input multiple-output (MIMO) semantic communication, imperfect channel state information (CSI) and equalization mismatch can seriously degrade semantic reconstruction quality. To address this issue, we propose a unified restoration flow matching (RFM)-based framework for channel refinement and equalization correction. Specifically, the channel RFM (CRFM) module is developed to refine the coarse channel, thereby improving channel estimation accuracy. Based on the refined channel, the developed semantic RFM (SRFM) module is employed to correct the residual distortions in the post-equalization latent space. The key idea is to formulate the two cascaded inverse problems of channel estimation and equalization as the unified conditional restoration task, in which the learned conditional velocity field guides the perturbed distribution towards the target distribution. To enhance the robustness of these two modules under various distortion conditions, we develop a dual-anchor perturbation training strategy that jointly learns near-manifold refinement and large-error correction, and implement inference through a few-step deterministic ordinary differential equation (ODE) solver. Extensive experiments on MIMO channels and visual semantic transmission tasks demonstrate that the proposed scheme improves key metrics for channel estimation and semantic reconstruction quality. Moreover, compared with representative diffusion-based generative baselines, the proposed method requires fewer sampling steps.",
+    "landing_page_url": "https://arxiv.org/abs/2607.23615",
+    "pdf_url": "https://arxiv.org/pdf/2607.23615",
+    "is_oa": true,
+    "screen_score": 15,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "face detail restoration diffusion transformer"
+    ],
+    "openalex_id": "https://openalex.org/W7168328605",
+    "doi": null,
+    "title": "YeTI: You Only Need Two Noisy Images for Real-World sRGB Noise Generation",
+    "publication_date": "2026-07-10",
+    "year": 2026,
+    "type": "preprint",
+    "venue": "arXiv (Cornell University)",
+    "cited_by_count": 0,
+    "authors": [
+      "Jaekyun Ko",
+      "Byung Wan Lim",
+      "Soomin Lee",
+      "Dongjin Kim",
+      "Tae Hyun Kim"
+    ],
+    "institutions": [],
+    "abstract": "Real-world sRGB image denoising remains challenging due to the nonlinear characteristics of sensor noise and the difficulty of acquiring aligned clean-noisy image pairs. Supervised denoisers often overfit to limited paired datasets, while self-supervised methods still depend on sufficiently diverse noisy observations. These limitations motivate scalable noise synthesis methods that can model real-world noise without clean ground truth or camera metadata. We propose YeTI, a real-world sRGB noise generation framework that learns from only two noisy observations of the same scene. YeTI uses a Reconstruction Autoencoder to disentangle scene structure and noise characteristics, and models the latent noise distribution with a one-step Conditional Diffusion Transformer trained using consistency objectives. Given a single noisy input at inference time, YeTI generates realistic, signal-dependent noise while preserving the underlying scene content. Extensive experiments demonstrate the effectiveness of YeTI across real-world benchmarks. We evaluate noise generation on SIDD and further assess generalization on SIDD+, MAI2021, and SID, covering smartphone and diverse consumer-camera sensors. Downstream denoising results on DND further show that denoisers trained with YeTI-synthesized images achieve strong real-world performance, highlighting the practical value of clean-image-free and metadata-free noise generation.",
+    "landing_page_url": "https://arxiv.org/abs/2607.09193",
+    "pdf_url": "https://arxiv.org/pdf/2607.09193",
+    "is_oa": true,
+    "screen_score": 15,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "blind face restoration",
+      "personalized face restoration"
+    ],
+    "openalex_id": "https://openalex.org/W7171693701",
+    "doi": "https://doi.org/10.1007/s13534-026-00603-x",
+    "title": "Trends in neuroprosthetic technologies to restore sensations",
+    "publication_date": "2026-07-29",
+    "year": 2026,
+    "type": "article",
+    "venue": "Biomedical Engineering Letters",
+    "cited_by_count": 0,
+    "authors": [
+      "Byungwook Park",
+      "Woojae Butterworth",
+      "Nayeong Lee",
+      "Sohee Kim"
+    ],
+    "institutions": [
+      "Daegu Gyeongbuk Institute of Science and Technology"
+    ],
+    "abstract": "The loss of sensory function significantly reduces the ability to perform daily activities and lowers quality of life. Accordingly, the artificial replacement or support of impaired sensory function has become one of the main objectives of neural engineering and neuroprosthetics. This review systematically organizes auditory, visual, and somatosensory restoration technologies by target organ—from peripheral sensory organs to the central nervous system—and provides a comprehensive overview of the achievements and limitations of each approach. Auditory restoration includes cochlear, brainstem, and auditory cortex approaches; visual restoration includes retinal, optic nerve, and visual cortex approaches; and somatosensory restoration includes somatosensory cortex and peripheral nerve approaches. Although neuroprosthetics-based sensory restoration technologies have achieved considerable progress, the sensations currently restored remain far from natural perception. This review discusses future directions to address these limitations, focusing on higher-density electrodes, device and system optimization, decoding-based biomimetic stimulation, and personalized stimulation strategies. Ultimately, these advances may enable more natural sensation and improve the quality of life of patients with sensory impairments.",
+    "landing_page_url": "https://doi.org/10.1007/s13534-026-00603-x",
+    "pdf_url": "https://link.springer.com/content/pdf/10.1007/s13534-026-00603-x.pdf",
+    "is_oa": true,
+    "screen_score": 14,
+    "screen_reasons": [
+      "personalized"
+    ]
+  },
+  {
+    "query": [
+      "portrait image restoration"
+    ],
+    "openalex_id": "https://openalex.org/W7170177133",
+    "doi": "https://doi.org/10.1016/j.pbiomolbio.2026.07.009",
+    "title": "Epigenetic regulation of the membrane transportome: implications for cancer progression",
+    "publication_date": "2026-07-23",
+    "year": 2026,
+    "type": "article",
+    "venue": "Progress in Biophysics and Molecular Biology",
+    "cited_by_count": 0,
+    "authors": [
+      "Luca Munaron"
+    ],
+    "institutions": [
+      "University of Turin"
+    ],
+    "abstract": "Cancer cells undergo extensive functional, morphological, and genetic alterations that profoundly affect proliferation, metabolism, differentiation, and communication with the surrounding microenvironment. In this context, reciprocal exchanges with the extracellular milieu play a pivotal role. These processes are mediated by membrane transport proteins collectively referred to as the \"transportome\", including both plasma membrane transporters and those localized to intracellular compartments that regulate trafficking between organelles. In many cancers, the transportome undergoes extensive remodeling, ranging from altered gene expression to the generation of distinct protein isoforms. These changes are driven by multiple direct and indirect epigenetic mechanisms, including DNA methylation, histone modifications, and non-coding RNA activity. Here, we review the rapidly expanding body of literature addressing the epigenetic regulation of the transportome in cancer, with particular emphasis on the growing number of cases in which epigenetic modulation has been demonstrated or strongly suggested. Although this field is still in its early stages, further mechanistic investigation and comprehensive characterization of these processes will be essential to fully elucidate their biological and clinical relevance. Ultimately, such advances may contribute to the development of more personalized therapeutic strategies, with the potential to improve efficacy while reducing the side effects associated with conventional treatments.",
+    "landing_page_url": "https://doi.org/10.1016/j.pbiomolbio.2026.07.009",
+    "pdf_url": "https://www.sciencedirect.com/science/article/pii/S0079610726000520/pdf",
+    "is_oa": true,
+    "screen_score": 14,
+    "screen_reasons": [
+      "personalized"
+    ]
+  },
+  {
+    "query": [
+      "personalized face restoration"
+    ],
+    "openalex_id": "https://openalex.org/W7172015047",
+    "doi": "https://doi.org/10.3390/macromol6030056",
+    "title": "Functional Liposomal Nanocarriers for the Treatment of Antimicrobial-Resistant and Biofilm-Associated Ocular Infections",
+    "publication_date": "2026-07-31",
+    "year": 2026,
+    "type": "article",
+    "venue": "Macromol—A Journal of Macromolecular Research",
+    "cited_by_count": 0,
+    "authors": [
+      "Paula Stefana Pintilei",
+      "Roya Binaymotlagh",
+      "Farid Hajareh Haghighi",
+      "Laura Chronopoulou",
+      "Cleofe Palocci"
+    ],
+    "institutions": [
+      "Sapienza University of Rome"
+    ],
+    "abstract": "Nanomedicine-based liposomal delivery systems are gaining increasing attention as advanced therapeutic platforms for managing ocular infections associated with antimicrobial resistance (AMR) and biofilm formation. The primary objective of this review is to critically evaluate the potential of liposomal drug delivery systems for improving the treatment of antimicrobial-resistant and biofilm-associated ocular infections by integrating current knowledge on antimicrobial resistance mechanisms, biofilm-targeted therapeutic strategies, and advances in liposomal formulations, while also identifying the major limitations, translational challenges, and knowledge gaps in this rapidly evolving field. Traditional ocular antimicrobial treatments are frequently limited by poor drug penetration, short precorneal residence time, low bioavailability, systemic side effects, and inadequate activity against resistant microorganisms and biofilm-embedded pathogens. This review provides a comprehensive overview of different liposomal systems, including conventional, cationic, polyethylene glycol (PEG)-modified, deformable, and stimulus-responsive liposomes, and discusses their advantages in ophthalmic drug delivery, such as enhanced corneal permeation, prolonged drug retention, controlled release, improved biocompatibility, and reduced ocular toxicity. The review further examines the mechanisms through which liposomes help overcome AMR, including improved epithelial transport, membrane disruption, intracellular drug delivery, efflux pump evasion, and enhanced antimicrobial efficacy. In addition, liposomal approaches targeting ocular biofilms are explored, focusing on improved biofilm penetration and the delivery of anti-biofilm agents such as antibiotics, enzymes, quorum-sensing inhibitors, and antimicrobial peptides. Current evidence from in vitro and in vivo ocular infection models is summarized together with disease-specific applications in keratitis, endophthalmitis, and contact lens-related infections. The article also compares liposomes with other ocular nanocarriers and addresses important considerations related to safety, stability, sterilization, large-scale production, and regulatory translation. In addition to highlighting recent advances, this review critically discusses the current limitations of liposomal formulations, the major barriers to clinical translation, and the key knowledge gaps that should be addressed to facilitate the future development and successful clinical application of these systems. Finally, emerging directions including ligand-targeted and stimulus-responsive liposomes, AI-driven formulation development, personalized nanotherapy, and gene therapy combinations are discussed as promising future strategies for combating resistant ocular infections.",
+    "landing_page_url": "https://doi.org/10.3390/macromol6030056",
+    "pdf_url": "https://www.mdpi.com/2673-6209/6/3/56/pdf?version=1785496124",
+    "is_oa": true,
+    "screen_score": 14,
+    "screen_reasons": [
+      "personalized"
+    ]
+  },
+  {
+    "query": [
+      "video face restoration"
+    ],
+    "openalex_id": "https://openalex.org/W7172045173",
+    "doi": "https://doi.org/10.17148/ijarcce.2026.15750",
+    "title": "Image Steganography: A Comprehensive Systematic Review Methods, Advances and Future Directions",
+    "publication_date": "2026-07-31",
+    "year": 2026,
+    "type": "review",
+    "venue": "IJARCCE",
+    "cited_by_count": 0,
+    "authors": [
+      "Dr. Balaji K",
+      "Miss Dhanushree H N",
+      "Miss Rachana BM"
+    ],
+    "institutions": [],
+    "abstract": "Image steganography, which involves the embedding of data into digital images in such a way that the embedding remains undetectable, has seen dramatic changes over the past several years due to advances in deep learning, generative adversarial networks (GANs), diffusion-based generative modelling, and transformer architectures.This paper aims to synthesize recent progress within four main categories of image steganography spatial domain, transform domain, deep-learning-based, and coverless steganography via a review of 40 recent papers published from 2021 to 2025.The methods are reviewed according to a common set of metrics Peak Signal-To-Noise Ratio (PSNR), structural similarity index (SSIM), embedding capacity, invisibility, robustness against steganalysis, and computation cost.Special attention is devoted to four rapidly developing subdomains: diffusion-based generative steganography, invertible neural networks (INNs), adversarially trained hidden mechanisms, and secure methods with provable guarantees.The review additionally includes a structured taxonomy of the field, a comparative analysis based on visual data, a list of popular datasets, an overview of open challenges, and directions for future work.",
+    "landing_page_url": "https://doi.org/10.17148/ijarcce.2026.15750",
+    "pdf_url": "https://doi.org/10.17148/ijarcce.2026.15750",
+    "is_oa": true,
+    "screen_score": 14,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "blind face restoration",
+      "personalized face restoration"
+    ],
+    "openalex_id": "https://openalex.org/W7171868154",
+    "doi": "https://doi.org/10.3390/antiox15080951",
+    "title": "Functional Foods and Micro- and Nanoplastics: Advances in Precision Nutritional Medicine for Oral–Gut–Brain Axis Health",
+    "publication_date": "2026-07-30",
+    "year": 2026,
+    "type": "article",
+    "venue": "Antioxidants",
+    "cited_by_count": 0,
+    "authors": [
+      "Maria Scuto",
+      "Lombardo Cinzia",
+      "Giulia Zerbo",
+      "Ledda Caterina",
+      "Gaetano Isola",
+      "Musso Nicolò",
+      "Angela Trovato Salinaro"
+    ],
+    "institutions": [
+      "University of Catania",
+      "Università degli Studi di Enna Kore"
+    ],
+    "abstract": "Microplastics and nanoplastics (MNPs) are emerging environmental pollutants due to their persistence and bodily accumulation. Recently, functional foods have received much attention for their ability to reverse or block MNP damage for therapeutic purposes and the potential risk of developing oral–gut–brain axis disorders. Among these, artichoke, spirulina algae, Opuntia ficus-indica, pterostilbene, hydroxycinnamic acids, and quinic acid are rich sources of polyphenols. These bioactive ingredients, especially when combined with probiotics and prebiotics, exhibit significant antioxidant and anti-inflammatory potential by activating nuclear factor erythroid 2-related factor 2 (Nrf2) signaling and cellular resilience enzymes. Nrf2 activation enhances cellular resilience response, and it may preserve oral epithelial barrier (OEB), intestinal epithelial barrier (IEB), and blood–brain barrier (BBB) integrity, while modulating oral pathogens, gut microbial dysbiosis, and neuroinflammatory processes. However, most of the available evidence supporting these mechanisms derives from in vitro and animal studies, whereas clinical evidence in humans remains limited. Perturbations of Nrf2 due to circulating MNPs may exacerbate selective susceptibility to oral, gut, and nervous system disorders, including Alzheimer’s disease (AD). Although these findings are biologically plausible, the causal relationships and their clinical relevance have not yet been fully established. This review discusses the role of functional foods in maintaining oral–gut–brain health through Nrf2-mediated mechanisms that may mitigate MNP-induced inflammation and reactive oxygen species (ROS). The review also examines emerging concepts in precision nutritional medicine, including individual variability in dietary responses, microbiome-related factors, and future personalized strategies for populations exposed to MNPs. Finally, current knowledge gaps, the scarcity of human studies, and the challenges in translating preclinical findings into clinical practice are highlighted, emphasizing the need for further translational and clinical research.",
+    "landing_page_url": "https://doi.org/10.3390/antiox15080951",
+    "pdf_url": "https://www.mdpi.com/2076-3921/15/8/951/pdf?version=1785405749",
+    "is_oa": true,
+    "screen_score": 13,
+    "screen_reasons": [
+      "personalized"
+    ]
+  },
+  {
+    "query": [
+      "blind face restoration",
+      "personalized face restoration"
+    ],
+    "openalex_id": "https://openalex.org/W7171804323",
+    "doi": "https://doi.org/10.3389/fragi.2026.1868486",
+    "title": "Advances in anti-aging Drug research leveraging multi-omics and artificial intelligence",
+    "publication_date": "2026-07-30",
+    "year": 2026,
+    "type": "article",
+    "venue": "Frontiers in Aging",
+    "cited_by_count": 0,
+    "authors": [
+      "Lijuan Gao",
+      "Yongsheng Qin",
+      "Yudai Xu",
+      "Ju Su",
+      "Zhicheng Cai",
+      "Zhongyu Hu",
+      "Ruohu Shi",
+      "Xinyi Mu",
+      "Shiying Cen",
+      "Chanchan Xiao",
+      "Guobing Chen"
+    ],
+    "institutions": [
+      "Environmental Protection Engineering (Greece)",
+      "First Affiliated Hospital of Jinan University",
+      "Institute of Immunology",
+      "Jinan Central Hospital",
+      "Scientific Research and Development (Germany)",
+      "University of Jinan",
+      "VA Office of Research and Development"
+    ],
+    "abstract": "The intensifying global population aging has rendered the development of anti-aging drugs a core challenge in the life sciences domain. Traditional models struggle to address the systemic and networked nature of aging. Multi-omics technologies provide a panoramic perspective for deciphering molecular networks of aging, while Artificial Intelligence (AI) has demonstrated significant advantages in target discovery, drug screening, and clinical trial optimization. This review systematically elaborates on the pathological characteristics and molecular mechanisms of aging, analyzes the application paradigms of multi-omics in biomarker screening, mechanism elucidation, and high-throughput screening, and discusses the core value and technical bottlenecks of AI in target prediction, virtual screening, and trial design. Simultaneously, this paper addresses critical challenges including ethical controversies and data standardization currently confronting the field, and explores the prospects of precision anti-aging drug development and personalized treatment strategies driven by deep integration of multi-omics and AI. This approach offers novel theoretical frameworks and practical pathways for extending human healthspan.",
+    "landing_page_url": "https://doi.org/10.3389/fragi.2026.1868486",
+    "pdf_url": "https://www.frontiersin.org/journals/aging/articles/10.3389/fragi.2026.1868486/pdf",
+    "is_oa": true,
+    "screen_score": 13,
+    "screen_reasons": [
+      "personalized"
+    ]
+  },
+  {
+    "query": [
+      "blind face restoration"
+    ],
+    "openalex_id": "https://openalex.org/W7171797159",
+    "doi": "https://doi.org/10.1201/9781003774082",
+    "title": "Mathematical Modeling of Heavy Metal Transport in Soil",
+    "publication_date": "2026-07-30",
+    "year": 2026,
+    "type": "book",
+    "venue": null,
+    "cited_by_count": 0,
+    "authors": [
+      "Busayamas Pimpunchat",
+      "V. Govindan",
+      "N. Avinash",
+      "Mustafa Inc"
+    ],
+    "institutions": [],
+    "abstract": "This monograph provides a comprehensive mathematical framework for modeling heavy metal transport in soil. Drawing on advection-diffusion equations, exponential decay models, and advanced numerical techniques, the book bridges theoretical mathematics with practical applications in environmental science and policy. Through detailed derivations, simulations, and case studies it demonstrates how predictive models can forecast plume migration, optimize remediation, and quantify climate change impacts. Key innovations include stochastic uncertainty analysis, machine learning integration for parameter estimation, and scalable frameworks for site-to-regional assessments. The text explores real-world implications, from cost reductions in cleanup (up to 31% savings) to environmental justice considerations, equipping readers with tools to mitigate risks to human health and ecosystems. Intended for environmental scientists, mathematicians, engineers, and policymakers, this work synthesizes decades of research while proposing forward-looking scenarios, such as microplastic-metal interactions and real-time sensor assimilation. With rigorous analytical solutions, computational efficiency (O (n log n) complexity), and interdisciplinary connections to hydrogeology and soil chemistry, it offers a robust toolkit for sustainable soil management. Ultimately, the book transforms abstract equations into actionable strategies for a cleaner planet, emphasizing mathematics as a language of environmental hope and stewardship.",
+    "landing_page_url": "https://doi.org/10.1201/9781003774082",
+    "pdf_url": "https://api.taylorfrancis.com/content/books/mono/download?identifierName=doi&identifierValue=10.1201/9781003774082&type=googlepdf",
+    "is_oa": true,
+    "screen_score": 13,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "face detail restoration diffusion transformer",
+      "face super resolution",
+      "identity preserving face restoration",
+      "personalized face restoration",
+      "portrait image restoration",
+      "portrait super resolution",
+      "video face restoration"
+    ],
+    "openalex_id": "https://openalex.org/W7172244099",
+    "doi": "https://doi.org/10.3390/math14152737",
+    "title": "Collaborative Control in Diffusion Models for Precise Image Generation: A Survey",
+    "publication_date": "2026-08-02",
+    "year": 2026,
+    "type": "article",
+    "venue": "Mathematics",
+    "cited_by_count": 0,
+    "authors": [
+      "Jingzhong Qi",
+      "Wei Xu",
+      "Qing Zhu",
+      "出新 陈",
+      "Yifan Wang"
+    ],
+    "institutions": [
+      "Beijing Academy of Artificial Intelligence",
+      "Beijing University of Technology"
+    ],
+    "abstract": "Diffusion models have become a central paradigm for image generation because they combine stable optimization, high-fidelity synthesis, and controllability through iterative denoising. However, precise image generation in practical settings requires more than text prompts. Here, precision means measurable satisfaction of semantic, spatial, structural, identity, interaction, and domain constraints rather than pixelwise reproduction alone. This survey examines collaborative control methods for diffusion-based image generation from a system-level perspective. We distinguish ordinary controllable diffusion from collaborative control, then review theoretical foundations, conditional generation, single-condition extensions, multi-condition fusion, conflict mediation, controller–evaluator loops, scalability, applications, and evaluation protocols. The discussion emphasizes how control signals are represented, injected, scheduled, and evaluated along the denoising trajectory. It also compares representative methods in terms of controllability, computational overhead, scalable inference, and task-oriented metrics. We identify three continuing challenges: robust coordination under conflicting heterogeneous conditions, fine-grained control under few-step sampling, and reliable benchmarks that jointly measure constraint satisfaction and efficiency. Overall, collaborative control reframes precise diffusion generation as a coordinated modeling and optimization problem involving models, conditions, schedulers, and evaluators.",
+    "landing_page_url": "https://doi.org/10.3390/math14152737",
+    "pdf_url": "https://www.mdpi.com/2227-7390/14/15/2737/pdf?version=1785645956",
+    "is_oa": true,
+    "screen_score": 13,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "face detail restoration diffusion transformer",
+      "face super resolution",
+      "video face restoration"
+    ],
+    "openalex_id": "https://openalex.org/W7172332596",
+    "doi": "https://doi.org/10.1007/s11263-026-02963-4",
+    "title": "RealX3D: A Physically-Degraded 3D Benchmark for Multi-view Visual Restoration and Reconstruction",
+    "publication_date": "2026-08-01",
+    "year": 2026,
+    "type": "article",
+    "venue": "International Journal of Computer Vision",
+    "cited_by_count": 0,
+    "authors": [
+      "Shuhong Liu",
+      "Chenyu Bao",
+      "Ziteng Cui",
+      "Yun Liu",
+      "Xuangeng Chu",
+      "Lin Gu",
+      "Marcos V. Conde",
+      "Ryo Umagami",
+      "Tomohiro Hashimoto",
+      "Zijian Hu",
+      "Tianhan Xu",
+      "Yuan Gan",
+      "Yusuke Kurose",
+      "Tatsuya Harada"
+    ],
+    "institutions": [
+      "National Institute of Informatics",
+      "RIKEN Center for Advanced Intelligence Project",
+      "The University of Tokyo",
+      "Tohoku University",
+      "University of Würzburg"
+    ],
+    "abstract": "Abstract Reliable 3D reconstruction is a prerequisite for robotics, embodied AI, and immersive AR/VR applications; however, real-world observations frequently depart from clean imaging assumptions due to illumination changes, participating media, occlusions, and blur that break multi-view consistency and destabilize pose estimation, which leaves a gap between performance on curated benchmarks and behavior in practical deployments. To address this gap, we introduce RealX3D, a real capture benchmark for multi-view restoration and reconstruction under real-world degradations, organized into four families spanning nine controlled settings that include motion and defocus blur, low-light, view-varying exposure, smoke, dynamic occlusion, and reflection. RealX3D is collected using a unified acquisition protocol that enables recapturing the same camera trajectories to obtain pixel-aligned low-quality and reference ground-truth image pairs. Each scene also provides per-view RAW measurements to preserve high dynamic range linear sensor signals. To support geometry-grounded evaluation beyond image photometric fidelity, we capture dense laser scan geometry for every scene and derive world-scale measures such as point clouds, meshes, and metric depth, allowing comprehensive assessment of pose, depth, and surface reconstruction alongside photometric restoration quality. The benchmark contains 55 scenes recorded at high resolution with diverse real-world degradation patterns. We benchmark a broad set of optimization-based and feed-forward methods using both image metrics and geometry metrics, and the results reveal substantial robustness gaps across degradations in adverse conditions. Overall, RealX3D provides a rigorous benchmark that moves beyond synthetic data and establishes a standardized foundation for developing degradation-robust 3D reconstruction systems.",
+    "landing_page_url": "https://doi.org/10.1007/s11263-026-02963-4",
+    "pdf_url": "https://link.springer.com/content/pdf/10.1007/s11263-026-02963-4.pdf",
+    "is_oa": true,
+    "screen_score": 13,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "face hallucination diffusion"
+    ],
+    "openalex_id": "https://openalex.org/W7171494086",
+    "doi": "https://doi.org/10.1007/s43762-026-00279-0",
+    "title": "Mapping and comparing climate equity policy practices using RAG LLM-based semantic analysis and recommendation systems",
+    "publication_date": "2026-07-28",
+    "year": 2026,
+    "type": "article",
+    "venue": "Computational Urban Science",
+    "cited_by_count": 0,
+    "authors": [
+      "Seung Jun Choi",
+      "Sang-Yup Lee"
+    ],
+    "institutions": [
+      "Incheon National University"
+    ],
+    "abstract": "This study investigates the use of Large Language Models to enhance the policymaking process. We first analyze planning-related job postings to revisit the evolving roles of planners in the era of AI. We then present the Retrieval-Augmented Policy Analysis Framework (RAPAF), implemented using LangChain-native Retrieval-Augmented Generation pipelines with ChatGPT. The framework performs semantic analysis and extracts policy, strategy, and action items related to common themes in climate equity/justice or action plans. Based on these extracted elements and their evaluated presence, we develop a content-based recommendation system to support cross-city policy comparison. The results indicate that, despite growing attention to AI, planning jobs largely retain their traditional domain emphases in transportation, environmental planning, housing, and land use. Communicative responsibilities remain central to planning practice. Climate equity/justice or action plans commonly address transportation, environmental, and energy-related measures aimed at reducing greenhouse gas emissions and predominantly employ affirmative language. The implementation of our content-based recommendation system demonstrates how planners can efficiently identify cities with similar policy themes, highlighting patterns of cross-jurisdictional semantic similarity. The study concludes by envisioning localized and personalized AI-assisted systems designed to support professional planning judgment within urban governance contexts.",
+    "landing_page_url": "https://doi.org/10.1007/s43762-026-00279-0",
+    "pdf_url": "https://link.springer.com/content/pdf/10.1007/s43762-026-00279-0.pdf",
+    "is_oa": true,
+    "screen_score": 13,
+    "screen_reasons": [
+      "personalized"
+    ]
+  },
+  {
+    "query": [
+      "face detail restoration diffusion transformer",
+      "face hallucination diffusion"
+    ],
+    "openalex_id": "https://openalex.org/W7171748673",
+    "doi": null,
+    "title": "Frequency-Aware Dual-Stream Learning for Balanced Realism and Fidelity in Electron Microscopy Imaging",
+    "publication_date": "2026-07-24",
+    "year": 2026,
+    "type": "preprint",
+    "venue": "arXiv (Cornell University)",
+    "cited_by_count": 0,
+    "authors": [
+      "Longmi Gao",
+      "Zhengkai Zhao",
+      "Pan Gao",
+      "Manoranjan Paul"
+    ],
+    "institutions": [],
+    "abstract": "Electron microscopy enables nanoscale cellular visualization but faces a trade-off between imaging resolution and acquisition speed. Existing learning-based methods rely on single-stream architectures that struggle to balance perceptual realism and quantitative fidelity, either over-smoothing details or generating unrealistic hallucinations. This work introduces a frequency-adaptive dual-stream architecture to resolve this conflict. Using discrete wavelet transform, we decompose images into low-frequency structures and high-frequency details, then employ a conditional diffusion model for realistic global synthesis and a transformer network for precise detail recovery. Experiments on the EMDiffuse dataset show the method achieves superior LPIPS and resolution ratio, substantially outperforming existing approaches. The method also shows strong generalization across diverse biological samples, supporting fast and reliable electron microscopy imaging for structural biology and nanotechnology applications. The source code and associated dataset are publicly available to facilitate further research.",
+    "landing_page_url": "https://arxiv.org/abs/2607.22765",
+    "pdf_url": "https://arxiv.org/pdf/2607.22765",
+    "is_oa": true,
+    "screen_score": 13,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "face hallucination diffusion"
+    ],
+    "openalex_id": "https://openalex.org/W7170166799",
+    "doi": "https://doi.org/10.3389/frai.2026.1867175",
+    "title": "An explainable end-to-end computer vision pipeline for detection, segmentation, and reconstruction of occluded weapons in forensic imagery",
+    "publication_date": "2026-07-23",
+    "year": 2026,
+    "type": "article",
+    "venue": "Frontiers in Artificial Intelligence",
+    "cited_by_count": 0,
+    "authors": [
+      "Vaibhav Rohella",
+      "Kumar Anurag",
+      "Aditya Kumar",
+      "V. Manjula",
+      "P. Shanthi"
+    ],
+    "institutions": [
+      "Vellore Institute of Technology University"
+    ],
+    "abstract": "Introduction Images from crime scenes often show partially concealed weapons due to obstructions such as hands and clothing, as well as surveillance camera limitations, which affect the efficacy of traditional detection methods. This work proposes an explainable forensic pipeline for occluded weapons detection, segmentation, and reconstruction. Methods The proposed framework integrates RT-DETR-L, a transformer-based weapon detection model; MobileSAM for zero-shot segmentation of visible weapon regions; Stable Diffusion Inpainting for reconstruction of occluded regions; and a bilateral filter with Canny edge detection for forensic sketch generation. The detector was trained using synthetic occlusion augmentation on five weapon categories, such as firearm, grenade, knife, pistol, and rocket, and fire as an additional class for the environmental hazard indicator. Results The RT-DETR-L model achieves a mAP@50 of 0.86 and a mAP@50-95 of 0.65, averaged over the five weapon classes, on a dataset with synthetic occlusion augmentation. Reconstruction quality meets minimum quality thresholds (SSIM &amp;gt; 0.54, PSNR &amp;gt; 16 dB, Region IoU &amp;gt; 0.80) up to approximately 50% occlusion. An interactive Streamlite application demonstrates the pipeline’s feasibility in 42–46 seconds as a controlled laboratory prototype. Discussion The proposed explainable forensic pipeline highlights the potential of combining transformer-based detection with generative AI to assist forensic weapon analysis under challenging occlusion scenarios. The generated reconstructions and sketches are intended as visual aids for expert review and must undergo independent forensic validation before any operational use.",
+    "landing_page_url": "https://doi.org/10.3389/frai.2026.1867175",
+    "pdf_url": "https://www.frontiersin.org/journals/artificial-intelligence/articles/10.3389/frai.2026.1867175/pdf",
+    "is_oa": true,
+    "screen_score": 13,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "face hallucination diffusion"
+    ],
+    "openalex_id": "https://openalex.org/W7170166868",
+    "doi": "https://doi.org/10.3350/cmh.2026.0258",
+    "title": "Artificial Intelligence and Generative Models in Hepatology: From Large Language Models to Digital Pathology in Liver Disease Diagnosis and Treatment",
+    "publication_date": "2026-07-23",
+    "year": 2026,
+    "type": "article",
+    "venue": "Clinical and Molecular Hepatology",
+    "cited_by_count": 0,
+    "authors": [
+      "Nana Peng",
+      "Mary Yue Wang",
+      "Sherlot Juan Song",
+      "Jimmy Che‐To Lai",
+      "Vicki Wing‐Ki Hui",
+      "Vincent Wai-Sun Wong",
+      "Grace Lai‐Hung Wong",
+      "Mamatha Bhat",
+      "Terry Cheuk‐Fung Yip"
+    ],
+    "institutions": [
+      "Chinese University of Hong Kong",
+      "University Health Network"
+    ],
+    "abstract": "Artificial intelligence (AI), particularly foundation and generative models, is reshaping the practice of hepatology through enhanced knowledge synthesis, quantitative and reproducible analysis of multimodal data, and personalized clinical decision support. This narrative review examines the transition from task-specific discrimination AI to large language models (LLMs), multimodal foundation models, and agentic AI. We synthesize evidence from original and validation studies, clinical evaluations, and benchmark studies, as well as expert reviews and regulatory frameworks across metabolic dysfunction-associated steatotic liver disease, chronic hepatitis B, cirrhosis and portal hypertension, hepatocellular carcinoma, and liver transplantation. LLMs can convert free-text notes into structured data, summarize longitudinal electronic health records, support patient education, and retrieve guideline-based information. Retrieval-augmented generation and agentic AI may improve traceability and workflow support, but current evidence is largely retrospective or proof-of-concept. In digital pathology and imaging, discriminative AI has enabled more quantitative and reproducible histologic scoring and biomarker analysis. Pathology and multimodal foundation models offer transferable representations, report generation, and cross-modal reasoning, but hepatology-specific validation remains limited. Key risks include hallucination, automation bias, domain shift across centers and devices, and inequities due to under-representation of patient subgroups. We outline the future directions for safe AI model deployment based on multimodal foundation models, prospective and federated evaluation, lifecycle governance, and continuous monitoring for performance, calibration, and equity. Most generative AI applications in hepatology remain at the proof-of-concept stage, and rigorous prospective validation with human-in-the-loop oversight is required before clinical integration.",
+    "landing_page_url": "https://doi.org/10.3350/cmh.2026.0258",
+    "pdf_url": "https://www.e-cmh.org/upload/pdf/cmh-2026-0258.pdf",
+    "is_oa": true,
+    "screen_score": 13,
+    "screen_reasons": [
+      "personalized"
+    ]
+  },
+  {
+    "query": [
+      "face detail restoration diffusion transformer",
+      "face hallucination diffusion"
+    ],
+    "openalex_id": "https://openalex.org/W7170989636",
+    "doi": null,
+    "title": "WearWow: Native 2K Multi-Garment Virtual Try-On via Adaptive Token Packing and Preference Alignment",
+    "publication_date": "2026-07-22",
+    "year": 2026,
+    "type": "preprint",
+    "venue": "arXiv (Cornell University)",
+    "cited_by_count": 0,
+    "authors": [
+      "Xujie Zhang",
+      "Runyan Du",
+      "Song Chang",
+      "Jiang Li",
+      "Dongliang Shao",
+      "Liping Wu",
+      "W Luo",
+      "X. B. Qu",
+      "Luoqi Liu",
+      "C X Liang"
+    ],
+    "institutions": [],
+    "abstract": "Synthesizing native 2K multi-garment virtual try-on is a formidable frontier in digital fashion, critically bottlenecked by two fundamental limitations: the O(N^2) memory explosion induced by 2k conditions, and the spectral bias of diffusion models that over-smooths high-frequency fabric details. We present WearWow, an end-to-end, mask-free generative framework that pioneers ultra-high-resolution multi-garment synthesis. To mitigate the memory explosion , we propose Adaptive 2D Token Packing (ATP). ATP leverages inherent garment sparsity to algorithmically pack heterogeneous items onto a unified 2D canvas and prune uninformative background tokens, minimizing the effective sequence length and subsequent memory overhead while rigorously preserving 2D spatial priors. To rectify texture degradation, we introduce the Multi-dimensional Try-on Reward (MTR) system. MTR synergizes a Semantic Guidance Reward to explicitly drive tactile restoration with a Cloth Distribution Reward to implicitly anchor the physical distribution, a joint formulation that effectively mitigates the severe reward hacking. Furthermore, we curate WearWow-2K, an extreme-quality dataset comprising native 2K triplets, providing physically correct spatial interactions that naturally empower the model's mask-free generation. Extensive experiments demonstrate that WearWow establishes a new state-of-the-art, exceeding existing commercial baselines in native 2K multi-garment synthesis.",
+    "landing_page_url": "https://arxiv.org/abs/2607.19923",
+    "pdf_url": "https://arxiv.org/pdf/2607.19923",
+    "is_oa": true,
+    "screen_score": 13,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "personalized face restoration",
+      "portrait image restoration",
+      "portrait super resolution"
+    ],
+    "openalex_id": "https://openalex.org/W7171902562",
+    "doi": null,
+    "title": "Face De-Identification: A Domain-Centric Survey from Capture to Processing",
+    "publication_date": "2026-07-28",
+    "year": 2026,
+    "type": "preprint",
+    "venue": "arXiv (Cornell University)",
+    "cited_by_count": 0,
+    "authors": [
+      "Hui Wei",
+      "Hao Yu",
+      "Guoying Zhao"
+    ],
+    "institutions": [],
+    "abstract": "Face de-identification (De-ID) aims to remove or conceal personally identifiable facial features in images or videos to prevent identity recognition while preserving utility for downstream tasks. With the rising emphasis on data privacy and responsible AI, face De-ID has emerged as an active research area spanning computer vision and privacy-preserving communities. Early approaches, and many contemporary ones, operate in the digital domain by modifying pixel-level or appearance-level features through post-capture processing. Recent advances extend face De-ID beyond post-processing by integrating privacy mechanisms directly into sensors during image acquisition, bridging sensing systems and downstream vision algorithms. In parallel, physical-domain methods explore wearable accessories and materials that conceal identity information in real-world environments prior to capture. In this survey, we present the first unified overview that spans the full data acquisition pipeline, encompassing the physical, sensor, and digital domains. Through this domain-centric lens, we systematically analyze current methodologies, technical progress, and the distinct challenges inherent to each stage. We then review and organize existing evaluation protocols, examining current practices and highlighting the critical need for standardized, comprehensive benchmarks. Finally, we identify key open problems and outline emerging research directions to guide future work in this rapidly evolving field. To support ongoing research, we maintain a project page that organizes relevant literature with collected datasets and open source code: https://github.com/CV-AC/Awesome-FaceDe-ID.",
+    "landing_page_url": "https://arxiv.org/abs/2607.25926",
+    "pdf_url": "https://arxiv.org/pdf/2607.25926",
+    "is_oa": true,
+    "screen_score": 13,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "portrait super resolution"
+    ],
+    "openalex_id": "https://openalex.org/W7167154633",
+    "doi": null,
+    "title": "Quality-Aware Modulation for Diffusion Transformers",
+    "publication_date": "2026-06-29",
+    "year": 2026,
+    "type": "preprint",
+    "venue": "arXiv (Cornell University)",
+    "cited_by_count": 0,
+    "authors": [
+      "Luke Budny",
+      "Yi Guo",
+      "Kevin Cheung"
+    ],
+    "institutions": [
+      "Carleton University"
+    ],
+    "abstract": "Modern text-to-image diffusion models, such as diffusion transformers (DiT), rely on timestep or prompt embeddings to modulate the strength of the denoising process in each timestep. While this modulation communicates the current noise level, it does not provide any quality-aware information, which can lead to generated images that are unaligned, visually inconsistent, and lacking in fidelity. In this paper, we propose the Quality Representation Module (QRM), a lightweight transformer module that learns a quality-aware representation based on existing model inputs, and produces a set of vectors $M_{qrm}$. These vectors adjust the adaptive LayerNorm modulation within the DiT transformer blocks, thereby injecting a quality-sensitive signal into the denoising parameters. The QRM introduces no significant changes to the sampling schedule or diffusion backbone. Experiments include ablations on QRM training losses and architectures, as well as empirical results demonstrating consistent image quality improvements over baseline DiT-based models.",
+    "landing_page_url": "https://arxiv.org/abs/2606.30934",
+    "pdf_url": "https://arxiv.org/pdf/2606.30934",
+    "is_oa": true,
+    "screen_score": 13,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "portrait super resolution"
+    ],
+    "openalex_id": "https://openalex.org/W7165844097",
+    "doi": "https://doi.org/10.64898/2026.06.22.26356153",
+    "title": "Evaluating Generative Video AI for Standardized Psychiatric Patient Simulation With Graded Hygiene Deterioration",
+    "publication_date": "2026-06-25",
+    "year": 2026,
+    "type": "preprint",
+    "venue": "medRxiv",
+    "cited_by_count": 0,
+    "authors": [
+      "Benson Mwangi",
+      "Hammza Jabbar Abdl Sattar Hamoudi",
+      "Mon‐Ju Wu",
+      "Andrés Martin",
+      "Jair C. Soares",
+      "César A. Soutullo"
+    ],
+    "institutions": [
+      "The University of Texas Health Science Center",
+      "The University of Texas Health Science Center at Houston",
+      "Yale University"
+    ],
+    "abstract": "Abstract Introduction A clinician’s initial assessment during the mental status examination (MSE) places substantial weight on a patient’s general appearance, grooming, and hygiene. However, the logistical difficulty of producing simulated or standardized patient (SP) videos that systematically manipulate these characteristics limits the development of clinical AI tools and training curricula. This pilot study investigates the technical feasibility of using a video-generation diffusion model to re-animate modified reference images onto driving videos, enabling the creation of diverse patient presentations without the need for repeated filming. Methods Utilizing an established publicly available dataset, we extracted reference images of three SPs and applied a text-to-image AI model to generate five appearance conditions: the unmodified baseline and four escalating hygiene-deterioration levels: mild, moderate, marked, and severe. We then used the Wan2.2-Animate-14B animate video generation AI model to re-animate these modified portraits onto the original driving footage. This factorial design varied several model parameters including; pose retargeting, classifier-free guidance scales, and generation modes, resulting in 180 unique videos. Quality was measured through Fréchet Video Distance (FVD) for distributional fidelity and a physics-aware assessment performed by a multimodal large language model to evaluate physical plausibility. Results Our analysis yielded two primary observations. First, compositing through replacement-mode achieved significantly higher temporal fidelity than animation-mode (mean FVD 8.6 vs. 19.4; Cohen’s d = 1.84). Second, while distributional fidelity showed a monotonic decline as hygiene perturbation increased (Spearman ρ = 0.48, p &lt; 0.001), physics-aware scores did not follow a similar trend. This pattern is consistent with fine-motor artifacts arising from model-level generative constraints rather than from the severity of the appearance modification alone. Conclusions These findings demonstrate that generating appearance-modulated clinical video libraries is technically achievable. Nevertheless, the persistence of fine-motor artifacts underscores the necessity of expert human oversight before these materials can be safely deployed in educational and translational settings.",
+    "landing_page_url": "https://doi.org/10.64898/2026.06.22.26356153",
+    "pdf_url": "https://www.medrxiv.org/content/medrxiv/early/2026/06/25/2026.06.22.26356153.full.pdf",
+    "is_oa": true,
+    "screen_score": 13,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "reference based face restoration"
+    ],
+    "openalex_id": "https://openalex.org/W7172319833",
+    "doi": "https://doi.org/10.62051/ajmse.v1n4.05",
+    "title": "Dwelling in Mobility: Reconstructing Everyday Life Meaning among Digital Nomads through Rural Sojourns",
+    "publication_date": "2026-08-03",
+    "year": 2026,
+    "type": "article",
+    "venue": "Academic Journal of Management Science and Engineering",
+    "cited_by_count": 0,
+    "authors": [
+      "Fangyi He",
+      "Qingyan Huang"
+    ],
+    "institutions": [
+      "Xi'an International Studies University",
+      "Xi’an International University"
+    ],
+    "abstract": "The rapid expansion of digital technologies has enabled a growing number of workers to separate professional activities from fixed workplaces. Digital nomads represent a new form of mobile lifestyle, combining remote work with temporary residence across different locations. However, existing studies have mainly examined their mobility patterns, economic motivations, or destination preferences, while less attention has been paid to how rural sojourns reshape their everyday life meanings. Drawing on the case of Jianya Village in Xi’an, China, this study explores how digital nomads transform from temporary visitors into embedded participants through rural living practices. Based on Xiaohongshu user-generated content, semi-structured interviews, guided topic modeling, emotional meaning analysis, and semantic network analysis, the study investigates the relationship between mobility motivation, rural experience, and identity reconstruction. The findings reveal that digital nomads’ mobility is driven not only by the pursuit of geographical freedom but also by dissatisfaction with urban time pressure and fragmented social relations. Rural spaces provide an urban-rural compatible environment where individuals can maintain professional productivity while reorganizing their temporal rhythms, social connections, and self-perceptions. Rather than being produced by explicit “healing” narratives, the reconstruction of life meaning emerges through accumulated feelings of belonging, relaxation, and autonomy. This study contributes to understanding contemporary forms of mobility and offers implications for the development of rural communities capable of supporting longer-term living practices.",
+    "landing_page_url": "https://doi.org/10.62051/ajmse.v1n4.05",
+    "pdf_url": "https://ajomse.com/index.php/ojs/article/download/41/41",
+    "is_oa": true,
+    "screen_score": 13,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "personalized face restoration",
+      "reference based face restoration"
+    ],
+    "openalex_id": "https://openalex.org/W7172278670",
+    "doi": "https://doi.org/10.1016/j.matdes.2026.116738",
+    "title": "Smart response food-derived polysaccharide hydrogels: reprogramming the microenvironment for skin rejuvenation",
+    "publication_date": "2026-08-03",
+    "year": 2026,
+    "type": "article",
+    "venue": "Materials & Design",
+    "cited_by_count": 0,
+    "authors": [
+      "Min Li",
+      "Ye Zhao",
+      "Xianglan Li",
+      "Mingwei Zhou"
+    ],
+    "institutions": [
+      "Union Hospital"
+    ],
+    "abstract": "Skin aging is a multifaceted biological process marked by the disruption of the ROS-MMP-collagen axis, resulting in the degradation of the extracellular matrix (ECM) and compromised barrier function. Traditional synthetic interventions often face challenges related to biocompatibility and limited efficacy in targeted delivery. In contrast, food-derived polysaccharide hydrogels (FDPH) have emerged as a novel class of bio-instructive materials. These hydrogels extend beyond the conventional role of passive scaffolds by leveraging their intrinsic bioactivity and tunable three-dimensional architectures, which may contribute to the modulation of aging-associated microenvironmental factors. This review offers a comprehensive critical analysis of the evolution of FDPH from their initial role as structural fillers to their current status as sophisticated therapeutic platforms. These platforms are capable of detecting pathological signals, including pH, ROS, and enzymes, thus facilitating more precise and localized therapeutic interventions.We explore the molecular mechanisms that underpin their dual functionality in mitigating oxidative stress and influencing fibroblast-associated regenerative processes that may support collagen remodeling. Additionally, it identifies challenges such as structural variability, transdermal efficiency, and long-term safety. The review also predicts future trends in precision design and personalized applications, fueled by AI and multi-omics, guiding the advancement of FDPH for skin health and anti-aging.",
+    "landing_page_url": "https://doi.org/10.1016/j.matdes.2026.116738",
+    "pdf_url": "https://www.sciencedirect.com/science/article/pii/S0264127526013134/pdf",
+    "is_oa": true,
+    "screen_score": 13,
+    "screen_reasons": [
+      "personalized"
+    ]
+  },
+  {
+    "query": [
+      "reference based face restoration"
+    ],
+    "openalex_id": "https://openalex.org/W7172338519",
+    "doi": "https://doi.org/10.1007/s10915-026-03425-2",
+    "title": "Efficient Uncertainty Quantification for Stochastic Reaction–Diffusion Equations: A Time-Splitting Spectral Method Based on WCE–Karhunen–Loève Expansion",
+    "publication_date": "2026-08-03",
+    "year": 2026,
+    "type": "article",
+    "venue": "Journal of Scientific Computing",
+    "cited_by_count": 0,
+    "authors": [
+      "Hongling Xie",
+      "Chuchu Chen"
+    ],
+    "institutions": [
+      "Honghe University"
+    ],
+    "abstract": "Abstract Stochastic reaction–diffusion equations play an important role in characterizing the coupled mechanisms among nonlinear reaction, spatial diffusion, and random perturbations. However, during long-time integration, the high-precision computation of the mean, variance, higher-order moments, probability density functions (PDFs), and cumulative distribution functions (CDFs) remains a challenging task. In this paper, we propose a time-splitting Fourier spectral method based on Wiener chaos expansion and Karhunen–Loève expansion for stochastic reaction–diffusion equations driven by additive noise, aiming to achieve efficient and stable uncertainty quantification over long-time integration. The computational accuracy, long-time stability, and efficiency of the proposed method are validated by two examples with analytical reference solutions, namely an OU-type stochastic benchmark and a linear stochastic heat equation. Numerical results show that the method accurately computes the mean, variance, and higher-order moments such as the third and fourth moments, and efficiently reconstructs PDFs and CDFs. Compared with the traditional Monte Carlo method, the proposed method achieves higher statistical accuracy and better probability distribution reconstruction under the same or lower computational cost over long-time integration. Furthermore, the framework is applied to one- and two-dimensional nonlinear stochastic reaction–diffusion equations to analyze the competition among noise, diffusion, and nonlinear reaction, revealing the statistical equilibrium characteristics and dynamic transition mechanisms of stochastic reaction–diffusion systems during long-time evolution.",
+    "landing_page_url": "https://doi.org/10.1007/s10915-026-03425-2",
+    "pdf_url": "https://link.springer.com/content/pdf/10.1007/s10915-026-03425-2.pdf",
+    "is_oa": true,
+    "screen_score": 13,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "personalized face restoration"
+    ],
+    "openalex_id": "https://openalex.org/W7172199440",
+    "doi": "https://doi.org/10.63939/1ctxw017",
+    "title": "Viral Evasion Mechanisms of Host Interferon Signaling Pathways",
+    "publication_date": "2026-07-31",
+    "year": 2026,
+    "type": "article",
+    "venue": "International Journal of Environmental and Biological Sciences",
+    "cited_by_count": 0,
+    "authors": [
+      "Dhefaf Hameed Al-mudhafer",
+      "Hawraa Ameer Mubark",
+      "Saif Jabbar Yasir"
+    ],
+    "institutions": [
+      "University of Kufa"
+    ],
+    "abstract": "Interferons (IFNs) are one of the core pillars of innate antiviral immunity that together forms a cascade in signaling network by intra- and inter-cellular responses, detecting viral infection, activating Janus kinase-signal transducer and activator of transcription (JAK–STAT), and ultimately inducing hundreds of interferon-stimulated genes (ISGs) which inhibit viral propagation. Nonetheless, viruses have developed intricate immune evasion strategies that target virtually all facets of the interferon response thus promoting viral survival, persistence, and pathogenesis. This review summarizes the basic molecular mechanisms of host interferon signaling and the various viruses that have evolved to counteract these pathways. Most notably with respect to viral interference with pattern recognition receptor signaling, type I interferon induction, JAK STAT signal transduction and ISGF3 complex formation and host restriction factors. Soon afterward, the review introduces how viruses manipulate post-translational modifications (PTMs), such as ubiquitination, ISGylation, SUMOylation and proteasomal degradation to potentiate their effects on innate immune responses. The coevolution between virus and host is emphasized as a key mechanism promoting viral immune antagonists in one hand and host antiviral restriction factors on the other, contributing to rapid diversification of both sectors. Finally, novel therapeutic approaches targeting the restoration of interferon signaling via host-directed therapies, inhibition of viral antagonists, modulation of pathways responsible for post-translational modifications (PTMs) and personalized immunotherapies are thoroughly discussed. Targeting host–virus interaction networks rather than viral replication alone provide new avenues for broad-spectrum antiviral therapies, which are less susceptible to resistance due to the dynamic nature of host and virus evolution. Such integration of structural biology, systems immunology, multi-omics technologies with clinical investigation will be necessary for translating mechanistic insights into therapeutics against viral pathogens and enhancing preparedness to future viral threats.",
+    "landing_page_url": "https://doi.org/10.63939/1ctxw017",
+    "pdf_url": "https://ijebs-journal.de/index.php/IJEBS/article/download/32/28",
+    "is_oa": true,
+    "screen_score": 13,
+    "screen_reasons": [
+      "personalized"
+    ]
+  },
+  {
+    "query": [
+      "personalized face restoration"
+    ],
+    "openalex_id": "https://openalex.org/W7171932647",
+    "doi": "https://doi.org/10.64784/273",
+    "title": "Advances in Supermicrosurgery and Physiological Lymphatic Reconstruction: Contemporary Strategies for the Comprehensive Management of Lymphedema",
+    "publication_date": "2026-07-31",
+    "year": 2026,
+    "type": "article",
+    "venue": "International Science Journal",
+    "cited_by_count": 0,
+    "authors": [
+      "Abigail Berenice Gómez Valenzuela",
+      "Jorge Reynaldo Ayala Aguilar",
+      "André Ayala Rodríguez",
+      "Stephanie Paola Feijóo Tapia",
+      "Kevin Alexander Achig Carrion",
+      "Sara Valentina Alarcón Ricaurte",
+      "Luis Felipe Espinal Pérez",
+      "Sandro José Nava Daza",
+      "Cristian Israel Sarmiento Bonilla"
+    ],
+    "institutions": [
+      "Centro Universitario de Occidente",
+      "Industrial University of Santander",
+      "Universidad Anáhuac",
+      "Universidad Autónoma Monterrey",
+      "Universidad La Salle",
+      "University of Guayaquil",
+      "Victim Support"
+    ],
+    "abstract": "Lymphedema is a chronic and progressive disorder resulting from impaired lymphatic transport, leading to fluid accumulation, chronic inflammation, fibrosis, and progressive functional impairment. Recent advances in reconstructive surgery have shifted therapeutic strategies from symptom control toward physiological restoration of lymphatic drainage through supermicrosurgical techniques. This review analyzes the current scientific evidence regarding supermicrosurgery and lymphatic reconstruction, emphasizing lymphaticovenous anastomosis, vascularized lymph node transfer, immediate lymphatic reconstruction, advanced diagnostic imaging, and emerging regenerative medicine approaches. Contemporary literature demonstrates that individualized patient selection, supported by indocyanine green lymphography and other imaging modalities, is fundamental for optimizing surgical outcomes. Physiological reconstruction has been associated with reductions in limb volume, lower incidence of cellulitis, improved functional recovery, decreased dependence on compression therapy, and better quality of life when integrated into multidisciplinary care. Emerging technologies, including tissue engineering, therapeutic lymphangiogenesis, artificial intelligence, and image-guided surgery, are expanding future therapeutic possibilities while promoting increasingly personalized treatment strategies. Although current evidence supports the effectiveness of physiological lymphatic reconstruction, further multicenter prospective studies with standardized methodologies are required to strengthen clinical recommendations and improve the global implementation of these techniques. Overall, supermicrosurgery represents a major milestone in modern reconstructive surgery and continues to redefine the management of primary and secondary lymphedema through innovation, technological development, and international multidisciplinary collaboration.",
+    "landing_page_url": "https://doi.org/10.64784/273",
+    "pdf_url": "https://the-sci.org/revista/index.php/ieee/article/download/86/82",
+    "is_oa": true,
+    "screen_score": 13,
+    "screen_reasons": [
+      "personalized"
+    ]
+  },
+  {
+    "query": [
+      "personalized face restoration"
+    ],
+    "openalex_id": "https://openalex.org/W7171960063",
+    "doi": "https://doi.org/10.1002/advs.76738",
+    "title": "Trafficking Deficiency of TMEM175 Variants in Parkinson's Disease Pathogenesis and the Prospects of Precision Medicine",
+    "publication_date": "2026-07-31",
+    "year": 2026,
+    "type": "article",
+    "venue": "Advanced Science",
+    "cited_by_count": 0,
+    "authors": [
+      "Ting Luo",
+      "Yu He",
+      "Shuyao Li",
+      "Haoyu Guan",
+      "Ruili Cui",
+      "Yu Shi",
+      "Zhongwen Jiang",
+      "Siyu Wang",
+      "Xuan Li",
+      "Jiyuan Li",
+      "Mei Hu",
+      "Yupeng Zhou",
+      "Yupeng Zhou",
+      "Beisha Tang",
+      "Yanyan Zhang",
+      "Zhaobing Gao",
+      "Zhou Yu",
+      "Zhou Yu",
+      "Zhenhua Liu",
+      "Ping Li"
+    ],
+    "institutions": [
+      "Central South University",
+      "Chinese Academy of Sciences",
+      "Guiyang Medical University",
+      "Macau University of Science and Technology",
+      "Nanjing University of Chinese Medicine",
+      "National Clinical Research",
+      "Shanghai Institute of Materia Medica",
+      "Southern Medical University",
+      "Xiangya Hospital Central South University",
+      "Xinjiang Medical University",
+      "Zhongshan Hospital"
+    ],
+    "abstract": "The transmembrane protein 175 (TMEM175) is a high-risk gene for Parkinson's disease (PD) and encodes an ion channel in lysosomes. Many PD-associated variants in TMEM175 lead to the loss of ion channel function. In this study, we identified the PD-associated TMEM175-L156P variant is a missense mutation with trafficking deficiency. Using imaging, biochemical, and whole-endolysosomal electrophysiological approaches, we identified that L156P abolished the lysosomal expression of TMEM175; instead, it accumulates in the endoplasmic reticulum (ER). The cytosolic segment of the fourth transmembrane helix (TM4-1), where the L156 resides, determined the lysosomal localization of TMEM175. Having understood the structural basis, we evaluated wild-type (WT) TMEM175 and pharmacological chaperones previously used in cystic fibrosis treatment. We elucidated that WT partially rescued the aberrant expression of L156P. Moreover, the chaperones substantially reduced the ER-retained L156P and facilitated its trafficking to lysosomes. We further screened and identified a bifunctional chemical molecule that both corrected the trafficking defects and potentiated the ion channel function of L156P. Notably, the chemical-restored L156P is functional, as it relieves the lysosomal over-acidification. Conclusively, we establish the relationship between aberrant trafficking and pathogenesis in PD, demonstrating the potential of utilizing \"chaperone plus agonist\" bifunctional chemical molecules as personalized treatment for PD.",
+    "landing_page_url": "https://doi.org/10.1002/advs.76738",
+    "pdf_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/advs.76738",
+    "is_oa": true,
+    "screen_score": 13,
+    "screen_reasons": [
+      "personalized"
+    ]
+  },
+  {
+    "query": [
+      "personalized face restoration"
+    ],
+    "openalex_id": "https://openalex.org/W7171822607",
+    "doi": "https://doi.org/10.52403/ijrr.20260755",
+    "title": "Evolution of Food Science: Bridging Tradition and Innovation",
+    "publication_date": "2026-07-30",
+    "year": 2026,
+    "type": "article",
+    "venue": "International Journal of Research and Review",
+    "cited_by_count": 0,
+    "authors": [
+      "Ranjana Chand",
+      "Shubham Kaintura"
+    ],
+    "institutions": [
+      "Jamia Hamdard",
+      "Ministry of Electronics and Information Technology"
+    ],
+    "abstract": "Food science has evolved from indigenous culinary wisdom and ancient preservation methods into a complex interdisciplinary field that integrates modern technological advancements, systems biology, and data analytics. This transformation reflects a continuous interplay between traditional knowledge systems and cutting-edge scientific innovation aimed at addressing contemporary global challenges including nutrition security, public health, and environmental sustainability. This chapter comprehensively examines the historical foundations of food science, its scientific milestones, and contemporary innovations such as biotechnology, nanotechnology, and personalized nutrition. Further, it highlights integrative approaches that meld traditional practices with novel technologies, supported by illustrative case studies. Ethical considerations surrounding intellectual property and cultural stewardship are discussed alongside future directions emphasizing systems thinking, resilience, and equity. This synthesis articulates a pathway toward sustainable, ethical, and health-promoting food systems at the nexus of tradition and innovation. Keywords: food science, traditional knowledge, food innovation, biotechnology, functional foods, nutrigenomics, sustainability, food safety, culinary heritage",
+    "landing_page_url": "https://doi.org/10.52403/ijrr.20260755",
+    "pdf_url": "https://doi.org/10.52403/ijrr.20260755",
+    "is_oa": true,
+    "screen_score": 13,
+    "screen_reasons": [
+      "personalized"
+    ]
+  },
+  {
+    "query": [
+      "personalized face restoration"
+    ],
+    "openalex_id": "https://openalex.org/W7171493789",
+    "doi": "https://doi.org/10.38124/ijisrt/26jul778",
+    "title": "Gender Differences, the Environment and Skin Aging: A Review of Targeted Anti-Aging Formulations for the Asia-Pacific Region",
+    "publication_date": "2026-07-28",
+    "year": 2026,
+    "type": "article",
+    "venue": "International Journal of Innovative Science and Research Technology (IJISRT)",
+    "cited_by_count": 0,
+    "authors": [
+      "Seamus C. C. Phan"
+    ],
+    "institutions": [],
+    "abstract": "This conceptual review integrates the mechanistic hallmarks of cutaneous aging with population-specific and gender-dependent variables to establish a targeted formulation framework for the Asia Pacific region. The synthesis delivers three core scholarly contributions: first, it establishes how baseline sexual dimorphism and distinct hormonal trajectories (such as postmenopausal estrogen drop vs. gradual testosterone decline) alter structural skin compartments and manifest divergent clinical phenotypes between gender; second, it maps the unique photo-pollution exposome of East and Southeast Asian cohorts, highlighting the prominence of dyspigmentation over deep wrinkling; and third, it provides concrete formulation design rules—pairing stabilized, low-pH vitamin C, matrix-stimulating peptides, and multifunctional botanicals—tailored to these distinct regional and gender-specific cutaneous vulnerabilities. Additionally, we evaluate the limitations of current diagnostic scales and highlight the role of controlled environmental challenge systems in validating anti-pollution efficacy. Ultimately, this framework provides a structured blueprint for transitioning from generic anti-aging formulations to ethnically and structurally personalized dermatological interventions.",
+    "landing_page_url": "https://doi.org/10.38124/ijisrt/26jul778",
+    "pdf_url": "https://www.ijisrt.com/assets/upload/files/IJISRT26JUL778.pdf",
+    "is_oa": true,
+    "screen_score": 13,
+    "screen_reasons": [
+      "personalized"
+    ]
+  },
+  {
+    "query": [
+      "face detail restoration diffusion transformer"
+    ],
+    "openalex_id": "https://openalex.org/W7172068075",
+    "doi": null,
+    "title": "WildShadowRemover: In-the-Wild Video Shadow Removal via Detail-Preserving Video Diffusion Models",
+    "publication_date": "2026-07-28",
+    "year": 2026,
+    "type": "preprint",
+    "venue": "arXiv (Cornell University)",
+    "cited_by_count": 0,
+    "authors": [
+      "Jiamin Xu",
+      "Cong Wang",
+      "Zheng Dong",
+      "Chi Wang",
+      "Renshu Gu",
+      "Weiwei Xu",
+      "Gang Xu"
+    ],
+    "institutions": [],
+    "abstract": "Video shadow removal in the wild remains challenging due to complex illumination, diverse shadow appearances, and limited training data. Despite its importance to numerous vision and graphics applications, it remains largely unexplored in unconstrained real-world scenarios. To address this gap, we present WildShadowRemover, a framework that adapts a pretrained video diffusion model for robust video shadow removal via LoRA fine-tuning. To preserve fine image details while retaining the model's powerful generative prior, we augment the frozen VAE decoder with a detail injection module and introduce a shadow-mask-guided frequency-decomposed modulation module to selectively restore high-frequency textures while suppressing shadow artifacts. Monocular depth priors from Depth Anything 3 further provide geometry-aware guidance under challenging lighting conditions. We also construct WildShadow, a large-scale paired video shadow removal dataset and benchmark, covering diverse synthetic scenes. Extensive experiments demonstrate that our method outperforms existing approaches in shadow removal quality and temporal consistency, producing temporally coherent shadow-free videos with superior visual quality and strong generalization across challenging in-the-wild scenarios.",
+    "landing_page_url": "https://arxiv.org/abs/2607.26203",
+    "pdf_url": "https://arxiv.org/pdf/2607.26203",
+    "is_oa": true,
+    "screen_score": 13,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "face detail restoration diffusion transformer"
+    ],
+    "openalex_id": "https://openalex.org/W7171267764",
+    "doi": null,
+    "title": "RealVDeblur: One-Step Diffusion for Generalizable Real-World Video Deblurring",
+    "publication_date": "2026-07-22",
+    "year": 2026,
+    "type": "preprint",
+    "venue": "arXiv (Cornell University)",
+    "cited_by_count": 0,
+    "authors": [
+      "Renbiao Jin",
+      "Mingxin Yang",
+      "Yutian Chen",
+      "Junhao Zhuang",
+      "Xin Cai",
+      "Mengmeng Yu",
+      "Linning Xu",
+      "W K Yu",
+      "Danping Zou",
+      "Shi Guo",
+      "T Xue"
+    ],
+    "institutions": [],
+    "abstract": "Real-world video deblurring remains challenging due to diverse motion patterns, complex degradations, and the scarcity of realistic training data, yet robust restoration is critical for downstream pipelines such as mobile imaging and 3D reconstruction. This work presents \\textbf{RealVDeblur}, an efficient generative framework designed to improve in-the-wild robustness under diverse real capture conditions. First, a large-scale, physically grounded blur synthesis pipeline is constructed from scene-level 3D Gaussian Splatting (3DGS) assets and high-frame-rate videos, providing realistic training data covering both camera-induced and object-motion blur. Second, a video diffusion prior is leveraged for restoration; to better accommodate frame-dependent blur variations, temporal compression in the VAE is disabled and a frame-wise encoding scheme is adopted. For practical deployment on long videos, multi-step diffusion sampling is distilled into an efficient one-step generator, and a training-free Temporal Window Mask stabilizes inference beyond the training horizon with constant memory usage. Extensive experiments on diverse real-world benchmarks demonstrate strong perceptual quality, semantic fidelity, and temporal consistency on unseen videos, as well as improved robustness in downstream 3D reconstruction under severe motion blur. Project page: https://rbjin.github.io/RealVDeblur",
+    "landing_page_url": "https://arxiv.org/abs/2607.20628",
+    "pdf_url": "https://arxiv.org/pdf/2607.20628",
+    "is_oa": true,
+    "screen_score": 13,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "face detail restoration diffusion transformer"
+    ],
+    "openalex_id": "https://openalex.org/W7170111184",
+    "doi": null,
+    "title": "Pixel-Space Diffusion Transformers",
+    "publication_date": "2026-07-20",
+    "year": 2026,
+    "type": "preprint",
+    "venue": "arXiv (Cornell University)",
+    "cited_by_count": 0,
+    "authors": [
+      "Renye Yan",
+      "Jikang Cheng",
+      "You Wu",
+      "Ling Liang",
+      "W. Peng",
+      "Athanasios V. Vasilakos",
+      "Qingyu Zhao",
+      "Yu Zhang",
+      "Yimao Cai",
+      "Kilian M. Pohl",
+      "Guoying Zhao"
+    ],
+    "institutions": [],
+    "abstract": "Latent diffusion models (LDMs) enable efficient high-resolution image synthesis by denoising in a VAE-compressed latent space. However, fixed visual tokenizers can discard fine textures and structural details, while separate representation and diffusion training creates a mismatch between reconstruction and generation objectives. These limitations have renewed interest in pixel-space diffusion, which models raw pixels directly, removes the VAE bottleneck, and supports end-to-end optimization. This formulation better matches the demands of high-fidelity generation but introduces challenges in high-dimensional modeling, including noise scheduling, loss weighting, token efficiency, and scalable architecture design. Pixel-space modeling also offers a promising basis for unified multimodal systems: raw pixels, text, and task conditions can be represented in a shared token space and jointly processed by a single Transformer, narrowing the gap between visual understanding and generation. This paper reviews Pixel-Space Diffusion Transformers (pDiTs) from the perspectives of model architecture, continuous generative mechanisms, and unified multimodal modeling. We summarize representative methods, identify key technical challenges, and discuss future directions toward high-fidelity, end-to-end vision foundation models that integrate generation and understanding.",
+    "landing_page_url": "https://arxiv.org/abs/2607.17585",
+    "pdf_url": "https://arxiv.org/pdf/2607.17585",
+    "is_oa": true,
+    "screen_score": 13,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "face detail restoration diffusion transformer"
+    ],
+    "openalex_id": "https://openalex.org/W7170111134",
+    "doi": null,
+    "title": "Coarse-to-fine Framework for Generative MEF via Implicit Neural Representation",
+    "publication_date": "2026-07-20",
+    "year": 2026,
+    "type": "preprint",
+    "venue": "arXiv (Cornell University)",
+    "cited_by_count": 0,
+    "authors": [
+      "Soo-Chul Han",
+      "Jinho Kim",
+      "Jinwoo Kim",
+      "Dongyoung Kim",
+      "Seon Joo Kim"
+    ],
+    "institutions": [],
+    "abstract": "Multi-exposure fusion (MEF) expands the luminance range beyond what a single exposure can capture. Combining images taken at different exposure levels requires handling geometric differences while naturally merging their complementary brightness information. It often demands generative completion where details are missing. Diffusion-based generative methods address these challenges, however, they are computationally expensive and struggle to preserve fine structures in saturated regions. We propose LIIFusion, a coarse-to-fine framework that balances fusion quality and efficiency in generative MEF. The coarse stage performs low resolution generative fusion, enhanced by an adaptive exposure correction that recovers structure lost in saturated over-exposed areas. The fine stage adapts a local implicit image function into a multi-exposure fusion function: conditioned on the HR OE/UE sources and the coarse output, it queries arbitrary target coordinates and fuses source evidence regardless of the HR input resolution. LIIFusion achieves up to 3.5$\\times$ speed-up over existing generative methods while maintaining or improving structural fidelity and perceptual quality. We believe this framework provides an effective pathway toward making generative MEF more practical in real-world applications.",
+    "landing_page_url": "https://arxiv.org/abs/2607.17611",
+    "pdf_url": "https://arxiv.org/pdf/2607.17611",
+    "is_oa": true,
+    "screen_score": 13,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "face detail restoration diffusion transformer"
+    ],
+    "openalex_id": "https://openalex.org/W7169923427",
+    "doi": null,
+    "title": "Efficient Difficulty-Aware Dynamic Routing for Diffusion-Based Real-World Image Super-Resolution",
+    "publication_date": "2026-07-17",
+    "year": 2026,
+    "type": "preprint",
+    "venue": "arXiv (Cornell University)",
+    "cited_by_count": 0,
+    "authors": [
+      "X . Wu",
+      "Kang Zhao",
+      "Kafeng Wang",
+      "Jianfei Chen",
+      "Jingwei Xin",
+      "Nannan Wang",
+      "Gao X"
+    ],
+    "institutions": [],
+    "abstract": "Diffusion-based methods have achieved impressive performance in real-world image super-resolution (Real-ISR) by leveraging large pre-trained stable diffusion (SD) models as powerful generative priors. However, these methods still face two key limitations. First, existing SD-based one-step and multi-step Real-ISR approaches adopt a unified processing paradigm for all input samples, ignoring the varying restoration difficulty across images. Second, the aggressive resolution reduction of the VAE in SD models (e.g., 8x downsampling) leads to irreversible loss of fine-scale details, which cannot be recovered by the subsequent diffusion process. To address these limitations, we propose a Difficulty-aware Dynamic Routing (DDR) strategy that overcomes the rigid, one-size-fits-all processing paradigm. Specifically, we first design a difficulty estimator to predict the restoration cost of each input image, enabling automatic assignment to a network of appropriate capacity. Then, we construct a set of Real-ISR networks with varying model capacities by modulating the spatial downsampling ratio of the VAE in the SD backbone, thereby preserving more high-frequency information for challenging cases while maintaining efficiency for simpler inputs. Extensive experiments have demonstrated the superior efficiency and effectiveness of the proposed model compared to recent state-of-the-art methods.",
+    "landing_page_url": "https://arxiv.org/abs/2607.15711",
+    "pdf_url": "https://arxiv.org/pdf/2607.15711",
+    "is_oa": true,
+    "screen_score": 13,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "face detail restoration diffusion transformer"
+    ],
+    "openalex_id": "https://openalex.org/W7168413329",
+    "doi": "https://doi.org/10.1007/978-981-92-3420-2_27",
+    "title": "TransDiff-SR: Frequency-Aware Lightweight Diffusion Transformer for Real-World Super-Resolution",
+    "publication_date": "2026-07-15",
+    "year": 2026,
+    "type": "conference-paper",
+    "venue": "Lecture notes in computer science",
+    "cited_by_count": 0,
+    "authors": [
+      "Qingqing Lu",
+      "Xuanchen Liu",
+      "Yurong Qian"
+    ],
+    "institutions": [
+      "Xinjiang University"
+    ],
+    "abstract": "",
+    "landing_page_url": "https://doi.org/10.1007/978-981-92-3420-2_27",
+    "pdf_url": null,
+    "is_oa": false,
+    "screen_score": 13,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "face detail restoration diffusion transformer"
+    ],
+    "openalex_id": "https://openalex.org/W7167729021",
+    "doi": "https://doi.org/10.1016/j.eswa.2026.133540",
+    "title": "BabeLLM: A unified taxonomy for NLP-based LLM cybersecurity applications",
+    "publication_date": "2026-07-08",
+    "year": 2026,
+    "type": "article",
+    "venue": "Expert Systems with Applications",
+    "cited_by_count": 0,
+    "authors": [
+      "Pellegrino Casoria",
+      "Simon Pietro Romano"
+    ],
+    "institutions": [
+      "University of Naples Federico II"
+    ],
+    "abstract": "As cybersecurity becomes increasingly complex, Large Language Models (LLMs) are emerging as valuable tools for supporting security professionals in routine tasks. However, existing research remains fragmented: no unified, machine-readable reference exists to compare and consolidate LLM use cases across academia and industry, limiting knowledge sharing and encouraging duplicated efforts. This paper presents BabeLLM, a concept-based taxonomy and OWL ontology grounded in established literature and cybersecurity standards (NIST, ISO/IEC, FIRST, JRC, and IETF). BabeLLM integrates NLP tasks, cybersecurity processes, and their intersection as LLM-based cybersecurity applications. Our analysis of 46 taxonomic efforts shows that none covers all three dimensions, leaving 17 LLM application categories absent from existing taxonomies. BabeLLM also introduces an operational architecture organized around three capabilities: exploration of existing work, design of new use cases, and automated ontology maintenance through LLM-assisted metadata enrichment and classification. The ontology is constructed through an umbrella systematic literature review covering more than 1,400 publications, combined with a concept-based cross-dimensional analysis of NLP and cybersecurity, and refined through iterative expert review. BabeLLM is validated through complementary evaluations: coverage and agreement analyses across existing taxonomies, a real-world Security Operations Center (SOC) deployment demonstrating practical applicability, and an LLM-assisted classification pipeline benchmarked against human-annotated ground truth. The ontology is released as an open-source resource alongside this paper.",
+    "landing_page_url": "https://doi.org/10.1016/j.eswa.2026.133540",
+    "pdf_url": "https://www.sciencedirect.com/science/article/pii/S0957417426024498/pdf",
+    "is_oa": true,
+    "screen_score": 13,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "face hallucination diffusion"
+    ],
+    "openalex_id": "https://openalex.org/W7172172594",
+    "doi": null,
+    "title": "The Geometric Nature and a Free Proxy for Flow-Matching Uncertainty",
+    "publication_date": "2026-07-30",
+    "year": 2026,
+    "type": "preprint",
+    "venue": "arXiv (Cornell University)",
+    "cited_by_count": 0,
+    "authors": [
+      "Ziyang Rao",
+      "Yiren Zhao",
+      "Weiyu Guo",
+      "Ben Fei",
+      "Yandong Guo",
+      "Hui Xiong"
+    ],
+    "institutions": [],
+    "abstract": "Flow matching (FM) has become a popular action head paradigm for modern embodied models. However, as a conditional generative model, it does not explicitly expose its inherent uncertainty, producing faulty action chunks even when it misinterprets the scene or encounters out-of-distribution (OOD) inputs. Therefore, determining when an FM-generated action can be trusted is essential for safe deployment, yet existing uncertainty estimation methods on real-time control suffer from several issues: extra training budget, high computational overhead, and low generalization ability. In this work, we provide a geometric interpretation of FM uncertainty in the velocity field, showing that uncertainty manifests as deviation from an ideal affine-isotropic contraction field. Building on this observation, we introduce denoising acceleration ($\\mathrm{accel}$), a highly-generalizable and cost-free uncertainty proxy that measures the bending of the denoising trajectory from a single forward pass, without additional model evaluations, training, or resampling. We theoretically and empirically demonstrate that $\\mathrm{accel}$ is a faithful proxy for FM uncertainty and further test its utility in online failure detection. Results show that $\\mathrm{accel}$ identifies failing rollouts well before termination, matching or even outperforming costly resampling- and training-based baselines across settings under realistic deployment budget. Code and demos available at: https://github.com/rrrrrrzy/fm-geometry.",
+    "landing_page_url": "https://arxiv.org/abs/2607.27933",
+    "pdf_url": "https://arxiv.org/pdf/2607.27933",
+    "is_oa": true,
+    "screen_score": 12,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "face hallucination diffusion"
+    ],
+    "openalex_id": "https://openalex.org/W7171535071",
+    "doi": "https://doi.org/10.3389/fradi.2026.1875905",
+    "title": "Swin-Qwen3: a three-stage vision–language framework for automated radiology report generation with multi-agent verification",
+    "publication_date": "2026-07-28",
+    "year": 2026,
+    "type": "article",
+    "venue": "Frontiers in Radiology",
+    "cited_by_count": 0,
+    "authors": [
+      "Hamida Abdaoui",
+      "Sabri Barbaria",
+      "Ahmed Al Kuwaiti",
+      "Noureddine Raouafi",
+      "R. Ben Salah",
+      "Hanene Boussi Rahmouni"
+    ],
+    "institutions": [
+      "Imam Abdulrahman Bin Faisal University",
+      "Medical Technologies (Czechia)",
+      "Tunis El Manar University",
+      "University of the West of England"
+    ],
+    "abstract": "Background Automated chest x-ray reporting could substantially reduce the burden on radiology services worldwide; however, the implementation of current vision–language models (VLMs) in clinical workflows remains limited by factual errors, hallucinations, and inadequate clinical reliability. Bridging this implementation gap requires frameworks that are not only technically sound but also designed for safe integration into real-world healthcare settings. Objective This study aimed to improve the clinical accuracy and factual consistency of radiology report generation by introducing an agent-inspired, three-stage reasoning framework and evaluating its feasibility as research prototype for potential implementation in resource-constrained and high-throughput clinical environments. Methods We propose the Swin-Qwen3 vision–language architecture, which integrates a Swin Transformer visual encoder with a Q-Former-style query-driven cross-attention module aligned with a large language model (Qwen3-0.6B). A three-stage generation strategy—comprising initial report drafting, clinical verification, and structured refinement—was guided by role-specific prompts to simulate distinct clinical reasoning behaviours. Parameter-efficient fine-tuning via low-rank adaptation (LoRA) enabled training within standard GPU constraints. The framework was evaluated on the full IU x-Ray test set (321 Samples) using lexical, semantic, clinical, and factuality metrics and compared with one- and two-stage ablations. Computational feasibility and inference overhead were assessed for offline or batch processing contexts. Results The three-stage framework showed modest but consistent improvements over ablation baselines. CheXpert-F1 reached 0.7038 (compared to 0.7154 for one-stage and 0.7123 for two-stage), Clinical-F1 reached 0.5401 (compared to 0.5478 for one-stage and 0.5449 for two-stage), and RadGraph-F1 scored 0.5467 (compared to 0.5478 for one-stage and 0.5445 for two-stage). The factuality score reached 0.843 (compared to 0.845 for one-stage and 0.845 for two-stage), while the hallucination rate remained at 0.6116 (compared to 0.6109 for one-stage and 0.6109 for two-stage). Clinical recall decreased from 0.8361 (one-stage) and 0.8337 (two-stage) to 0.8044 (three-stage), reflecting a trade-off between sensitivity and precision. However, the clinical verifier demonstrated substantial effectiveness, correcting 85.6% of identified hallucinations. Lexical quality improved: BLEU-4 was 0.0628 (+10.9% vs. one-stage; +13.1% vs. two-stage), ROUGE-2-F was 0.0957 (+10.2% vs. one-stage; +13.1% vs. two-stage), and METEOR was 0.3728 (+4.5% vs. one-stage; +6.3% vs. two-stage). Improvements in METEOR ( p &amp;lt; 0.001) and ROUGE-2-F ( p &amp;lt; 0.05) were statistically significant. A 14.8 × inference overhead was identified, indicating suitability for offline reporting contexts. Conclusions The Swin-Qwen3 three-stage framework demonstrates that explicit clinical verification and iterative refinement can modestly enhance the clinical reliability of VLMs for automated radiology reporting. The parameter-efficient design is scalable across diverse clinical settings, including resource-limited environments, and supports a practical deployment pathway aligned with SDGs 3 (Good Health and Well-being), 9 (Industry, Innovation and Infrastructure), and 17 (Partnerships for the Goals). However, the residual hallucination rate of 61.2% indicates that the current system is a promising research prototype rather than a clinically deployable tool. Future work should prioritize multi-institutional validation on larger datasets (e.g., MIMIC-CXR) with radiologist expert review, regulatory evaluation, and prospective clinical integration studies.",
+    "landing_page_url": "https://doi.org/10.3389/fradi.2026.1875905",
+    "pdf_url": "https://www.frontiersin.org/journals/radiology/articles/10.3389/fradi.2026.1875905/pdf",
+    "is_oa": true,
+    "screen_score": 12,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "face hallucination diffusion"
+    ],
+    "openalex_id": "https://openalex.org/W4416452040",
+    "doi": "https://doi.org/10.1145/3831677",
+    "title": "Causal-Invariant Cross-Domain Out-of-Distribution Recommendation",
+    "publication_date": "2026-07-25",
+    "year": 2026,
+    "type": "article",
+    "venue": "ACM Transactions on Information Systems",
+    "cited_by_count": 0,
+    "authors": [
+      "Jiajie Zhu",
+      "Yan Wang",
+      "Feng Zhu",
+      "Pengfei Ding",
+      "Hongyang Liu",
+      "Zhu Sun"
+    ],
+    "institutions": [
+      "Arup Group (United States)",
+      "Macquarie University",
+      "Singapore University of Technology and Design"
+    ],
+    "abstract": "Cross-Domain Recommendation (CDR) aims to leverage knowledge from a relatively data-richer source domain to address the data sparsity problem in a relatively data-sparser target domain. While CDR methods need to address the distribution shifts between different domains, i.e., cross-domain distribution shifts (CDDS), they typically assume independent and identical distribution (IID) between training and testing data within the target domain. However, this IID assumption rarely holds in real-world scenarios due to single-domain distribution shift (SDDS). The above two co-existing distribution shifts lead to out-of-distribution (OOD) environments that hinder effective knowledge transfer and generalization, ultimately degrading recommendation performance in CDR. To address these co-existing distribution shifts, we propose a novel C ausal- I nvariant C ross- D omain O ut-of-distribution R ecommendation framework, called CICDOR. In CICDOR, we first learn dual-level causal structures to infer domain-specific and domain-shared causal-invariant user preferences for tackling both CDDS and SDDS under OOD environments in CDR. Then, we propose an LLM-guided confounder discovery module that seamlessly integrates LLMs with a conventional causal discovery method to extract observed confounders for effective deconfounding, thereby enabling accurate causal-invariant preference inference. Extensive experiments on two real-world datasets demonstrate the superior recommendation accuracy of CICDOR over state-of-the-art methods across various OOD scenarios.",
+    "landing_page_url": "https://doi.org/10.1145/3831677",
+    "pdf_url": "https://arxiv.org/pdf/2505.16532",
+    "is_oa": true,
+    "screen_score": 12,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "face hallucination diffusion"
+    ],
+    "openalex_id": "https://openalex.org/W7171268498",
+    "doi": null,
+    "title": "Scientific exploration, collaboration and labor division in the large language model era",
+    "publication_date": "2026-07-23",
+    "year": 2026,
+    "type": "preprint",
+    "venue": "arXiv (Cornell University)",
+    "cited_by_count": 0,
+    "authors": [
+      "Xiang Zheng",
+      "Xi Hong",
+      "Jialin Liu",
+      "Chaoqun Ni"
+    ],
+    "institutions": [],
+    "abstract": "Large language models (LLMs) have rapidly and significantly entered scientific workflows, but it remains unclear how their diffusion is associated with changes in scientists' strategies in research directions and team building. We link PubMed Central full text with OpenAlex publication and collaboration histories for 775,323 scientists and analyze CRediT contribution statements from 137,120 multi-author papers. After 2022, scientists increasingly published across more intellectually distant fields and entered fields in which they had not previously worked. These increases in interdisciplinarity and exploration were especially pronounced among established scientists and scientists from non-English-speaking low- and middle-income countries. Authors with stronger AI-writing signals were already more interdisciplinary and exploratory before the widespread adoption of LLMs, and the gap widened further after 2022 compared with authors with weaker AI-writing signals. Scientists' collaboration networks also became more interdisciplinary after 2022. Yet, among authors with stronger AI-writing signals, research interdisciplinarity was less closely tied to the disciplinary diversity of their collaborators. The division of labor within research teams also became more differentiated. Contributors on papers published after 2022 reported narrower role sets on average, coauthors shared fewer roles in common, and their role profiles became less rigid and more fluid. Software and validation roles increased, while conceptual and management roles decreased. These patterns suggest that team members are taking on more distinct responsibilities and may rely less on one another to perform research tasks. Overall, this study indicates that the LLM era coincides with a broader reorganization of scientific exploration, collaboration, and the division of labor.",
+    "landing_page_url": "https://arxiv.org/abs/2607.20923",
+    "pdf_url": "https://arxiv.org/pdf/2607.20923",
+    "is_oa": true,
+    "screen_score": 12,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "portrait image restoration"
+    ],
+    "openalex_id": "https://openalex.org/W7169794094",
+    "doi": "https://doi.org/10.54097/6mqzwy06",
+    "title": "A Data-Driven Closed-Loop Parameter Adaptive Framework for Automated Visual Standardization Systems",
+    "publication_date": "2026-07-20",
+    "year": 2026,
+    "type": "article",
+    "venue": "Journal of Computing and Electronic Information Management",
+    "cited_by_count": 0,
+    "authors": [
+      "Guozhi Hu",
+      "Robiatul A'dawiah Jamaluddin"
+    ],
+    "institutions": [
+      "Kuala Lumpur Metropolitan University College",
+      "Kuala Lumpur Sports Medicine Centre",
+      "University of Kuala Lumpur"
+    ],
+    "abstract": "Automated visual standardization — the conversion of arbitrary user-provided portraits into images that satisfy strict format specifications — is a key component of high-reliability identity-management systems. Conventional pipelines operate as feedforward open-loop systems: they map facial landmarks to a fixed scaling ratio and synthesize the output in a single pass, implicitly assuming a linear relationship between facial scale and body anatomy. Under high-dimensional stochastic geometric variation (narrow or wide shoulders, long hair, atypical clothing), this assumption breaks down and produces shoulder truncation or bottom-edge gaps that violate format compliance. This paper reformulates visual standardization as a feedback-controlled parameter-optimization process. Our framework cascades perception-aware color normalization, BiRefNet-based foreground segmentation with distance-transform edge purification, and a closed-loop geometric adaptation stage in which an edge-integrity sensor measures posterior canvas coverage and a controller iteratively refines the affine scale parameter until convergence. On 120 real-world samples spanning 12 challenging categories, the closed-loop framework raises the bottom-edge touch rate from 99.17% to 100% and bottom-row foreground coverage from 98.73% to 99.99%, while reducing the boundary contamination ratio from 67.5% to 53.8%. Ablation studies confirm that the geometric feedback loop is the sole factor eliminating bottom-edge gaps and that edge purification independently accounts for a 15.9-percentage-point reduction in boundary contamination. The results demonstrate that posterior feedback converts residual geometric uncertainty into a convergent control problem, enabling deterministic compliance under strict business constraints.",
+    "landing_page_url": "https://doi.org/10.54097/6mqzwy06",
+    "pdf_url": "https://jceim.org/index.php/ojs/article/download/227/223",
+    "is_oa": true,
+    "screen_score": 12,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "portrait image restoration"
+    ],
+    "openalex_id": "https://openalex.org/W7171182390",
+    "doi": "https://doi.org/10.65655/ts42dv16",
+    "title": "When the Church Places Scripture on Trial",
+    "publication_date": "2026-07-19",
+    "year": 2026,
+    "type": "book-chapter",
+    "venue": null,
+    "cited_by_count": 0,
+    "authors": [
+      "Sixbert Sangwa",
+      "Placide Mutabazi"
+    ],
+    "institutions": [
+      "Culver Stockton College"
+    ],
+    "abstract": "This chapter examines the crisis that arises when the church retains the Bible in its vocabulary, liturgy, institutions, and preaching while transferring final interpretive authority from God to the reader, the academy, personal experience, ideological identity, therapeutic preference, or contemporary moral approval. Building upon the preceding chapters' analysis of autonomous authority, contested truth, scientistic naturalism, the sovereign self, reconstructed theology, and counterfeit Christology, it argues that another Jesus and another gospel cannot gain durable ecclesial legitimacy while Scripture remains the final Judge. The text itself must therefore be subordinated, selectively inspired, demythologised, culturally relativised, or placed beneath a moral court established by the age. Through sustained exposition of Psalm 119:89-112, Matthew 5:17-20, 2 Timothy 3:14-17, 2 Peter 1:16-21, Jude 3-4, and related passages, the chapter defends revelation, verbal and plenary inspiration, complete truthfulness, authority, sufficiency, clarity, necessity, canonical unity, and finality. It distinguishes responsible historical, linguistic, literary, textual, archaeological, and contextual study from criticism governed by antisupernatural assumptions. It traces the development of theological liberalism from Enlightenment rationalism through Schleiermacher, Strauss, Wellhausen, Harnack, Bultmann, reader-response theories, postmodern hermeneutics, and contemporary progressive Christianity. The strongest objections concerning difficult texts, interpretive situatedness, ecclesial misuse, marginalised voices, canon formation, textual variants, moral development, and modern knowledge are represented fairly before being answered biblically, historically, logically, and pastorally. Particular attention is given to African Christianity, where imported liberalism, cultural traditionalism, prosperity hermeneutics, charismatic authoritarianism, donor influence, anti-intellectualism, and syncretism may all compete for authority over the Word. The chapter also rebukes conservative proof-texting, abusive appeals to submission, denominational traditionalism, and the use of Scripture to shield corrupt leadership. It concludes with a constructive programme for recovering the church under the Word and an urgent call to repentance, holiness, intellectual honesty, persevering obedience, and readiness for Christ's return.",
+    "landing_page_url": "https://doi.org/10.65655/ts42dv16",
+    "pdf_url": "https://books.openchristian.education/index.php/ocp/catalog/download/5/20/49",
+    "is_oa": true,
+    "screen_score": 12,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "portrait image restoration"
+    ],
+    "openalex_id": "https://openalex.org/W7170049511",
+    "doi": "https://doi.org/10.63056/jllsa.2.7.2026.201",
+    "title": "Bilingualism and Issues of Identity: A Sociolinguistic Study with Special Reference to Pakistan",
+    "publication_date": "2026-07-15",
+    "year": 2026,
+    "type": "article",
+    "venue": "Journal of Language Literature & Social Affairs",
+    "cited_by_count": 0,
+    "authors": [
+      "Samia Tahir",
+      "Neelma Riaz",
+      "Irram Waheed"
+    ],
+    "institutions": [
+      "National University of Sciences and Technology"
+    ],
+    "abstract": "This article examines the intricate relationship between bilingualism and identity construction, with a particular focus on the Pakistani sociolinguistic context. Drawing on an extensive review of existing literature and an analytical case study of the Hindi film English Vinglish (2012), the article argues that bilingualism, far from being a purely linguistic phenomenon, is deeply embedded in the social, political, and psychological fabric of a speaker's identity. In Pakistan's tri-lingual structure, where speakers navigate between vernacular regional languages, Urdu as the national language, and English as the official language of power, identity construction becomes a site of contest, negotiation, and crisis. The article demonstrates how the hierarchical valuation of languages engenders issues of prestige, shame, and loyalty that determine not only linguistic choices but also social mobility and self-perception. The case study of English Vinglish, though a Hindi film, illustrates these dynamics in the South Asian context by tracing the protagonist's journey from identity crisis to self-actualization. The article concludes by advocating an acceptance-based framework for bilingual identity that acknowledges the compound, rather than conflicting, nature of bilingual selfhood.",
+    "landing_page_url": "https://doi.org/10.63056/jllsa.2.7.2026.201",
+    "pdf_url": "https://scholarclub.org/index.php/jllsa/article/download/201/292",
+    "is_oa": true,
+    "screen_score": 12,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "portrait super resolution"
+    ],
+    "openalex_id": "https://openalex.org/W7165972538",
+    "doi": null,
+    "title": "TIGER: Taming Identity, Geometry, and Generative Priors for High-Quality Face Video Restoration",
+    "publication_date": "2026-06-23",
+    "year": 2026,
+    "type": "preprint",
+    "venue": "arXiv (Cornell University)",
+    "cited_by_count": 0,
+    "authors": [
+      "Yang Zhou",
+      "Wenxue Li",
+      "P Zhang",
+      "Yifei Chen",
+      "Fang Wang",
+      "Daiguo Zhou"
+    ],
+    "institutions": [],
+    "abstract": "Face Video Restoration (FVR) aims to recover high-fidelity facial videos from degraded input while preserving identity and semantic consistency across frames. Existing methods often struggle to simultaneously address three key challenges: identity shift, viewpoint-entangled guidance, and perceptual realism. To tackle these issues, we propose TIGER, a structured tri-prior fusion framework that Tames Identity, Geometry, and gEnerative pRiors for high-quality FVR. Specifically, an Identity Prior is first established by injecting subject-discriminative embeddings into the latent space, effectively anchoring the subject's identity against severe degradations. Then, to provide temporally consistent structural guidance for dynamic videos, TIGER constructs a Geometry Prior by lifting 2D reference cues into a disentangled 3D parameter space, creating a geometric anchor through cross-source parameter fusion. Moreover, to achieve maximum efficiency without compromising realism, we harness the video generation model's Generative Prior through a one-step rectified flow. We further design a progressive three-stage training optimization strategy that refines structural fidelity, textural reconstruction, and distribution-level realism to ensure robust optimization. We also construct a large-scale FVR dataset to facilitate robust training and standardized evaluation. Extensive experiments demonstrate that TIGER achieves state-of-the-art performance in both identity fidelity and temporal stability, delivering a high-quality, efficient and identity-consistent FVR. Project page: https://yzhoulv.github.io/Tiger/.",
+    "landing_page_url": "https://arxiv.org/abs/2606.24336",
+    "pdf_url": "https://arxiv.org/pdf/2606.24336",
+    "is_oa": true,
+    "screen_score": 12,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "portrait super resolution"
+    ],
+    "openalex_id": "https://openalex.org/W4417207303",
+    "doi": "https://doi.org/10.3758/s13421-026-01908-z",
+    "title": "Identity in the spotlight: Matching faces without overlapping features",
+    "publication_date": "2026-06-22",
+    "year": 2026,
+    "type": "article",
+    "venue": "Memory & Cognition",
+    "cited_by_count": 0,
+    "authors": [
+      "Rachel A Searston",
+      "Daniel J. Carragher"
+    ],
+    "institutions": [
+      "The University of Adelaide"
+    ],
+    "abstract": "One-to-one face matching is widely used for identity verification yet becomes difficult with unfamiliar faces or when parts of the face are covered. We investigated whether observers could accurately verify identity from different nonoverlapping facial fragments. Each stimulus of our novel face-matching task had the appearance of a single face image as revealed through four circular 'spotlights,' one from each quadrant of the face. Observers judged whether the designated target spotlight (from Image A) depicted the same identity as the three reference spotlights sampled from a different image (all from Image B). Across three experiments, we examined observers' matching performance for familiar and unfamiliar faces under Baseline (Experiment 1), Scrambled (Experiment 2), and Inverted (Experiment 3) spotlight arrangements. Accuracy reliably exceeded chance across all but one condition: familiar inverted faces. A familiar-face advantage emerged under baseline conditions, disappeared when the spatial layout was scrambled, and reversed under inversion-while unfamiliar-face accuracy remained robust to these manipulations. These findings demonstrate that observers can exploit latent identity information without direct feature correspondence to achieve above-chance accuracy in identification and reveal an unexpected dissociation between familiar-face and unfamiliar-face matching when spatial orientation is disrupted in these highly challenging conditions.",
+    "landing_page_url": "https://doi.org/10.3758/s13421-026-01908-z",
+    "pdf_url": "https://link.springer.com/content/pdf/10.3758/s13421-026-01908-z.pdf",
+    "is_oa": true,
+    "screen_score": 12,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "portrait super resolution"
+    ],
+    "openalex_id": "https://openalex.org/W7165424542",
+    "doi": null,
+    "title": "CUPID: Reconstructing UV Texture Maps for Interpretable Person-of-Interest Deepfake Detection",
+    "publication_date": "2026-06-18",
+    "year": 2026,
+    "type": "preprint",
+    "venue": "arXiv (Cornell University)",
+    "cited_by_count": 0,
+    "authors": [
+      "Giovanni Affatato",
+      "Sara Mandelli",
+      "Edoardo Daniele Cannas",
+      "Paolo Bestagini",
+      "Stefano Tubaro"
+    ],
+    "institutions": [],
+    "abstract": "Deepfakes targeting a high-profile individual, known as Person-of-Interest (POI), are a threat to modern democracies and societies. Current POI deepfake detection methods still struggle to combine robustness to post-processing, efficiency and interpretability, key aspects of modern deepfake detectors. In this paper we propose CUPID, a POI video deepfake detector that combines UV texture maps, a facial appearance representation derived from 3D face reconstructions, with the representation learning capabilities of the Masked Autoencoder (MAE). Our method does not require any deepfake videos in its training phase. Moreover, it does not even require including a specific POI in the training set: the combination of UV texture maps extracted from real video frames and the MAE context-guided reconstruction yields a latent space that captures rich and discriminative facial features even for identities unseen during training. In the testing phase, the embeddings extracted from a query video depicting the POI can be matched against pristine reference videos to assess the video authenticity. Furthermore, operating in the UV space naturally provides an additional layer of interpretability. Specifically, we can extract decoded residual maps that highlight which facial regions of a test video deviate most from the identity representation of the corresponding POI. Experiments on four deepfake datasets show that CUPID outperforms the current state of the art on most datasets and achieves the best overall robustness against strong downscaling and compression, while also providing substantially faster inference. Our experimental code will be released at https://github.com/polimi-ispl/CUPID.",
+    "landing_page_url": "https://arxiv.org/abs/2606.20302",
+    "pdf_url": "https://arxiv.org/pdf/2606.20302",
+    "is_oa": true,
+    "screen_score": 12,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "identity preserving face restoration",
+      "personalized face restoration"
+    ],
+    "openalex_id": "https://openalex.org/W7172243841",
+    "doi": "https://doi.org/10.3390/journalmedia7030162",
+    "title": "Digital Transformation in Institutional Communication: A Systematic Review of Transparency, Trust, and Organizational Culture",
+    "publication_date": "2026-08-03",
+    "year": 2026,
+    "type": "review",
+    "venue": "Journalism and Media",
+    "cited_by_count": 0,
+    "authors": [
+      "Rahima Aissani",
+      "Haneen Mohammad Shabaneh",
+      "Haneen Bahij Kanaan",
+      "Ibrahim Ibrahim Elshenawy"
+    ],
+    "institutions": [
+      "Al Ain University"
+    ],
+    "abstract": "This study aims to analyze digital transformation in institutions as a structural shift that reshapes the logic of communication, patterns of power, and mechanisms of trust building within organizations. This study is grounded in the assumption that digitalization is no longer limited to the adoption of technical tools but has evolved into an organizational and governance framework driven by algorithms and recommendation platforms, with direct implications for communication practices, levels of transparency, and organizational culture. This study adopts a descriptive–analytical approach based on a critical review of peer-reviewed academic research published from 2019 until the beginning of 2026. To ensure methodological rigor and transparency, the review process follows the PRISMA guidelines. Relevant studies were identified through comprehensive searches of major academic databases (Scopus, Web of Science, and Google Scholar), and the final sample contained all scholarly publications that address digital transformation in institutional communication within the specified timeframe. The number of studies that met the conditions amounted to 92 studies and reports. The sample draws on several theoretical frameworks, including technological determinism, communication visibility, diffusion of innovations, and uses and gratifications, thereby enabling a comprehensive examination of the relationship between digital transformation and institutional communication from a closed hierarchical model into an interactive networked system increasingly shaped by algorithmic logics and governance mechanisms that redistribute visibility and influence within institutions. The results suggest that the success of digital transformation is more closely associated with organizational culture and transformational digital leadership than with technical infrastructure alone. Moreover, audiences have become active co-producers of meaning and trust through interaction and user-generated content. In conclusion, digital transparency and organizational communication visibility constitute key foundations of institutional trust, highlighting the need for clear frameworks of digital transformation, particularly in the Arab context.",
+    "landing_page_url": "https://doi.org/10.3390/journalmedia7030162",
+    "pdf_url": "https://www.mdpi.com/2673-5172/7/3/162/pdf?version=1785720638",
+    "is_oa": true,
+    "screen_score": 12,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "video face restoration"
+    ],
+    "openalex_id": "https://openalex.org/W7171824699",
+    "doi": "https://doi.org/10.1038/s41598-026-63813-4",
+    "title": "An improved YOLOv8 model for container damage detection in complex scenarios",
+    "publication_date": "2026-07-30",
+    "year": 2026,
+    "type": "article",
+    "venue": "Scientific Reports",
+    "cited_by_count": 0,
+    "authors": [
+      "Yuxuan Zhang",
+      "Zhenghao Tang",
+      "Yinghan Yang",
+      "Aiping Zhou"
+    ],
+    "institutions": [
+      "Southeast University",
+      "Taizhou University"
+    ],
+    "abstract": "Container damage detection is a critical process for ensuring cargo safety, improving logistics efficiency, and reducing repair costs. To address the issues of susceptibility to environmental interference and high false detection rates encountered when applying the YOLOv8 model to complex scenarios, we propose an improved YOLOv8 model named EB-YOLOv8 based on its original architecture. This model replaces the original backbone network with EfficientViT, a memory-efficient vision transformer with cascaded group attention, to enhance feature extraction capabilities. It introduces the Bidirectional Feature Pyramid Network (BiFPN) to improve multi-scale feature fusion via bidirectional connections and adaptive weighted fusion mechanisms. Additionally, it employs the Enhanced Intersection over Union (EIoU) and Varifocal Loss to optimize bounding box regression and classification confidence prediction, respectively. We conducted extensive ablation experiments and comparative experiments using a real-world port dataset. Experimental results demonstrate that EB-YOLOv8 achieves substantially better detection accuracy and positioning performance for various container damage types under complex backgrounds compared to the original YOLOv8. It obtains an mAP50 of 87.99%, which is 8.08% points higher than that of YOLOv8s, and reaches an FPS of 41.16, which meets the requirements of real-time detection.",
+    "landing_page_url": "https://doi.org/10.1038/s41598-026-63813-4",
+    "pdf_url": "https://www.nature.com/articles/s41598-026-63813-4_reference.pdf",
+    "is_oa": true,
+    "screen_score": 12,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "face detail restoration diffusion transformer"
+    ],
+    "openalex_id": "https://openalex.org/W7171902140",
+    "doi": null,
+    "title": "Optimization of Collaborative Semantic Communication Network Performance with Channel and Content Preference Feedback",
+    "publication_date": "2026-07-27",
+    "year": 2026,
+    "type": "preprint",
+    "venue": "arXiv (Cornell University)",
+    "cited_by_count": 0,
+    "authors": [
+      "Defeng Zhou",
+      "Dongyu Wei",
+      "Siyao Li",
+      "Mingzhe Chen"
+    ],
+    "institutions": [],
+    "abstract": "Existing semantic communication frameworks treat and transmit all image regions with equal importance, which is not practical for real-world applications which may prioritize different content in an image. To address this issue, we propose a novel semantic communication framework that enables a transmitter to use limited channel and content feedback to prioritize the transmission of important image regions. In particular, in the proposed framework, a base station (BS) divides each image into sub-images, extracts their semantic information, and transmits them to users according to their preferences. The users will reconstruct the image based on the received sub-images and cooperatively decide when to send channel state information (CSI) or content-preference feedback under dynamic channels and limited resources. We formulate an optimization problem to minimize the semantic-weighted mean square error between the original image and the regenerated image by optimizing sub-channel allocation, users' power allocation, and feedback selection. To address this problem, a value decomposition actor- critic (AC) with dynamic neighborhood construction (VDAC-DNC) scheme is proposed. The proposed method combines AC with value decomposition networks to allow the BS to approximate discrete actions by a continuous action distribution, thus reducing the output dimension and improving training efficiency. The introduced DNC method further improves training efficiency by constructing a small discrete neighboring action space to search for an action with the maximum Q value, thus avoiding traversing the large discrete action space. Simulation results show that the proposed VDAC-DNC scheme can improve the performance by up to 5.04% and 18.55% compared to the standard multi-agent QAC method and the proposed method without feedback transmission.",
+    "landing_page_url": "https://arxiv.org/abs/2607.25011",
+    "pdf_url": "https://arxiv.org/pdf/2607.25011",
+    "is_oa": true,
+    "screen_score": 12,
+    "screen_reasons": []
+  },
+  {
+    "query": [
+      "face detail restoration diffusion transformer"
+    ],
+    "openalex_id": "https://openalex.org/W7167748318",
+    "doi": null,
+    "title": "Perceptual Flow Matching for Few-Step Generative Modeling",
+    "publication_date": "2026-07-03",
+    "year": 2026,
+    "type": "preprint",
+    "venue": "arXiv (Cornell University)",
+    "cited_by_count": 0,
+    "authors": [
+      "Chuyang Zhao",
+      "Y Song",
+      "Hongfa Wang",
+      "Jianlong Yuan",
+      "Yuan Zhang",
+      "Siming Fu",
+      "Zhineng Chen",
+      "Huilin Deng",
+      "H Huang",
+      "Nan Duan"
+    ],
+    "institutions": [],
+    "abstract": "We propose Perceptual Flow Matching (PFM), a simple yet effective framework for few-step generation in flow-matching models. Rather than performing velocity regression in the conventional VAE latent space, PFM supervises flow matching in a perceptual feature space using pretrained perceptual models. This simple change substantially improves the few-step generation capability of flow-matching models, reducing the number of sampling steps from 35-50 to 4-8 while preserving generation quality. Unlike existing acceleration and distillation approaches, PFM requires neither teacher models nor auxiliary score networks and can be integrated into standard flow-matching training pipelines with minimal modifications. Extensive experiments on image generation, video generation, and image editing tasks demonstrate that PFM consistently produces high-quality results while producing fewer artifacts than existing distillation-based methods. We further show that perceptual supervision shifts the regression minimizer from mean-seeking to mode-seeking, biasing predictions toward on-manifold modes that remain accurate under coarse few-step integration. Our results reveal that standard flow-matching training can naturally yield high-quality few-step generators when supervised in an appropriate representation space. We hope this insight inspires future research into representation-aware objectives for efficient generative modeling.",
+    "landing_page_url": "https://arxiv.org/abs/2607.03524",
+    "pdf_url": "https://arxiv.org/pdf/2607.03524",
+    "is_oa": true,
+    "screen_score": 12,
+    "screen_reasons": []
+  }
+]

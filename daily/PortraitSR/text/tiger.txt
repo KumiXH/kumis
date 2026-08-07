@@ -1,0 +1,816 @@
+=== PAGE 1 ===
+TIGER: Taming Identity, Geometry, and Generative
+Priors for High-Quality Face Video Restoration
+Yang Zhou1∗, Wenxue Li1,2∗, Peng Zhang1†, Yifei Chen1, Fei Wang1, Daiguo Zhou1
+1 MiLM Plus, Xiaomi Inc.
+2 The Hong Kong University of Science and Technology (Guangzhou)
+Abstract
+Face Video Restoration (FVR) aims to recover high-fidelity facial videos from de-
+graded input while preserving identity and semantic consistency across frames.
+Existing methods often struggle to simultaneously address three key challenges:
+identity shift, viewpoint-entangled guidance, and perceptual realism. To tackle
+these issues, we propose TIGER, a structured tri-prior fusion framework that
+TamesIdentity,Geometry, and gEnerative pRiors for high-quality FVR. Specif-
+ically, anIdentity Prioris first established by injecting subject-discriminative
+embeddings into the latent space, effectively anchoring the subject’s identity
+against severe degradations. Then, to provide temporally consistent structural
+guidance for dynamic videos, TIGER constructs aGeometry Priorby lifting 2D
+reference cues into a disentangled 3D parameter space, creating a geometric
+anchor through cross-source parameter fusion. Moreover, to achieve maximum
+efficiency without compromising realism, we harness the video generation
+model’sGenerative Priorthrough a one-step rectified flow. We further design a
+progressive three-stage training optimazition strategy that refines structural
+fidelity, textural reconstruction, and distribution-level realism to ensure robust
+optimization. We also construct a large-scale FVR dataset to facilitate robust
+training and standardized evaluation. Extensive experiments demonstrate that
+TIGER achieves state-of-the-art performance in both identity fidelity and tem-
+poral stability, delivering a high-quality, efficient and identity-consistent FVR.
+Project page:https://yzhoulv.github.io/Tiger/.
+1 Introduction
+Recent advances in video restoration have demonstrated remarkable progress in reconstruct-
+ing high-fidelity content from severely degraded inputs [1–3]. Among these tasks, Face Video
+Restoration (FVR) is particularly challenging due to its structural and semantic constraints. Unlike
+generic video restoration, FVR must simultaneously recover fine-grained facial details, preserve
+the subject’s identity-defining characteristics, and maintain temporal coherence across dynamic
+expressions and pose variations [4, 5]. The difficulty is further amplified when degradations are
+severe, as the available observations become insufficient to reliably preserve identity.
+1∗Equal contribution.
+2†Corresponding author.
+arXiv:2606.24336v2  [cs.CV]  30 Jun 2026
+
+=== PAGE 2 ===
+High-Quality Video Face Restoration
+TIGER(Ours)
+BFVR DOVE
+KEEP PGTFormer
+SVFR
+Low Quality Frame
+Reference Image
+Figure1Qualitative and quantitative comparisons with state-of-the-art video restoration methods.
+Left: Visual comparison of restored facial details, particularly eye regions, demonstrating that
+TIGER generates more realistic and perceptually pleasing results.Right: 3D scatter plot showing
+the trade-offs among IDS (identity similarity), LPIPS (perceptual quality), and FVD (temporal
+consistency). TIGERachievessuperiorperformanceinbothvisualqualityandidentitypreservation.
+The advent of powerful generative foundation models [6, 7] has shifted the paradigm from
+mere degradation removal to photorealistic synthesis, significantly boosting perceptual quality
+[8, 9]. However, naively adapting these generative paradigms to FVR reveals three critical
+failures that constitute a formidable trilemma:(1) Identity Drift:Under severe degradations,
+identity-discriminative cues are heavily corrupted. Consequently, strong generative priors tend
+to dominate the reconstruction process, producing visually plausible yet subject-inconsistent
+facial traits.(2) Viewpoint-Entangled Guidance:While reference images can anchor identity, a
+static 2D reference inherently entangles identity with a single pose and expression. When large
+viewpoint or motion variations occur, the model must extrapolate unseen structures from learned
+appearance statistics, reintroducing identity ambiguity and temporal inconsistency.(3) Perceptual
+Quality and Realism:To achieve efficient inference, many one-step acceleration techniques rely
+on distillation or regression-based objectives, which suffer from a regression-to-the-mean effect,
+resulting in softened textures and diminished photorealistic realism. Balancing generative realism
+with computational efficiency therefore remains an open challenge.
+To resolve this trilemma, we proposeTIGER, a structured framework thatTamesIdentity,
+Geometry, and gEnerative pRiors for high-quality FVR. We reformulate FVR as prior-conditioned
+latent transport, where identity cues, geometric structure, and generative knowledge are utilized
+to stabilize identity, promote geometry-consistent temporal dynamics, and preserve perceptual
+richness within a unified framework.
+Specifically, we first establish aIdentity Priorby leveraging ArcFace-based [10] identity embed-
+dings extracted from the reference image. By injecting the subject-discriminative anchors into the
+diffusion backbone, TIGER ensures that the synthesized features remain unequivocally bound to
+the target subject’s unique traits, effectively eliminating identity drift. To bridge the viewpoint-
+entangled guidance gap, we lift 2D reference cues into a 3D parameter space to construct a
+Geometry Prior. By performing cross-source parameter fusion—recombining the static identity of
+the reference with the frame-specific motion of the degraded sequence—we generate a sequence
+of viewpoint-agnostic normal maps. This geometry prior serves as a dense, temporally consistent
+structural scaffold, ensuring that the latent transport process is strictly bounded by 3D-aware
+2
+
+=== PAGE 3 ===
+High-Quality Video Face Restoration
+facial dynamics. Finally, we harness the foundation model’sGenerative Priorby formulating the
+restoration as a one-step rectified flow. Guided by the aforementioned geometry and identity
+priors, TIGER learns a direct velocity field that transports the degraded latent to the high-fidelity
+manifold in a single inference step. To ensure the robust optimization of this synergistic prior in-
+tegration, we design a progressive three-stage training strategy that sequentially refines structural
+fidelity, textural reconstruction, and holistic realism.
+Our main contributions are:
+• We propose TIGER, a FVR framework that effectively resolves the long-standing trilemma
+between identity fidelity, viewpoint-entangled guidance, and perceptual realism through
+the integration of identity, geometry, and generative priors.
+• We introduce a prior-conditioned one-step rectified-flow formulation. Equipped with cross-
+source 3D parameter fusion and hybrid prior injection, it achieves high-fidelity, identity-
+preserving restoration in a single forward pass.
+• We design a progressive three-stage optimization strategy that sequentially enhances struc-
+tural fidelity, fine-grained detail, and distribution-level realism.
+• To facilitate robust training and standardized evaluation, we construct a new large-scale
+FVR dataset comprising 28,491 training samples and establish a comprehensive benchmark.
+Extensive experiments demonstrate that TIGER achieves state-of-the-art performance.
+2 Related Work
+2.1 General Video Enhancement
+Earlyvideosuper-resolution(VSR)andvideorestorationmethodsprimarilyreliedonconvolutional
+networks [11, 12], optical flow–based alignment [13], and later, Transformer-based designs [14].
+To handle real-world degradations, subsequent approaches incorporated pre-cleaning modules
+[3], degradation kernel estimation [15], synthetic degradation pipelines [16, 17], and GAN-based
+objectives [18]. Temporal consistency was further enforced through alignment error minimization
+or motion compensation [19].
+More recently, diffusion models—leveraging strong generative priors—have been adopted for
+image and video restoration [20–23]. In VSR, this paradigm has led to methods employing
+diffusion backbones [24, 25], high-capacity GANs [26], autoregressive generation [27, 28], and
+explicit temporal modeling [29]. To address the computational burden of iterative sampling,
+acceleration techniques such as distillation [30, 31] and efficient stochastic differential equation
+(SDE) solvers [32, 33] have been proposed. Despite these advances, general VSR frameworks
+often lack identity-aware modeling, resulting in identity drift and suboptimal performance in
+portrait-centric scenarios.
+2.2 Face Video Enhancement
+Blind FVR requires simultaneously preserving identity, recovering fine textures, and maintaining
+temporal stability under unknown and severe degradations. However, general VSR models lack
+explicit facial priors and often exhibit identity inconsistency, texture artifacts, and temporal
+flickering. This limitation has motivated a shift toward face-specific designs. Early efforts enhance
+inter-frame correlation through temporal modeling [34], while more recent approaches integrate
+3
+
+=== PAGE 4 ===
+High-Quality Video Face Restoration
+generative priors with facial semantics. For example, some methods learn identity-aware represen-
+tations end-to-end without explicit alignment [35]; others incorporate motion or diffusion priors
+to stabilize dynamic details [36], or leverage structured codebooks to improve the robustness of
+feature representations [37]. Moreover, model performance remains bottlenecked by training
+data quality. Widely used datasets like VoxCeleb [38] and CelebV-HQ [39], though large, contain
+in-the-wild degradations (e.g., motion blur, occlusion, and low illumination) that hinder the
+learning of clean facial distributions. This degraded-to-clean learning gap introduces a distribution
+mismatch that limits the recovery of realistic high-frequency details, highlighting the need for
+higher-fidelity training data.
+2.3 Reference-Guided Face Restoration
+Incorporating identity information from a reference image has emerged as a promising strategy
+to enhance identity fidelity in blind restoration. Early methods transferred identity cues via
+pose alignment or keypoint matching [40, 41], but were sensitive to input quality. Extensions to
+multiple references improved robustness but remained dependent on reliable landmark detection,
+which often fails under severe degradation and introduces temporal jitter in videos [42].
+Alternative approaches construct personalized identity spaces in GAN latent domains using
+numerous subject images [43], achieving high fidelity at the cost of per user optimization and
+poor scalability. In the video domain, reference guided solutions are still limited. Existing attempts
+built on diffusion models [4] often neglect explicit temporal modeling and struggle with data
+scarcity during fine-tuning. In contrast, our method aligns the degraded video with the reference
+via geometric cues, enabling robust identity transfer without requiring explicit correspondence.
+Combined with stochastic conditioning dropout, the framework naturally supports both reference-
+guidedandreference-freeinference,achievingaflexiblebalancebetweenidentityfidelity,temporal
+consistency, and deployment efficiency.
+3 Method
+3.1 Overview
+As illustrated in Fig. 2, we present TIGER, a framework designed to resolve the FVR trilemma by
+synergizingidentity, geometry, andgenerativepriors. GivenadegradedvideoI (1:𝑁)
+deg andareference
+imageI ref, we first extract their facial attributes into a disentangled 3D parameter space. By
+performing cross-source fusion, we combine the static identity fromIref with the dynamic motion
+fromI (1:𝑁)
+deg to render a sequence of geometry-consistent normal mapsI(1:𝑁)
+norm. These geometric
+cues, along with an identity embedding generated by ArcFace [10], form the structured priors for
+our restoration network. We adopt a DiT-based one-step rectified-flow mapper to perform latent
+transport. By leveraging the generative priors of the pretrained foundation model, TIGER directly
+maps the degraded latentz𝑙 to the clean manifold in a single forward pass, ensuring high-fidelity
+results with maximum efficiency.
+3.2 Geometry Prior Construction
+A major hurdle in FVR is that a static reference image provides identity cues that are fundamentally
+entangled with its specific viewpoint and expression. Relying on 2D-based reference guidance
+often fails when the video subject undergoes significant pose variations, as the fixed-viewpoint
+prior cannot provide consistent structural constraints across dynamic frames. To address this,
+we construct a geometry prior in the disentangled 3D parameter space, where identity- and
+4
+
+=== PAGE 5 ===
+High-Quality Video Face Restoration
+VAE
+Decoder
+VAE
+Encoder
+ArcFace
+Attribute
+Extraction
+Stage I
+Attribute
+Extraction
+Ref Image
+Degraded Video
+Normal Maps
+Geometry Prior Construction
+VAE
+Encoder
+C
+GT
+...
+.........
+Face
+Model
+VAE
+Encoder
+VAE
+Encoder
+ChannelConcat
+DiT Blocks×N
+Stage II
+DiT Blocks×N
+GT
+DiT Blocks×N
+Stage III
+VAE
+Encoder
+GT
+Conditioned-
+Input Latent
+MLP
+C
+“repair this video ...”
+Prompt
+UMT5
+ChannelConcat
+Identity-Fused 
+Embedding Identity-Fused  Embedding
+Identity-Fused  Embedding
+Identity-Fused  Embedding
+Figure 2Overview of the proposedTIGERframework, whichTamesIdentity,Geometry, and
+gEnerative pRiors for high-quality FVR. Given a degraded video and a high-quality reference
+image, we estimate 3D facial parameters to construct geometry-aware constraints that fuse the
+reference identity with the degraded video’s pose and camera. The resulting geometry prior,
+together with an identity embedding, conditions a one-step rectified-flow mapper in latent space.
+We adopt a progressive three-stage optimization strategy: (I) geometry-identity conditioned latent
+mapping, (II) decoder-coupled detail refinement, and (III) adversarial distribution alignment.
+motion-related factors can be explicitly factorized, enabling consistent identity preservation under
+dynamic pose variations.
+Following the 3D Morphable Model (3DMM) [44], the 3D face vertices are parameterized as:
+V3𝑑 (𝜶𝑖𝑑 ,𝜶 exp,𝜶 𝑎,𝜶 𝑡𝑟𝑎 )=R(𝜶 𝑎) (V+𝜶 𝑖𝑑A𝑖𝑑 +𝜶 expAexp) +𝜶 𝑡𝑟𝑎 ,(1)
+where V denotes the mean face shape,A𝑖𝑑 andA 𝑒𝑥 𝑝 are the identity and expression bases learned
+from statistical face models. The parameters𝜶𝑖𝑑, 𝜶𝑒𝑥 𝑝, 𝜶𝑎, and𝜶𝑡𝑟𝑎 control identity, expression,
+rotation, and translation, extracted from the pretrained 3DDFA-V3 [45] respectively.
+Decoupled Attribute Extraction.To obtain the coefficients for identity and motion, we employ a
+pretrained 3D face reconstructor (3DDFA-V3 [45]) as a spatial parameter encoderE3𝑑. For the
+high-quality reference imageIref, we extract its static identity representation:𝜶ref
+𝑖𝑑 =E 3𝑑 (Iref).
+Simultaneously, for each degraded frameI(𝑖)
+deg, we extract the time-varying motion parameters:
+{𝜶deg(𝑖)
+exp ,𝜶 deg(𝑖)
+𝑎 ,𝜶 deg(𝑖)
+𝑡𝑟𝑎 }=E 3𝑑 (I(𝑖)
+deg). This step maps raw pixels into a common, disentangled
+parameter space, enabling the subsequent cross-source fusion.
+Cross-source Parameter Fusion.To construct geometry-aware guidance that preserves identity
+and tracks motion dynamics, we explicitly decompose facial geometry estimation into comple-
+mentary identity and motion streams. This design addresses the limited identity guidance of 2D
+references: whileIref provides clean identity traits, it lacks motion; conversely,I(1:𝑁)
+deg contains the
+target motion but suffers from identity ambiguity.
+Specifically, we decompose the 3DMM parameter estimation into two complementary streams:
+5
+
+=== PAGE 6 ===
+High-Quality Video Face Restoration
+• Identity from Reference:We extract identity coefficients 𝜶ref
+𝑖𝑑 from the high-qualityIref.
+These coefficients represent view-invariant facial traits and are kept fixed across all frames
+to ensure rigorous identity preservation.
+• Motion from Degraded Video:For each frame 𝑖∈ { 1, . . . , 𝑁} inI (1:𝑁)
+deg , we estimate the
+dynamic parameters: pose𝜶deg(𝑖)
+𝑎 , expression𝜶deg(𝑖)
+exp , and translation𝜶deg(𝑖)
+𝑡𝑟𝑎 . These capture
+the precise motion dynamics of the input video despite the presence of degradations.
+By fusing the static identity from the reference with the dynamic motion from the degraded video,
+we construct a hybrid 3D geometry for each frame:
+V (𝑖)
+3𝑑 =V 3𝑑
+
+𝜶ref
+𝑖𝑑 ,𝜶 deg(𝑖)
+exp ,𝜶 deg(𝑖)
+𝑎 ,𝜶 deg(𝑖)
+𝑡𝑟𝑎
+
+.(2)
+Finally, we employ a fixed perspective camera following [45] to project the 3D vertices onto the
+2D image plane. We render surface normal maps using the differentiable rendererRnorm, as
+I(𝑖)
+norm =R norm
+V (𝑖)
+3𝑑
+
+,(3)
+These normal maps serve as a view-agnostic geometric prior, providing the restoration network
+with a structurally consistent scaffold that maintains the subject’s identity across diverse poses
+and expressions.
+3.3 Prior-Conditioned One-Step Rectified Flow
+To bridge the gap between degraded inputs and photorealistic reconstructions, we formulate FVR
+as a prior-conditioned latent transport problem. Unlike standard diffusion models that rely on
+stochastic multi-step sampling, we leverage a one-step rectified flow to directly map the degraded
+distribution to the clean data manifold.
+Specifically, given the ground-truth videoI(1:𝑁) and its degraded versionI(1:𝑁)
+deg , we operate in
+the latent space of a pretrained video VAE with encoderE (·)and decoder D (·). The clean and
+degraded sequences are encoded as:
+zℎ =E (I (1:𝑁) ),z 𝑙 =E (I (1:𝑁)
+deg ),(4)
+wherez ℎ ∼𝑝 data represents the latent distribution of natural videos. We define the latent residual
+y = zℎ − z𝑙 as the restoration target. Following the rectified flow [46], we construct a linear
+probability path between the degraded and clean latents:
+z𝑡 =(1−𝑡)z 𝑙 +𝑡z ℎ, 𝑡∈ [0,1].(5)
+The theoretical velocity of this path is constant:v𝑡 = 𝑑z𝑡
+𝑑𝑡 =z ℎ −z 𝑙. The velocity predictorv𝜃 is
+implemented using a Diffusion Transformer (DiT).
+To provide dense geometric and visual constraints frame-by-frame, we encode geometry-aware
+normal mapsI (1:𝑁)
+norm and the reference imageIref into the latent space. These are concatenated
+with the degraded latentz𝑙 along the channel dimension, forming a spatially-aligned input
+z𝑐 =[z 𝑙,E (I (1:𝑁)
+norm ),E (I ref)].(6)
+This ensures that the velocityv𝜃 is strictly bounded by the 3D geometry and reference appearance.
+To further anchor the subject’s identity, we leverage the projected ArcFace [10] embeddingfarc
+6
+
+=== PAGE 7 ===
+High-Quality Video Face Restoration
+extracted fromIref. We fuse the identity embedding with text embeddings to construct the identity-
+fused embeddingfid, which is injected into the DiT blocks via the cross-attention mechanism. This
+design forces the generative process to attend to identity features for eliminating identity drift.
+Instead of relying on unguided velocity estimation, we incorporate the proposed priors to rectify
+the transport direction as:
+ˆzℎ =z 𝑙 +v 𝜃
+z𝑐,f id, 𝑡∗
+,(7)
+where𝑡 ∗ is the fixed rectification time (set to0.4for both training and inference).
+3.4 Progressive Three-Stage Optimization
+To synergize the structured priors and the generative capabilities of the foundation model, we
+adopt a coarse-to-fine optimization strategy that progressively refines identity fidelity, textural
+detail, and holistic realism.
+Stage I: Geometry-Identity Conditioned Latent Mapping.The initial stage focuses on establish-
+ing a robust one-step mapping from the degraded latentz𝑙 to the clean manifoldzℎ. We feed the
+spatially-aligned inputz𝑐 into the DiT backbone, while anchoring the identity via cross-attention
+withf arc. The model is optimized by minimizing the latent-space MSE:
+Llatent =E
+h
+∥ˆzℎ −z ℎ∥2
+2
+i
+.(8)
+The training objective of Stage I is defined asLStage1 =L latent. This stage tames the model to
+reconstruct basic facial structures and identity consistent with the guidance.
+Stage II: Decoder-Coupled Detail Refinement.While Stage I achieves structural restoration,
+the pretrained VAE decoderD may introduce texture softening when processing restored latents.
+To alleviate this, we decodeˆzℎ into framesˆI
+(1:𝑁)
+rec =D ( ˆzℎ) and jointly optimize DiT andD with a
+perceptual loss (LPIPS [47]) in addition to latent and pixel losses:
+LStage2 =𝜆 1Llatent +𝜆 2Lperc +𝜆 3Lpixel.(9)
+Where L 𝑝𝑖𝑥𝑒𝑙 is the MSE loss between the output and the ground truth. This strengthens texture
+and edge fidelity while preserving identity and pose accuracy.
+Stage III: Adversarial Distribution Alignment.To bridge the perceptual gap, we employ
+adversarial training with a curated face-video dataset to better fit the distribution of real portrait
+videos. A spatiotemporal discriminatorD𝜙 is employed to supervise the realism and temporal
+coherence. The overall objective is:
+LStage3 =𝜆 1Llatent +𝜆 2Lperc +𝜆 3Lpixel +𝜆 4 Ladv.(10)
+This improves global coherence and perceptual quality while maintaining identity faithfulness
+and temporal stability.
+To improve robustness, we apply conditional dropout tozc during training: with a certain proba-
+bility, we drop the identity embedding or the geometry control stream, making the model resilient
+to missing or unreliable priors at inference. At the inference time, the model can operate with
+reference guidance when available, or fall back to geometry-only or unguided restoration under
+challenging conditions.
+7
+
+=== PAGE 8 ===
+High-Quality Video Face Restoration
+Clarity: 0.9
+Motion: 50
+Area:421
+Saved
+Clarity:0.85
+Motion:110 
+Area: 384
+Excessive motion
+Clarity:0.56
+Motion:62
+Area:330
+Lack of clarity
+Clarity:0.42
+Motion: 74
+Area:185
+Insufficient face size
+Face Region Extraction
+ Automatic Quality Scoring Sample Filtering Face Region Extraction Automatic Quality Scoring Sample Filtering
+Figure 3Pipeline of the proposed high-quality face video filtering with three core dimensions:
+(1) motion amplitude, (2) face clarity, and (3) face proportion.
+3.5 Quality-Aware Face-Centric Dataset Construction
+Although existing mainstream face video datasets such as VFHQ [48] and CelebVHQ [39] contain
+high-resolution portrait videos, they still exhibit notable limitations for FVR. First, the facial
+regions often occupy a limited proportion of each frame, causing models to implicitly emphasize
+background reconstruction at the expense of fine-grained facial textures. Second, many samples
+are affected by motion blur, low illumination, or compression artifacts. Without reliable high-
+frequency facial details as supervision, models are prone to generating spurious textures during
+inference, thereby degrading restoration fidelity.
+To address these challenges, we construct a quality-aware, face-centric training dataset via a
+dedicated video selection pipeline (Fig. 3). We collect raw videos from three public datasets:
+OpenHumanVid [49], CelebV-HQ [39], and VFHQ [48]. In the quality filtering stage, we establish
+quantitative criteria across three core dimensions: motion amplitude, face clarity, and face
+proportion. Motion amplitude is quantified by facial centroid displacement, with a threshold
+of less than 100 pixels to ensure temporal stability. Face clarity is evaluated via normalized
+Laplacian variance, scaled to[0,1]using a logarithmic function with a variance upper bound of
+1000. Samples are filtered to retain only those with a clarity score above0.7, thereby excluding
+blurry frames. Face proportion requires the minimum side length of the facial region to exceed
+320 pixels, ensuring that faces occupy a significant proportion of frames and provide sufficient
+texture information. Through this process, we provide high-quality training data with geometric
+consistency, rich details, and controllable degradation levels for FVR.
+After filtering, we retain 28,491 high-quality face video samples for training. Reference images are
+obtained by random sampling from video frames followed by background removal, ensuring that
+the model focuses on learning geometric priors and reconstructing facial details. The resulting
+dataset provides high-resolution, geometrically consistent, and detail-rich supervision tailored for
+FVR.
+4 Experiments
+4.1 Implementation details
+Training Details.We utilize Wan2.1-Fun-1.3B [7] as the base model. The DiT backbone is
+fine-tuned via LoRA [50] with a rank of 384, whereas the VAE decoder is optimized with full-
+parameter fine-tuning. Training is conducted for 10 epochs on 8 GPUs with a batch size of 8. For
+all training phases, we set the learning rate to10−4 and adopt the Adam [51] optimizer. In Stage
+I, each video clip consists of 81 frames. In Stages II and III, the clip length is set to 21 frames to
+reduce computational overhead. All videos are resized to a spatial resolution of512× 512for
+training.
+8
+
+=== PAGE 9 ===
+High-Quality Video Face Restoration
+Table 1Quantitative comparison results on the VFHQ-Test dataset.↑ / ↓ denote higher / lower is
+better, respectively. We highlight thebest and second metrics.
+Method PSNR↑SSIM↑LPIPS↓IDS↑FVD↓LIQE↑MUSIQ↑CLIP-IQA↑VIRD↓
+DOVE 30.40820.87510.11890.9283103.892 3.798369.9454 0.4654 0.4891
+BasicVSR++ 27.9281 0.8216 0.2822 0.8970 325.657 1.6914 43.9436 0.3498 0.5355
+STAR 24.6980 0.7821 0.2307 0.8259 251.939 3.8819 68.46780.5889 0.6481
+SeedVR2-3B 23.1543 0.7848 0.1638 0.8931 593.618 3.7019 67.80740.5076 0.5438
+KEEP 28.0798 0.8488 0.1776 0.7682 370.081 2.9652 61.3693 0.4097 0.7430
+BFVR 26.8917 0.8377 0.2128 0.8454 316.215 1.8835 53.3688 0.3725 0.6265
+PGTFormer 28.7534 0.8466 0.2052 0.8421 334.736 2.9345 64.5613 0.5059 0.6310
+SVFR 25.6862 0.8019 0.1936 0.8943 147.999 3.2908 65.8764 0.4588 0.5496
+TIGER(Ours)30.72890.87730.06970.948140.42224.091970.1086 0.4756 0.4536
+Datasets.For Stage I, we use 28,491 filtered facial video samples from three datasets (OpenHu-
+manVid [49], CelebV-HQ [39], and VFHQ[48]) to train the model’s ability to adhere to geometry
+priors. The reference images are sampled randomly from video frames with background removed.
+Following common practices [37], Stages II and III are trained on filtered video samples from
+VFHQ. In addition to the standard 50 test samples from VFHQ-Test, we construct a new test
+benchmark for reference-guided FVR without ground truth (GT) based on the VoxCeleb2 [52]
+dataset. This benchmark consists of 100 low-quality real-world video samples and corresponding
+extra-scene photos of the same subjects as reference images.
+Evaluation Metrics.For synthetic VFHQ-Test dataset with GT, we evaluate performance using
+PSNR, SSIM, LPIPS [47], and FVD [53]. For real-world datasets, we adopt CLIP-IQA [54], MUSIQ
+[55], and LIQE [56]. Furthermore, we use IDS (identity similarity distance) to assess identity
+preservation, which is defined as the cosine similarity with ArcFace [10]. To measure inter-frame
+identity consistency, we propose VIRD (video identity and reference distance), representing the
+identity similarity between each frame in the facial video and the reference image. The metric is
+defined as:
+VIRD= 1
+𝑁
+𝑁∑︁
+𝑖=1
+∥F𝐴𝑟𝑐 (𝐼 𝑖),F 𝐴𝑟𝑐 (𝐼 𝑟𝑒 𝑓 ) ∥2,(11)
+where we use ArcFace [10] as the feature extractorF𝐴𝑟𝑐 (·) to obtain discriminative identity
+embeddings.
+4.2 Comparison With State-of-the-Art
+ComparedMethods.Weconductedacomparisonwithcurrentstate-of-the-artvideoenhancement
+methods, including BasicVSR++[2], DOVE[57], STAR[1], and SeedVR2-3B[58], as well as blind
+FVR algorithms KEEP[34], BFVR[37], PGTFormer[35], and SVFR[36]. Among these, DOVE,
+STAR, SeedVR2-3B, and SVFR are all built upon generative priors of video generation models,
+leveraging their capacity to model complex video distributions and recover high-quality facial
+details from degraded inputs.
+Quantitative Results.Our method demonstrates superior performance over SoTAs across both
+VFHQ-Test and VoxCeleb2 datasets, excelling in critical metrics that measure visual quality,
+perceptual fidelity, identity preservation, and temporal consistency. On VFHQ-Test, it outperforms
+SoTAs in eight of nine metrics—significantly improving on LPIPS, IDS, and temporal stability
+(FVD, VIRD)—while establishing new benchmarks in visual quality (PSNR, SSIM) and LIQE.
+Similarly, on VoxCeleb2, it dominates three metrics, showcasing exceptional perceptual quality
+(LIQE, MUSIQ) and consistency (VIRD). Collectively, these results validate its efficacy in balancing
+9
+
+=== PAGE 10 ===
+High-Quality Video Face Restoration
+Input
+GT
+basicVSR++ BFVR DOVE KEEP
+PGTFormer SeedVR STAR TIGER(Ours)
+Input basicVSR++ BFVR DOVE KEEP
+GT PGTFormer SeedVR STAR TIGER(Ours)
+Figure4Qualitativecomparisonwithotherstate-of-the-artmodels. Ourapproachbetterpreserves
+identity-discriminative features and restores more fine-grained facial details.
+identity retention, temporal coherence, and visual realism, establishing its superiority across FVR
+task.
+Qualitative Results.We provide visual comparisons in Fig. 4. Our method produces more
+realistic and coherent results compared to other approaches. For instance, our model successfully
+reconstructsfinedetailssuchasskintextureandfacialfeatures, whileothermethodsoftenproduce
+overly smooth or distorted results. Similarly, in complex motion scenarios, our approach maintains
+sharper restoration with better preservation of dynamic elements across frames.
+We also visualize the temporal profile in Fig. 5, demonstrating that our method achieves excellent
+temporal consistency even under challenging conditions. Existing approaches often struggle
+with complex degradations, exhibiting visible artifacts such as misalignment or blurring between
+consecutive frames. This results in a more natural and visually pleasing restoration that better
+aligns with human perception.
+4.3 Ablation Studies
+We conduct ablation studies to validate the effectiveness of our approach. Specifically, we evaluate
+the impact of reference priors, the contribution of each training stage, cross-source parameter
+fusion, and identity conditioning on VFHQ-Test. Additionally, the loss weight balancing strategy
+is assessed on VoxCeleb2.
+Effectiveness of Different Priors.We analyze the contributions of the identity and geometry
+priors. “w/o Ide.” removes the identity input, while “w/o Geo.” disables the 3D normal-based
+10
+
+=== PAGE 11 ===
+High-Quality Video Face Restoration
+Table 2Quantitative comparison of our
+methodwithSoTAapproachesontheVox-
+Celeb2 dataset.
+Method LIQE↑MUSIQ↑CLIP-IQA↑VIRD↓
+DOVE 2.0396 58.8717 0.3731 0.9360
+BasicVSR++ 1.0208 37.3428 0.2847 0.9470
+STAR 2.861559.96010.5706 0.9625
+SeedVR 1.3459 48.9973 0.3143 0.9408
+KEEP 2.1701 55.3556 0.3630 0.9767
+BFVR 1.0706 43.0584 0.3191 0.9819
+PGTFormer 1.8864 56.8901 0.4370 0.9641
+SVFR 2.1780 57.7379 0.4031 0.9536
+TIGER(Ours)3.741266.23820.4933 0.9322
+t x
+BasicVSR++
+BFVR
+Input
+DOVE
+KEEP
+PGTFormer
+SeedVR
+STAR
+SVFR
+TIGER(Ours)
+GTFigure 5Qualitative comparison of temporal consis-
+tency, stacking the yellow line across frames.
+Table 3Ablation study on the effectiveness of
+identity (Ide.) and geometry (Geo.) priors.
+Ide. Geo. VIRD↓FVD↓LPIPS↓
+× × 0.4940 101.5778 0.1942
+×✓ 0.4791 70.4368 0.1275
+✓× 0.4783 71.1703 0.1272
+✓ ✓ 0.4492 40.4222 0.0697
+Table 4Ablation study on the effectiveness of
+the progressive three-stage optimization.
+I II III VIRD↓FVD↓LPIPS↓
+✓ 0.4774 70.0517 0.1261
+✓ ✓ 0.4628 60.5291 0.0911
+✓ ✓ ✓ 0.4492 40.4222 0.0697
+geometry prior. VIRD evaluates identity fidelity, LPIPS measures perceptual similarity, and FVD
+reflects overall video consistency. As shown in Tab. 3, removing both priors leads to the worst
+performance, with degraded identity preservation and visual quality. Using only a reference image
+improves results significantly, as it provides strong identity cues through identity embeddings.
+However, without explicit geometric guidance, the model lacks structural consistency across poses
+and expressions. The best performance is achieved when both reference and geometry priors
+are employed, demonstrating their complementary roles: the reference anchors identity, while
+geometry enforces cross-frame structural coherence.
+Effectiveness of Three Stage Pipeline.We conduct a ablation study by incrementally introducing
+each stage of the proposed three-stage training pipeline. Specifically, we evaluate: (i) training
+with only Stage I, (ii) Stage I + Stage II, and (iii) the full three-stage pipeline. As shown in
+Tab. 4, Stage I training only the latent mapper yields limited perceptual quality despite reasonable
+identity preservation. In Stage II, joint fine-tuning of the mapper and the VAE decoder significantly
+improves visual fidelity by refining textures and edges. To stabilize adversarial training in Stage III,
+we freeze the decoder parameters to prevent mode collapse and performance degradation, while
+optimizing the mapper with GAN loss. This final stage further boosts both identity consistency
+and perceptual quality, demonstrating the necessity of staged optimization.
+Impact of Cross-source Parameter Fusion.We ablate the parameter sources for geometry
+construction in Tab. 5. Using parameters solely from the degraded video leads to unreliable
+identity cues due to the severe degradation. Conversely, extracting both from the reference images
+provides stable identity but fails to capture the true motion dynamics, resulting in degraded
+performance. Disentangling identity and motion in the 3D parameter space and recombining
+them from complementary sources provides more reliable geometric guidance for FVR.
+11
+
+=== PAGE 12 ===
+High-Quality Video Face Restoration
+GT Input Stage I Stage II Stage III
+Figure 6Qualitative of ablation study on the three-stage training pipeline.
+Table 5Effectiveness of cross-source param-
+eter fusion.refanddegindicate parameters
+extracted from reference image and degraded
+video, respectively.
+Identity
+Source
+Motion
+SourceVIRD↓FVD↓LPIPS↓
+deg deg 0.4790 71.0134 0.1275
+ref ref 0.4781 71.3495 0.1274
+ref deg 0.4492 40.4222 0.0697
+Table 6Ablation on the identity-fused embed-
+ding.
+Text
+Embedding
+Identity
+EmbeddingVIRD↓FVD↓LPIPS↓
+×✓ 0.6122 618.2963 0.3666
+✓× 0.4501 41.0479 0.0698
+✓ ✓ 0.4492 40.4222 0.0697
+Table 7Impact of loss weight configurations (𝜆1, 𝜆2, 𝜆3, 𝜆4) on latent supervision, perceptual
+similarity, pixel reconstruction, and adversarial learning.
+𝜆1 𝜆2 𝜆3 𝜆4 VIRD↓LIQE↑
+1.0 2.0 10.0 0.1 0.92803.0988
+2.0 2.0 10.0 0.1 0.9315 2.8255
+1.0 2.0 5.0 0.1 0.9356 3.1156
+1.0 3.0 10.0 0.1 0.9452 3.1068
+1.0 2.0 10.0 0.2 0.93223.7412
+ImpactofIdentityConditioning.We evaluate the impact of introducing identity embeddings into
+the cross-attention layers. As shown in Tab. 6, compared to the text-only baseline, incorporating
+identity embeddings significantly improves overall performance.
+Impact of LossWeights.Tab. 7 presents the ablation results under different weight configurations.
+Stronger latent supervision or weaker pixel loss degrades identity consistency, while increasing the
+adversarial weight improves perceptual quality at the cost of slight fidelity drop. The configuration
+(1.0, 2.0, 10.0, 0.2) achieves the best trade-off between identity preservation and visual realism
+and is thus adopted.
+5 Conclusion
+In this work, we introduced TIGER, a diffusion-based, one-step inference framework for FVR that
+excels in identity preservation, temporal consistency, and visual quality. Our approach synergisti-
+callyTamingIdentity,Geometry, and gEnerative pRiors to produce high-fidelity, coherent results.
+To mitigate identity drift, we anchor the restoration process using robust identity embeddings
+from a reference image. Coherence across frames is enforced by incorporating 3D geometric priors
+12
+
+=== PAGE 13 ===
+High-Quality Video Face Restoration
+as structural constraints. The one-step inference design, augmented with adversarial training for
+texture refinement, ensures both speed and photorealism. Furthermore, we propose a three-stage
+training strategy and a new large-scale benchmark dataset to facilitate stable optimization and
+rigorous evaluation. Extensive experiments confirm that TIGER sets a new state-of-the-art in
+reference-guided FVR. Future work will focus on expanding our training data to encompass a
+wider range of real-world variations, pushing the boundaries of photorealistic FVR.
+References
+[1] R. Xie, Y. Liu, P. Zhou, C. Zhao, J. Zhou, K. Zhang, Z. Zhang, J. Yang, Z. Yang, and Y. Tai,
+“STAR: Spatial-temporal augmentation with text-to-video models for real-world video super-
+resolution,” inProceedings of the IEEE/CVF International Conference on Computer Vision,
+October 2025, pp. 17108–17118.
+[2] K. C. Chan, S. Zhou, X. Xu, and C. C. Loy, “Basicvsr++: Improving video super-resolution
+with enhanced propagation and alignment,” inProceedings of the IEEE/CVF conference on
+computer vision and pattern recognition, 2022, pp. 5972–5981.
+[3] K. C. K. Chan, S. Zhou, X. Xu, and C. C. Loy, “Investigating tradeoffs in real-world video
+super-resolution,” inProceedings of the IEEE/CVF Conference on Computer Vision and Pattern
+Recognition, 2022, pp. 5962–5971.
+[4] W. Han, W. Lin, Y. Zhou, Q. Liu, S. Wang, C. Yao, and J. Chen, “Show and polish: reference-
+guided identity preservation in face video restoration,” inProceedings of the 33rd ACM
+International Conference on Multimedia, 2025, pp. 10315–10324.
+[5] S. Zhou, K. Chan, C. Li, and C. C. Loy, “Towards robust blind face restoration with codebook
+lookup transformer,”Advances in Neural Information Processing Systems, vol. 35, pp. 30599–
+30611, 2022.
+[6] R. Rombach, A. Blattmann, D. Lorenz, P. Esser, and B. Ommer, “High-resolution image
+synthesiswithlatentdiffusionmodels,” inProceedingsoftheIEEE/CVFconferenceoncomputer
+vision and pattern recognition, 2022, pp. 10684–10695.
+[7] T.Wan, A.Wang, B.Ai, B.Wen,C.Mao,C.-W.Xie,D.Chen,F.Yu,H.Zhao, J.Yangetal.,“Wan:
+Open and advanced large-scale video generative models,”arXiv preprint arXiv:2503.20314,
+2025.
+[8] J. He, T. Xue, D. Liu, X. Lin, P. Gao, D. Lin, Y. Qiao, W. Ouyang, and Z. Liu, “Venhancer:
+Generative space-time enhancement for video generation,”arXiv preprint arXiv:2407.07667,
+2024.
+[9] C.-H. Yeh, C.-Y. Lin, Z. Wang, C.-W. Hsiao, T.-H. Chen, H.-S. Shiu, and Y.-L. Liu, “Diffir2vr-
+zero: Zero-shot video restoration with diffusion-based image restoration models,”arXiv
+preprint arXiv:2407.01519, 2024.
+[10] J. Deng, J. Guo, N. Xue, and S. Zafeiriou, “Arcface: Additive angular margin loss for deep
+face recognition,” inProceedings of the IEEE/CVF conference on computer vision and pattern
+recognition, 2019, pp. 4690–4699.
+[11] K. C. Chan, X. Wang, K. Yu, C. Dong, and C. C. Loy, “Basicvsr: The search for essential
+components in video super-resolution and beyond,” inProceedings of the IEEE/CVF conference
+on computer vision and pattern recognition, 2021, pp. 4947–4956.
+13
+
+=== PAGE 14 ===
+High-Quality Video Face Restoration
+[12] X. Wang, K. C. Chan, K. Yu, C. Dong, and C. C. Loy, “Edvr: Video restoration with enhanced
+deformable convolutional networks,” inIEEE/CVF Conference on Computer Vision and Pattern
+Recognition Workshops, 2019, pp. 1954–1963.
+[13] Z. Guo, W. Li, and C. C. Loy, “Generalizable implicit motion modeling for video frame
+interpolation,” inAdvances in Neural Information Processing Systems, vol. 37, 2024, pp.
+63747–63770.
+[14] J. Liang, J. Cao, Y. Fan, K. Zhang, R. Ranjan, Y. Li, R. Timofte, and L. Van Gool, “Vrt: A video
+restoration transformer,”arXiv preprint arXiv:2201.12288, 2022.
+[15] X. Ji, Y. Cao, Y. Tai, C. Wang, J. Li, and F. Huang, “Real-world super-resolution via kernel
+estimation and noise injection,” inProceedings of the IEEE/CVF Conference on Computer
+Vision and Pattern Recognition Workshops, 2020, pp. 466–467.
+[16] K.-C. Chang, R. Wang, H.-J. Lin, Y.-L. Liu, C.-P. Chen, Y.-L. Chang, and H.-T. Chen, “Learning
+camera-aware noise models,” inEuropean Conference on Computer Vision. Springer, 2020,
+pp. 343–358.
+[17] Y.Song,M.Wang,Z.Yang,X.Xian,andY.Shi,“Negvsr: Augmentingnegativesforgeneralized
+noise modeling in real-world video super-resolution,” inProceedings of the AAAI Conference
+on Artificial Intelligence, 2024, pp. 10705–10713.
+[18] R. Chen, Y. Mu, and Y. Zhang, “High-order relational generative adversarial network for
+video super-resolution,”Pattern Recognition, vol. 146, p. 110059, 2024.
+[19] C. Lei, Y. Xing, and Q. Chen, “Blind video temporal consistency via deep video prior,” in
+Advances in Neural Information Processing Systems, vol. 33, 2020, pp. 1083–1093.
+[20] H. Li, Y. Yang, M. Chang, S. Chen, H. Feng, Z. Xu, Q. Li, and Y. Chen, “Srdiff: Single image
+super-resolution with diffusion probabilistic models,”Neurocomputing, vol. 479, pp. 47–59,
+2022.
+[21] C. Saharia, J. Ho, W. Chan, T. Salimans, D. J. Fleet, and M. Norouzi, “Image super-resolution
+via iterative refinement,”IEEE Transactions on Pattern Analysis and Machine Intelligence,
+vol. 45, no. 4, pp. 4713–4726, 2022.
+[22] A.Lugmayr, M.Danelljan, A.Romero, F.Yu, R.Timofte, andL.VanGool, “Repaint: Inpainting
+using denoising diffusion probabilistic models,” inProceedings of the IEEE/CVF Conference
+on Computer Vision and Pattern Recognition, 2022, pp. 11461–11471.
+[23] S. Weng, H. Zheng, P. Zhan, Y. Hong, H. Jiang, S. Li, and B. Shi, “Vires: Video instance
+repainting with sketch and text guidance,”arXiv preprint arXiv:2411.16199, 2024.
+[24] C. Rota, M. Buzzelli, and J. van de Weijer, “Enhancing perceptual quality in video super-
+resolution through temporally-consistent detail synthesis using diffusion models,” inEuro-
+pean Conference on Computer Vision. Springer, 2024, pp. 36–53.
+[25] X. Li, Y. Liu, S. Cao, Z. Chen, S. Zhuang, X. Chen, Y. He, Y. Wang, and Y. Qiao, “Diffvsr:
+Enhancing real-world video super-resolution with diffusion models for advanced visual
+quality and temporal consistency,”arXiv preprint arXiv:2501.10110, 2025.
+[26] Y. Xu, T. Park, R. Zhang, Y. Zhou, E. Shechtman, F. Liu, J.-B. Huang, and D. Liu, “Videogiga-
+gan: Towards detail-rich video super-resolution,” 2024, unpublished manuscript.
+14
+
+=== PAGE 15 ===
+High-Quality Video Face Restoration
+[27] M. Sun, W. Wang, G. Li, J. Liu, J. Sun, W. Feng, S. Lao, S. Zhou, Q. He, and J. Liu, “Ar-
+diffusion: Asynchronous video generation with auto-regressive diffusion,” inProceedings of
+the Computer Vision and Pattern Recognition Conference, 2025, pp. 7364–7373.
+[28] Z. Zhang, K. Liu, Z. Chen, X. Li, Y. Chen, B. Duan, L. Kong, and Y. Zhang, “Infvsr: Breaking
+length limits of generic video super-resolution,”arXiv preprint arXiv:2510.00948, 2025.
+[29] H. Wang, Y. Liu, H. Liu, C.-C. Wang, Y. Guo, H. Li, B. Wang, and J. Sun, “Temporal-consistent
+video restoration with pre-trained diffusion models,”arXiv preprint arXiv:2503.14863, 2025.
+[30] C. Meng, R. Rombach, R. Gao, D. Kingma, S. Ermon, J. Ho, and T. Salimans, “On distillation
+of guided diffusion models,” inProceedings of the IEEE/CVF Conference on Computer Vision
+and Pattern Recognition, 2023, pp. 14297–14306.
+[31] Z. Zhou, D. Chen, C. Wang, C. Chen, and S. Lyu, “Simple and fast distillation of diffusion
+models,” inAdvances in Neural Information Processing Systems, vol. 37, 2024, pp. 40831–
+40860.
+[32] C. Lu, Y. Zhou, F. Bao, J. Chen, C. Li, and J. Zhu, “Dpm-solver++: Fast solver for guided
+sampling of diffusion probabilistic models,”Machine Intelligence Research, pp. 1–22, 2025.
+[33] K. Zheng, C. Lu, J. Chen, and J. Zhu, “Dpmsolver-v3: Improved diffusion ode solver with
+empirical model statistics,” inAdvances in Neural Information Processing Systems, vol. 36,
+2023, pp. 55502–55542.
+[34] R. Feng, C. Li, and C. C. Loy, “Kalman-inspired feature propagation for video face super-
+resolution,” inEuropean Conference on Computer Vision. Springer, 2024, pp. 202–218.
+[35] K. Xu, L. Xu, G. He, W. Yu, and Y. Li, “Beyond alignment: Blind video face restoration via
+parsing-guided temporal-coherent transformer,”IJCAI 2024, 2024.
+[36] Z. Wang, X. Chen, C. Xu, J. Zhu, X. Hu, J. Zhang, C. Wang, Y. Liu, Y. Zhou, and R. Ji, “Svfr:
+A unified framework for generalized video face restoration,” inProceedings of the Computer
+Vision and Pattern Recognition Conference, 2025, pp. 7406–7415.
+[37] L. Xie, B. Zheng, S. Wu, and H. S. Wong, “Dynamic content prediction with motion-aware
+priors for blind face video restoration,” inProceedings of the Computer Vision and Pattern
+Recognition Conference, 2025, pp. 17821–17830.
+[38] A. Nagrani, J. S. Chung, W. Xie, and A. Zisserman, “Voxceleb: Large-scale speaker verification
+in the wild,”Computer Speech & Language, vol. 60, p. 101027, 2020.
+[39] H. Zhu, W. Wu, W. Zhu, L. Jiang, S. Tang, L. Zhang, Z. Liu, and C. C. Loy, “CelebV-HQ: A
+large-scale video facial attributes dataset,” inECCV, 2022.
+[40] X. Li, M. Liu, Y. Ye, W. Zuo, L. Lin, and R. Yang, “Learning warped guidance for blind face
+restoration,” inProceedings of the European Conference on Computer Vision (ECCV), 2018, pp.
+272–289.
+[41] X. Li, W. Li, D. Ren, H. Zhang, M. Wang, and W. Zuo, “Enhanced blind face restoration with
+multi-exemplar images and adaptive spatial feature fusion,” inProceedings of the IEEE/CVF
+Conference on Computer Vision and Pattern Recognition, 2020, pp. 2706–2715.
+[42] X. Li, S. Zhang, S. Zhou, L. Zhang, and W. Zuo, “Learning dual memory dictionaries for blind
+face restoration,”IEEE Transactions on Pattern Analysis and Machine Intelligence, vol. 45,
+no. 5, pp. 5904–5917, 2022.
+15
+
+=== PAGE 16 ===
+High-Quality Video Face Restoration
+[43] Y. Nitzan, K. Aberman, Q. He, O. Liba, M. Yarom, Y. Gandelsman, I. Mosseri, Y. Pritch, and
+D. Cohen-Or, “MyStyle: A personalized generative prior,”ACM Transactions on Graphics
+(TOG), vol. 41, no. 6, pp. 1–10, 2022.
+[44] V. Blanz and T. Vetter, “A morphable model for the synthesis of 3d faces,” inProceedings of
+the 26th Annual Conference on Computer Graphics and Interactive Techniques, ser. SIGGRAPH
+’99. ACM Press/Addison-Wesley Publishing Co., 1999, p. 187–194.
+[45] Z. Wang, X. Zhu, T. Zhang, B. Wang, and Z. Lei, “3d face reconstruction with the geometric
+guidance of facial part segmentation,” inProceedings of the IEEE/CVF Conference on Computer
+Vision and Pattern Recognition, 2024, pp. 1672–1682.
+[46] P. Esser, S. Kulal, A. Blattmann, R. Entezari, J. Müller, H. Saini, Y. Levi, D. Lorenz, A. Sauer,
+F. Boeselet al., “Scaling rectified flow transformers for high-resolution image synthesis,” in
+Forty-first international conference on machine learning, 2024.
+[47] R. Zhang, P. Isola, A. A. Efros, E. Shechtman, and O. Wang, “The unreasonable effectiveness
+of deep features as a perceptual metric,” inProceedings of the IEEE conference on computer
+vision and pattern recognition, 2018, pp. 586–595.
+[48] L. Xie, X. Wang, H. Zhang, C. Dong, and Y. Shan, “VHFQ: A high-quality dataset and
+benchmark for video face super-resolution,” inProceedings of the IEEE/CVF Conference on
+Computer Vision and Pattern Recognition, 2022, pp. 657–666.
+[49] H. Li, M. Xu, Y. Zhan, S. Mu, J. Li, K. Cheng, Y. Chen, T. Chen, M. Ye, J. Wanget al.,
+“Openhumanvid: A large-scale high-quality dataset for enhancing human-centric video
+generation,” inProceedings of the Computer Vision and Pattern Recognition Conference, 2025,
+pp. 7752–7762.
+[50] E. J. Hu, Y. Shen, P. Wallis, Z. Allen-Zhu, Y. Li, S. Wang, L. Wang, W. Chenet al., “Lora:
+Low-rank adaptation of large language models.”ICLR, vol. 1, no. 2, p. 3, 2022.
+[51] D. Kinga, J. B. Adamet al., “A method for stochastic optimization,” inInternational conference
+on learning representations (ICLR), vol. 5, no. 6. California;, 2015.
+[52] J. S. Chung, A. Nagrani, and A. Zisserman, “Voxceleb2: Deep speaker recognition,”arXiv
+preprint arXiv:1806.05622, 2018.
+[53] T. Unterthiner, S. Van Steenkiste, K. Kurach, R. Marinier, M. Michalski, and S. Gelly, “FVD: A
+new metric for video generation,” 2019.
+[54] J. Wang, K. C. Chan, and C. C. Loy, “Exploring clip for assessing the look and feel of images,”
+inProceedings of the AAAI conference on artificial intelligence, vol. 37, no. 2, 2023, pp.
+2555–2563.
+[55] J. Ke, Q. Wang, Y. Wang, P. Milanfar, and F. Yang, “Musiq: Multi-scale image quality
+transformer,” inProceedings of the IEEE/CVF international conference on computer vision,
+2021, pp. 5148–5157.
+[56] W. Zhang, G. Zhai, Y. Wei, X. Yang, and K. Ma, “Blind image quality assessment via vision-
+language correspondence: A multitask learning perspective,” inProceedings of the IEEE/CVF
+conference on computer vision and pattern recognition, 2023, pp. 14071–14081.
+16
+
+=== PAGE 17 ===
+High-Quality Video Face Restoration
+[57] Z. Chen, Z. Zou, K. Zhang, X. Su, X. Yuan, Y. Guo, and Y. Zhang, “DOVE: Efficient one-step
+diffusion model for real-world video super-resolution,” inThe Thirty-ninth Annual Conference
+on Neural Information Processing Systems, 2025.
+[58] J. Wang, S. Lin, Z. Lin, Y. Ren, M. Wei, Z. Yue, S. Zhou, H. Chen, Y. Zhao, C. Yanget al.,
+“Seedvr2: One-step video restoration via diffusion adversarial post-training,”arXiv preprint
+arXiv:2506.05301, 2025.
+17

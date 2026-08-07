@@ -1,0 +1,47 @@
+[
+  {
+    "name": "title_face_restoration",
+    "query": "ti:\"face restoration\"",
+    "results": 82
+  },
+  {
+    "name": "title_blind_face_restoration",
+    "query": "ti:\"blind face restoration\"",
+    "results": 46
+  },
+  {
+    "name": "title_face_super_resolution",
+    "query": "ti:\"face super resolution\" OR ti:\"face super-resolution\"",
+    "results": 45
+  },
+  {
+    "name": "title_portrait_restoration",
+    "query": "ti:\"portrait restoration\"",
+    "results": 0
+  },
+  {
+    "name": "title_portrait_super_resolution",
+    "query": "ti:\"portrait super resolution\" OR ti:\"portrait super-resolution\"",
+    "results": 0
+  },
+  {
+    "name": "title_video_face_restoration",
+    "query": "ti:\"video face restoration\"",
+    "results": 6
+  },
+  {
+    "name": "all_identity_face_restoration",
+    "query": "all:\"identity preserving\" AND all:\"face restoration\"",
+    "results": 13
+  },
+  {
+    "name": "all_reference_face_restoration",
+    "query": "all:\"reference based\" AND all:\"face restoration\"",
+    "results": 10
+  },
+  {
+    "name": "all_diffusion_face_restoration",
+    "query": "all:diffusion AND all:\"face restoration\"",
+    "results": 52
+  }
+]

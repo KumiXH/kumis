@@ -1,0 +1,2494 @@
+[
+  {
+    "key": "authface",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\01_single_face\\authface_2410.09864.pdf",
+    "page_count": 10,
+    "first_page_excerpt": "AuthFace: Towards Authentic Blind Face Restoration with\nFace-oriented Generative Diffusion Prior\nGuoqiang Liang∗\nHong Kong University of Science and\nTechnology (Guangzhou)\nGuangzhou, China\ngliang041@connect.hkust-gz.edu.cn\nQingnan Fan†\nvivo Mobile Communication Co., Ltd\nHangzhou, China\nfqnchina@gmail.com\nBingtao Fu\nAnt Group\nHangzhou, China\nbingtaofu93@gmail.com\nJinwei Chen\nvivo Mobile Communication Co., Ltd\nHangzhou, China\njinwei.chen@vivo.com\nHong Gu\nvivo Mobile Communication Co., Ltd\nHangzhou, China\nguhong@vivo.com\nLin Wang†\nNanyang Technological University\nSingapore\nlinwang@ntu.edu.sg\nAbstract\nBlind face restoration (BFR) is a fundamental and challenging prob-\nlem in computer vision. To faithfully restore high-quality (HQ)\nphotos from poor-quality ones, recent research endeavors predom-\ninantly rely on facial image priors from the powerful pretrained\ntext-to-image (T2I) diffusion models. However, such priors often\nlead to the incorrect generation of non-facial features and insuf-\nficient facial details, thus rendering them less practical for real-\nworld applications. In this paper, we propose a novel framework,\nnamelyAuthFacethat achieves highly authentic face restoration\nresults by exploring a face-oriented generative diffusion prior. To\nlearn such a prior, we first collect a dataset of1.5Khigh-quality\nimages, with resolutions exceeding 8K, captured by professional\nphotographers. Based on the dataset, we then introduce a novel face-\noriented restoration-tuning pipeline that fine-tunes a pretrained\nT2I model. The photography-guided annotation system and facial\nprior refinements fully explore the potential of these high-quality\nphotographic images. In this way, the potent natural image pri-\nors from pretrained T2I diffusion models can be subtly harnessed,\nspecifically enhancing their capability in facial detail restoration.\nMoreover, to minimize artifacts in critical facial areas, such as\neyes and mouth, we propose a time-aware latent facial feature\nloss to learn the authentic face restoration process. Extensive exper-\niments on the synthetic and real-world BFR datasets demonstrate\nthe superiority of our approach. Code and models are available at\nhttps://github.com/EthanLiang99/AuthFace.\nCCS Concepts\n•Computing methodologies→Computer vision tasks.\n∗Work done during internship at vivo. †Corresponding authors.\nPermission to make digital or hard copies of all or part of this work for personal or\nclassroom use is granted without fee provided that copies are not made or distributed\nfor profit or commercial advantage and that copies bear this notice and the full citation\non the first page. Copyrights for components of this work owned by others than the\nauthor(s) must be honored. Abstracting with credit is permitted. To copy otherwise, or\nrepublish, to post on servers or to redistribute to lists, requires prior specific permission\nand/or a fee. Request permissions from permissions@acm.org.\nMM ’25, Dublin, Ireland.\n©2025 Copyright held by the owner/author(s). Publication rights licensed to ACM.\nACM ISBN 979-8-4007-2035-2/2025/10\nhttps://doi.org/10.1145/3746027.3755165\nKeywords\nText-to-image Diffusion Model; Blind Face Restoration\nACM Reference Format:\nGuoqiang Liang, Qingnan Fan†, Bingtao Fu, Jinwei Chen, Hong Gu, and Lin\nWang†. 2025. AuthFace: Towards Authentic Blind Face Restoration with\nFace-oriented Generative Diffusion Prior. InProceedings of the 33rd ACM\nInternational Conference on Multimedia (MM ’25), October 27–31, 2025, Dublin,\nIreland.ACM, New York, NY, USA, 10 pages. https://doi.org/10.1145/3746027.\n3755165\n1 Introduction\nFace images captured in natural settings often exhibit various forms\nof degradation, including compression, blur, and noise [ 52, 59].\nCapturing high-quality (HQ) face images is crucial, as humans\nare highly sensitive to subtle facial details. Blind face restoration\n(BFR) aims to reconstruct HQ images from degraded inputs and\nhas rapidly progressed in recent years due to significant research\ninterest. However, BFR remains an ill-posed problem due to the\nunknown degradation and the loss of valuable information resulting\nfrom these complex conditions [74].\nSufficient prior information is critical for HQ reconstruction.\nResearchers have used geometric and reference priors from sources\nlike [4, 6, 9, 12, 20, 24, 27–29, 35, 40, 45, 63, 67, 75] to guide face\nrestoration. These priors, however, are limited by their sensitiv-\nity to degradation and inability to capture fine facial details, and\ncan even result in corrupted texture details due to incorrect prior\ninformation [34]. With advancements in generative models, such\nas StyleGAN [22] and VQVAE [39], recent works [5, 6, 27, 28, 30,\n49, 52, 54, 56–58, 62, 74] have leveraged pretrained networks to\nderive facial priors, achieving superior results compared to earlier\nmethods. Nonetheless, these approaches still face significant per-\nformance declines in handling unseen cases. Denoising diffusion\nprobabilistic models (DDPMs) [17] have shown promise as an al-\nternative to generative adversarial networks (GANs) [46] in image\ngeneration. Some approaches [ 59, 68] use pretrained DDPMs to\ndiffuse and then denoise degraded inputs. However, their practical\napplication is hindered by the loss of original identity and detailed\nfacial features [36], with pretrained DDPMs also facing limitations\nin representational capacity.\narXiv:2410.09864v2  [cs.CV]  6 Mar 2026",
+    "figure_candidates": [
+      {
+        "page": 2,
+        "caption": "Figure 1: Compared to CodeFormer [ 74] and DiffBIR [31], our method more effectively captures and renders fine-grained facial"
+      },
+      {
+        "page": 3,
+        "caption": "Figure 2: (a) A HQ face image with its paired tags generated through photography-guided image annotation. Specifically, we"
+      },
+      {
+        "page": 3,
+        "caption": "Fig. 2 (a)). In line with our established criteria, we collect a curated"
+      },
+      {
+        "page": 4,
+        "caption": "Figure 3: An overview of our framework consisting Stage I & II. Denoising UNet, carried over from Stage I, maintains its facial"
+      },
+      {
+        "page": 5,
+        "caption": "Fig. 3 illustrates the structure of stage II. Given the fine-tuned"
+      },
+      {
+        "page": 6,
+        "caption": "Figure 4: Qualitative results on CelebA-Test dataset. Red box areas highlight the detailed skin texture achieved by our method."
+      },
+      {
+        "page": 7,
+        "caption": "Figure 5: Qualitative results are presented on LFW-Test [52], WebPhoto-Test [52], and WIDER-Test [74]. Zoom in for details."
+      },
+      {
+        "page": 8,
+        "caption": "Figure 6: Visualization of ablation results. Zoom in for more details."
+      },
+      {
+        "page": 8,
+        "caption": "Fig. 6) and eyelashes (red box), which align the great improvemnt on"
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 7,
+        "caption": "Table 1: Quantitative results for blind face restoration on both synthetic and real-world datasets. The best result is highlighted"
+      },
+      {
+        "page": 8,
+        "caption": "Table 2: Ablation studies of variant generative diffusion prior"
+      }
+    ],
+    "keyword_pages": {
+      "architecture": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "identity": [
+        1,
+        3
+      ],
+      "portrait_detail": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "efficiency": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "datasets": [
+        6,
+        7,
+        8,
+        10
+      ],
+      "limitations": [
+        1,
+        2,
+        8
+      ]
+    },
+    "source_urls": [
+      {
+        "page": 1,
+        "url": "https://github.com/EthanLiang99/AuthFace"
+      },
+      {
+        "page": 1,
+        "url": "https://doi.org/10.1145/3746027.3755165"
+      },
+      {
+        "page": 1,
+        "url": "https://doi.org/10.1145/3746027"
+      },
+      {
+        "page": 9,
+        "url": "https://cdn"
+      },
+      {
+        "page": 10,
+        "url": "https://stability.ai/stable-diffusion-2"
+      }
+    ],
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\authface.txt"
+  },
+  {
+    "key": "geomar",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\01_single_face\\geomar_2608.03923.pdf",
+    "page_count": 20,
+    "first_page_excerpt": "arXiv:2608.03923v1  [cs.CV]  4 Aug 2026\nGeoMAR: Unleashing Geometrically Aligned Features for Masked\nAutoregressive Blind Face Restoration\nLu Gan∗\nSchool of Artificial Intelligence,\nSun Yat-sen University\nZhuhai, China\nganlu33@mail2.sysu.edu.cn\nHanyu Yan∗\nSchool of Artificial Intelligence,\nSun Yat-sen University\nZhuhai, China\nyanhy27@mail2.sysu.edu.cn\nChaofeng Chen\nInstitute for Math and AI, Wuhan\nSchool of Artificial Intelligence,\nWuhan University\nWuhan, China\nchaofengchen@whu.edu.cn\nJunqi Hu\nSchool of Artificial Intelligence,\nSun Yat-sen University\nZhuhai, China\nhujq28@mail2.sysu.edu.cn\nDan Zeng†\nSchool of Artificial Intelligence,\nSun Yat-sen University\nZhuhai, China\nThe Technology Innovation Center\nfor Collaborative Applications of\nNatural Resources Data in GBA, MNR\nGuangzhou, China\nzengd8@mail.sysu.edu.cn\nT5 text encoder\n(b) Multi-step Code Prediction Refinement\nStep 0\n(a) Geometric Priors Extractor & Injector\nStep T-1\nOne-step Prediction\nStep t\nCodebook\n0\n2\nN\n1\n...\n0\n2\nN\n1\n...\nCodebook\n0\n2\nN\n1\n...\nStep T-1\nOne-step Prediction\nStep t\nCodebook\n0\n2\nN\n1\n...\nVLM\nFace shape Nose\nMouth\nEye\nEyebrow\nEncoder\nVisual feature space Textual embedding spaceGeometric-aware\nfeature space\nEyebrow\nTexture and geometric\ntext descriptions\nMouth\nEye\nNose\nFace shape\naligned\nFigure 1: Our motivations are twofold: (a) aligned geometry-aware feature extraction and (b) multi-step latent code refinement.\nAbstract\nCodebook-based blind face restoration (BFR) often suffers from am-\nbiguous conditioning features and a fragile prediction mechanism\nunder severe degradation. To address these challenges, we propose\nGeoMAR, a framework designed to unleash geometrically aligned\nfeatures with masked autoregressive (MAR) refinement for robust\nface restoration. For feature conditioning, we introduce a dual-input\nextraction pipeline to extract component-based geometric descrip-\ntions with explicit, spatially faithful anchors. These textual priors\nare integrated with low-quality (LQ) features via an Aligned Geo-\nmetric Priors Injector, which employs a KV-Q exchange strategy to\n∗Both authors contributed equally to this research.\n†Corresponding author: zengd8@mail.sysu.edu.cn.\nThis work is licensed under a Creative Commons Attribution-NonCommercial-\nNoDerivatives 4.0 International License.\nMM ’26, Rio de Janeiro, Brazil\n©2026 Copyright held by the owner/author(s).\nACM ISBN 979-8-4007-2213-4/2026/11\nhttps://doi.org/10.1145/3767308.3836198\ngenerate geometrically aligned features. For prediction mechanism,\nwe reformulate the one-step mapping into a multi-step MAR pro-\ncess. This coarse-to-fine generation progressively refines complex\nfacial regions based on increasingly reliable context. Experiments\non one synthetic and three real-world benchmarks demonstrate\nthat GeoMAR achieves highly competitive perceptual quality and\ncoherent visual structures compared with existing methods. The\ncode is available at https://github.com/BRL-SYSU/GeoMAR.git.\nCCS Concepts\n•Computing methodologies→Computer vision.\nKeywords\nblind face restoration, masked autoregressive modeling\nACM Reference Format:\nLu Gan, Hanyu Yan, Chaofeng Chen, Junqi Hu, and Dan Zeng. 2026. Geo-\nMAR: Unleashing Geometrically Aligned Features for Masked Autoregres-\nsive Blind Face Restoration. InProceedings of the 34th ACM International Con-\nference on Multimedia (MM ’26), November 10–14, 2026, Rio de Janeiro, Brazil.\nACM, New York, NY, USA, 20 pages. https://doi.org/10.1145/3767308.3836198",
+    "figure_candidates": [
+      {
+        "page": 1,
+        "caption": "Figure 1: Our motivations are twofold: (a) aligned geometry-aware feature extraction and (b) multi-step latent code refinement."
+      },
+      {
+        "page": 3,
+        "caption": "Figure 2: An overview of GeoMAR, which takes LQ images and geometry-aware facial component descriptions as inputs to"
+      },
+      {
+        "page": 5,
+        "caption": "Figure 3: Qualitative comparison on three real-world datasets: LFW-Test, WebPhoto-Test and WIDER-Test."
+      },
+      {
+        "page": 6,
+        "caption": "Figure 4: Qualitative comparison on the synthetic CelebA-Test dataset under two degradation levels (FID=144 and FID=267)."
+      },
+      {
+        "page": 7,
+        "caption": "Figure 5: Qualitative comparison of different textual priors"
+      },
+      {
+        "page": 7,
+        "caption": "Figure 6: Qualitative comparison of different query designs."
+      },
+      {
+        "page": 8,
+        "caption": "Figure 7: Generalization of MAR. MAR improves restoration"
+      },
+      {
+        "page": 8,
+        "caption": "Figure 8: Comparison with and without geometric priors"
+      },
+      {
+        "page": 12,
+        "caption": "Figure 9: Comparison of the tag description accuracy between"
+      },
+      {
+        "page": 12,
+        "caption": "Fig. 15 reveal that MAR enables better restoration through iterative"
+      },
+      {
+        "page": 13,
+        "caption": "Figure 10: Extreme cases on SCface Distance-3."
+      },
+      {
+        "page": 14,
+        "caption": "Figure 11: Failure cases under severe occlusions."
+      },
+      {
+        "page": 14,
+        "caption": "Fig. 18, Fig. 19, Fig. 20, and Fig. 21 present results on LFW-Test,"
+      },
+      {
+        "page": 15,
+        "caption": "Figure 12: Qualitative comparison of different textual priors on two real-world datasets."
+      },
+      {
+        "page": 15,
+        "caption": "Figure 13: Qualitative comparisons of different types of query on two real-world datasets."
+      },
+      {
+        "page": 16,
+        "caption": "Figure 14: Qualitative comparisons of different steps𝑇in masked auto-regressive on two real-world datasets."
+      },
+      {
+        "page": 17,
+        "caption": "Figure 15: Qualitative comparisons of CodeFormer with and without MAR on two real-world datasets."
+      },
+      {
+        "page": 17,
+        "caption": "Figure 16: Qualitative comparisons of DAEFR with and without MAR on two real-world datasets."
+      },
+      {
+        "page": 18,
+        "caption": "Figure 17: Qualitative comparisons of GeoMAR with and without MAR on two real-world datasets."
+      },
+      {
+        "page": 18,
+        "caption": "Figure 18: Visual comparisons of different methods on LFW-Test dataset."
+      },
+      {
+        "page": 19,
+        "caption": "Figure 19: Visual comparisons of different methods on WebPhoto-Test dataset."
+      },
+      {
+        "page": 19,
+        "caption": "Figure 20: Visual comparisons of different methods on WIDER-Test dataset."
+      },
+      {
+        "page": 20,
+        "caption": "Figure 21: Visual comparisons of different methods on synthetic CelebA-Test dataset."
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 5,
+        "caption": "Table 1: Quantitative comparison on three real-world datasets. Red, blue and cyan indicate the best, second and third-best,"
+      },
+      {
+        "page": 6,
+        "caption": "Table 2: Quantitative comparison on the synthetic CelebA-Test dataset under two degradation levels (FID=144 and FID=267)."
+      },
+      {
+        "page": 7,
+        "caption": "Table 3: Ablation study of GeoMAR design on CelebA-Test"
+      },
+      {
+        "page": 7,
+        "caption": "Table 4: Ablation study on geometric priors design."
+      },
+      {
+        "page": 7,
+        "caption": "Table 5: Ablation of query types in geometric prior injector."
+      },
+      {
+        "page": 7,
+        "caption": "Table 4, our design achieves the best FID. Although the ‘w/o Geo-"
+      },
+      {
+        "page": 8,
+        "caption": "Table 6: Generalization of MAR across BFR methods (FID). △"
+      },
+      {
+        "page": 8,
+        "caption": "Table 7: Quantitative results with different prediction steps"
+      },
+      {
+        "page": 12,
+        "caption": "Table 8: System prompt template and a component-based example used in the VLM pipeline."
+      },
+      {
+        "page": 12,
+        "caption": "Table 9: GeoMAR parameter breakdown."
+      },
+      {
+        "page": 12,
+        "caption": "Table 10: Comparison of model complexity and reported in-"
+      },
+      {
+        "page": 13,
+        "caption": "Table 14: Quantitative comparison on SCface Distance-3."
+      },
+      {
+        "page": 13,
+        "caption": "Table 11: Quantitative results of CodeFormer with and with-"
+      },
+      {
+        "page": 13,
+        "caption": "Table 12: Per-image end-to-end runtime breakdown of Geo-"
+      },
+      {
+        "page": 13,
+        "caption": "Table 13: Ablation study on the effect of the contrastive align-"
+      },
+      {
+        "page": 13,
+        "caption": "Table 14, GeoMAR achieves the best FID and MANIQA among the"
+      },
+      {
+        "page": 13,
+        "caption": "Table 16. SFT and the projected T5 features are retained as the com-"
+      },
+      {
+        "page": 14,
+        "caption": "Table 15: Robustness to imperfect geometric priors. “Dropout”"
+      },
+      {
+        "page": 14,
+        "caption": "Table 16: Fine-grained additive ablation on CelebA-Test."
+      },
+      {
+        "page": 14,
+        "caption": "Table 17: Sensitivity to the VLM used for geometric-prior"
+      }
+    ],
+    "keyword_pages": {
+      "architecture": [
+        1,
+        2,
+        3,
+        5,
+        7,
+        8,
+        11,
+        12,
+        13
+      ],
+      "identity": [
+        14
+      ],
+      "portrait_detail": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        17,
+        19
+      ],
+      "efficiency": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18
+      ],
+      "datasets": [
+        1,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        11,
+        12,
+        13,
+        14,
+        18,
+        19,
+        20
+      ],
+      "limitations": [
+        2,
+        8,
+        11,
+        14
+      ]
+    },
+    "source_urls": [
+      {
+        "page": 1,
+        "url": "https://doi.org/10.1145/3767308.3836198"
+      },
+      {
+        "page": 1,
+        "url": "https://github.com/BRL-SYSU/GeoMAR.git"
+      }
+    ],
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\geomar.txt"
+  },
+  {
+    "key": "hdrface",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\01_single_face\\hdrface_2605.14821.pdf",
+    "page_count": 19,
+    "first_page_excerpt": "HDRFace: Rethinking Face Restoration with\nHigh-Dimensional Representation\nZirui Wang1, Xianhui Lin 2† , Yi Dong2, Bo Wei2, Gangjian Zhang 2,\nSiteng Ma2, Zebiao Zheng 2, Xing Liu 2, Hong Gu 2, Minjing Dong 1∗\n1 City University of Hong Kong\n2 vivo BlueImage Lab, vivo Mobile Communication Co., Ltd\nzrwang23-c@my.cityu.edu.hk xhlin129@gmail.com minjdong@cityu.edu.hk\nProject Page\nAbstract\nFace restoration under complex degradations still remains an ill-posed inverse\nproblem due to severe information loss. Although diffusion models benefit from\nstrong generative priors, most methods still condition only on low-quality inputs,\nmaking it difficult to recover identity-critical details under heavy degradations. In\nthis work, we proposeHDRF ace, aHigh-DimensionalRepresentation conditioned\nF acerestoration framework that injects semantically rich priors into the conditional\nflow without modifying the generative backbone. Our pipeline first obtains a\nstructurally reliable intermediate restoration with an off-the-shelf restorer, then\nuses a pretrained high-dimensional feature encoder to extract fine-grained facial\nrepresentations from both the low-quality input and the intermediate result, and\ninjects them as additional conditions for generation. We further introduce SDFM,\na Structure-Detail aware adaptive Fusion Mechanism that emphasizes global con-\nstraints during structure modeling and strengthens representation guidance during\ndetail synthesis, balancing structural consistency and detail fidelity. To validate the\ngeneralization ability of our method, we implement the proposed framework on\ntwo generative models, SD V2.1-base and Qwen-Image, and consistently observe\nstable and coherent performance gains across different architectures.\n1 Introduction\nFace restoration aims to reconstruct high-quality face images from low-quality inputs that have\nundergone complex degradations. Degradations such as blur, noise, downsampling, and JPEG\ncompression can severely damage facial structures and fine-grained texture details, making the task\ninherently an ill-posed inverse problem. In recent years, diffusion models [ 1, 2], empowered by\nstrong generative priors and superior detail completion capabilities, have achieved notable progress in\nimproving perceptual realism and have gradually become a dominant paradigm in face restoration [3,\n4, 5, 6, 7, 8], particularly demonstrating enhanced robustness and advantages under severe degradation\nconditions.\nHowever, most existing diffusion-based face restoration methods [6, 4, 7, 8] still exhibit suboptimal\nperformance in fine-grained detail reconstruction and image fidelity. The fundamental reason lies\nin the fact that these approaches typically rely solely on low-quality images as the only input and\nattempt to learn a direct mapping from LQ to HQ images. Due to the severe information loss and\ncomplex degradations commonly present in low-quality observations, many identity-related facial\ndetails are irreversibly damaged or heavily blurred, making it difficult for the model to accurately\n† Project leader. ∗ Corresponding author.\nPreprint.\narXiv:2605.14821v1  [cs.CV]  14 May 2026",
+    "figure_candidates": [
+      {
+        "page": 2,
+        "caption": "Figure 1: Motivation and improvements of HDRFace. (Left) Existing diffusion-based methods"
+      },
+      {
+        "page": 4,
+        "caption": "Figure 2: Overview of our proposed HDRFace framework."
+      },
+      {
+        "page": 8,
+        "caption": "Figure 3: Qualitative comparison on the CelebA-Test dataset."
+      },
+      {
+        "page": 9,
+        "caption": "Figure 4: Heatmap visualizations of representation"
+      },
+      {
+        "page": 9,
+        "caption": "Figure 5: Ablation evaluation of different"
+      },
+      {
+        "page": 16,
+        "caption": "Figure 6: More Qualitative comparison on CelebA-Test dataset. From left to right: HQ, results of"
+      },
+      {
+        "page": 17,
+        "caption": "Figure 7: More Qualitative comparison on LFW-Test dataset. From left to right: LQ, results of other"
+      },
+      {
+        "page": 17,
+        "caption": "Figure 8: More Qualitative comparison on CeleChild-Test dataset. From left to right: LQ, results of"
+      },
+      {
+        "page": 18,
+        "caption": "Figure 9: Representative failure cases of HDRFace under severe degradations. Our method still"
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 6,
+        "caption": "Table 1: Quantitative comparison on the synthetic CelebA-Test dataset among non-diffusion, multi-"
+      },
+      {
+        "page": 7,
+        "caption": "Table 2: Comparison of metrics with our"
+      },
+      {
+        "page": 7,
+        "caption": "Table 3: Quantitative comparison on real-world datasets."
+      },
+      {
+        "page": 9,
+        "caption": "Table 4: Ablation studies of our method. The left table compares the proposed method with three"
+      },
+      {
+        "page": 15,
+        "caption": "Table 5: Full training and inference details."
+      },
+      {
+        "page": 16,
+        "caption": "Table 6: Complexity comparison during inference. All models are tested with an input image size of"
+      },
+      {
+        "page": 18,
+        "caption": "Table 7: Comparison of metrics with different guidance models, where C-IQA stands for CLIP-IQA."
+      }
+    ],
+    "keyword_pages": {
+      "architecture": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        11,
+        13,
+        14,
+        15,
+        18,
+        19
+      ],
+      "identity": [
+        1,
+        2,
+        5,
+        6,
+        7,
+        8,
+        9,
+        14,
+        18,
+        19
+      ],
+      "portrait_detail": [
+        1,
+        2,
+        3,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        15,
+        16,
+        18,
+        19
+      ],
+      "efficiency": [
+        1,
+        2,
+        3,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19
+      ],
+      "datasets": [
+        6,
+        7,
+        8,
+        15,
+        16,
+        17,
+        18
+      ],
+      "limitations": [
+        2,
+        3,
+        9,
+        18,
+        19
+      ]
+    },
+    "source_urls": [],
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\hdrface.txt"
+  },
+  {
+    "key": "latent_pmrf",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\01_single_face\\latent_pmrf_2507.00447.pdf",
+    "page_count": 11,
+    "first_page_excerpt": "arXiv:2507.00447v1  [cs.CV]  1 Jul 2025\nLatent Posterior-Mean Rectified Flow for Higher-Fidelity\nPerceptual Face Restoration\nXin Luo, Menglin Zhang, Yunwei Lan, Tianyu Zhang, Rui Li, Chang Liu, Dong Liu\nUniversity of Science and Technology of China, Hefei, China\nxinluo@mail.ustc.edu.cn, dongeliu@ustc.edu.cn\nhttps://github.com/Luciennnnnnn/Latent-PMRF\nAbstract\nThe Perception-Distortion tradeoff (PD-tradeoff) theory\nsuggests that face restoration algorithms must balance per-\nceptual quality and fidelity. To achieve minimal distor-\ntion while maintaining perfect perceptual quality, Posterior-\nMean Rectified Flow (PMRF) proposes a flow based ap-\nproach where source distribution is minimum distortion es-\ntimations. Although PMRF is shown to be effective, its\npixel-space modeling approach limits its ability to align\nwith human perception, where human perception is defined\nas how humans distinguish between two image distribu-\ntions. In this work, we propose Latent-PMRF, which re-\nformulates PMRF in the latent space of a variational au-\ntoencoder (VAE), facilitating better alignment with human\nperception during optimization. By defining the source\ndistribution on latent representations of minimum distor-\ntion estimation, we bound the minimum distortion by the\nVAE’s reconstruction error. Moreover, we reveal the de-\nsign of VAE is crucial, and our proposed Sim-VAE sig-\nnificantly outperforms existing VAEs in both reconstruc-\ntion and restoration. Extensive experiments on blind face\nrestoration demonstrate the superiority of Latent-PMRF , of-\nfering an improved PD-tradeoff compared to existing meth-\nods, along with remarkable convergence efficiency, achiev-\ning a 5.79× speedup over PMRF in terms of FID. Our code\nwill be available as open-source.\n1. Introduction\nFace images are among the most common types of images,\nyet they often suffer from complex degradations during for-\nmation, recording, processing, and transmission [59]. Typ-\nical degradations, such as blur [70], noise [14], downsam-\npling [12, 39, 45], and JPEG compression [26], can signif-\nicantly degrade visual quality. Perceptual face restoration\naims to recover high-quality, visually pleasing face images\nfrom degraded inputs. The key challenge lies in enhancing\n5.79x Speedup\nFigure 1. Illustration of perception optimization efficiency in la-\ntent space. We train PMRF and Latent-PMRF with the same com-\npute budget. For V AEs with perceptual compression capabilities,\ndifferences in their latent space align better with human perception\nthan those in pixel space, making latent space modeling more ef-\nfective for perception optimization. Validation curves demonstrate\nthe superior perceptual quality achieved by Latent-PMRF, with a\n5.79× speedup over PMRF in terms of FID.\nperceptual quality while maintaining fidelity. Recent stud-\nies show that generative models, particularly diffusion mod-\nels [23, 37, 53, 58] and flow matching models [46, 73], offer\nstrong solutions for perceptual quality by modeling the dis-\ntribution of natural images. Although such posterior mod-\neling approaches can achieve perfect perceptual quality in\ntheory, they do not guarantee minimal distortion under per-\nfect perceptual quality constrain [2, 17, 46]. To minimize\ndistortion, Posterior-Mean Rectified Flow (PMRF) [46]\ntransports minimum distortion estimation to the target dis-\ntribution using a rectified flow model. This approach can\ntheoretically achieve minimal distortion [17, 46] under per-\nfect perceptual quality constrain.\nIn this work, we challenge the necessity of construct-\ning PMRF in the pixel space. While perceptual quality\nis formally defined as the statistical distance between the\ndistributions of reconstructed and original images [2], re-\n1",
+    "figure_candidates": [
+      {
+        "page": 1,
+        "caption": "Figure 1. Illustration of perception optimization efficiency in la-"
+      },
+      {
+        "page": 3,
+        "caption": "Figure 2. Training Framework of Latent-PMRF. We first es-"
+      },
+      {
+        "page": 4,
+        "caption": "Figure 3. Comparison of ResBlock designs between SD-V AE and"
+      },
+      {
+        "page": 4,
+        "caption": "Figure 4. Two examples of the latent representations. Using pixel-"
+      },
+      {
+        "page": 4,
+        "caption": "Figure 5. Illustration of the resizing layer design. Sim-V AE redis-"
+      },
+      {
+        "page": 6,
+        "caption": "Figure 6. Convergence Efficiency of Latent-PMRF.We train both PMRF and Latent-PMRF using Sim-V AE for 400k iterations on FFHQ"
+      },
+      {
+        "page": 7,
+        "caption": "Figure 7. Qualitative comparisons on CelebA-Test [60] benchmark. Our method produces visually appealing details while maintaining"
+      },
+      {
+        "page": 8,
+        "caption": "Figure 8. Comparisons on real-world datasets. Top: Qualitative results on the WIDER-Test [72] dataset. Bottom: Comparison on the"
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 2,
+        "caption": "Table 1. Comparison of V AEsin CelebA-Test [60]. We evalu-"
+      },
+      {
+        "page": 6,
+        "caption": "Table 2. Impact of V AE architectureson CelebA-Test [60]. All"
+      },
+      {
+        "page": 6,
+        "caption": "Table 3. Impact of Latent Channels on CelebA-Test [60]."
+      },
+      {
+        "page": 7,
+        "caption": "Table 4. Quantitative comparisons on CelebA-Test [60] benchmark. Our approach achieves the best PD-tradeoff, significantly reducing"
+      }
+    ],
+    "keyword_pages": {
+      "architecture": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        10
+      ],
+      "identity": [
+        5,
+        7,
+        8
+      ],
+      "portrait_detail": [
+        1,
+        5,
+        8,
+        11
+      ],
+      "efficiency": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        7,
+        8,
+        10
+      ],
+      "datasets": [
+        2,
+        5,
+        6,
+        7
+      ],
+      "limitations": [
+        4,
+        8
+      ]
+    },
+    "source_urls": [
+      {
+        "page": 1,
+        "url": "https://github.com/Luciennnnnnn/Latent-PMRF"
+      },
+      {
+        "page": 10,
+        "url": "https://github.com/"
+      }
+    ],
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\latent_pmrf.txt"
+  },
+  {
+    "key": "three_diffusion",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\01_single_face\\three_diffusion_2409.00991.pdf",
+    "page_count": 10,
+    "first_page_excerpt": "3D Priors-Guided Diffusion for Blind Face Restoration\nXiaobin Lu∗\nShenzhen Campus of Sun Yat-sen\nUniversity\nShenzhen, China\nYunnan Key Laboratory of Smart\nEducation\nKunming, China\nluxb@mail2.sysu.edu.cn\nXiaobin Hu∗\nTencent Youtu Lab\nShanghai, China\nxiaobinhu@tencent.com\nJun Luo\nUniversity of Chinese Academy of\nSciences\nBeijing, China\nluojun@iie.ac.cn\nBen Zhu\nTencent Cloud Architecture Platform\nShenzhen, China\nbenjaminzhu@tencent.com\nYaping Ruan\nTencent Cloud Architecture Platform\nShenzhen, China\npaulruan@tencent.com\nWenqi Ren†\nShenzhen Campus of Sun Yat-sen\nUniversity\nShenzhen, China\nrenwq3@mail.sysu.edu.cn\nLQGFPGANDiffBIRPSFRGAN\nVQFR Ours\nGan-based DPM-basedCNN-based\nDR2 + SPAR\nFigure 1: Comparison of our method with other blind face restoration methods. The left segment illustrates low-quality images (LQ), while the\ncenter showcases the outcomes of Generative Adversarial Networks (GANs) in the green rectangle [ 3, 45], results from a CNN-based model in\nthe blue region [ 16], and outcomes from the Diffusion Probability Model (DPM) in the red rectangle [ 31, 48]. Our approach excels in enhancing\nrestoration details significantly.\n∗Both authors contributed equally to this research.\n†Corresponding author.\nPermission to make digital or hard copies of all or part of this work for personal or\nclassroom use is granted without fee provided that copies are not made or distributed\nfor profit or commercial advantage and that copies bear this notice and the full citation\non the first page. Copyrights for components of this work owned by others than the\nauthor(s) must be honored. Abstracting with credit is permitted. To copy otherwise, or\nrepublish, to post on servers or to redistribute to lists, requires prior specific permission\nand/or a fee. Request permissions from permissions@acm.org.\nMM ’24, October 28-November 1, 2024, Melbourne, VIC, Australia\n© 2024 Copyright held by the owner/author(s). Publication rights licensed to ACM.\nACM ISBN 979-8-4007-0686-8/24/10. . . $15.00\nhttps://doi.org/10.1145/3664647.3681611\nABSTRACT\nBlind face restoration endeavors to restore a clear face image from\na degraded counterpart. Recent approaches employing Generative\nAdversarial Networks (GANs) as priors have demonstrated remark-\nable success in this field. However, these methods encounter chal-\nlenges in achieving a balance between realism and fidelity, particu-\nlarly in complex degradation scenarios. To inherit the exceptional re-\nalism generative ability of the diffusion model and also constrained\nby the identity-aware fidelity, we propose a novel diffusion-based\narXiv:2409.00991v2  [cs.CV]  12 Sep 2024",
+    "figure_candidates": [
+      {
+        "page": 1,
+        "caption": "Figure 1: Comparison of our method with other blind face restoration methods. The left segment illustrates low-quality images (LQ), while the"
+      },
+      {
+        "page": 2,
+        "caption": "Figure 2: Results on the Arcface identity score (IDS). The"
+      },
+      {
+        "page": 3,
+        "caption": "Figure 3: Comparison of reconstructing 3D faces from the"
+      },
+      {
+        "page": 4,
+        "caption": "Figure 4: The architecture of 3D priors embedded diffusion model. Top: Our framework consists of two parts: the 3D recon-"
+      },
+      {
+        "page": 6,
+        "caption": "Figure 5: Qualitative comparisons of blind face restoration methods on the CelebA-Test dataset[ 24]. Our method performs better in both"
+      },
+      {
+        "page": 7,
+        "caption": "Figure 6: Comparisons of blind face restoration methods on the real-world datasets. The results in the first row are from the"
+      },
+      {
+        "page": 7,
+        "caption": "Figure 7: Analysis of the weight in Scale Add Block."
+      },
+      {
+        "page": 8,
+        "caption": "Figure 8: Ablation study on the CelebA-Test dataset [ 24]. (a) without a facial 3D image as the guidance condition, (b) without"
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 6,
+        "caption": "Table 1: Quantitative evaluation of blind face restoration on CelebA-Test dataset [24] using 3000 randomly selected images."
+      },
+      {
+        "page": 7,
+        "caption": "Table 2: For the performance of blind face restoration, we conducted tests on the real datasets LFW-Test [ 22], WebPhoto [45],"
+      },
+      {
+        "page": 8,
+        "caption": "Table 3: The computational complexity comparison between"
+      },
+      {
+        "page": 8,
+        "caption": "Table 4: Ablation study on the CelebA-Test dataset."
+      }
+    ],
+    "keyword_pages": {
+      "architecture": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "identity": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "portrait_detail": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "efficiency": [
+        2,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "datasets": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "limitations": []
+    },
+    "source_urls": [
+      {
+        "page": 2,
+        "url": "https://doi.org/10.1145/3664647.3681611"
+      },
+      {
+        "page": 2,
+        "url": "https://github.com/838143396/3Diffusion"
+      },
+      {
+        "page": 9,
+        "url": "https://doi.org/10.1109/tip.2003.819861"
+      }
+    ],
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\three_diffusion.txt"
+  },
+  {
+    "key": "heads_up",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\02_portrait_scene\\heads_up_2510.09924.pdf",
+    "page_count": 20,
+    "first_page_excerpt": "Preprint\nHEADSUP! HIGH-FIDELITYPORTRAITIMAGE\nSUPER-RESOLUTION\nRenjie Li1, Zihao Zhu 1, Xiaoyu Wang2, Zhengzhong Tu1∗\n1Texas A&M University,2Topaz Labs\nFigure 1: Different approaches to solve the portrait image super resolution (ISR) task:(a)General\nISR models like (Wu et al., 2024a) may produce unnatural faces when applied to portrait photos\ndue to the lack of face-specific supervision;(b)While introducing an extra face ISR expert (Zhou\net al., 2022) can generate a more natural face, theblendingprocedure will introduce inconsistent\nboundaries.(c)Our portrait ISR approach, HeadsUp, can generate a natural portrait photo without\nintroducing inconsistent boundaries around faces using an all-in-one face-aware restoration model.\nABSTRACT\nPortrait pictures, which typically feature both human subjects and natural back-\ngrounds, are one of the most prevalent forms of photography on social media.\nExisting image super-resolution (ISR) techniques generally focus either on generic\nreal-world images or strictly aligned facial images (i.e., face super-resolution). In\npractice, separate models are blended to handle portrait photos: the face specialist\nmodel handles the face region, and the general model processes the rest. However,\nthese blending approaches inevitably introduce blending or boundary artifacts\naround the facial regions due to different model training recipes, while human\nperception is particularly sensitive to facial fidelity. To overcome these limitations,\nwe study the portrait image supersolution (PortraitISR) problem, and propose\nHeadsUp, a single-step diffusion model that is capable of seamlessly restoring\nand upscaling portrait images in an end-to-end manner. Specifically, we build\nour model on top of a single-step diffusion model and develop a face supervision\nmechanism to guide the model in focusing on the facial region. We then integrate\na reference-based mechanism to help with identity restoration, reducing face am-\nbiguity in low-quality face restoration. Additionally, we have built a high-quality\n4K portrait image ISR dataset dubbedPortraitSR-4K, to support model training\nand benchmarking for portrait images. Extensive experiments show that HeadsUp\nachieves state-of-the-art performance on the PortraitISR task while maintaining\ncomparable or higher performance on both general image and aligned face datasets.\n∗tzz@tamu.edu\n1\narXiv:2510.09924v1  [cs.CV]  10 Oct 2025",
+    "figure_candidates": [
+      {
+        "page": 1,
+        "caption": "Figure 1: Different approaches to solve the portrait image super resolution (ISR) task:(a)General"
+      },
+      {
+        "page": 3,
+        "caption": "Figure 2:Pipeline of HeadsUp.Starting from a pre-trained latent diffusion model, we add a LoRA"
+      },
+      {
+        "page": 6,
+        "caption": "Figure 3:Qualitative Results.While general ISR approaches can achieve good overall quality, they"
+      },
+      {
+        "page": 8,
+        "caption": "Figure 4:Ablation Studies.Us-"
+      },
+      {
+        "page": 16,
+        "caption": "Figure 5: Visualization of some portrait images sampled from PortraitSR-4K."
+      },
+      {
+        "page": 17,
+        "caption": "Fig. 7, which demonstrate our competitive performance compared to the state-of-the-art models. The"
+      },
+      {
+        "page": 18,
+        "caption": "Figure 6:Visual Comparison on PortraitISR.OSEDiff-Face is a blending-based approach, the"
+      },
+      {
+        "page": 19,
+        "caption": "Figure 7:Visual Comparison on GISR.Our model achieves competitive results."
+      },
+      {
+        "page": 20,
+        "caption": "Figure 8:Visual Comparison on FISR.Our model achieves performance comparable to that of the"
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 6,
+        "caption": "Table 1:Comparison on Face ISR.We compare"
+      },
+      {
+        "page": 7,
+        "caption": "Table 2:Comparison on PortraitISR.We compare HeadsUp with state-of-the-art general ISR"
+      },
+      {
+        "page": 8,
+        "caption": "Table 3:Comparison on General ISR.We compare HeadsUp with state-of-the-art GISR models on"
+      },
+      {
+        "page": 8,
+        "caption": "Table 4:Ablation Studies.We ablate the key component of HeadsUp. Compare the first and fourth"
+      }
+    ],
+    "keyword_pages": {
+      "architecture": [
+        2,
+        3,
+        4,
+        5,
+        9,
+        10,
+        11,
+        16
+      ],
+      "identity": [
+        1,
+        2,
+        4,
+        5,
+        7,
+        8,
+        9
+      ],
+      "portrait_detail": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18
+      ],
+      "efficiency": [
+        2,
+        3,
+        4,
+        5,
+        9,
+        13,
+        14,
+        16,
+        18,
+        19,
+        20
+      ],
+      "datasets": [
+        1,
+        2,
+        6,
+        8,
+        10,
+        16
+      ],
+      "limitations": [
+        1
+      ]
+    },
+    "source_urls": [
+      {
+        "page": 5,
+        "url": "https://huggingface.co/datasets/bghira/photo-concept-bucket"
+      },
+      {
+        "page": 10,
+        "url": "https://github.com/chaofengc/IQA-PyTorch"
+      }
+    ],
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\heads_up.txt"
+  },
+  {
+    "key": "iconface",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\03_reference_identity\\iconface_2605.02814.pdf",
+    "page_count": 25,
+    "first_page_excerpt": "IConFace: Fine-Grained Identity Conditioning for\nReference-Aware Face Restoration\nAxi Niu*, Jinyang Zhang*, Senyan Qing\nNorthwestern Polytechnical University\nnax@nwpu.edu.cn zhangjinyang@mail.nwpu.edu.cn qingsenyan@nwpu.edu.cn\nHomepage: https://cosmicrealm.github.io/IConFace/\nAbstract\nSeverefacedegradationcanremoveperson-specificevidence,\nmaking restoration underdetermined. A generative prior may\nrecover a sharp, plausible face yet miss localized traits that\npersist across images of the same person. Same-identity ref-\nerences supply this missing evidence, while the degraded ob-\nservation anchors target structure. We proposeIConFace, a\nfine-grained identity-conditioned framework that optionally\nconditionsrestorationonuptothreesame-identityreferences.\nIts hybrid concat backbone retains degraded and reference\nobservations as dense visual tokens, preserving localized\nreference evidence. An identity pathway provides compact\nmulti-reference guidance, while a degraded-structure path-\nway injects full-field and local-residual memories to rein-\nforce target-aligned structure. We also introduce a human-\nauditedbenchmarkthatmeasureswhetherpersistentlocalized\nidentity details survive restoration. IConFace achieves lead-\ning reference compatibility, especially under severe degra-\ndation, and the highest observed preservation rate on this\nbenchmark. Without references, it achieves leading learned\nperceptual quality across five blind-restoration benchmarks.\nJoint reference-based and paired-target evaluations show that\nreference-supported identity recovery and exact target agree-\nment are complementary.\nIntroduction\nBlind face restoration (BFR) recovers a high-quality face\nfrom an observation corrupted by unknown and potentially\nseveredegradations.Low-levelrestorationbenefitsfromfea-\nture and attention modeling (Niu et al. 2025, 2024b) and\ndiffusion-based priors (Niu et al. 2024a; Tu et al. 2026). For\nfaces,generative,codebook,transformer,anddiffusionpriors\nhave substantially improved sharpness and realism (Menon\net al. 2020; Wang et al. 2021a; Gu et al. 2022; Zhou et al.\n2022; Wang et al. 2022; Lin et al. 2024; Miao et al. 2025).\nYetseveredegradationcaneraseperson-specificevidence:a\npopulation prior may synthesize a plausible face but cannot\ndetermine which traits were present before degradation. We\nfocus onpersistent localized identity details, such as moles,\nscars, freckle patterns, and pigmentation regions that recur\nacross captures (Fig. 1).\nSame-identityreferencescansupplyevidencethatisweak\normissinginthedegradedobservation(Lietal.2018,2020b,\n*These authors contributed equally.\nRef1 Ref2 Ref3 LQ\nCodeFormer (blind) RefSTAR (ref.) Ours GT\nFigure 1:Reference-supported detail with target-aligned\nstructure (FFHQ-Ref Moderate, case 19802).Ref1 and\nthe paired GT show a forehead mark largely obscured in\nthe degraded observation. IConFace recovers this cue more\nclearlythanCodeFormerandRefSTARwhilepreservingGT-\nconsistent periocular structure.\n2022; Hsiao et al. 2024; Liu et al. 2025; Chong et al. 2025;\nYin et al. 2026). Multiple captures help separate recurring\nidentity cues from incidental appearance, but also encode\ncapture-specific pose, expression, illumination, and texture,\nrisking reference-state transfer. The degraded observation\nremains target-aligned and anchors pose, expression, and\nrecoverable structure.\nWe proposeIConFace(Fig. 2) to combine these two ev-\nidence sources. Its hybrid concat backbone retains the de-\ngraded observation and optional references as dense visual-\ntoken segments alongside the noisy scene latent. A norm-\nweightedidentitypathwayprovidescompactmulti-reference\nguidance,whileadegraded-structurepathwayrepeatedlyre-\ninforces target-aligned evidence through an input residual\narXiv:2605.02814v2  [cs.CV]  5 Aug 2026",
+    "figure_candidates": [
+      {
+        "page": 1,
+        "caption": "Figure 1:Reference-supported detail with target-aligned"
+      },
+      {
+        "page": 2,
+        "caption": "Figure 2:IConFace framework.The current noisy scene latent is concatenated with VAE-encoded degraded-image and"
+      },
+      {
+        "page": 4,
+        "caption": "Figure 3:Reference-aware qualitative comparisons on three benchmarks.Each row shows one displayed reference, LQ,"
+      },
+      {
+        "page": 4,
+        "caption": "Figure 4:Localized-detail preservation.Rates over 167"
+      },
+      {
+        "page": 5,
+        "caption": "Figure 5:Localized-detail preservation.IConFace preserves the three-mole cheek pattern and its spatial arrangement more"
+      },
+      {
+        "page": 5,
+        "caption": "Figure6:No-referencecomparisonsonfivebenchmarks.RowsshowLQandsixoutputs.Acrossvariedages,poses,occlusions,"
+      },
+      {
+        "page": 5,
+        "caption": "Figure7:Qualitativecomponentablations.ArclabelscomparewithdisplayedRef 1;headlineidentitymetricsuseallprotocol"
+      },
+      {
+        "page": 7,
+        "caption": "Figure3providesqualitativecomparisons;onSevere,sup-"
+      },
+      {
+        "page": 15,
+        "caption": "Figure1:Reference-awarecomparisonsonnineCelebA-Test-Refcases,includingsubstantialRef 1–GTcross-capturedifferences"
+      },
+      {
+        "page": 16,
+        "caption": "Figure 2: Reference-aware comparisons on nine FFHQ-Ref Moderate cases combining Ref1–GT cross-capture variation with"
+      },
+      {
+        "page": 17,
+        "caption": "Figure3:Reference-awarecomparisonsonnineFFHQ-RefSeverecasescombiningpronouncedreference–targetvariationwith"
+      },
+      {
+        "page": 18,
+        "caption": "Figure 4: Expanded localized identity-detail examples from PID-167. Columns show Ref1, Ref2, LQ, representative reference-"
+      },
+      {
+        "page": 19,
+        "caption": "Figure5:Extendedno-referencecomparisonsonninepairedCelebA-Testcases.Paired-targetreconstructionmetricsarereported"
+      },
+      {
+        "page": 20,
+        "caption": "Figure 6: Extended no-reference comparisons on nine LFW cases spanning varied pose, expression, occlusion, and image"
+      },
+      {
+        "page": 21,
+        "caption": "Figure 7: Extended no-reference comparisons on nine CelebChild cases covering both child and adult images."
+      },
+      {
+        "page": 22,
+        "caption": "Figure 8: Extended no-reference comparisons on nine WebPhoto cases with low resolution, illumination variation, color shifts,"
+      },
+      {
+        "page": 23,
+        "caption": "Figure 9: Extended no-reference comparisons on nine Wider-Test cases with strong blur, low resolution, and pose variation."
+      },
+      {
+        "page": 24,
+        "caption": "Figure 10: Qualitative component ablations on nine FFHQ-Ref Moderate cases. The five output columns correspond to the"
+      },
+      {
+        "page": 25,
+        "caption": "Figure 11: Qualitative component ablations on nine FFHQ-Ref Severe cases. Separating the Severe examples from Fig. 10"
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 6,
+        "caption": "Table 1: Reference-aware comparison under each method’s official reference configuration; RefAvg uses only its supplied"
+      },
+      {
+        "page": 6,
+        "caption": "Table 2: Paired-GT similarity to protocol references. Similarities are averaged per sample; Moderate and Severe share the"
+      },
+      {
+        "page": 6,
+        "caption": "Table 3: No-reference restoration on five benchmarks; all three columns are learned perceptual-quality metrics."
+      },
+      {
+        "page": 7,
+        "caption": "Table 3 compares IConFace with five established blind face"
+      },
+      {
+        "page": 7,
+        "caption": "Table 4 reveals a clear division of roles between the two"
+      },
+      {
+        "page": 12,
+        "caption": "Table 2: Reference-count diagnostic on fixed three-reference subsets: 1,921 CelebA-Test-Ref samples and 841 samples from"
+      },
+      {
+        "page": 13,
+        "caption": "Table 3: Paired-target fidelity on the reference-aware benchmarks. GT ArcFace/MagFace measure identity agreement with the"
+      },
+      {
+        "page": 13,
+        "caption": "Table 4 yields positive median margins and majority tar-"
+      },
+      {
+        "page": 13,
+        "caption": "Table 4: Target-versus-reference state alignment of ICon-"
+      },
+      {
+        "page": 14,
+        "caption": "Table 5: PID-167 construction and retained-set sources."
+      },
+      {
+        "page": 14,
+        "caption": "Table 6: Human-verified PID-167 preservation by source"
+      },
+      {
+        "page": 14,
+        "caption": "Table 7: No-reference paired-target reconstruction on"
+      }
+    ],
+    "keyword_pages": {
+      "architecture": [
+        1,
+        2,
+        3,
+        7,
+        8
+      ],
+      "identity": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        10,
+        11,
+        12,
+        13,
+        14,
+        18,
+        25
+      ],
+      "portrait_detail": [
+        1,
+        2,
+        4,
+        8,
+        9,
+        10,
+        11,
+        13
+      ],
+      "efficiency": [
+        1,
+        2,
+        3,
+        4,
+        9,
+        10,
+        11,
+        14,
+        18
+      ],
+      "datasets": [
+        1,
+        2,
+        4,
+        5,
+        6,
+        7,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        19,
+        21,
+        24,
+        25
+      ],
+      "limitations": []
+    },
+    "source_urls": [
+      {
+        "page": 10,
+        "url": "https://cosmicrealm.github.io/IConFace/"
+      },
+      {
+        "page": 8,
+        "url": "https://bfl.ai/blog/flux-2"
+      }
+    ],
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\iconface.txt"
+  },
+  {
+    "key": "personalized_fsr",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\03_reference_identity\\personalized_fsr_2508.10937.pdf",
+    "page_count": 9,
+    "first_page_excerpt": "Personalized Face Super-Resolution with Identity Decoupling and Fitting\nJiarui Yang1 2, Hang Guo2, Wen Huang2, Tao Dai3, Shutao Xia2\n1 Nankai University 2 Tsinghua University 2 Shenzhen University\nAbstract\nIn recent years, face super-resolution (FSR) methods have\nachieved remarkable progress, generally maintaining high\nimage fidelity and identity (ID) consistency under standard\nsettings. However, in extreme degradation scenarios (e.g.,\nscale > 8×), critical attributes and ID information are of-\nten severely lost in the input image, making it difficult for\nconventional models to reconstruct realistic and ID-consistent\nfaces. Existing methods tend to generate hallucinated faces\nunder such conditions, producing restored images lacking\nauthentic ID constraints. To address this challenge, we pro-\npose a novel FSR method with Identity Decoupling and Fit-\nting (IDFSR), designed to enhance ID restoration under large\nscaling factors while mitigating hallucination effects. Our ap-\nproach involves three key designs: 1) Masking the facial re-\ngion in the low-resolution (LR) image to eliminate unreliable\nID cues; 2) Warping a reference image to align with the\nLR input, providing style guidance; 3) Leveraging ID em-\nbeddings extracted from ground truth (GT) images for fine-\ngrained ID modeling and personalized adaptation. We first\npretrain a diffusion-based model to explicitly decouple style\nand ID by forcing it to reconstruct masked LR face regions\nusing both style and identity embeddings. Subsequently, we\nfreeze most network parameters and perform lightweight\nfine-tuning of the ID embedding using a small set of target\nID images. This embedding encodes fine-grained facial at-\ntributes and precise ID information, significantly improving\nboth ID consistency and perceptual quality. Extensive quan-\ntitative evaluations and visual comparisons demonstrate that\nthe proposed IDFSR substantially outperforms existing ap-\nproaches under extreme degradation, particularly achieving\nsuperior performance on ID consistency.\nIntroduction\nFace super-resolution (FSR) has significant application\nvalue in downstream tasks such as identity (ID) recognition\nand facial analysis (Jiang et al. 2021; Zhang, Wu, and Chen\n2020). In scenarios with strict ID requirements, FSR models\nmust not only enhance image quality but also maintain ID\nconsistency. Existing FSR methods are capable of produc-\ning high-fidelity, ID-consistent face images under moderate\ndegradation (Chen et al. 2018; Zhou et al. 2022). However,\nunder extreme degradation conditions (e.g., scaling factors\nCopyright © 2026, Association for the Advancement of Artificial\nIntelligence (www.aaai.org). All rights reserved.\nFigure 1: Visualization of the pretraining and finetuning\nresult. Under severe degradation, it is often impossible to re-\nconstruct fine-grained features without relying on reference\nimages. Generalized training can only ensure local ID simi-\nlarity, whereas personalized fine-tuning demonstrates strong\nconsistency in ID-related attributes.\nexceeding 8×), critical ID and attribute information in the\ninput image is often severely lost, turning the reconstruction\ntask into a highly ill-posed problem (Alekseev and Navon\n2001). In the absence of strong prior constraints, the solution\nspace becomes underdetermined, with numerous plausible\nlocal optima, making the model prone to generating “hallu-\ncinated” results that fail to accurately preserve the target ID.\nFor example, as shown in Fig. 1, the conventional method\n(CodeFormer (Zhou et al. 2022)) may erroneously recon-\nstruct a blurry tattoo region into an unrealistic dark patch.\nReference-based FSR methods (Zhao et al. 2023; Li et al.\n2020) provide a promising solution to this problem by lever-\naging high-quality (HQ) semantic information from refer-\nence images to restore missing details in low-resolution (LR)\ninputs. However, single-reference approaches are highly\nsensitive to pose, lighting, and expression variations, and\ntypically only perform well when the reference and LR im-\nages are closely aligned (Li et al. 2018; Dogan, Gu, and\nTimofte 2019). Although multi-reference methods (Li et al.\n2020; Nitzan et al. 2022) attempt to incorporate richer ID\nfeatures, most existing approaches fail to disentangle ID in-\nformation between the reference and LR images. This dis-\narXiv:2508.10937v1  [cs.CV]  13 Aug 2025",
+    "figure_candidates": [
+      {
+        "page": 1,
+        "caption": "Figure 1: Visualization of the pretraining and finetuning"
+      },
+      {
+        "page": 2,
+        "caption": "Fig. 2 illustrates the overall architecture of IDFSR. Given a"
+      },
+      {
+        "page": 3,
+        "caption": "Figure 2: A schematic diagram of single-step diffusion in IDFSR, including input preprocessing and the overall model archi-"
+      },
+      {
+        "page": 3,
+        "caption": "Fig. 3, IDFSR still generating plausible and ID-consistent"
+      },
+      {
+        "page": 4,
+        "caption": "Figure 3: Warping Analysis. From top to bottom: reference"
+      },
+      {
+        "page": 5,
+        "caption": "Figure 4: Visualization results of different methods under upsampling scales of 8 and 16, separated by double dashed lines. For"
+      },
+      {
+        "page": 6,
+        "caption": "Figure 5: Visualization of cross-ID attribute transfer. We first fit the embedding on ID A, then perform FSR using the LR"
+      },
+      {
+        "page": 6,
+        "caption": "Figure 6: Latent Editing Effects of Style Embedding. Us-"
+      },
+      {
+        "page": 7,
+        "caption": "Figure 7: Effect of Reference Image Quantity on Finetun-"
+      },
+      {
+        "page": 7,
+        "caption": "Fig. 7, we report the average values and confidence intervals"
+      },
+      {
+        "page": 7,
+        "caption": "Figure 8: Ablation Study on Model Components . Since"
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 4,
+        "caption": "Table 1: Quantitative comparison on the CelebRef-HQ dataset with upsampling scales of 8 × and 16×. FT and PT refer to"
+      },
+      {
+        "page": 5,
+        "caption": "Table 2: The qualitative comparison of face ID verifica-"
+      }
+    ],
+    "keyword_pages": {
+      "architecture": [
+        2,
+        3,
+        6,
+        7,
+        8,
+        9
+      ],
+      "identity": [
+        1,
+        2,
+        3,
+        6,
+        7,
+        8
+      ],
+      "portrait_detail": [
+        1,
+        2,
+        7,
+        8,
+        9
+      ],
+      "efficiency": [
+        1,
+        2,
+        3,
+        6,
+        7
+      ],
+      "datasets": [
+        2,
+        4,
+        7
+      ],
+      "limitations": []
+    },
+    "source_urls": [],
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\personalized_fsr.txt"
+  },
+  {
+    "key": "restorerid",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\03_reference_identity\\restorerid_2411.14125.pdf",
+    "page_count": 10,
+    "first_page_excerpt": "RestorerID: Towards Tuning-Free Face Restoration with ID Preservation\nJiacheng Ying1,† Mushui Liu1,† Zhe Wu1 Runming Zhang1\nZhu Yu1 Siming Fu1 Si-Yuan Cao1 Chao Wu1 Yunlong Yu1 Hui-Liang Shen1,∗\n1 Zhejiang University\n{yingjiacheng, lms, jeffw, runmin zhang}@zju.edu.cn\n{yu zhu, fusiming, cao siyuan, chao.wu, yuyunlong, shenhl }@zju.edu.cn\nIncreasing Degradation\nGround-Truth\nReference\nInputBase ModelFaceRestorer\nTuning-free Insertion\nID Preservation\nID Preservation\nIncreasing Degradation\nGround-Truth\nReference\nInputBase ModelFaceRestorer\nTuning-free Insertion\nID Preservation\nID Preservation\nIncreasing Degradation\nID Preservation\nID Preservation\nRestorerID Input\nBase Model\nGround-Truth\nReference\nTuning-free Insertion\nIncreasing Degradation\nID Preservation\nID Preservation\nRestorerID InputBase Model\nGround-Truth\nReference\nTuning-free Insertion\nCodeFormer\nCodeFormer\nFigure 1. As image degradation increases, the blind face restoration approach CodeFormer [45] can restore images but fails to preserve ID\nconsistency (see the second row). In contrast, OurRestorerID, incorporating reference ID priors, generates restored images with consistent\nID information (see the third row).\nAbstract\nBlind face restoration has made great progress in producing\nhigh-quality and lifelike images. Yet it remains challenging\nto preserve the ID information especially when the degra-\ndation is heavy. Current reference-guided face restoration\napproaches either require face alignment or personalized\ntest-tuning, which are unfaithful or time-consuming. In this\npaper, we propose a tuning-free method named RestorerID\nthat incorporates ID preservation during face restoration.\nRestorerID is a diffusion model-based method that restores\nlow-quality images with varying levels of degradation by\nusing a single reference image. To achieve this, we pro-\npose a unified framework to combine the ID injection with\nthe base blind face restoration model. In addition, we de-\nsign a novel Face ID Rebalancing Adapter (FIR-Adapter)\nto tackle the problems of content unconsistency and con-\ntours misalignment that are caused by information conflicts\nbetween the low-quality input and reference image. Fur-\nthermore, by employing an Adaptive ID-Scale Adjusting\n† Equal contribution. ∗ Corresponding author.\nstrategy, RestorerID can produce superior restored images\nacross various levels of degradation. Experimental results\non the Celeb-Ref dataset and real-world scenarios demon-\nstrate that RestorerID effectively delivers high-quality face\nrestoration with ID preservation, achieving a superior per-\nformance compared to the test-tuning approaches and other\nreference-guided ones. The code of RestorerID is avail-\nable at https : / / github . com / YingJiacheng /\nRestorerID.\n1. Introduction\nFace restoration [14, 15, 17, 28] aims to recover clear and\nhigh-quality (HQ) facial images from degraded inputs af-\nfected by blurring, pixelation, artifacts, JPEG compression,\nand other noise distortions. This task has important applica-\ntions across various fields, e.g., computational photography\n[40], old photo recovery [29].\nTo eliminate complex and unknown degradations in low-\nquality (LQ) images, blind face restoration approaches use\nGANs [33, 38], codebooks [45], and diffusion models [35]\n1\narXiv:2411.14125v1  [cs.CV]  21 Nov 2024",
+    "figure_candidates": [
+      {
+        "page": 1,
+        "caption": "Figure 1. As image degradation increases, the blind face restoration approach CodeFormer [45] can restore images but fails to preserve ID"
+      },
+      {
+        "page": 3,
+        "caption": "Figure 2. (a) Our RestorerID framework integrates LQ structural information and reference ID information into a unified diffusion UNet."
+      },
+      {
+        "page": 4,
+        "caption": "Figure 3. The outputs produced by the base model, base model + ID injection, and Our method. Blue, red, and green boxes highlight the"
+      },
+      {
+        "page": 5,
+        "caption": "Figure 4. The restored images under light and heavy degradation using increasing ID-Scale values and our adaptive adjusting strategy. Red"
+      },
+      {
+        "page": 5,
+        "caption": "Figure 5. The curves of the average ID similarity values with re-"
+      },
+      {
+        "page": 6,
+        "caption": "Figure 6. Qualitative comparison with state-of-the-art restoration models on Celeb-Ref dataset with heavy synthetic degradation."
+      },
+      {
+        "page": 7,
+        "caption": "Figure 7. Qualitative comparison with state-of-the-art restoration models on real-world images. Images are sourced from the Internet."
+      },
+      {
+        "page": 7,
+        "caption": "Figure 8. User study results. V oting rates of our RestorerID com-"
+      },
+      {
+        "page": 8,
+        "caption": "Figure 9. The qualitative results of ablation studies on the proposed components under light and heavy degradations. We incrementally"
+      },
+      {
+        "page": 8,
+        "caption": "Figure 10. The qualitative results of ablation study on the two-"
+      },
+      {
+        "page": 8,
+        "caption": "Fig. 9 illustrates the qualitative results of the ablation"
+      },
+      {
+        "page": 8,
+        "caption": "Fig. 10 illustrates the qualitative results of the ablation"
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 2,
+        "caption": "Table 1. An overview of previous works on face restoration, in"
+      },
+      {
+        "page": 6,
+        "caption": "Table 2. Quantitative comparison on light and heavy degradation levels. Red indicates the best and blue indicates the second best."
+      },
+      {
+        "page": 7,
+        "caption": "Table 3. Ablation study on the proposed components, includ-"
+      },
+      {
+        "page": 8,
+        "caption": "Table 4. Ablation study for our two-stage training strategy."
+      }
+    ],
+    "keyword_pages": {
+      "architecture": [
+        1,
+        2,
+        3,
+        8,
+        9
+      ],
+      "identity": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "portrait_detail": [
+        1,
+        2,
+        3,
+        4,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "efficiency": [
+        1,
+        2,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "datasets": [
+        1,
+        6,
+        9
+      ],
+      "limitations": [
+        2
+      ]
+    },
+    "source_urls": [
+      {
+        "page": 9,
+        "url": "https://cdn"
+      }
+    ],
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\restorerid.txt"
+  },
+  {
+    "key": "fadra",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\04_video_face\\fadra_2607.06389.pdf",
+    "page_count": 13,
+    "first_page_excerpt": "1\nFADRA: Frequency-Aware Diffusion with Residual Adaptation for\nVideo Face Restoration\nJin Jiang 1 Jia Wang2 Panwen Hu3 Weiran Zhao1 Shengcai Liao 1†\n1UAEU 2OUC 3MBZUAI\nAbstract—Video face restoration (VFR) aims to recover high-\nquality and temporally consistent facial details from severely de-\ngraded video sequences; however, existing methods still struggle\nto balance spatial fidelity and temporal coherence under complex\ndegradations. To address this, we propose FADRA, a frequency-\naware diffusion framework with iterative residual adaptation\nspecifically tailored for robust VFR. We first leverage the strong\ntemporal consistency of a pre-trained text-to-video diffusion\nmodel and introduce lightweight LoRA adapters together with\na Low-Quality (LQ) Pixel-Alignment Feature Fusion module to\nefficiently adapt the frozen generative prior to the VFR task. To\nfurther adapt the frozen diffusion backbone to the downstream\nVFR task beyond LoRA-based adaptation, we introduce a Re-\npeated Residual Adaptation Head (RRAH) for step-wise residual\nrefinement after the diffusion backbone. To make this refinement\nexplicitly guided by the degraded observation, RRAH further\ntakes the LQ latent together with the current velocity prediction\nas input, allowing the model to repeatedly revisit LQ cues and\npredict residual updates at each flow-matching step. This LQ-\nguided repeated residual adaptation helps recover fine facial\ndetails while preserving the inherent temporal priors of the pre-\ntrained model. Furthermore, to ensure the structural integrity of\nperceptually important details, we introduce a Frequency-Aware\nLoss that provides explicit supervision across multiple spectral\nbands, emphasizing visually sensitive frequency components that\nare crucial for perceptual quality and prone to temporal jittering.\nExtensive experiments demonstrate that FADRA recovers better\nfacial structures and produces more temporally consistent videos\nthan state-of-the-art methods, leading to clear gains in both\nquantitative metrics and visual perception.\nIndex Terms—Video face restoration, Diffusion models,\nFrequency-aware loss, Temporal consistency, Repeated residual\nadaptation.\nI. INTRODUCTION\nVideo face restoration (VFR) aims to recover high-quality\nand temporally consistent facial details from severely degraded\nvideo sequences. Despite recent progress, VFR remains highly\nchallenging due to the need to simultaneously reconstruct\nfine-grained facial structures and maintain temporal coherence\nacross frames under complex degradations such as blur, noise,\nand compression artifacts [1]–[4]. The problem becomes even\nJin Jiang, Weiran Zhao, and Shengcai Liao are with the College of\nInformation Technology (CIT), United Arab Emirates University (UAEU),\nAl Ain, Abu Dhabi, United Arab Emirates.\nJia Wang is with the State Key Laboratory of Physical Oceanography and\nthe Faculty of Information Science and Engineering, Ocean University of\nChina (OUC), Shandong, 266100, China.\nPanwen Hu is with the Computer Vision Department, Mohamed bin Zayed\nUniversity of Artificial Intelligence (MBZUAI), Abu Dhabi, United Arab\nEmirates.\n†Corresponding author: Shengcai Liao (email: scliao@ieee.org).\n…SVFRFVD:66.80\n…OursFVD:38.97\n…PGTFormerFVD:73.52\n…KEEPFVD: 154.73\n…DiffBIRFVD: 53.35\nExisting Methods:•Over-smoothing•Flicker•Temporal Inconsistency\nOurs:•Sharp Details•Stable ResultsTemporally Stable\nInconsistent Over Time\nHigher FVDLower Quality\nBest QualityBest FVD 38.97\nFig. 1. Visual comparison with state-of-the-art methods on video frames.\nExisting methods often produce over-smoothed facial details and temporally\ninconsistent restorations, leading to flickering artifacts and higher FVD scores.\nIn contrast, FADRA restores sharper eye details and maintains a stable\nappearance across frames, achieving the best FVD on the VFHQ test set.\nmore difficult when the input videos exhibit large pose varia-\ntions or expressive facial motions.\nExisting VFR approaches [5]–[7] typically follow either\nframe-wise restoration or temporal aggregation paradigms.\nFrame-based methods process each frame independently and\nthus may achieve reasonable spatial quality, but they often\nsuffer from noticeable temporal flickering and identity drift.\nIn contrast, video-based models aggregate information over\ntime to improve consistency, yet they often oversmooth high-\nfrequency facial details, e.g., eyes, mouth, and teeth, that are\ncrucial for perceptual quality.\nRecently, diffusion models have demonstrated remarkable\nperformance on image and video restoration tasks [8]–[11]\nthanks to their strong generative priors and ability to model\ncomplex data distributions. However, standard diffusion [12],\n[13] or flow-matching frameworks [14] typically predict noise\nor velocity conditioned on the current state, but lack an explicit\nmechanism to make full use of the low-quality input cues\nthroughout the trajectory. Once early predictions underutilize\nor misinterpret these cues, the model may fail to recover subtle\nfacial structures, particularly under severe degradations. More-\nover, existing diffusion-based restoration methods [15], [16]\nmainly rely on pixel-space or latent-space losses that implicitly\ntreat different frequency components equally. Such uniform\nsupervision is suboptimal for facial restoration, where high-\nfrequency structures and textures carry important perceptual\ncues and are especially prone to temporal jittering [17].\nTo address the above issues, we propose FADRA, a\nfrequency-aware diffusion framework with iterative residual\nadaptation specifically tailored for robust VFR. We first lever-\narXiv:2607.06389v1  [cs.CV]  7 Jul 2026",
+    "figure_candidates": [
+      {
+        "page": 1,
+        "caption": "Fig. 1. Visual comparison with state-of-the-art methods on video frames."
+      },
+      {
+        "page": 3,
+        "caption": "Fig. 2. Overview of the proposed FADRA framework. During training, low-quality (LQ) and high-quality (HQ) videos are both encoded into the latent space"
+      },
+      {
+        "page": 4,
+        "caption": "Fig. 3. Illustration of the LQ-guided “re-examination” mechanism in the Repeated Residual Adaptation Head (RRAH)."
+      },
+      {
+        "page": 7,
+        "caption": "Fig. 4. Visual comparison of restoration results from different methods on the VFHQ test set. For two image-based methods, RestoreFormer++ [5] and"
+      },
+      {
+        "page": 8,
+        "caption": "Fig. 5. Visual comparison of restoration results from different methods on examples from CelebV-HQ test set. For two image-based methods, RestoreFormer++"
+      },
+      {
+        "page": 9,
+        "caption": "Fig. 6. Visual comparison of restoration results from different methods on real movies. For two image-based methods, RestoreFormer++ and DiffBIR, we"
+      },
+      {
+        "page": 11,
+        "caption": "Fig. 7. Visualization of latent-space error and frequency statistics between ground-truth and predicted latents. MSE: mean squared error; MAE: mean absolute"
+      }
+    ],
+    "table_candidates": [],
+    "keyword_pages": {
+      "architecture": [
+        1,
+        2,
+        3,
+        5,
+        6,
+        10,
+        12
+      ],
+      "identity": [
+        1,
+        2,
+        3,
+        5,
+        6,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "portrait_detail": [
+        1,
+        2,
+        3,
+        4,
+        6,
+        8,
+        12,
+        13
+      ],
+      "efficiency": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "datasets": [
+        1,
+        2,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        13
+      ],
+      "limitations": [
+        2
+      ]
+    },
+    "source_urls": [],
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\fadra.txt"
+  },
+  {
+    "key": "svfr",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\04_video_face\\svfr_2501.01235.pdf",
+    "page_count": 10,
+    "first_page_excerpt": "SVFR: A Unified Framework for Generalized Video Face Restoration\nZhiyao Wang1,2, Xu Chen2,*, Chengming Xu2, Junwei Zhu2†, Xiaobin Hu2,\nJiangning Zhang2, Chengjie Wang2, Yuqi Liu1, Yiyi Zhou1†, Rongrong Ji1\n1Key Laboratory of Multimedia Trusted Perception and Efficient Computing,\nMinistry of Education of China, Xiamen University, China 2Tencent Youtu Lab\nAbstract\nFace Restoration (FR) is a crucial area within image and\nvideo processing, focusing on reconstructing high-quality\nportraits from degraded inputs. Despite advancements in\nimage FR, video FR remains relatively under-explored, pri-\nmarily due to challenges related to temporal consistency,\nmotion artifacts, and the limited availability of high-quality\nvideo data. Moreover, traditional face restoration typi-\ncally prioritizes enhancing resolution and may not give as\nmuch consideration to related tasks such as facial coloriza-\ntion and inpainting. In this paper, we propose a novel ap-\nproach for the Generalized Video Face Restoration (GVFR)\ntask, which integrates video BFR, inpainting, and coloriza-\ntion tasks that we empirically show to benefit each other.\nWe present a unified framework, termed as stable video\nface restoration (SVFR), which leverages the generative\nand motion priors of Stable Video Diffusion (SVD) and\nincorporates task-specific information through a unified\nface restoration framework. A learnable task embedding\nis introduced to enhance task identification. Meanwhile,\na novel Unified Latent Regularization (ULR) is employed\nto encourage the shared feature representation learning\namong different subtasks. To further enhance the restora-\ntion quality and temporal stability, we introduce the fa-\ncial prior learning and the self-referred refinement as aux-\niliary strategies used for both training and inference. The\nproposed framework effectively combines the complemen-\ntary strengths of these tasks, enhancing temporal coherence\nand achieving superior restoration quality. This work ad-\nvances the state-of-the-art in video FR and establishes a\nnew paradigm for generalized video face restoration. Code\nand video demo are available at https://github.\ncom/wangzhiyaoo/SVFR.git.\n1. Introduction\nFace Restoration (FR) is a critical area of research within\nthe broader field of image and video processing, aiming to\nrecover high-quality facial images from degraded inputs.\nSVFR\nColorization\nGPEN\nBFR\nPGTFormer\nInpainting\nCodeFormer\nFigure 1. Face restoration results of SOTA single task methods\nand SVFR. Our unified SVFR model outperforms SOTA single\ntask methods by avoiding facial structure abnormalities, temporal\ncolor inconsistencies, and texture distortions.\nThis task has significant applications for both images and\nvideos. For example, effective image FR methods can help\non personal photo enhancement, historical photo restora-\ntion, and forensic analysis, while video FR can well serve\nthe goal of film restoration and surveillance.\nWhile abundant works have been proposed to solve im-\nage FR with acceptable results, the video FR, which tar-\ngets high-quality and realistic face recovery with appropri-\nate identity consistency together with temporal stability, has\nhardly been explored. Few efforts dedicated to this area\nsuch as BasicVSR++ [7] and KEEP [43] still significantly\nlack behind their image-based counterparts, suffering from\nproblems such as low generation quality, temporal jitter\nand discontinuity, due to the multifaceted challenges. The\nmain problem lies in the fact that video FR is intrinsically\nmore complex than image FR in that the temporal dimen-\nsion introduces additional complexity, requiring the model\nto maintain consistency across frames while dealing with\nmotion artifacts, occlusions, and varying lighting condi-\ntions. However, the high-quality training data for video FR\nis hard to collect. In this way, the scarcity of high-quality\nannotated video datasets further complicates the training\nprocess, making it difficult to achieve robust performance.\nMoreover, the limited capacity of architecture adopted by\n*Equal Contribution. †Corresponding Author.\n1\narXiv:2501.01235v2  [cs.CV]  3 Jan 2025",
+    "figure_candidates": [
+      {
+        "page": 1,
+        "caption": "Figure 1. Face restoration results of SOTA single task methods"
+      },
+      {
+        "page": 4,
+        "caption": "Figure 2. Pipeline of our proposed SVFR. (a) Training pipeline of SVFR: We incorporate task information into the training process using"
+      },
+      {
+        "page": 7,
+        "caption": "Figure 3. Comparisons of SVFR with Advanced BFR Methods. Compared to other methods, SVFR avoids distortions in facial structure"
+      },
+      {
+        "page": 7,
+        "caption": "Figure 4. Comparisons of SVFR with Advanced Colorization (left) and Inpainting (right) Methods. Compared to other methods,"
+      },
+      {
+        "page": 8,
+        "caption": "Figure 5. Temporal Stability Comparison. Through temporal"
+      },
+      {
+        "page": 8,
+        "caption": "Figure 6. Ablation study on self-referred refinement (SRR)."
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 3,
+        "caption": "Table 1. Pilot study results. For all subtasks, training models based"
+      },
+      {
+        "page": 6,
+        "caption": "Table 2. Quantitative comparisons with state-of-the-art methods on the VFHQ-test dataset.The results show that our method achieves"
+      },
+      {
+        "page": 8,
+        "caption": "Table 3. Ablation study for multi-task training."
+      }
+    ],
+    "keyword_pages": {
+      "architecture": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        8,
+        9
+      ],
+      "identity": [
+        1,
+        2,
+        5,
+        6,
+        8
+      ],
+      "portrait_detail": [
+        1,
+        2,
+        3,
+        4,
+        6,
+        8,
+        9,
+        10
+      ],
+      "efficiency": [
+        1,
+        3,
+        4,
+        6,
+        7
+      ],
+      "datasets": [
+        2,
+        6,
+        8,
+        9,
+        10
+      ],
+      "limitations": [
+        8
+      ]
+    },
+    "source_urls": [
+      {
+        "page": 1,
+        "url": "https://github"
+      }
+    ],
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\svfr.txt"
+  },
+  {
+    "key": "tiger",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\04_video_face\\tiger_2606.24336.pdf",
+    "page_count": 17,
+    "first_page_excerpt": "TIGER: Taming Identity, Geometry, and Generative\nPriors for High-Quality Face Video Restoration\nYang Zhou1∗, Wenxue Li1,2∗, Peng Zhang1†, Yifei Chen1, Fei Wang1, Daiguo Zhou1\n1 MiLM Plus, Xiaomi Inc.\n2 The Hong Kong University of Science and Technology (Guangzhou)\nAbstract\nFace Video Restoration (FVR) aims to recover high-fidelity facial videos from de-\ngraded input while preserving identity and semantic consistency across frames.\nExisting methods often struggle to simultaneously address three key challenges:\nidentity shift, viewpoint-entangled guidance, and perceptual realism. To tackle\nthese issues, we propose TIGER, a structured tri-prior fusion framework that\nTamesIdentity,Geometry, and gEnerative pRiors for high-quality FVR. Specif-\nically, anIdentity Prioris first established by injecting subject-discriminative\nembeddings into the latent space, effectively anchoring the subject’s identity\nagainst severe degradations. Then, to provide temporally consistent structural\nguidance for dynamic videos, TIGER constructs aGeometry Priorby lifting 2D\nreference cues into a disentangled 3D parameter space, creating a geometric\nanchor through cross-source parameter fusion. Moreover, to achieve maximum\nefficiency without compromising realism, we harness the video generation\nmodel’sGenerative Priorthrough a one-step rectified flow. We further design a\nprogressive three-stage training optimazition strategy that refines structural\nfidelity, textural reconstruction, and distribution-level realism to ensure robust\noptimization. We also construct a large-scale FVR dataset to facilitate robust\ntraining and standardized evaluation. Extensive experiments demonstrate that\nTIGER achieves state-of-the-art performance in both identity fidelity and tem-\nporal stability, delivering a high-quality, efficient and identity-consistent FVR.\nProject page:https://yzhoulv.github.io/Tiger/.\n1 Introduction\nRecent advances in video restoration have demonstrated remarkable progress in reconstruct-\ning high-fidelity content from severely degraded inputs [1–3]. Among these tasks, Face Video\nRestoration (FVR) is particularly challenging due to its structural and semantic constraints. Unlike\ngeneric video restoration, FVR must simultaneously recover fine-grained facial details, preserve\nthe subject’s identity-defining characteristics, and maintain temporal coherence across dynamic\nexpressions and pose variations [4, 5]. The difficulty is further amplified when degradations are\nsevere, as the available observations become insufficient to reliably preserve identity.\n1∗Equal contribution.\n2†Corresponding author.\narXiv:2606.24336v2  [cs.CV]  30 Jun 2026",
+    "figure_candidates": [
+      {
+        "page": 2,
+        "caption": "Figure1Qualitative and quantitative comparisons with state-of-the-art video restoration methods."
+      },
+      {
+        "page": 5,
+        "caption": "Figure 2Overview of the proposedTIGERframework, whichTamesIdentity,Geometry, and"
+      },
+      {
+        "page": 8,
+        "caption": "Figure 3Pipeline of the proposed high-quality face video filtering with three core dimensions:"
+      },
+      {
+        "page": 10,
+        "caption": "Figure4Qualitativecomparisonwithotherstate-of-the-artmodels. Ourapproachbetterpreserves"
+      },
+      {
+        "page": 12,
+        "caption": "Figure 6Qualitative of ablation study on the three-stage training pipeline."
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 9,
+        "caption": "Table 1Quantitative comparison results on the VFHQ-Test dataset.↑ / ↓ denote higher / lower is"
+      },
+      {
+        "page": 11,
+        "caption": "Table 2Quantitative comparison of our"
+      },
+      {
+        "page": 11,
+        "caption": "Table 3Ablation study on the effectiveness of"
+      },
+      {
+        "page": 11,
+        "caption": "Table 4Ablation study on the effectiveness of"
+      },
+      {
+        "page": 12,
+        "caption": "Table 5Effectiveness of cross-source param-"
+      },
+      {
+        "page": 12,
+        "caption": "Table 6Ablation on the identity-fused embed-"
+      },
+      {
+        "page": 12,
+        "caption": "Table 7Impact of loss weight configurations (𝜆1, 𝜆2, 𝜆3, 𝜆4) on latent supervision, perceptual"
+      }
+    ],
+    "keyword_pages": {
+      "architecture": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        8,
+        11,
+        12,
+        15
+      ],
+      "identity": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "portrait_detail": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "efficiency": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        17
+      ],
+      "datasets": [
+        3,
+        4,
+        8,
+        9,
+        10,
+        11,
+        13,
+        15,
+        16
+      ],
+      "limitations": [
+        3,
+        8
+      ]
+    },
+    "source_urls": [
+      {
+        "page": 1,
+        "url": "https://yzhoulv.github.io/Tiger/"
+      }
+    ],
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\tiger.txt"
+  },
+  {
+    "key": "cfrnet",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\05_efficiency\\cfrnet_2606.06850.pdf",
+    "page_count": 11,
+    "first_page_excerpt": "1\nCFRNet: Cycle-Consistent Fixed-Point Training for\nReal-Time Blind Face Restoration on Consumer\nEmbedded NPUs\nFuchen Li, Xinyang Wang, Yahui Zhang, Yuhan Chen, Jiahong Guo, Zhuohan Qin, and Wenbo Ma\nAbstract—Blind face restoration on consumer devices has\nto balance image quality against speed and memory. Strong\nmethods such as GFPGAN and CodeFormer give good perceptual\nquality, but they rely on large pretrained generative priors and\non operators such as attention, codebook lookup, and style\nmodulation that are hard to compile and quantize on the small\nneural processing units (NPUs) used in consumer hardware.\nSmall convolutional restorers run fast enough, but they tend\nto over-smooth and to leave artifacts around the eyes, nose,\nand mouth. We present CFRNet, a 2.0 M-parameter ResNet-style\nrestorer for on-device use at256×256, the common face-crop\nsize on consumer NPUs. The main idea is Cycle-Consistent Fixed-\nPoint Training (CCFP). Instead of training the network for one\npass and then running it several times by hand, we train it to act\nas a fixed-point operator, so that applying it again to a restored\nface does not change the face. CCFP uses three training losses,\nnamely progressive multi-cycle supervision, an idempotence loss,\nand a re-degradation cycle loss, and it adds no cost at inference.\nTo compare fairly under our deployment limits, we retrain all\nbaselines from scratch at the same256×256resolution. On\na 300-image test set, CFRNet reaches the best perceptual score\n(LPIPS 0.250 at three cycles, which is 31% lower than one cycle)\nand also the best PSNR and SSIM at two cycles. It runs in about\n23 ms per cycle in INT8 on a HiSilicon Hi3402 NPU, while the\nsame baselines cannot be compiled to that chip. The cycle count\nkacts as a simple quality knob that needs no retraining: PSNR\nis best atk= 2and LPIPS keeps improving up tok= 3. We\nfurther show that the same idea works with a plain CNN that is\neven easier to deploy, and we run the model in real time on an\nin-car driver-monitoring board.\nIndex Terms—Blind face restoration, cyclical inference, fixed-\npoint training, cycle consistency, lightweight neural networks,\nembedded NPU, consumer electronics, on-device inference.\nI. INTRODUCTION\nB\nLIND face restoration takes a degraded face image,\nwhich may have blur, downsampling, noise, and com-\npression artifacts, and recovers a clean and identity-consistent\nface. The task matters for many consumer products: photo\nand video apps on phones, video calls, smart cameras and\ndoorbells, and in-car driver-monitoring systems [1], [2]. In\nthese products the input is often captured in poor conditions,\nF. Li and X. Wang contributed equally to this work.(Corresponding author:\nFuchen Li, (e-mail: fuchen.li@ufl.edu).)\nF. Li, X. Wang, and J. Guo are with the University of Florida, Gainesville,\nFL, USA.\nY . Zhang is with the University of Southampton, Southampton, UK.\nY . Chen is with Chongqing University, Chongqing, China.\nZ. Qin is with Qingdao University, Qingdao, China.\nW. Ma is with Intel Asia-Pacific Research & Development Ltd, Shanghai,\nChina.\nand the model has to run on a small NPU with a tight\nlatency and memory budget. Recent prior-guided methods\nsuch as GFPGAN [3], GPEN [4], RestoreFormer [5], and\nCodeFormer [6] give very good perceptual quality. They do\nthis with pretrained StyleGAN2 generators, transformer mod-\nules, or learned codebooks. The cost is size and complexity.\nCounting the frozen priors, these systems often have 70–85 M\nparameters, and they use operators such as style modulation,\nmulti-head attention, and codebook lookup. These operators\nare hard to compile and to quantize to INT8 on the NPUs\nfound in consumer devices. Small CNN restorers [7], [8] fit\nthe latency budget, but they have two common problems: they\nover-smooth high-frequency texture, and they leave artifacts\naround the eyes, nose, and mouth. One way to make a small\nnetwork better without making it larger is to run it more than\nonce at test time. Earlier work on iterative super-resolution [9],\n[10] and recurrent restoration [11] ran a single network several\ntimes. But these methods train the network for a single forward\npass and then reuse it in a heuristic way. This leaves a basic\nquestion open: why should running a single-pass network\nagain make the result better instead of worse? What stops the\nsecond pass from harming a face that is already restored? If\nGis trained only to map a degraded imagexto a clean image\ny, then feeding ity ′ ≈yis out of distribution. The network\nwas never asked to keep a good image good, so further passes\nmay over-sharpen, add detail that is not there, or oscillate. We\ncall this the training-inference gap.\nThis paper closes that gap. We present CFRNet, a small\nrestorer for consumer NPUs, and Cycle-Consistent Fixed-Point\nTraining (CCFP). Rather than trainGfor one mapping and\nreuse it by hand, CCFP trainsGto be a fixed-point operator\non the set of natural faces. Three losses work together:\n•Progressive supervision. We supervise the output of every\ncycleG (i)(x),i= 1,2,3, against the ground truth, with\nlarger weight on later cycles. This teachesGa coarse-to-\nfine refinement instead of a one-shot mapping.\n•Idempotence. A loss∥G(G (k)(x))−G (k)(x)∥1 pushes\nthe last output toward a fixed point ofG, so one more\npass does not change it.\n•Re-degradation cycle. If we degrade a restored face again\nwith the degradation modelDand restore it, we should\nget the same restored face:G(D(G (k)(x)))≈G (k)(x).\nThis pushesGto learn the inverse of the degradation\nprocess, not to memorize training pairs.\nCCFP only changes training. The deployed network is the\narXiv:2606.06850v1  [cs.CV]  5 Jun 2026",
+    "figure_candidates": [
+      {
+        "page": 2,
+        "caption": "Fig. 1 shows CFRNet. It has three parts: a small genera-"
+      },
+      {
+        "page": 3,
+        "caption": "Fig. 1. CFRNet and CCFP training. The same 2.0 M-parameter generatorGis runk= 3times with shared weights. Progressive supervision compares each"
+      },
+      {
+        "page": 4,
+        "caption": "Fig. 2. Distance to the clean image as a function of the cycle count. A single-"
+      },
+      {
+        "page": 5,
+        "caption": "Fig. 3 compares CFRNet (k= 3) with the retrained Lite"
+      },
+      {
+        "page": 6,
+        "caption": "Fig. 3. Qualitative comparison on the FFHQ-256 test set. Left to right: degraded input, CodeFormer-Lite, GPEN-Lite, GFPGAN-Lite, CFRNet (k=3), ground"
+      },
+      {
+        "page": 7,
+        "caption": "Fig. 4. Cycle-by-cycle output of one trained CFRNet. Left to right: degraded input,k= 1,k= 2,k= 3,k= 4, ground truth. Every cycle reuses the same"
+      },
+      {
+        "page": 7,
+        "caption": "Fig. 5. Component-level comparison with zoom-ins. Yellow box: eye region;"
+      },
+      {
+        "page": 8,
+        "caption": "Fig. 6. The plain variant on a hard real-world input (heavy haze, low contrast,"
+      },
+      {
+        "page": 8,
+        "caption": "Fig. 6 shows a hard real-world example. One pass (direct-1)"
+      },
+      {
+        "page": 8,
+        "caption": "Fig. 7. Real-time output on the embedded board in a driver-monitoring setting."
+      },
+      {
+        "page": 8,
+        "caption": "Fig. 7 shows a frame captured and restored in real time on"
+      }
+    ],
+    "table_candidates": [],
+    "keyword_pages": {
+      "architecture": [
+        2,
+        5,
+        8,
+        9,
+        10
+      ],
+      "identity": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        8
+      ],
+      "portrait_detail": [
+        1,
+        2,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "efficiency": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "datasets": [
+        4,
+        5,
+        6,
+        8,
+        9
+      ],
+      "limitations": [
+        8
+      ]
+    },
+    "source_urls": [],
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\cfrnet.txt"
+  },
+  {
+    "key": "lafr",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\05_efficiency\\lafr_2505.23462.pdf",
+    "page_count": 17,
+    "first_page_excerpt": "LAFR: Efficient Diffusion-based Blind Face\nRestoration via Latent Codebook Alignment Adapter\nRunyi Li1 Bin Chen1 Jian Zhang1† Radu Timofte2†\n1School of Electronic and Computer Engineering, Peking University, China\n2Computer Vision Lab, CAIDAS & IFI, University of Würzburg, Germany\nAbstract\nBlind face restoration from low-quality (LQ) images is a challenging task that\nrequires not only high-fidelity image reconstruction but also the preservation of\nfacial identity. While diffusion models like Stable Diffusion have shown promise\nin generating high-quality (HQ) images, their V AE modules are typically trained\nonly on HQ data, resulting in semantic misalignment when encoding LQ inputs.\nThis mismatch significantly weakens the effectiveness of LQ conditions during\nthe denoising process. Existing approaches often tackle this issue by retraining\nthe V AE encoder, which is computationally expensive and memory-intensive. To\naddress this limitation efficiently, we proposeLAFR (Latent Alignment for Face\nRestoration), a novel codebook-based latent space adapter that aligns the latent\ndistribution of LQ images with that of HQ counterparts, enabling semantically\nconsistent diffusion sampling without altering the original V AE. To further enhance\nidentity preservation, we introduce a multi-level restoration loss that combines\nconstraints from identity embeddings and facial structural priors. Additionally,\nby leveraging the inherent structural regularity of facial images, we show that\nlightweight finetuning of diffusion prior on just 0.9% of FFHQ dataset is sufficient\nto achieve results comparable to state-of-the-art methods, reduce training time by\n70%. Extensive experiments on both synthetic and real-world face restoration\nbenchmarks demonstrate the effectiveness and efficiency of LAFR, achieving high-\nquality, identity-preserving face reconstruction from severely degraded inputs.\n1 Introduction\nFace image restoration is a critical task within the broader domain of image restoration [82; 69; 2; 2],\nwith applications ranging from photo enhancement to facial forensics [54; 35; 74]. Unlike general\nimages, facial images exhibit highly structured patterns and identity-sensitive features [52; 18; 1],\nnecessitating tailored solutions to ensure structural fidelity and identity preservation. Recent advances\nin diffusion models [16; 44; 43; 39] have positioned them as strong generative priors across various\nrestoration tasks, including super-resolution, inpainting, and deblurring. Among these, latent diffusion\nmodels have gained popularity for face image reconstruction, where inputs are encoded into a latent\nspace before restoration. However, the V AE encoder in the widely adopted Stable Diffusion [39] is\ntrained solely on high-quality (HQ) images. When applied directly to low-quality (LQ) inputs, it\nproduces misaligned latent codes, leading to suboptimal restoration performance [57; 73].\nExisting approaches [ 3; 57; 45] attempt to correct this by retraining the V AE and incorporating\ncomplex alignment modules, but at the cost of increased computational load and inference latency.\nMoreover, most diffusion models are pre-trained on general-purpose datasets such as ImageNet [5],\nwhich limits their direct applicability to face-specific tasks. Adapting these models typically requires\n†Corresponding author.\nPreprint. Under review.\narXiv:2505.23462v1  [cs.CV]  29 May 2025",
+    "figure_candidates": [
+      {
+        "page": 2,
+        "caption": "Figure 1: Comparison of our proposed LAFR with state-of-the-art face restoration methods. (a)"
+      },
+      {
+        "page": 3,
+        "caption": "Figure 2: Comparison of alignment strategies of LQ-HQ code in restoration. (a) Our proposed"
+      },
+      {
+        "page": 4,
+        "caption": "Figure 3: Overall pipeline of our proposed LAFR. We keep V AE encoder and decoder frozen, only"
+      },
+      {
+        "page": 7,
+        "caption": "Figure 4: Visualized results on CelebA-Test dataset. RF++ is short for RestoreFormer++ [63]."
+      },
+      {
+        "page": 7,
+        "caption": "Figure 5: Visualized results of real-world face restoration. RF++ is RestoreFormer++ [63] for short."
+      },
+      {
+        "page": 8,
+        "caption": "Figure 6: Performance trend on CelebA-Test as the amount of the training images increases. The"
+      },
+      {
+        "page": 8,
+        "caption": "Figure 7: T-SNE results show that compared to natural"
+      },
+      {
+        "page": 8,
+        "caption": "Figure 8: T-SNE result of distribution"
+      },
+      {
+        "page": 11,
+        "caption": "Figure 9: Performance trend of OSEDiff and our LAFR on CelebA-Test, as the amount of training"
+      },
+      {
+        "page": 12,
+        "caption": "Figure 10: Results on animation images with real-world degradations. Our method yields high-quality"
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 6,
+        "caption": "Table 1: Quantitative comparison with previous methods, which include non-diffusion, multi-step,"
+      },
+      {
+        "page": 6,
+        "caption": "Table 2: Comparison on real-world face restoration benchmarks. C-IQA, M-IQA, and M-IQ stands"
+      },
+      {
+        "page": 8,
+        "caption": "Table 3: Efficiency of our LAFR compared to diffusion-based restoration approaches. Calculation of"
+      },
+      {
+        "page": 9,
+        "caption": "Table 4: Ablation study of multi-level loss on"
+      },
+      {
+        "page": 9,
+        "caption": "Table 5: Ablation study on CelebA-Test for alignment,"
+      },
+      {
+        "page": 9,
+        "caption": "Table 6: Comparison between (1) our proposed alignment adapter and alignment module in FaithD-"
+      },
+      {
+        "page": 11,
+        "caption": "Table 7: Comparison between our proposed alignment adapter and alignment module in VQFR [13]"
+      },
+      {
+        "page": 11,
+        "caption": "Table 8: Ablation studies of different training images amount for our LAFR."
+      },
+      {
+        "page": 11,
+        "caption": "Table 9: Ablation studies of different training images amount for OSEDiff."
+      },
+      {
+        "page": 12,
+        "caption": "Table 10: Comparison between our alignment adapter and directly using LQ images as conditional"
+      }
+    ],
+    "keyword_pages": {
+      "architecture": [
+        3,
+        4,
+        5,
+        6,
+        9,
+        10,
+        14
+      ],
+      "identity": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        12,
+        13,
+        15,
+        16
+      ],
+      "portrait_detail": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        9,
+        10,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "efficiency": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        10,
+        12,
+        13,
+        16,
+        17
+      ],
+      "datasets": [
+        1,
+        2,
+        3,
+        4,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        16
+      ],
+      "limitations": [
+        1,
+        5,
+        10,
+        12
+      ]
+    },
+    "source_urls": [],
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\lafr.txt"
+  },
+  {
+    "key": "one_step_flow",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\05_efficiency\\one_step_flow_2603.03648.pdf",
+    "page_count": 6,
+    "first_page_excerpt": "1\nLinearized Coupling Flow with Shortcut Constraints\nfor One-Step Face Restoration\nXiaohui Sun, Hanlin Wu ,Member, IEEE\nAbstract—Face restoration can be formulated as a continuous-\ntime transformation between image distributions via Flow Match-\ning (FM). However, standard FM typically employs independent\ncoupling, ignoring the statistical correlation between low-quality\n(LQ) and high-quality (HQ) data. This leads to intersecting\ntrajectories and high velocity-field curvature, requiring multi-\nstep integration. We propose Shortcut-constrained Coupling Flow\nfor Face Restoration (SCFlowFR) to address these challenges.\nBy establishing a data-dependent coupling, we explicitly model\nthe LQ–HQ dependency to minimize path crossovers and pro-\nmote near-linear probability flow. Furthermore, we employ a\nconditional mean estimator to refine the source distribution’s\nanchor, effectively tightening the transport cost and stabilizing\nthe velocity field. To ensure stable one-step inference, a shortcut\nconstraint is introduced to supervise average velocities over\narbitrary intervals, mitigating discretization bias in large-step\nupdates. SCFlowFR achieves state-of-the-art one-step restoration,\nproviding a superior trade-off between perceptual fidelity and\ncomputational efficiency.\nIndex Terms—Data-dependent coupling, face restoration, flow\nmatching, shortcut constraints.\nI. INTRODUCTION\nF\nACE restoration, a classical ill-posed inverse problem,\nseeks to reconstruct high-quality (HQ) facial images from\ncorrupted low-quality (LQ) observations. It is fundamental\nto various signal processing applications, including biometric\nidentification and video communication [1], [2]. While recent\ngenerative paradigms have significantly advanced restoration\nfidelity, a critical trade-off persists between reconstruction\nquality and efficiency [3], [4].\nDiffusion Models (DMs) formulate restoration as a gradual\nrefinement process [5], [6], [7], achieving impressive percep-\ntual quality and fidelity by integrating a stochastic differential\nequation (SDE) [8]. However, their iterative nature requires\ndozens of sampling steps, leading to high inference latency that\nhinders real-time signal processing. Recently, Flow Matching\n(FM) [9], [10] has emerged as an efficient deterministic\nalternative. FM learns a time-dependent velocity fieldv θ\nthat satisfies the continuity equation, defining an ordinary\ndifferential equation (ODE) to transport a source distribution\nρ0 to the target HQ distributionρ 1.\nDespite its potential, standard FM-based restoration [11],\n[12] typically assumes anindependent coupling, where source\nsamples (e.g., Gaussian noise) and target HQ images are\nThis work was supported in part by the National Natural Science Foun-\ndation of China under Grant 62401064, and in part by the Fundamental\nResearch Funds for the Central Universities under Grant 2024JJ040 and Grant\n2024TD001.(Corresponding author: Hanlin Wu.)\nThe authors are with the School of Information Science and Technol-\nogy, Beijing Foreign Studies University, Beijing 100089, China (e-mail:\nhlwu@bfsu.edu.cn).\nHQHQLQ\n(c)\nLQHQnoise\n(a) (d)(b)\nHQnoise\n𝜌𝜌0 𝜌𝜌1 𝜌𝜌0 𝜌𝜌1 𝜌𝜌0 𝜌𝜌1 𝜌𝜌0 𝜌𝜌1\n( ,, )tv xt tθ ∆\n'( , ', )tvxt tθ ∆\n( , ,2 )tv xt tθ ∆\n⊥⊥ coupled coupled\nFig. 1. (a) Intersecting paths in independent coupling. (b) Resulting curved\nvelocity field in vanilla FM. (c) Straighter trajectories via data-dependent\ncoupling. (d) One-step sampling via shortcut-constrained average velocity.\npaired without considering the observed LQ signal. From a\nstatistical perspective, this ignores the inherent conditional\ndependency between the LQ input and the HQ ground truth.\nAs illustrated in Fig. 1 (a), independent pairing yields inter-\nsecting interpolation paths. Since the resulting ODE flow\nis deterministic and non-intersecting, the model is forced\nto learn a highly non-linear velocity field with significant\ntrajectory curvature (Fig. 1 (b)). In such curved dynamics, the\napproximation of the instantaneous derivative during one-step\ninference is highly susceptible to discretization errors, leading\nto degraded fidelity [13], [14].\nTo address the challenges of non-linear transport and in-\ntegration instability, we propose Shortcut-constrained Cou-\npling Flow for Face Restoration (SCFlowFR). Our frame-\nwork optimizes the transport dynamics through three key\ninnovations. First, we establish adata-dependent coupling\nthat reformulates the transport as a conditional process. By\nleveraging the mutual information between the LQ and HQ\ndomains, we minimize path crossovers and promote near-linear\nprobability flow (Fig. 1 (c)). Second, we utilize aconditional\nmean estimationas a Bayesian-like prior to anchor the source\ndistribution. This strategy effectively minimizes the expected\nsquared displacement (transport cost) and stabilizes the learned\nvelocity field. Third, we integrate ashortcut constraintthat\nsupervises the model to predict the average velocity over\narbitrary time intervals rather than the instantaneous derivative.\nThis enables the model to implicitly compensate for residual\ncurvature, ensuring stable and accurate one-step inference even\nunder complex degradations (Fig. 1 (d)).\nThe main contributions can be summarized as follows:\n1) We propose a novel FM framework that establishes a\ndata-dependent coupling, explicitly modeling the LQ–HQ\ndependency to linearize the transport trajectory.\n2) We employ aconditional mean estimatorthat refines\nthe source distribution’s center, thereby tightening the\ntransport cost bound and reducing velocity field variance.\n3) We introduce ashortcut constraintthat supervises av-\nerage velocities over arbitrary time intervals, enabling\narXiv:2603.03648v2  [cs.CV]  8 Apr 2026",
+    "figure_candidates": [
+      {
+        "page": 1,
+        "caption": "Fig. 1. (a) Intersecting paths in independent coupling. (b) Resulting curved"
+      },
+      {
+        "page": 2,
+        "caption": "Fig. 2. Overview of SCFlowFR. We construct a coupled LQ–HQ transport path (left), conditioning the velocity fieldv θ on a coarse estimatecfromτ ϕ. A"
+      },
+      {
+        "page": 4,
+        "caption": "Fig. 3. Qualitative comparisons on the CelebA-Test dataset."
+      },
+      {
+        "page": 6,
+        "caption": "Fig. 4. Qualitative comparisons on three wild datasets. From top to bottom:"
+      }
+    ],
+    "table_candidates": [],
+    "keyword_pages": {
+      "architecture": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "identity": [
+        5
+      ],
+      "portrait_detail": [
+        1,
+        2,
+        4,
+        5,
+        6
+      ],
+      "efficiency": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "datasets": [
+        3,
+        4,
+        6
+      ],
+      "limitations": []
+    },
+    "source_urls": [
+      {
+        "page": 5,
+        "url": "https://github.com/madebyollin/taesd"
+      }
+    ],
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\one_step_flow.txt"
+  },
+  {
+    "key": "osdface",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\05_efficiency\\osdface_2411.17163.pdf",
+    "page_count": 22,
+    "first_page_excerpt": "OSDFace: One-Step Diffusion Model for Face Restoration\nJingkai Wang1*, Jue Gong 1*, Lin Zhang 1, Zheng Chen 1\nXing Liu2, Hong Gu 2, Yutong Liu 1†, Yulun Zhang 1†, Xiaokang Yang 1\n1Shanghai Jiao Tong University, 2vivo Mobile Communication Co., Ltd\nAbstract\nDiffusion models have demonstrated impressive perfor-\nmance in face restoration. Yet, their multi-step inference\nprocess remains computationally intensive, limiting their\napplicability in real-world scenarios. Moreover, existing\nmethods often struggle to generate face images that are har-\nmonious, realistic, and consistent with the subject’s identity.\nIn this work, we propose OSDFace, a novel one-step diffu-\nsion model for face restoration. Specifically, we propose\na visual representation embedder (VRE) to better capture\nprior information and understand the input face. In VRE,\nlow-quality faces are processed by a visual tokenizer and\nsubsequently embedded with a vector-quantized dictionary\nto generate visual prompts. Additionally, we incorporate a\nfacial identity loss derived from face recognition to further\nensure identity consistency. We further employ a generative\nadversarial network (GAN) as a guidance model to encour-\nage distribution alignment between the restored face and\nthe ground truth. Experimental results demonstrate that\nOSDFace surpasses current state-of-the-art (SOTA) meth-\nods in both visual quality and quantitative metrics, gen-\nerating high-fidelity, natural face images with high iden-\ntity consistency. The code and model will be released at\nhttps://github.com/jkwang28/OSDFace.\n1. Introduction\nFace restoration aims to restore high-quality (HQ) face im-\nages from degraded low-quality (LQ) inputs caused by com-\nplex degradation processes. Blur, noise, downsampling, and\nJPEG compression are common degradation types that can\nsignificantly affect the quality of face images, leading to\nan ill-posed problem. Recent advancements focus on lever-\naging CNN-based methods and Transformer-based meth-\nods [51, 58, 61, 74] to restore HQ face images, and have\nshown remarkable performance. However, due to the severe\ndegradation of face images, generative models with strong\nprior knowledge exhibit irreplaceable advantages.\nGenerative adversarial networks (GANs) [14] and dif-\n*Equal contribution.\n†Corresponding authors.\nHQ (512×512) LQ (512 ×512) PGDiff [64] DifFace [70]\nMACs (T) / Time (s) / # Steps 481.0 / 85.8 / 1,000 18.68 / 7.05 / 250\nDiffBIR [32] OSEDiff [59] OSEDiff* [59] OSDFace (ours)\n189.2 / 9.03 / 50 2.269 / 0.13 / 1 2.269 / 0.13 / 1 2.132 / 0.10 / 1\nFigure 1. Visual samples of diffusion-based face restoration meth-\nods. We provide multiply-accumulate operations (MACs), time,\nand number of timesteps during inference. Our OSDFace achieves\na more natural and faithful visual result than other ones.\nfusion models [18, 46, 47] have gained considerable at-\ntention for generating high-fidelity images with percep-\ntual details. Many efforts, such as DifFace [70] and Diff-\nBIR [32], have also been applied to restoring HQ face im-\nages [3, 6, 7, 36, 38, 49, 54, 64, 66]. However, GANs are\nchallenging to train and may encounter issues such as mode\ncollapse and training instability. Conversely, diffusion mod-\nels produce promising results but require multiple forward\npasses during inference, leading to increased computational\ncost and longer inference time.\nTo speed up the diffusion inference, one-step diffusion\n(OSD) models [28, 59] have emerged as a promising re-\nsearch topic. Benefiting from the recently developed gen-\nerative diffusion models, especially large-scale pretrained\ntext-to-image (T2I) models [40, 41], OSD models [28, 59]\nenjoy the powerful restoration capability and fast inference\nspeed. It is anticipated that OSD models could be highly\ncompetitive in face restoration practical applications.\nAs shown in Fig. 1, most diffusion-based face restora-\ntion methods can effectively recover basic facial features\nsuch as eyes, mouth, and contour. However, details, such as\nrealistic-looking hair and complex backgrounds, often re-\nmain unharmonious. The primary issue lies in the insuf-\nficient incorporation of face priors [62]. Some diffusion-\nbased methods [7, 32, 70] rely solely on the diffusion\n1\narXiv:2411.17163v2  [cs.CV]  23 Apr 2025",
+    "figure_candidates": [
+      {
+        "page": 1,
+        "caption": "Figure 1. Visual samples of diffusion-based face restoration meth-"
+      },
+      {
+        "page": 2,
+        "caption": "Figure 2. Performance comparison on the CelebA-Test. Those"
+      },
+      {
+        "page": 3,
+        "caption": "Figure 3. Training framework of OSDFace. First, to establish a visual representation embedder (VRE), we train the autoencoder and VQ"
+      },
+      {
+        "page": 4,
+        "caption": "Figure 4. Attention maps of VRE and visual comparison of prompt"
+      },
+      {
+        "page": 6,
+        "caption": "Figure 5. Visual comparison of the synthetic CelebA-Test dataset in challenging cases. Please zoom in for a better view."
+      },
+      {
+        "page": 6,
+        "caption": "Figure 6. Zero-shot results"
+      },
+      {
+        "page": 7,
+        "caption": "Figure 7. Visual comparison of the real-world datasets in challenging cases. Please zoom in for a better view."
+      },
+      {
+        "page": 12,
+        "caption": "Figure 1. Visual comparisons of various versions of OSEDiff [9]."
+      },
+      {
+        "page": 13,
+        "caption": "Figure 2. Visualization of the atmospheric tur-"
+      },
+      {
+        "page": 13,
+        "caption": "Fig. 5, and Fig. 6. Compared to other methods, OSDFace"
+      },
+      {
+        "page": 15,
+        "caption": "Figure 3. Quantitative results on the LFW dataset [4] for face recognition using the official ArcFace [2] MS1MV3 R50 model. The evaluated"
+      },
+      {
+        "page": 16,
+        "caption": "Figure 4. More visual comparison of the synthetic CelebA-Test dataset in challenging cases. Please zoom in for a better view."
+      },
+      {
+        "page": 17,
+        "caption": "Figure 5. More visual comparison of the synthetic CelebA-Test dataset in challenging cases. Please zoom in for a better view."
+      },
+      {
+        "page": 18,
+        "caption": "Figure 6. More visual comparison of the synthetic CelebA-Test dataset in challenging cases. Please zoom in for a better view."
+      },
+      {
+        "page": 19,
+        "caption": "Figure 7. More visual comparison of the real-world Wider-Test dataset in challenging cases. Please zoom in for a better view."
+      },
+      {
+        "page": 20,
+        "caption": "Figure 8. More visual comparison of the real-world LFW-Test dataset in challenging cases. Please zoom in for a better view."
+      },
+      {
+        "page": 21,
+        "caption": "Figure 9. More visual comparison of the real-world WebPhoto-Test dataset in challenging cases. Please zoom in for a better view."
+      },
+      {
+        "page": 22,
+        "caption": "Figure 10. More visual comparison of the real-world datasets in challenging cases. Please zoom in for a better view."
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 6,
+        "caption": "Table 1. Quantitative comparison on the synthetic CelebA-Test dataset with non-diffusion, multi-step diffu-"
+      },
+      {
+        "page": 7,
+        "caption": "Table 2. Quantitative comparison on real-world datasets. C-IQA stands for CLIPIQA, and M-IQA stands for MANIQA. The best and"
+      },
+      {
+        "page": 8,
+        "caption": "Table 3. Complexity comparison during inference. All models are"
+      },
+      {
+        "page": 8,
+        "caption": "Table 4. Ablation study of prompt embedding generation. The best"
+      },
+      {
+        "page": 8,
+        "caption": "Table 3 provides a detailed comparison of model complex-"
+      },
+      {
+        "page": 8,
+        "caption": "Table 5. Ablation studies on different components. The best and"
+      },
+      {
+        "page": 12,
+        "caption": "Table 1 clearly shows that OSDFace achieves high inference"
+      },
+      {
+        "page": 12,
+        "caption": "Table 1. Complexity comparison during inference. “parallelized”"
+      },
+      {
+        "page": 13,
+        "caption": "Table 2. Quantitative comparison on real-world datasets with one-step diffusion methods. C-IQA stands for CLIPIQA, and M-IQA stands"
+      },
+      {
+        "page": 13,
+        "caption": "Table 3. Quantitative comparison on the synthetic CelebA-Test dataset with one-step diffu-"
+      }
+    ],
+    "keyword_pages": {
+      "architecture": [
+        3,
+        4,
+        9,
+        13
+      ],
+      "identity": [
+        1,
+        2,
+        5,
+        6,
+        8
+      ],
+      "portrait_detail": [
+        1,
+        2,
+        3,
+        5,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "efficiency": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "datasets": [
+        2,
+        4,
+        6,
+        7,
+        13,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21
+      ],
+      "limitations": [
+        2,
+        3,
+        5,
+        8,
+        12,
+        13
+      ]
+    },
+    "source_urls": [
+      {
+        "page": 1,
+        "url": "https://github.com/jkwang28/OSDFace"
+      }
+    ],
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\osdface.txt"
+  },
+  {
+    "key": "ntire2025",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\06_benchmarks_baselines\\ntire2025_2504.14600.pdf",
+    "page_count": 12,
+    "first_page_excerpt": "arXiv:2504.14600v1  [cs.CV]  20 Apr 2025\nNTIRE 2025 Challenge on Real-World Face Restoration: Methods and Results\nZheng Chen* Jingkai Wang* Kai Liu* Jue Gong* Lei Sun* Zongwei Wu*\nRadu Timofte* Yulun Zhang*† Jianxing Zhang Jinlong Wu Jun Wang Zheng Xie\nHakjae Jeon Suejin Han Hyung-Ju Chun Hyunhee Park Zhicun Yin\nJunjie Chen Ming Liu Xiaoming Li Chao Zhou Wangmeng Zuo Weixia Zhang\nDingquan Li Kede Ma Yun Zhang Zhuofan Zheng Yuyue Liu Shizhen Tang\nZihao Zhang Yi Ning Hao Jiang Wenjie An Kangmeng Yu Chenyang Wang\nKui Jiang Xianming Liu Junjun Jiang Yingfu Zhang Gang He Siqi Wang\nKepeng Xu Zhenyang Liu Changxin Zhou Shanlan Shen Yubo Duan\nYiang Chen Jin Guo Mengru Yang Jen-Wei Lee Chia-Ming Lee\nChih-Chung Hsu Hu Peng Chunming He\nAbstract\nThis paper provides a review of the NTIRE 2025 challenge\non real-world face restoration, highlighting the proposed\nsolutions and the resulting outcomes. The challenge focuses\non generating natural, realistic outputs while maintaining\nidentity consistency. Its goal is to advance state-of-the-art\nsolutions for perceptual quality and realism, without im-\nposing constraints on computational resources or training\ndata. The track of the challenge evaluates performance us-\ning a weighted image quality assessment (IQA) score and\nemploys the AdaFace model as an identity checker. The\ncompetition attracted 141 registrants, with 13 teams sub-\nmitting valid models, and ultimately, 10 teams achieved a\nvalid score in the final ranking. This collaborative effort ad-\nvances the performance of real-world face restoration while\noffering an in-depth overview of the latest trends in the field.\n1. Introduction\nFace restoration aims to recover high-quality (HQ) face im-\nages from low-quality (LQ) inputs that are degraded by\nblur, noise, compression, and other distortions. The sig-\nnificant loss of information makes the problem highly ill-\nposed. With the continuous advancement of portrait pho-\ntography technology, people have higher expectations for\n*Zheng Chen, Jingkai Wang, Kai Liu, Jue Gong, Lei Sun, Zong-\nwei Wu, Radu Timofte, and Yulun Zhang are the challenge organiz-\ners, while the other authors participated in the challenge. Section B\nin the supplementary materials contains the authors’ teams and affilia-\ntions. NTIRE 2025 webpage: https://cvlai.net/ntire/2025 .\nCode: https://github.com/zhengchen1999/NTIRE2025_\nRealWorld_Face_Restoration.\n†Corresponding author: Yulun Zhang. yulun100@gmail.com\nthe detail and fidelity of face images. Therefore, there\nis an urgent need to ensure that the restored image ap-\npears natural and realistic. Recent developments in deep\nlearning have greatly improved face restoration. Modern\napproaches using CNNs, Transformers [56, 66, 71, 84],\nGANs [1, 2, 63, 75] and Diffusion Models [4, 35, 38, 42, 50,\n55, 62, 67, 69, 73, 78], have shown superior performance.\nOne of the main challenges faced by researchers is the\neffective capture of face priors. While statistical priors have\nbeen commonly employed in traditional image processing\napproaches, the rise of neural networks has led to the ex-\nploration of more learning-based methods. Geometric-prior\nmethods [5, 24, 47, 77] are particularly useful for provid-\ning explicit facial structure information. However, for faces\nwith less severe degradation, people prefer the output to\nbe as realistic as possible, even with skin textures that can\nonly be captured by high-performance cameras. Therefore,\nin addition to semantic guidance, texture information for\nrestoring facial details is also important.\nMany recent studies [16, 56, 66, 71, 84] have explored\nthe use of Transformer models to integrate face priors.\nCodeFormer [84] and DAEFR [56], as two notable exam-\nples, utilize codebooks trained on HQ data as face priors.\nThese models perform well at preserving facial information,\nyet are also limited in handling face and background transi-\ntions in those severely degraded images.\nAs for those severely degraded images, the model’s\ngenerative capability becomes crucial. Many GAN-based\nmethods [1, 2, 63, 75] can effectively restore facial de-\ntails. It’s worth mentioning that GFPGAN [63] not only\nbuilds an effective model, but also provides many bench-\nmark datasets for the computer vision community. In recent\nyears, diffusion-based methods have emerged [4, 35, 38, 42,",
+    "figure_candidates": [
+      {
+        "page": 5,
+        "caption": "Figure 1. Team AllForFace. Basic idea."
+      },
+      {
+        "page": 5,
+        "caption": "Figure 2. Team AllForFace. Fidelity mode structure."
+      },
+      {
+        "page": 5,
+        "caption": "Figure 3. Team AllForFace. Naturalness model."
+      },
+      {
+        "page": 6,
+        "caption": "Figure 4. Team IIL."
+      },
+      {
+        "page": 6,
+        "caption": "Figure 5. Team PISA-MAP."
+      },
+      {
+        "page": 7,
+        "caption": "Figure 6. Team MiPortrait."
+      },
+      {
+        "page": 8,
+        "caption": "Figure 7. Team AIIA."
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 3,
+        "caption": "Table 1 presents the final rankings and results of the teams."
+      },
+      {
+        "page": 4,
+        "caption": "Table 1. Results of NTIRE 2025 Real-world Face Restoration Challenge. The testing was conducted on the test dataset, consisting of 450"
+      }
+    ],
+    "keyword_pages": {
+      "architecture": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "identity": [
+        1,
+        2,
+        3,
+        5,
+        7,
+        8
+      ],
+      "portrait_detail": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "efficiency": [
+        1,
+        2,
+        3,
+        5,
+        6,
+        7,
+        8,
+        9,
+        11
+      ],
+      "datasets": [
+        2,
+        3,
+        4,
+        7,
+        8
+      ],
+      "limitations": []
+    },
+    "source_urls": [
+      {
+        "page": 1,
+        "url": "https://cvlai.net/ntire/2025"
+      },
+      {
+        "page": 1,
+        "url": "https://github.com/zhengchen1999/NTIRE2025_"
+      },
+      {
+        "page": 2,
+        "url": "https://www.cvlai.net/ntire/2025/"
+      },
+      {
+        "page": 3,
+        "url": "https://github"
+      }
+    ],
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\ntire2025.txt"
+  },
+  {
+    "key": "ntire2026",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\06_benchmarks_baselines\\ntire2026_2604.10532.pdf",
+    "page_count": 13,
+    "first_page_excerpt": "The Second Challenge on Real-World Face Restoration at NTIRE 2026:\nMethods and Results\nJingkai Wang* Jue Gong* Zheng Chen* Kai Liu* Jiatong Li* Yulun Zhang*†\nRadu Timofte* Jiachen Tu Yaokun Shi Guoyi Xu Yaoxin Jiang Jiajia Liu\nYingsi Chen Yijiao Liu Hui Li Yu Wang Congchao Zhu\nAlexandru-Gabriel Lefterache Anamaria Radoi Chuanyue Yan Tao Lu\nYanduo Zhang Kanghui Zhao Jiaming Wang Yuqi Li WenBo Xiong\nYifei Chen Xian Hu Wei Deng Daiguo Zhou Sujith Roy V Claudia Jesuraj\nVikas B Spoorthi LC Nikhil Akalwadi Ramesh Ashok Tabib Uma Mudenagudi\nYuxuan Jiang Chengxi Zeng Tianhao Peng Fan Zhang David Bull Wei Zhou\nLinfeng Li Hongyu Huang Hoyoung Lee SangYun Oh ChangYoung Jeong\nAxi Niu Jinyang Zhang Zhenguo Wu Senyan Qing Jinqiu Sun Yanning Zhang\nAbstract\nThis paper provides a review of the NTIRE 2026 challenge\non real-world face restoration, highlighting the proposed\nsolutions and the resulting outcomes. The challenge focuses\non generating natural and realistic outputs while maintain-\ning identity consistency. Its goal is to advance state-of-the-\nart solutions for perceptual quality and realism, without im-\nposing constraints on computational resources or training\ndata. Performance is evaluated using a weighted image\nquality assessment (IQA) score and employs the AdaFace\nmodel as an identity checker. The competition attracted\n96 registrants, with 10 teams submitting valid models; ul-\ntimately, 9 teams achieved valid scores in the final ranking.\nThis collaborative effort advances the performance of real-\nworld face restoration while offering an in-depth overview\nof the latest trends in the field.\n1. Introduction\nFace restoration aims to reconstruct high-quality (HQ) face\nimages from low-quality (LQ) inputs degraded by blur,\nnoise, compression, and other distortions. Since severe\ndegradation often removes a large amount of visual in-\nformation, this task is inherently ill-posed. Meanwhile,\n*Jingkai Wang, Jue Gong, Zheng Chen, Kai Liu, Jiatong Li, Yu-\nlun Zhang, and Radu Timofte are the challenge organizers, while the\nother authors participated in the challenge. Section B in the supplemen-\ntary materials contains the authors’ teams and affiliations. NTIRE 2026\nwebpage:https://cvlai.net/ntire/2026. Code:https:\n/ / github . com / jkwang28 / NTIRE2026 _ RealWorld _ Face _\nRestoration.\n†Corresponding author: Yulun Zhang. yulun100@gmail.com\nwith the continuous progress of portrait imaging technol-\nogy, users increasingly expect restored face images to ex-\nhibit both rich details and high fidelity. This makes it es-\nsential for restoration methods to produce outputs that are\nnot only clear but also natural and realistic. In recent years,\ndeep learning has substantially advanced face restoration.\nMethods based on CNNs, Transformers [66, 77, 82, 98],\nGANs [5, 7, 74, 86], and diffusion models [8, 38, 43, 52, 61,\n65, 71, 78, 80, 84, 91] demonstrated strong performance.\nA key challenge in this field lies in how to effectively\nmodel face priors. Traditional image restoration methods\noften rely on statistical priors, whereas modern neural meth-\nods tend to learn such priors directly from data. Among\nthem, geometric-prior-based approaches [9, 29, 60, 90] are\nparticularly valuable because they provide explicit struc-\ntural cues for facial reconstruction. However, when the\ndegradation is relatively mild, users often expect the re-\nstored results to remain highly realistic, including subtle\nskin textures that are usually captured only by high-end\nimaging devices. Therefore, beyond semantic guidance,\ntexture priors are also vital for recovering fine facial details.\nRecent studies [16, 66, 77, 82, 98] have extensively ex-\nplored Transformer-based designs for incorporating face\npriors. Representative methods such as CodeFormer [98]\nand DAEFR [66] employ codebooks learned from HQ face\nimages as priors. Although these methods are effective at\npreserving facial information, they still show limitations\nwhen handling severely degraded images, especially in tran-\nsition regions between the face and the background.\nFor more severely degraded inputs, generative capabil-\nity becomes increasingly important. GAN-based meth-\nods [5, 7, 74, 86] have shown strong ability in synthesizing\narXiv:2604.10532v2  [cs.CV]  15 Apr 2026",
+    "figure_candidates": [
+      {
+        "page": 5,
+        "caption": "Figure 1. MiPlusCV adopts a two-stage pipeline that combines OSDFace-based coarse restoration with a Z-Image-based one-step detail"
+      },
+      {
+        "page": 5,
+        "caption": "Figure 2. Overview of the CEVI-KLETech pipeline. A semantic-"
+      },
+      {
+        "page": 5,
+        "caption": "Figure 3. Overview of the HONORAICamera pipeline."
+      },
+      {
+        "page": 6,
+        "caption": "Figure 4. YuFans combines a one-step SDFace restoration stage with CLIPIQA-guided pixel optimization at test time."
+      },
+      {
+        "page": 6,
+        "caption": "Figure 5. Overview of DeSC-Face. The degraded image is encoded into degraded latent tokens, which are used both as the main condition"
+      },
+      {
+        "page": 7,
+        "caption": "Figure 6. Architecture diagram of the DiffBIR v2.1 two-stage"
+      },
+      {
+        "page": 8,
+        "caption": "Figure 7. Overall architecture and training objective of MaDENN. The baseline CodeFormer architecture is extended with identity-"
+      },
+      {
+        "page": 8,
+        "caption": "Figure 8. The SN VISION pipeline first enhances the degraded"
+      },
+      {
+        "page": 8,
+        "caption": "Figure 9. The workflow of PRIDE-Face. GFPGAN provides the"
+      },
+      {
+        "page": 9,
+        "caption": "Figure 10. The BVI extends TADSR with a residual noise re-"
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 3,
+        "caption": "Table 1. Results of NTIRE 2026 Real-world Face Restoration Challenge. The testing was conducted on the test dataset, consisting of 450"
+      },
+      {
+        "page": 4,
+        "caption": "Table 1 presents the final rankings and results of the teams."
+      }
+    ],
+    "keyword_pages": {
+      "architecture": [
+        1,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10,
+        11
+      ],
+      "identity": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        7,
+        8,
+        10
+      ],
+      "portrait_detail": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "efficiency": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        12,
+        13
+      ],
+      "datasets": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "limitations": [
+        1
+      ]
+    },
+    "source_urls": [
+      {
+        "page": 1,
+        "url": "https://cvlai.net/ntire/2026"
+      },
+      {
+        "page": 2,
+        "url": "https://www.cvlai.net/ntire/2026/"
+      },
+      {
+        "page": 3,
+        "url": "https://github.com/jkwang28/NTIRE2026_"
+      }
+    ],
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\ntire2026.txt"
+  }
+]

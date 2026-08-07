@@ -1,0 +1,828 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>[2511.16341] Arbitrary-Resolution and Arbitrary-Scale Face Super-Resolution with Implicit Representation Networks</title><meta property="og:description" content="Face super-resolution (FSR) is a critical technique for enhancing low-resolution facial images and has significant implications for face-related tasks. However, existing FSR methods are limited by fixed up-sampling sca…">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Arbitrary-Resolution and Arbitrary-Scale Face Super-Resolution with Implicit Representation Networks">
+<meta name="twitter:image:src" content="https://ar5iv.labs.arxiv.org/assets/ar5iv_card.png">
+<meta name="twitter:image:alt" content="ar5iv logo">
+<meta property="og:title" content="Arbitrary-Resolution and Arbitrary-Scale Face Super-Resolution with Implicit Representation Networks">
+<meta property="og:site_name" content="ar5iv">
+<meta property="og:image" content="https://ar5iv.labs.arxiv.org/assets/ar5iv_card.png">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://ar5iv.labs.arxiv.org/html/2511.16341">
+<link rel="canonical" target="_blank" href="https://ar5iv.labs.arxiv.org/html/2511.16341">
+
+<!--Generated on Fri Dec  5 18:15:03 2025 by LaTeXML (version 0.8.8) http://dlmf.nist.gov/LaTeXML/.-->
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<script>
+  function detectColorScheme(){
+    var theme="light";
+    var current_theme = localStorage.getItem("ar5iv_theme");
+    if(current_theme){
+      if(current_theme == "dark"){
+        theme = "dark";
+      } }
+    else if(!window.matchMedia) { return false; }
+    else if(window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      theme = "dark"; }
+    if (theme=="dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.setAttribute("data-theme", "light"); } }
+
+  detectColorScheme();
+
+  function toggleColorScheme(){
+    var current_theme = localStorage.getItem("ar5iv_theme");
+    if (current_theme) {
+      if (current_theme == "light") {
+        localStorage.setItem("ar5iv_theme", "dark"); }
+      else {
+        localStorage.setItem("ar5iv_theme", "light"); } }
+    else {
+        localStorage.setItem("ar5iv_theme", "dark"); }
+    detectColorScheme(); }
+</script>
+<link media="all" rel="stylesheet" href="/assets/ar5iv-fonts.0.8.4.css"><link media="all" rel="stylesheet" href="/assets/ar5iv.0.8.5.css"><link media="all" rel="stylesheet" href="/assets/ar5iv-site.0.2.2.css">
+</head>
+<body>
+<div class="ltx_page_main">
+<div class="ltx_page_content">
+<article class="ltx_document ltx_authors_1line">
+<h1 class="ltx_title ltx_title_document">Arbitrary-Resolution and Arbitrary-Scale Face Super-Resolution with Implicit Representation Networks</h1>
+<div class="ltx_authors">
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Yi Ting Tsai, Yu Wei Chen, Hong-Han Shuai, and Ching-Chun Huang
+<br class="ltx_break">National Yang Ming Chiao Tung University
+<br class="ltx_break"><span class="ltx_text ltx_font_typewriter" style="font-size:90%;">{tsai.cs09, agarya89.11, chingchun}@nycu.edu.tw</span> <span class="ltx_text ltx_font_typewriter" style="font-size:90%;">hhshuai@nctu.edu.tw</span>
+</span></span>
+</div>
+
+<div class="ltx_abstract">
+<h6 class="ltx_title ltx_title_abstract">Abstract</h6>
+<p class="ltx_p">Face super-resolution (FSR) is a critical technique for enhancing low-resolution facial images and has significant implications for face-related tasks. However, existing FSR methods are limited by fixed up-sampling scales and sensitivity to input size variations. To address these limitations, this paper introduces an Arbitrary-Resolution and Arbitrary-Scale FSR method with implicit representation networks (ARASFSR), featuring three novel designs. First, ARASFSR employs 2D deep features, local relative coordinates, and up-sampling scale ratios to predict RGB values for each target pixel, allowing super-resolution at any up-sampling scale. Second, a local frequency estimation module captures high-frequency facial texture information to reduce the spectral bias effect. Lastly, a global coordinate modulation module guides FSR to leverage prior facial structure knowledge and achieve resolution adaptation effectively. Quantitative and qualitative evaluations demonstrate the robustness of ARASFSR over existing state-of-the-art methods while super-resolving facial images across various input sizes and up-sampling scales.</p>
+</div>
+<section id="S1" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">1 </span>Introduction</h2>
+
+<figure id="S1.F1" class="ltx_figure"><img src="/html/2511.16341/assets/teaser_compress.png" id="S1.F1.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="598" height="253" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">Figure 1</span>: </span><span class="ltx_text" style="font-size:90%;">Comparison of our proposed arbitrary-resolution and arbitrary-scale face super-resolution (ARASFSR) method with single image super-resolution (SISR) methods, face super-resolution (FSR) methods, and implicit neural representation (INR) based SISR methods. The figure highlights the differences in patch-based training in SISR versus the need for the whole low-resolution face image as input to match the test-time input distribution in FSR, resulting in a global approach instead of SISR’s local view. Conventional FSR methods have limited practical applications due to their fixed up-sampling scales and sensitivity to input resolution variations, while applying INR-based SISR methods to face images is not straightforward due to the lack of a global view. To address these issues, we propose ARASFSR, which utilizes implicit representation networks to produce facial images of any resolution and can handle changes in input resolution.</span></figcaption>
+</figure>
+<div id="S1.p1" class="ltx_para">
+<p class="ltx_p">Face super-resolution (FSR) is a technique that focuses on enhancing the resolution and quality of low-resolution facial images. This process involves generating high-resolution (HR) facial images from their low-resolution (LR) counterparts, offering significant advantages in various applications, such as face detection, face recognition, and face parsing. Due to its potential applications, FSR has garnered substantial attention in recent years.</p>
+</div>
+<div id="S1.p2" class="ltx_para">
+<p class="ltx_p">FSR is a specific type of single image super-resolution (SISR) problem. As illustrated in Fig. <a href="#S1.F1" title="Figure 1 ‣ 1 Introduction ‣ Arbitrary-Resolution and Arbitrary-Scale Face Super-Resolution with Implicit Representation Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a>, when addressing the SISR problem, it is assumed that the dataset includes general natural scenes and is not specific to any particular category. Consequently, state-of-the-art (SOTA) SISR methods focus on understanding local image features and learning the super-resolution mapping from LR patches to HR patches. Therefore, patch-based SISR is essentially suitable for handling LR images with varying resolutions. However, facial images possess a more consistent global structure. To leverage this prior knowledge, a more effective FSR method may prefer taking the entire and aligned LR facial image as input and learning the mapping globally to its HR counterpart. However, this global property makes the conventional FSR method sensitive to input image resolution. As a result, the design of FSR necessitates a different approach compared to SISR.</p>
+</div>
+<div id="S1.p3" class="ltx_para">
+<p class="ltx_p">In recent years, deep learning-based methods have made significant strides in improving the performance of FSR. Attention mechanisms have been extensively employed in various FSR methods <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">ChenSPARNet</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">lu2021face</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">MRRNet</span>]</cite> to enhance facial structural information and texture details. Moreover, some FSR methods leverage face priors <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">CT-FSRNet-2018</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">progressive-face-sr</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">ma2020deep</span>]</cite>, such as landmarks and component heatmaps, to further refine the recovery quality. Despite these advances, existing FSR methods exhibit limitations, such as their applicability only to a specific up-sampling scale, which constrains their generalizability. Furthermore, these FSR methods process the entire LR face image as input rather than in patches, making them highly sensitive to variations in input resolution. Consequently, as demonstrated in Fig. <a href="#S1.F1" title="Figure 1 ‣ 1 Introduction ‣ Arbitrary-Resolution and Arbitrary-Scale Face Super-Resolution with Implicit Representation Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a>, changes in input resolution can considerably impact the performance of FSR methods, making them impractical. This implies that when there are changes in up-sampling scales or input resolutions, the existing FSR methods require the network to be retrained.</p>
+</div>
+<div id="S1.p4" class="ltx_para">
+<p class="ltx_p">Facial images in the real world come in various resolutions, presenting challenges for downstream facial-related tasks. To address this issue, it is crucial to develop flexible FSR methods capable of handling a wider range of up-sampling scales and input sizes. For instance, in low-resolution face recognition tasks, some methods <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">superIdentity</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">IdentityPreserved</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">IdentityAware</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">bao2022distilling</span>]</cite> first super-resolve LR facial images into HR ones and then perform feature extraction. However, existing FSR methods are limited to a fixed up-sampling scale, while feature extraction networks typically have a fixed input size. As a result, the HR output of FSR must be resized before being fed into the feature extraction network, which compromises data fidelity and may negatively impact the downstream task. Therefore, there is an urgent need to develop a generalized FSR method that can handle a broader range of up-sampling scales and input sizes, making FSR more suitable for various facial-related applications.</p>
+</div>
+<div id="S1.p5" class="ltx_para">
+<p class="ltx_p">Implicit neural representation (INR) has gained popularity due to its effectiveness in 3D shape reconstruction, as demonstrated in recent works such as <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">sitzmann2019scene</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">mildenhall2020nerf</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">Local_Implicit_Grid_CVPR20</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">chibane20ifnet</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">Genova_2020_CVPR</span>]</cite>. The fundamental concept behind INR involves representing objects as multi-layer perceptrons (MLPs) that map coordinates to corresponding signal values. In recent years, there has been growing interest in using INR to learn 2D continuous image representations <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">DBLP:journals/corr/abs-2012-09161</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">xu2021ultrasr</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">9776607</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">lte-jaewon-lee</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">nguyen2023single</span>]</cite>. This approach utilizes implicit image functions, which are MLPs that input local coordinate information and query local latent codes to predict RGB values at target coordinates. This coordinates continuity property enables the representation of images in arbitrary resolutions, making it possible to achieve super-resolution at any up-sampling scale. However, existing methods based on local implicit image functions are not directly applicable to FSR due to their lack of a global view and designs that incorporate facial prior knowledge. Furthermore, as illustrated in Fig. <a href="#S1.F1" title="Figure 1 ‣ 1 Introduction ‣ Arbitrary-Resolution and Arbitrary-Scale Face Super-Resolution with Implicit Representation Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a>, these methods are sensitive to input image resolution, similar to existing FSR methods.</p>
+</div>
+<div id="S1.p6" class="ltx_para">
+<p class="ltx_p">In this paper, we propose an Arbitrary-Resolution and Arbitrary-Scale FSR method with implicit representation networks (ARASFSR) to address the aforementioned issues. Our method takes 2D deep features, local relative coordinates, and up-sampling scale ratios as inputs of the implicit representation network to predict the RGB value for each target pixel, enabling super-resolution at any up-sampling scale. To further enhance FSR reconstruction, we designed two specialized modules. The first is a local frequency estimation module that predicts high-frequency information about facial texture to reduce the spectral bias effect. The second is a global coordinate modulation module that guides facial structure, allowing for leveraging prior facial knowledge and achieving input resolution adaptation. We conduct comprehensive quantitative and qualitative evaluations, demonstrating our proposed method’s robustness and superiority over SOTA methods. Our main contributions can be summarized as follows:</p>
+<ul id="S1.I1" class="ltx_itemize">
+<li id="S1.I1.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S1.I1.i1.p1" class="ltx_para">
+<p class="ltx_p">We propose ARASFSR, a novel FSR method, with implicit representation networks to address the limitations of FSR in terms of fixed up-sampling scales and sensitivity to input resolution variations.</p>
+</div>
+</li>
+<li id="S1.I1.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S1.I1.i2.p1" class="ltx_para">
+<p class="ltx_p">The method incorporates two specialized modules to learn high-frequency information and guide facial structure for arbitrary up-sampling scales and variations in input resolutions, resulting in detailed and realistic facial image reconstruction.</p>
+</div>
+</li>
+<li id="S1.I1.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S1.I1.i3.p1" class="ltx_para">
+<p class="ltx_p">The proposed method outperforms state-of-the-art methods in comprehensive quantitative and qualitative evaluations, demonstrating its robustness and superiority in generalized FSR tasks.</p>
+</div>
+</li>
+</ul>
+</div>
+</section>
+<section id="S2" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">2 </span>Related Works</h2>
+
+<section id="S2.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">2.1 </span>Face Super-Resolution</h3>
+
+<div id="S2.SS1.p1" class="ltx_para">
+<p class="ltx_p">Deep learning-based methods have made significant strides in the field of FSR. URDGN <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">yu2016ultra</span>]</cite> uses a deep discriminative generative network to super-resolve ultra-LR facial images. Wavelet-SRNet <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">huang2017wavelet</span>]</cite> employs a wavelet-based CNN method to predict the corresponding series of HR wavelet coefficients from an LR input image. Some methods incorporate facial priors in the super-resolution process. FSRNet <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">CT-FSRNet-2018</span>]</cite> utilizes facial landmark heatmaps and parsing maps. PFSRNet <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">progressive-face-sr</span>]</cite> proposes a facial attention loss by multiplying the pixel difference and heatmap values to progressively recover facial details. DIC <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">ma2020deep</span>]</cite> adopts an iterative collaboration based on the guidance of landmark maps. Attention mechanisms have also been adopted in the latest methods. SPARNet <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">ChenSPARNet</span>]</cite> makes use of a spatial attention mechanism to adaptively guide features associated with facial structures. SISN <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">lu2021face</span>]</cite> introduces a split-attention in the split-attention network to strengthen facial structure and details. MRRNet <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">MRRNet</span>]</cite> designs a spatial attention mechanism guided by multi-scale receptive field features.</p>
+</div>
+</section>
+<section id="S2.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">2.2 </span>Implicit Neural Representation (INR)</h3>
+
+<div id="S2.SS2.p1" class="ltx_para">
+<p class="ltx_p">INR is an idea that represents an object using a function that maps coordinates to their corresponding signal values. The success of INR in 3D tasks has led to increasing interest in using INR for 2D image representations. IMNET <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">chen2018implicit_decoder</span>]</cite> introduces an implicit field decoder for 2D shape generation. SIREN <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">sitzmann2020implicit</span>]</cite> leverages sine instead of a ReLU as activation functions for implicit neural representations, resulting in higher image fidelity. LIIF <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">DBLP:journals/corr/abs-2012-09161</span>]</cite> proposes a local implicit image function to learn continuous image representation by taking coordinate and local latent codes as input to predict RGB values at target coordinates, achieving super-resolution at arbitrary up-sampling scale. LTE <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">lte-jaewon-lee</span>]</cite> designs a dominant-frequency estimator for implicit image function to alleviate spectral bias <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">rahaman2019spectral</span>]</cite> of a standard MLP with ReLU. Finally, DIINN <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">nguyen2023single</span>]</cite> decouples content and positional features using dual interactive implicit neural networks.</p>
+</div>
+<div id="S2.SS2.p2" class="ltx_para">
+<p class="ltx_p">However, applying these methods <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">DBLP:journals/corr/abs-2012-09161</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">lte-jaewon-lee</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">nguyen2023single</span>]</cite> to face images is not straightforward. While coordinates are used to enhance features in LTE <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">lte-jaewon-lee</span>]</cite>, they are not used directly as input to MLPs, making it less robust when the up-sampling scale changes. Although LIIF <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">DBLP:journals/corr/abs-2012-09161</span>]</cite> and DIINN <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">nguyen2023single</span>]</cite> take local relative coordinates as MLP’s input, the local implicit image functions still lack a global view, leading to artifacts in the output when the input image size changes. Inspired by the effectiveness of the implicit image function in SISR, ARASFSR extends the flexibility of continuous image representation to face super-resolution. Different from the aforementioned works, ARASFSR has a specific design tailored to face images to alleviate the problem of change in up-sampling scales and be more robust to input size variations.</p>
+</div>
+</section>
+</section>
+<section id="S3" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">3 </span>Method</h2>
+
+<section id="S3.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.1 </span>Overview</h3>
+
+<figure id="S3.F2" class="ltx_figure"><img src="/html/2511.16341/assets/architecture_compress.png" id="S3.F2.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="685" height="264" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">Figure 2</span>: </span><span class="ltx_text" style="font-size:90%;">Overall architecture of the proposed framework.</span></figcaption>
+</figure>
+<div id="S3.SS1.p1" class="ltx_para">
+<p class="ltx_p">Our goal is to develop a general framework for FSR that generates high-quality facial images at arbitrary up-sampling scales while accommodating variations in input resolution. Fig. <a href="#S3.F2" title="Figure 2 ‣ 3.1 Overview ‣ 3 Method ‣ Arbitrary-Resolution and Arbitrary-Scale Face Super-Resolution with Implicit Representation Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a> illustrates the overall architecture of the proposed framework. To achieve arbitrary-scale FSR, we introduce ARASFSR, which utilizes an implicit image function to represent facial images with arbitrary resolution. Besides the modified implicit representation network, our framework integrates two crucial modules: (a) a local frequency estimation module, which captures high-frequency information for facial texture to reduce the spectral bias effect; (b) a global coordinate modulation module, which allows for leveraging prior facial structure knowledge and enabling operation across various input sizes.</p>
+</div>
+</section>
+<section id="S3.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.2 </span>Implicit Image Function</h3>
+
+<div id="S3.SS2.p1" class="ltx_para">
+<p class="ltx_p">In Local Implicit Image Function approaches <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">DBLP:journals/corr/abs-2012-09161</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">lte-jaewon-lee</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">nguyen2023single</span>]</cite>, the decoding function <math id="S3.SS2.p1.m1" class="ltx_Math" alttext="f_{\theta}" display="inline" intent=":literal"><semantics><msub><mi>f</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">f_{\theta}</annotation></semantics></math> is shared among all images and is parameterized using an MLP with <math id="S3.SS2.p1.m2" class="ltx_Math" alttext="\theta" display="inline" intent=":literal"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math> as its model parameters. It maps the latent feature codes and local coordinates to RGB values, i.e., <math id="S3.SS2.p1.m3" class="ltx_Math" alttext="f_{\theta}(c,x):(\mathcal{C},\mathcal{X})\mapsto\mathcal{S}" display="inline" intent=":literal"><semantics><mrow><mrow><msub><mi>f</mi><mi>θ</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>c</mi><mo>,</mo><mi>x</mi><mo rspace="0.278em" stretchy="false">)</mo></mrow></mrow><mo rspace="0.278em">:</mo><mrow><mrow><mo stretchy="false">(</mo><mi class="ltx_font_mathcaligraphic">𝒞</mi><mo>,</mo><mi class="ltx_font_mathcaligraphic">𝒳</mi><mo stretchy="false">)</mo></mrow><mo stretchy="false">↦</mo><mi class="ltx_font_mathcaligraphic">𝒮</mi></mrow></mrow><annotation encoding="application/x-tex">f_{\theta}(c,x):(\mathcal{C},\mathcal{X})\mapsto\mathcal{S}</annotation></semantics></math>, where <math id="S3.SS2.p1.m4" class="ltx_Math" alttext="c\in\mathcal{C}" display="inline" intent=":literal"><semantics><mrow><mi>c</mi><mo>∈</mo><mi class="ltx_font_mathcaligraphic">𝒞</mi></mrow><annotation encoding="application/x-tex">c\in\mathcal{C}</annotation></semantics></math> is a latent feature code from an encoder <math id="S3.SS2.p1.m5" class="ltx_Math" alttext="E_{\varphi}" display="inline" intent=":literal"><semantics><msub><mi>E</mi><mi>φ</mi></msub><annotation encoding="application/x-tex">E_{\varphi}</annotation></semantics></math> with <math id="S3.SS2.p1.m6" class="ltx_Math" alttext="\varphi" display="inline" intent=":literal"><semantics><mi>φ</mi><annotation encoding="application/x-tex">\varphi</annotation></semantics></math> as its parameters, <math id="S3.SS2.p1.m7" class="ltx_Math" alttext="x\in\mathcal{X}" display="inline" intent=":literal"><semantics><mrow><mi>x</mi><mo>∈</mo><mi class="ltx_font_mathcaligraphic">𝒳</mi></mrow><annotation encoding="application/x-tex">x\in\mathcal{X}</annotation></semantics></math> is a 2D coordinate in the continuous image domain, and <math id="S3.SS2.p1.m8" class="ltx_Math" alttext="\mathcal{S}" display="inline" intent=":literal"><semantics><mi class="ltx_font_mathcaligraphic">𝒮</mi><annotation encoding="application/x-tex">\mathcal{S}</annotation></semantics></math> is a space of predicted RGB values from <math id="S3.SS2.p1.m9" class="ltx_Math" alttext="f_{\theta}" display="inline" intent=":literal"><semantics><msub><mi>f</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">f_{\theta}</annotation></semantics></math>.</p>
+</div>
+<div id="S3.SS2.p2" class="ltx_para">
+<p class="ltx_p">Our method aims to super-resolve LR facial images <math id="S3.SS2.p2.m1" class="ltx_Math" alttext="I^{LR}\in\mathbb{R}^{H\times W\times C}" display="inline" intent=":literal"><semantics><mrow><msup><mi>I</mi><mrow><mi>L</mi><mo lspace="0em" rspace="0em">​</mo><mi>R</mi></mrow></msup><mo>∈</mo><msup><mi>ℝ</mi><mrow><mi>H</mi><mo lspace="0.222em" rspace="0.222em">×</mo><mi>W</mi><mo lspace="0.222em" rspace="0.222em">×</mo><mi>C</mi></mrow></msup></mrow><annotation encoding="application/x-tex">I^{LR}\in\mathbb{R}^{H\times W\times C}</annotation></semantics></math> to HR images <math id="S3.SS2.p2.m2" class="ltx_Math" alttext="I^{HR}\in\mathbb{R}^{r_{y}H\times r_{x}W\times C}" display="inline" intent=":literal"><semantics><mrow><msup><mi>I</mi><mrow><mi>H</mi><mo lspace="0em" rspace="0em">​</mo><mi>R</mi></mrow></msup><mo>∈</mo><msup><mi>ℝ</mi><mrow><mrow><mrow><mrow><msub><mi>r</mi><mi>y</mi></msub><mo lspace="0em" rspace="0em">​</mo><mi>H</mi></mrow><mo lspace="0.222em" rspace="0.222em">×</mo><msub><mi>r</mi><mi>x</mi></msub></mrow><mo lspace="0em" rspace="0em">​</mo><mi>W</mi></mrow><mo lspace="0.222em" rspace="0.222em">×</mo><mi>C</mi></mrow></msup></mrow><annotation encoding="application/x-tex">I^{HR}\in\mathbb{R}^{r_{y}H\times r_{x}W\times C}</annotation></semantics></math> at any fractional ratio <math id="S3.SS2.p2.m3" class="ltx_Math" alttext="r_{y}" display="inline" intent=":literal"><semantics><msub><mi>r</mi><mi>y</mi></msub><annotation encoding="application/x-tex">r_{y}</annotation></semantics></math> and <math id="S3.SS2.p2.m4" class="ltx_Math" alttext="r_{x}" display="inline" intent=":literal"><semantics><msub><mi>r</mi><mi>x</mi></msub><annotation encoding="application/x-tex">r_{x}</annotation></semantics></math> and arbitrary input resolution <math id="S3.SS2.p2.m5" class="ltx_Math" alttext="H" display="inline" intent=":literal"><semantics><mi>H</mi><annotation encoding="application/x-tex">H</annotation></semantics></math> and <math id="S3.SS2.p2.m6" class="ltx_Math" alttext="W" display="inline" intent=":literal"><semantics><mi>W</mi><annotation encoding="application/x-tex">W</annotation></semantics></math>. Based on the conventional Local Implicit Image Function approaches with modification, for a continuous image <math id="S3.SS2.p2.m7" class="ltx_Math" alttext="I^{(i)}" display="inline" intent=":literal"><semantics><msup><mi>I</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><annotation encoding="application/x-tex">I^{(i)}</annotation></semantics></math>, the RGB value <math id="S3.SS2.p2.m8" class="ltx_Math" alttext="s" display="inline" intent=":literal"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math> at the target coordinate <math id="S3.SS2.p2.m9" class="ltx_Math" alttext="x_{s}" display="inline" intent=":literal"><semantics><msub><mi>x</mi><mi>s</mi></msub><annotation encoding="application/x-tex">x_{s}</annotation></semantics></math> is defined as follows:</p>
+<table id="S3.E1" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S3.E1.m1" class="ltx_Math" alttext="s=I^{(i)}(x_{s})=f_{\theta}(c^{\ast},x_{s}-x_{c})," display="block" intent=":literal"><semantics><mrow><mrow><mi>s</mi><mo>=</mo><mrow><msup><mi>I</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>x</mi><mi>s</mi></msub><mo stretchy="false">)</mo></mrow></mrow><mo>=</mo><mrow><msub><mi>f</mi><mi>θ</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msup><mi>c</mi><mo>∗</mo></msup><mo>,</mo><mrow><msub><mi>x</mi><mi>s</mi></msub><mo>−</mo><msub><mi>x</mi><mi>c</mi></msub></mrow><mo stretchy="false">)</mo></mrow></mrow></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">s=I^{(i)}(x_{s})=f_{\theta}(c^{\ast},x_{s}-x_{c}),</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(1)</span></td>
+</tr></tbody>
+</table>
+<p class="ltx_p">where <math id="S3.SS2.p2.m10" class="ltx_Math" alttext="c^{\ast}" display="inline" intent=":literal"><semantics><msup><mi>c</mi><mo>∗</mo></msup><annotation encoding="application/x-tex">c^{\ast}</annotation></semantics></math> represents the nearest (Euclidean distance) latent feature code from <math id="S3.SS2.p2.m11" class="ltx_Math" alttext="x_{s}" display="inline" intent=":literal"><semantics><msub><mi>x</mi><mi>s</mi></msub><annotation encoding="application/x-tex">x_{s}</annotation></semantics></math>, and <math id="S3.SS2.p2.m12" class="ltx_Math" alttext="x_{c}" display="inline" intent=":literal"><semantics><msub><mi>x</mi><mi>c</mi></msub><annotation encoding="application/x-tex">x_{c}</annotation></semantics></math> denotes the coordinate of the latent code <math id="S3.SS2.p2.m13" class="ltx_Math" alttext="c^{\ast}" display="inline" intent=":literal"><semantics><msup><mi>c</mi><mo>∗</mo></msup><annotation encoding="application/x-tex">c^{\ast}</annotation></semantics></math> in the image domain.</p>
+</div>
+<div id="S3.SS2.p3" class="ltx_para ltx_noindent">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Feature unfolding.</span> To enrich the feature map, we apply feature unfolding <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">DBLP:journals/corr/abs-2012-09161</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">nguyen2023single</span>]</cite>, which involves concatenating the features from a 3 <math id="S3.SS2.p3.m1" class="ltx_Math" alttext="\times" display="inline" intent=":literal"><semantics><mo>×</mo><annotation encoding="application/x-tex">\times</annotation></semantics></math> 3 neighborhood around each pixel of the feature map. Accordingly, Equation (<a href="#S3.E1" title="Equation 1 ‣ 3.2 Implicit Image Function ‣ 3 Method ‣ Arbitrary-Resolution and Arbitrary-Scale Face Super-Resolution with Implicit Representation Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a>) is replaced by:</p>
+<table id="S3.E2" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S3.E2.m1" class="ltx_Math" alttext="s=I^{(i)}(x_{s})=f_{\theta}(\hat{c}^{\ast},x_{s}-x_{c})," display="block" intent=":literal"><semantics><mrow><mrow><mi>s</mi><mo>=</mo><mrow><msup><mi>I</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>x</mi><mi>s</mi></msub><mo stretchy="false">)</mo></mrow></mrow><mo>=</mo><mrow><msub><mi>f</mi><mi>θ</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msup><mover accent="true"><mi>c</mi><mo>^</mo></mover><mo>∗</mo></msup><mo>,</mo><mrow><msub><mi>x</mi><mi>s</mi></msub><mo>−</mo><msub><mi>x</mi><mi>c</mi></msub></mrow><mo stretchy="false">)</mo></mrow></mrow></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">s=I^{(i)}(x_{s})=f_{\theta}(\hat{c}^{\ast},x_{s}-x_{c}),</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(2)</span></td>
+</tr></tbody>
+</table>
+<p class="ltx_p">where <math id="S3.SS2.p3.m2" class="ltx_Math" alttext="\hat{c}^{\ast}" display="inline" intent=":literal"><semantics><msup><mover accent="true"><mi>c</mi><mo>^</mo></mover><mo>∗</mo></msup><annotation encoding="application/x-tex">\hat{c}^{\ast}</annotation></semantics></math> is the enriched local feature code after increasing the number of channels.</p>
+</div>
+<div id="S3.SS2.p4" class="ltx_para ltx_noindent">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Scaling ratio.</span> Although <math id="S3.SS2.p4.m1" class="ltx_Math" alttext="f_{\theta}(c,x)" display="inline" intent=":literal"><semantics><mrow><msub><mi>f</mi><mi>θ</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mi>c</mi><mo>,</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">f_{\theta}(c,x)</annotation></semantics></math> can effectively model the continuous distribution, spectral bias tends to make <math id="S3.SS2.p4.m2" class="ltx_Math" alttext="f_{\theta}" display="inline" intent=":literal"><semantics><msub><mi>f</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">f_{\theta}</annotation></semantics></math> learn a smoother function (i.e., low-frequency function), thereby losing its capacity to recover high-frequency details. To tackle this issue, we propose incorporating an additional scaling ratio as a conditional input to the decoding function. This conditional factor enhances the representational capacity of the original <math id="S3.SS2.p4.m3" class="ltx_Math" alttext="f_{\theta}" display="inline" intent=":literal"><semantics><msub><mi>f</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">f_{\theta}</annotation></semantics></math>. When the scaling ratio is small, <math id="S3.SS2.p4.m4" class="ltx_Math" alttext="f_{\theta}" display="inline" intent=":literal"><semantics><msub><mi>f</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">f_{\theta}</annotation></semantics></math> is inclined to model smoother functions (less high frequency); conversely, <math id="S3.SS2.p4.m5" class="ltx_Math" alttext="f_{\theta}" display="inline" intent=":literal"><semantics><msub><mi>f</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">f_{\theta}</annotation></semantics></math> is encouraged to model functions with more high frequency when the scaling ratio is large. Consequently, Equation (<a href="#S3.E2" title="Equation 2 ‣ 3.2 Implicit Image Function ‣ 3 Method ‣ Arbitrary-Resolution and Arbitrary-Scale Face Super-Resolution with Implicit Representation Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a>) is extended to:</p>
+<table id="S3.E3" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S3.E3.m1" class="ltx_Math" alttext="s=I^{(i)}(x_{s})=f_{\theta}(\hat{c}^{\ast},x_{s}-x_{c},r)," display="block" intent=":literal"><semantics><mrow><mrow><mi>s</mi><mo>=</mo><mrow><msup><mi>I</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>x</mi><mi>s</mi></msub><mo stretchy="false">)</mo></mrow></mrow><mo>=</mo><mrow><msub><mi>f</mi><mi>θ</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msup><mover accent="true"><mi>c</mi><mo>^</mo></mover><mo>∗</mo></msup><mo>,</mo><mrow><msub><mi>x</mi><mi>s</mi></msub><mo>−</mo><msub><mi>x</mi><mi>c</mi></msub></mrow><mo>,</mo><mi>r</mi><mo stretchy="false">)</mo></mrow></mrow></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">s=I^{(i)}(x_{s})=f_{\theta}(\hat{c}^{\ast},x_{s}-x_{c},r),</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(3)</span></td>
+</tr></tbody>
+</table>
+<p class="ltx_p">where <math id="S3.SS2.p4.m6" class="ltx_Math" alttext="r=\left[1/r_{y},1/r_{x}\right]" display="inline" intent=":literal"><semantics><mrow><mi>r</mi><mo>=</mo><mrow><mo>[</mo><mrow><mn>1</mn><mo>/</mo><msub><mi>r</mi><mi>y</mi></msub></mrow><mo>,</mo><mrow><mn>1</mn><mo>/</mo><msub><mi>r</mi><mi>x</mi></msub></mrow><mo>]</mo></mrow></mrow><annotation encoding="application/x-tex">r=\left[1/r_{y},1/r_{x}\right]</annotation></semantics></math> represents the scaling ratio.</p>
+</div>
+<div id="S3.SS2.p5" class="ltx_para ltx_noindent">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Local ensemble.</span> The signal prediction at <math id="S3.SS2.p5.m1" class="ltx_Math" alttext="x_{s}" display="inline" intent=":literal"><semantics><msub><mi>x</mi><mi>s</mi></msub><annotation encoding="application/x-tex">x_{s}</annotation></semantics></math> is done by querying the nearest latent code, and as <math id="S3.SS2.p5.m2" class="ltx_Math" alttext="x_{s}" display="inline" intent=":literal"><semantics><msub><mi>x</mi><mi>s</mi></msub><annotation encoding="application/x-tex">x_{s}</annotation></semantics></math> moves in the 2D domain, the selection of the nearest latent code can suddenly change, causing the issue of discontinuous prediction. To address this, we refer to <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">DBLP:journals/corr/abs-2012-09161</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">lte-jaewon-lee</span>]</cite> and use local ensemble. Accordingly, we modify Equation (<a href="#S3.E3" title="Equation 3 ‣ 3.2 Implicit Image Function ‣ 3 Method ‣ Arbitrary-Resolution and Arbitrary-Scale Face Super-Resolution with Implicit Representation Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a>) as follows:</p>
+<table id="S3.E4" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S3.E4.m1" class="ltx_Math" alttext="s=I^{(i)}(x_{s})=\sum_{k\in K}w_{k}f_{\theta}(\hat{c}^{\ast}_{k},x_{s}-x_{c_{k}},r)," display="block" intent=":literal"><semantics><mrow><mrow><mi>s</mi><mo>=</mo><mrow><msup><mi>I</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>x</mi><mi>s</mi></msub><mo stretchy="false">)</mo></mrow></mrow><mo rspace="0.111em">=</mo><mrow><munder><mo movablelimits="false">∑</mo><mrow><mi>k</mi><mo>∈</mo><mi>K</mi></mrow></munder><mrow><msub><mi>w</mi><mi>k</mi></msub><mo lspace="0em" rspace="0em">​</mo><msub><mi>f</mi><mi>θ</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msubsup><mover accent="true"><mi>c</mi><mo>^</mo></mover><mi>k</mi><mo>∗</mo></msubsup><mo>,</mo><mrow><msub><mi>x</mi><mi>s</mi></msub><mo>−</mo><msub><mi>x</mi><msub><mi>c</mi><mi>k</mi></msub></msub></mrow><mo>,</mo><mi>r</mi><mo stretchy="false">)</mo></mrow></mrow></mrow></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">s=I^{(i)}(x_{s})=\sum_{k\in K}w_{k}f_{\theta}(\hat{c}^{\ast}_{k},x_{s}-x_{c_{k}},r),</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(4)</span></td>
+</tr></tbody>
+</table>
+<p class="ltx_p">where <math id="S3.SS2.p5.m3" class="ltx_Math" alttext="K" display="inline" intent=":literal"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math> is a set of indices of the four nearest latent codes around <math id="S3.SS2.p5.m4" class="ltx_Math" alttext="x_{s}" display="inline" intent=":literal"><semantics><msub><mi>x</mi><mi>s</mi></msub><annotation encoding="application/x-tex">x_{s}</annotation></semantics></math>, <math id="S3.SS2.p5.m5" class="ltx_Math" alttext="w_{K}" display="inline" intent=":literal"><semantics><msub><mi>w</mi><mi>K</mi></msub><annotation encoding="application/x-tex">w_{K}</annotation></semantics></math> is the bilinear interpolation weight for the enriched latent feature code <math id="S3.SS2.p5.m6" class="ltx_Math" alttext="\hat{c}_{k}" display="inline" intent=":literal"><semantics><msub><mover accent="true"><mi>c</mi><mo>^</mo></mover><mi>k</mi></msub><annotation encoding="application/x-tex">\hat{c}_{k}</annotation></semantics></math>, such that <math id="S3.SS2.p5.m7" class="ltx_Math" alttext="\sum_{k}w_{k}=1" display="inline" intent=":literal"><semantics><mrow><mrow><msub><mo>∑</mo><mi>k</mi></msub><msub><mi>w</mi><mi>k</mi></msub></mrow><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\sum_{k}w_{k}=1</annotation></semantics></math>.</p>
+</div>
+</section>
+<section id="S3.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.3 </span>Local Frequency Estimation Module</h3>
+
+<div id="S3.SS3.p1" class="ltx_para">
+<p class="ltx_p">As previously mentioned, spectral bias is a challenge where a standalone MLP struggles to capture high-frequency textures. To overcome this limitation, we propose a local frequency estimation module. This module employs an encoder-decoder architecture to predict the conditional distribution of high-frequency details (<math id="S3.SS3.p1.m1" class="ltx_Math" alttext="t" display="inline" intent=":literal"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>) given an LR facial image <math id="S3.SS3.p1.m2" class="ltx_Math" alttext="I^{LR}" display="inline" intent=":literal"><semantics><msup><mi>I</mi><mrow><mi>L</mi><mo lspace="0em" rspace="0em">​</mo><mi>R</mi></mrow></msup><annotation encoding="application/x-tex">I^{LR}</annotation></semantics></math>, specifically, <math id="S3.SS3.p1.m3" class="ltx_Math" alttext="P(t|I^{LR})" display="inline" intent=":literal"><semantics><mrow><mi>P</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mi>t</mi><mo fence="false">|</mo><msup><mi>I</mi><mrow><mi>L</mi><mo lspace="0em" rspace="0em">​</mo><mi>R</mi></mrow></msup></mrow><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">P(t|I^{LR})</annotation></semantics></math>. In particular, the encoder is designed to predict the parameters of a multi-dimensional Gaussian distribution based on the content of <math id="S3.SS3.p1.m4" class="ltx_Math" alttext="I^{LR}" display="inline" intent=":literal"><semantics><msup><mi>I</mi><mrow><mi>L</mi><mo lspace="0em" rspace="0em">​</mo><mi>R</mi></mrow></msup><annotation encoding="application/x-tex">I^{LR}</annotation></semantics></math>, which models the conditional distribution of the frequency latent code <math id="S3.SS3.p1.m5" class="ltx_Math" alttext="P(z|I^{LR})" display="inline" intent=":literal"><semantics><mrow><mi>P</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mi>z</mi><mo fence="false">|</mo><msup><mi>I</mi><mrow><mi>L</mi><mo lspace="0em" rspace="0em">​</mo><mi>R</mi></mrow></msup></mrow><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">P(z|I^{LR})</annotation></semantics></math>. Consequently, for different <math id="S3.SS3.p1.m6" class="ltx_Math" alttext="I^{LR}" display="inline" intent=":literal"><semantics><msup><mi>I</mi><mrow><mi>L</mi><mo lspace="0em" rspace="0em">​</mo><mi>R</mi></mrow></msup><annotation encoding="application/x-tex">I^{LR}</annotation></semantics></math> instances, the encoder can estimate image-specific high-frequency latent code <math id="S3.SS3.p1.m7" class="ltx_Math" alttext="z" display="inline" intent=":literal"><semantics><mi>z</mi><annotation encoding="application/x-tex">z</annotation></semantics></math> in a probabilistic manner. By sampling a latent code <math id="S3.SS3.p1.m8" class="ltx_Math" alttext="z" display="inline" intent=":literal"><semantics><mi>z</mi><annotation encoding="application/x-tex">z</annotation></semantics></math> from <math id="S3.SS3.p1.m9" class="ltx_Math" alttext="P(z|I^{LR})" display="inline" intent=":literal"><semantics><mrow><mi>P</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mi>z</mi><mo fence="false">|</mo><msup><mi>I</mi><mrow><mi>L</mi><mo lspace="0em" rspace="0em">​</mo><mi>R</mi></mrow></msup></mrow><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">P(z|I^{LR})</annotation></semantics></math> and inputting it into the decoder, we obtain a frequency token <math id="S3.SS3.p1.m10" class="ltx_Math" alttext="t" display="inline" intent=":literal"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>.</p>
+</div>
+<div id="S3.SS3.p2" class="ltx_para">
+<p class="ltx_p">After performing feature unfolding, we denote the estimated image-specific high-frequency token of a reference pixel location as <math id="S3.SS3.p2.m1" class="ltx_Math" alttext="\hat{t}^{\ast}" display="inline" intent=":literal"><semantics><msup><mover accent="true"><mi>t</mi><mo>^</mo></mover><mo>∗</mo></msup><annotation encoding="application/x-tex">\hat{t}^{\ast}</annotation></semantics></math>. By concatenating <math id="S3.SS3.p2.m2" class="ltx_Math" alttext="\hat{t}^{\ast}" display="inline" intent=":literal"><semantics><msup><mover accent="true"><mi>t</mi><mo>^</mo></mover><mo>∗</mo></msup><annotation encoding="application/x-tex">\hat{t}^{\ast}</annotation></semantics></math> with the latent feature code <math id="S3.SS3.p2.m3" class="ltx_Math" alttext="\hat{c}^{\ast}" display="inline" intent=":literal"><semantics><msup><mover accent="true"><mi>c</mi><mo>^</mo></mover><mo>∗</mo></msup><annotation encoding="application/x-tex">\hat{c}^{\ast}</annotation></semantics></math>, we enhance the representation function <math id="S3.SS3.p2.m4" class="ltx_Math" alttext="f_{\theta}" display="inline" intent=":literal"><semantics><msub><mi>f</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">f_{\theta}</annotation></semantics></math> and update Equation (<a href="#S3.E4" title="Equation 4 ‣ 3.2 Implicit Image Function ‣ 3 Method ‣ Arbitrary-Resolution and Arbitrary-Scale Face Super-Resolution with Implicit Representation Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a>) as follows:</p>
+<table id="S3.E5" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S3.E5.m1" class="ltx_Math" alttext="s=I^{(i)}(x_{s})=\sum_{k\in K}w_{k}f_{\theta}(\hat{p}^{\ast}_{k},x_{s}-x_{c_{k}},r)," display="block" intent=":literal"><semantics><mrow><mrow><mi>s</mi><mo>=</mo><mrow><msup><mi>I</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>x</mi><mi>s</mi></msub><mo stretchy="false">)</mo></mrow></mrow><mo rspace="0.111em">=</mo><mrow><munder><mo movablelimits="false">∑</mo><mrow><mi>k</mi><mo>∈</mo><mi>K</mi></mrow></munder><mrow><msub><mi>w</mi><mi>k</mi></msub><mo lspace="0em" rspace="0em">​</mo><msub><mi>f</mi><mi>θ</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msubsup><mover accent="true"><mi>p</mi><mo>^</mo></mover><mi>k</mi><mo>∗</mo></msubsup><mo>,</mo><mrow><msub><mi>x</mi><mi>s</mi></msub><mo>−</mo><msub><mi>x</mi><msub><mi>c</mi><mi>k</mi></msub></msub></mrow><mo>,</mo><mi>r</mi><mo stretchy="false">)</mo></mrow></mrow></mrow></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">s=I^{(i)}(x_{s})=\sum_{k\in K}w_{k}f_{\theta}(\hat{p}^{\ast}_{k},x_{s}-x_{c_{k}},r),</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(5)</span></td>
+</tr></tbody>
+</table>
+<p class="ltx_p">where <math id="S3.SS3.p2.m5" class="ltx_Math" alttext="\hat{p}^{\ast}=\left[\hat{t}^{\ast},\hat{c}^{\ast}\right]" display="inline" intent=":literal"><semantics><mrow><msup><mover accent="true"><mi>p</mi><mo>^</mo></mover><mo>∗</mo></msup><mo>=</mo><mrow><mo>[</mo><msup><mover accent="true"><mi>t</mi><mo>^</mo></mover><mo>∗</mo></msup><mo>,</mo><msup><mover accent="true"><mi>c</mi><mo>^</mo></mover><mo>∗</mo></msup><mo>]</mo></mrow></mrow><annotation encoding="application/x-tex">\hat{p}^{\ast}=\left[\hat{t}^{\ast},\hat{c}^{\ast}\right]</annotation></semantics></math> represents the high-frequency enhanced content feature.</p>
+</div>
+</section>
+<section id="S3.SS4" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.4 </span>Global Coordinate Modulation Module</h3>
+
+<div id="S3.SS4.p1" class="ltx_para">
+<p class="ltx_p">SISR is typically performed using patch-based training, wherein small patches of LR images are used to generate corresponding HR patches. However, in FSR, the entire LR facial image must be mapped to an HR counterpart. Previous SR methods based on INR <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">DBLP:journals/corr/abs-2012-09161</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">lte-jaewon-lee</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">nguyen2023single</span>]</cite> suffer from artifacts when the input resolution of facial images changes because the implicit image function only possesses a local view. In contrast, FSR methods process the entire LR facial image as input, making the global coordinate an essential component that provides landmark locations for reconstructing facial details. Furthermore, the global coordinate is resilient to variations in up-sampling scales and input sizes, making it an ideal source of facial priors.</p>
+</div>
+<div id="S3.SS4.p2" class="ltx_para">
+<p class="ltx_p">Intuitively, if facial images are pre-aligned, a well-trained model may be able to predict the possible texture around a specific location based on the normalized coordinate and facial structure. To provide the implicit image function with a global perspective, we propose a global coordinate guidance module that incorporates the global coordinate <math id="S3.SS4.p2.m1" class="ltx_Math" alttext="x_{s}" display="inline" intent=":literal"><semantics><msub><mi>x</mi><mi>s</mi></msub><annotation encoding="application/x-tex">x_{s}</annotation></semantics></math> as input. In our implementation, we employ positional encoding <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">mildenhall2020nerf</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">xu2021ultrasr</span>]</cite>, as illustrated in Equation (<a href="#S3.E6" title="Equation 6 ‣ 3.4 Global Coordinate Modulation Module ‣ 3 Method ‣ Arbitrary-Resolution and Arbitrary-Scale Face Super-Resolution with Implicit Representation Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6</span></a>), to map the coordinates to a higher dimension before inputting them into the MLP. Note that each of the two coordinate values in <math id="S3.SS4.p2.m2" class="ltx_Math" alttext="x_{s}" display="inline" intent=":literal"><semantics><msub><mi>x</mi><mi>s</mi></msub><annotation encoding="application/x-tex">x_{s}</annotation></semantics></math> is normalized to lie within the range <math id="S3.SS4.p2.m3" class="ltx_Math" alttext="\left[-1,1\right]" display="inline" intent=":literal"><semantics><mrow><mo>[</mo><mrow><mo>−</mo><mn>1</mn></mrow><mo>,</mo><mn>1</mn><mo>]</mo></mrow><annotation encoding="application/x-tex">\left[-1,1\right]</annotation></semantics></math> before positional encoding. In our experiments, we set <math id="S3.SS4.p2.m4" class="ltx_Math" alttext="N=10" display="inline" intent=":literal"><semantics><mrow><mi>N</mi><mo>=</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">N=10</annotation></semantics></math>.</p>
+<table id="S3.E6" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S3.E6.m1" class="ltx_Math" alttext="\begin{split}g_{s}=(x_{s},sin(2^{0}\pi x_{s}),cos(2^{0}\pi x_{s}),...,\\
+sin(2^{N-1}\pi x_{s}),cos(2^{N-1}\pi x_{s})).\end{split}" display="block" intent=":literal"><semantics><mtable displaystyle="true" rowspacing="0pt"><mtr><mtd class="ltx_align_right" columnalign="right"><mrow><msub><mi>g</mi><mi>s</mi></msub><mo>=</mo><mrow><mo stretchy="false">(</mo><msub><mi>x</mi><mi>s</mi></msub><mo>,</mo><mi>s</mi><mi>i</mi><mi>n</mi><mrow><mo stretchy="false">(</mo><msup><mn>2</mn><mn>0</mn></msup><mi>π</mi><msub><mi>x</mi><mi>s</mi></msub><mo stretchy="false">)</mo></mrow><mo>,</mo><mi>c</mi><mi>o</mi><mi>s</mi><mrow><mo stretchy="false">(</mo><msup><mn>2</mn><mn>0</mn></msup><mi>π</mi><msub><mi>x</mi><mi>s</mi></msub><mo stretchy="false">)</mo></mrow><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo></mrow></mrow></mtd></mtr><mtr><mtd class="ltx_align_right" columnalign="right"><mrow><mi>s</mi><mi>i</mi><mi>n</mi><mrow><mo stretchy="false">(</mo><msup><mn>2</mn><mrow><mi>N</mi><mo>−</mo><mn>1</mn></mrow></msup><mi>π</mi><msub><mi>x</mi><mi>s</mi></msub><mo stretchy="false">)</mo></mrow><mo>,</mo><mi>c</mi><mi>o</mi><mi>s</mi><mrow><mo stretchy="false">(</mo><msup><mn>2</mn><mrow><mi>N</mi><mo>−</mo><mn>1</mn></mrow></msup><mi>π</mi><msub><mi>x</mi><mi>s</mi></msub><mo stretchy="false">)</mo></mrow><mo stretchy="false">)</mo><mo lspace="0em">.</mo></mrow></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{split}g_{s}=(x_{s},sin(2^{0}\pi x_{s}),cos(2^{0}\pi x_{s}),...,\\
+sin(2^{N-1}\pi x_{s}),cos(2^{N-1}\pi x_{s})).\end{split}</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(6)</span></td>
+</tr></tbody>
+</table>
+</div>
+<div id="S3.SS4.p3" class="ltx_para">
+<p class="ltx_p">Recent approaches have addressed the spectral bias issue by employing non-linear activations. SIREN <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">sitzmann2020implicit</span>]</cite> utilizes the sine layer, which leads to rapid convergence and high data fidelity. Additionally, works such as <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">mehta2021modulated</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">nguyen2023single</span>]</cite> adopted modulated periodic activations. Inspired by them, we implement periodic activations to predict the modulation parameters given <math id="S3.SS4.p3.m1" class="ltx_Math" alttext="g_{s}" display="inline" intent=":literal"><semantics><msub><mi>g</mi><mi>s</mi></msub><annotation encoding="application/x-tex">g_{s}</annotation></semantics></math>. Next, as illustrated in Fig. <a href="#S3.F2" title="Figure 2 ‣ 3.1 Overview ‣ 3 Method ‣ Arbitrary-Resolution and Arbitrary-Scale Face Super-Resolution with Implicit Representation Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a>, we modulate the local implicit function <math id="S3.SS4.p3.m2" class="ltx_Math" alttext="f_{\theta}" display="inline" intent=":literal"><semantics><msub><mi>f</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">f_{\theta}</annotation></semantics></math> by multiplying and concatenating in order to fuse the original feature of the MLP with the encoded global coordinate information. The process is detailed in the following equations:</p>
+</div>
+<div id="S3.SS4.p4" class="ltx_para">
+<table id="S3.E7" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S3.E7.m1" class="ltx_Math" alttext="s_{0}=ReLU(w_{0}\left[\hat{p}^{\ast}_{k},x_{s}-x_{c_{k}},r\right]+b_{0})." display="block" intent=":literal"><semantics><mrow><mrow><msub><mi>s</mi><mn>0</mn></msub><mo>=</mo><mrow><mi>R</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>L</mi><mo lspace="0em" rspace="0em">​</mo><mi>U</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mrow><msub><mi>w</mi><mn>0</mn></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo>[</mo><msubsup><mover accent="true"><mi>p</mi><mo>^</mo></mover><mi>k</mi><mo>∗</mo></msubsup><mo>,</mo><mrow><msub><mi>x</mi><mi>s</mi></msub><mo>−</mo><msub><mi>x</mi><msub><mi>c</mi><mi>k</mi></msub></msub></mrow><mo>,</mo><mi>r</mi><mo>]</mo></mrow></mrow><mo>+</mo><msub><mi>b</mi><mn>0</mn></msub></mrow><mo stretchy="false">)</mo></mrow></mrow></mrow><mo lspace="0em">.</mo></mrow><annotation encoding="application/x-tex">s_{0}=ReLU(w_{0}\left[\hat{p}^{\ast}_{k},x_{s}-x_{c_{k}},r\right]+b_{0}).</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(7)</span></td>
+</tr></tbody>
+</table>
+<table id="S3.E8" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S3.E8.m1" class="ltx_Math" alttext="\hat{g}_{0}=sin(w_{0}^{\prime}g_{s}+b_{0}^{\prime})." display="block" intent=":literal"><semantics><mrow><mrow><msub><mover accent="true"><mi>g</mi><mo>^</mo></mover><mn>0</mn></msub><mo>=</mo><mrow><mi>s</mi><mo lspace="0em" rspace="0em">​</mo><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>n</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mrow><msubsup><mi>w</mi><mn>0</mn><mo>′</mo></msubsup><mo lspace="0em" rspace="0em">​</mo><msub><mi>g</mi><mi>s</mi></msub></mrow><mo>+</mo><msubsup><mi>b</mi><mn>0</mn><mo>′</mo></msubsup></mrow><mo stretchy="false">)</mo></mrow></mrow></mrow><mo lspace="0em">.</mo></mrow><annotation encoding="application/x-tex">\hat{g}_{0}=sin(w_{0}^{\prime}g_{s}+b_{0}^{\prime}).</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(8)</span></td>
+</tr></tbody>
+</table>
+<table id="S3.E9" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S3.E9.m1" class="ltx_Math" alttext="m_{0}=s_{0}\odot\hat{g}_{0}." display="block" intent=":literal"><semantics><mrow><mrow><msub><mi>m</mi><mn>0</mn></msub><mo>=</mo><mrow><msub><mi>s</mi><mn>0</mn></msub><mo lspace="0.222em" rspace="0.222em">⊙</mo><msub><mover accent="true"><mi>g</mi><mo>^</mo></mover><mn>0</mn></msub></mrow></mrow><mo lspace="0em">.</mo></mrow><annotation encoding="application/x-tex">m_{0}=s_{0}\odot\hat{g}_{0}.</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(9)</span></td>
+</tr></tbody>
+</table>
+<table id="S3.E10" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S3.E10.m1" class="ltx_Math" alttext="s_{i}=ReLU(w_{i}\left[m_{i-1},s_{i-1}\right]+b_{i})." display="block" intent=":literal"><semantics><mrow><mrow><msub><mi>s</mi><mi>i</mi></msub><mo>=</mo><mrow><mi>R</mi><mo lspace="0em" rspace="0em">​</mo><mi>e</mi><mo lspace="0em" rspace="0em">​</mo><mi>L</mi><mo lspace="0em" rspace="0em">​</mo><mi>U</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mrow><msub><mi>w</mi><mi>i</mi></msub><mo lspace="0em" rspace="0em">​</mo><mrow><mo>[</mo><msub><mi>m</mi><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>,</mo><msub><mi>s</mi><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>]</mo></mrow></mrow><mo>+</mo><msub><mi>b</mi><mi>i</mi></msub></mrow><mo stretchy="false">)</mo></mrow></mrow></mrow><mo lspace="0em">.</mo></mrow><annotation encoding="application/x-tex">s_{i}=ReLU(w_{i}\left[m_{i-1},s_{i-1}\right]+b_{i}).</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(10)</span></td>
+</tr></tbody>
+</table>
+<table id="S3.E11" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S3.E11.m1" class="ltx_Math" alttext="\hat{g}_{i}=sin(w_{i}^{\prime}g_{s}+b_{i}^{\prime})." display="block" intent=":literal"><semantics><mrow><mrow><msub><mover accent="true"><mi>g</mi><mo>^</mo></mover><mi>i</mi></msub><mo>=</mo><mrow><mi>s</mi><mo lspace="0em" rspace="0em">​</mo><mi>i</mi><mo lspace="0em" rspace="0em">​</mo><mi>n</mi><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><mrow><mrow><msubsup><mi>w</mi><mi>i</mi><mo>′</mo></msubsup><mo lspace="0em" rspace="0em">​</mo><msub><mi>g</mi><mi>s</mi></msub></mrow><mo>+</mo><msubsup><mi>b</mi><mi>i</mi><mo>′</mo></msubsup></mrow><mo stretchy="false">)</mo></mrow></mrow></mrow><mo lspace="0em">.</mo></mrow><annotation encoding="application/x-tex">\hat{g}_{i}=sin(w_{i}^{\prime}g_{s}+b_{i}^{\prime}).</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(11)</span></td>
+</tr></tbody>
+</table>
+<table id="S3.E12" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S3.E12.m1" class="ltx_Math" alttext="m_{i}=s_{i}\odot\hat{g}_{i}." display="block" intent=":literal"><semantics><mrow><mrow><msub><mi>m</mi><mi>i</mi></msub><mo>=</mo><mrow><msub><mi>s</mi><mi>i</mi></msub><mo lspace="0.222em" rspace="0.222em">⊙</mo><msub><mover accent="true"><mi>g</mi><mo>^</mo></mover><mi>i</mi></msub></mrow></mrow><mo lspace="0em">.</mo></mrow><annotation encoding="application/x-tex">m_{i}=s_{i}\odot\hat{g}_{i}.</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(12)</span></td>
+</tr></tbody>
+</table>
+</div>
+<div id="S3.SS4.p5" class="ltx_para">
+<p class="ltx_p">In the above equations, <math id="S3.SS4.p5.m1" class="ltx_Math" alttext="w_{i}" display="inline" intent=":literal"><semantics><msub><mi>w</mi><mi>i</mi></msub><annotation encoding="application/x-tex">w_{i}</annotation></semantics></math> and <math id="S3.SS4.p5.m2" class="ltx_Math" alttext="w_{i}^{\prime}" display="inline" intent=":literal"><semantics><msubsup><mi>w</mi><mi>i</mi><mo>′</mo></msubsup><annotation encoding="application/x-tex">w_{i}^{\prime}</annotation></semantics></math> are the weights, <math id="S3.SS4.p5.m3" class="ltx_Math" alttext="b_{i}" display="inline" intent=":literal"><semantics><msub><mi>b</mi><mi>i</mi></msub><annotation encoding="application/x-tex">b_{i}</annotation></semantics></math> and <math id="S3.SS4.p5.m4" class="ltx_Math" alttext="b_{i}^{\prime}" display="inline" intent=":literal"><semantics><msubsup><mi>b</mi><mi>i</mi><mo>′</mo></msubsup><annotation encoding="application/x-tex">b_{i}^{\prime}</annotation></semantics></math> are the biases, and <math id="S3.SS4.p5.m5" class="ltx_Math" alttext="s" display="inline" intent=":literal"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math> is the latent feature of the <math id="S3.SS4.p5.m6" class="ltx_Math" alttext="i^{th}" display="inline" intent=":literal"><semantics><msup><mi>i</mi><mrow><mi>t</mi><mo lspace="0em" rspace="0em">​</mo><mi>h</mi></mrow></msup><annotation encoding="application/x-tex">i^{th}</annotation></semantics></math> layer within the MLP. <math id="S3.SS4.p5.m7" class="ltx_Math" alttext="\hat{g}_{i}" display="inline" intent=":literal"><semantics><msub><mover accent="true"><mi>g</mi><mo>^</mo></mover><mi>i</mi></msub><annotation encoding="application/x-tex">\hat{g}_{i}</annotation></semantics></math> is the global positional feature and <math id="S3.SS4.p5.m8" class="ltx_Math" alttext="m_{i}" display="inline" intent=":literal"><semantics><msub><mi>m</mi><mi>i</mi></msub><annotation encoding="application/x-tex">m_{i}</annotation></semantics></math> is the modulated output. The last output of <math id="S3.SS4.p5.m9" class="ltx_Math" alttext="s_{i}" display="inline" intent=":literal"><semantics><msub><mi>s</mi><mi>i</mi></msub><annotation encoding="application/x-tex">s_{i}</annotation></semantics></math> is then passed through a final dense layer to output the predicted RGB value. With the guidance of the global coordinate, the modulated implicit image function now has a global view to identify the potential location of the landmark.</p>
+</div>
+<div id="S3.SS4.p6" class="ltx_para">
+<p class="ltx_p">In summary, the global coordinate modulation module incorporates prior facial structure information into FSR by mapping the global coordinate into a high-dimensional space using position encoding. By combining global coordinate guidance with locally enhanced features, our ARASFSR achieves improved facial reconstruction results.</p>
+</div>
+</section>
+<section id="S3.SS5" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.5 </span>Skip Connection</h3>
+
+<div id="S3.SS5.p1" class="ltx_para">
+<p class="ltx_p">The effectiveness of long skip connections in learning high-frequency components and improving convergence stability has been demonstrated in residual networks <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">kim2016accurate</span>, <span class="ltx_ref ltx_missing_citation ltx_ref_self">lte-jaewon-lee</span>]</cite>. In our proposed architecture, we introduce an additional branch incorporating a skip connection. Including this long skip connection can alleviate information loss and enhance the network’s capability to capture fine details.</p>
+</div>
+</section>
+<section id="S3.SS6" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.6 </span>Loss Function</h3>
+
+<div id="S3.SS6.p1" class="ltx_para">
+<p class="ltx_p">We train our model end-to-end and use the Charbonnier loss <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">lai2017deep</span>]</cite> given by:</p>
+<table id="S3.E13" class="ltx_equation ltx_eqn_table">
+
+<tbody><tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S3.E13.m1" class="ltx_Math" alttext="L_{\delta}=\frac{1}{N}\sum_{i=1}^{N}\sqrt{(I^{HR}(x_{s})-I^{SR}(x_{s}))^{2}+\delta^{2}}," display="block" intent=":literal"><semantics><mrow><mrow><msub><mi>L</mi><mi>δ</mi></msub><mo>=</mo><mrow><mfrac><mn>1</mn><mi>N</mi></mfrac><mo lspace="0em" rspace="0em">​</mo><mrow><munderover><mo movablelimits="false">∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><msqrt><mrow><msup><mrow><mo stretchy="false">(</mo><mrow><mrow><msup><mi>I</mi><mrow><mi>H</mi><mo lspace="0em" rspace="0em">​</mo><mi>R</mi></mrow></msup><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>x</mi><mi>s</mi></msub><mo stretchy="false">)</mo></mrow></mrow><mo>−</mo><mrow><msup><mi>I</mi><mrow><mi>S</mi><mo lspace="0em" rspace="0em">​</mo><mi>R</mi></mrow></msup><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>x</mi><mi>s</mi></msub><mo stretchy="false">)</mo></mrow></mrow></mrow><mo stretchy="false">)</mo></mrow><mn>2</mn></msup><mo>+</mo><msup><mi>δ</mi><mn>2</mn></msup></mrow></msqrt></mrow></mrow></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">L_{\delta}=\frac{1}{N}\sum_{i=1}^{N}\sqrt{(I^{HR}(x_{s})-I^{SR}(x_{s}))^{2}+\delta^{2}},</annotation></semantics></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+<td rowspan="1" class="ltx_eqn_cell ltx_eqn_eqno ltx_align_middle ltx_align_right"><span class="ltx_tag ltx_tag_equation ltx_align_right">(13)</span></td>
+</tr></tbody>
+</table>
+<p class="ltx_p">where <math id="S3.SS6.p1.m1" class="ltx_Math" alttext="I^{HR}(x_{s})" display="inline" intent=":literal"><semantics><mrow><msup><mi>I</mi><mrow><mi>H</mi><mo lspace="0em" rspace="0em">​</mo><mi>R</mi></mrow></msup><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>x</mi><mi>s</mi></msub><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">I^{HR}(x_{s})</annotation></semantics></math> is the ground truth value, <math id="S3.SS6.p1.m2" class="ltx_Math" alttext="I^{SR}(x_{s})" display="inline" intent=":literal"><semantics><mrow><msup><mi>I</mi><mrow><mi>S</mi><mo lspace="0em" rspace="0em">​</mo><mi>R</mi></mrow></msup><mo lspace="0em" rspace="0em">​</mo><mrow><mo stretchy="false">(</mo><msub><mi>x</mi><mi>s</mi></msub><mo stretchy="false">)</mo></mrow></mrow><annotation encoding="application/x-tex">I^{SR}(x_{s})</annotation></semantics></math> is the predicted value, <math id="S3.SS6.p1.m3" class="ltx_Math" alttext="N" display="inline" intent=":literal"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math> is the total number of samples, and <math id="S3.SS6.p1.m4" class="ltx_Math" alttext="\delta" display="inline" intent=":literal"><semantics><mi>δ</mi><annotation encoding="application/x-tex">\delta</annotation></semantics></math> is a hyper-parameter that controls the smoothness of the loss function.</p>
+</div>
+</section>
+</section>
+<section id="S4" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">4 </span>Experiments</h2>
+
+<section id="S4.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.1 </span>Datasets and Metrics</h3>
+
+<div id="S4.SS1.p1" class="ltx_para">
+<p class="ltx_p">We carry out experiments on four datasets. Firstly, we compare the performance of our approach with INR-based SISR methods at different up-sampling scales on CelebAHQ dataset <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">karras2017progressive</span>]</cite>. This dataset consists of 30,000 HR face images (1024×1024 pixels) selected from CelebA dataset <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">liu2015deep</span>]</cite>. Secondly, we create CelebAHQ-NN-JPEG dataset by down-sampling CelebAHQ dataset using the nearest neighbor method and introducing JPEG compression artifacts. This dataset, along with SCface dataset <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">grgic2011scface</span>]</cite> containing facial images captured by surveillance cameras, demonstrates our method’s applicability in real-world scenarios. Lastly, we compare our approach with FSR methods on CelebAHQ and Helen datasets <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">le2012interactive</span>]</cite>. We evaluate the performance using two widely-used metrics, PSNR and SSIM <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">wang2004image</span>]</cite>, calculated on the Y channel in the YCbCr color space.</p>
+</div>
+</section>
+<section id="S4.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.2 </span>Implementation Details</h3>
+
+<figure id="S4.T1" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering" style="font-size:90%;"><span class="ltx_tag ltx_tag_table">Table 1: </span>Quantitative comparison on CelebAHQ with INR-based SISR methods (PSNR(dB)). The best and second best performances are highlighted in <span class="ltx_text" style="--ltx-fg-color:#FF0000;">red</span> and <span class="ltx_text" style="--ltx-fg-color:#0000FF;">blue</span> colors, respectively. ”E-” and ”R-” indicate the use of EDSR and RDN as encoders, respectively.</figcaption>
+<table class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<tbody class="ltx_tbody">
+<tr class="ltx_tr">
+<th class="ltx_td ltx_th ltx_th_row ltx_border_r"></th>
+<td class="ltx_td ltx_align_center ltx_border_r" colspan="2"><span class="ltx_text" style="font-size:90%;">In-distribution</span></td>
+<td class="ltx_td ltx_align_center" colspan="2"><span class="ltx_text" style="font-size:90%;">Out-of-distribution</span></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><span class="ltx_text" style="font-size:90%;">Method</span></th>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">×1.5</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r"><span class="ltx_text" style="font-size:90%;">×2</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">×4</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">×8</span></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_th ltx_th_row ltx_border_r"></th>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">64-96</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r"><span class="ltx_text" style="font-size:90%;">64-128</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">64-256</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">64-512</span></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r ltx_border_t">
+<span class="ltx_text" style="font-size:90%;">E-LIIF </span><cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" style="font-size:90%;">[</span><span class="ltx_ref ltx_missing_citation ltx_ref_self">DBLP:journals/corr/abs-2012-09161</span><span class="ltx_text" style="font-size:90%;">]</span></cite>
+</th>
+<td class="ltx_td ltx_align_center ltx_border_t"><span class="ltx_text" style="font-size:90%;">40.1002</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:90%;">36.9650</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#0000FF;">32.3501</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#0000FF;">30.8161</span></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r">
+<span class="ltx_text" style="font-size:90%;">E-LTE </span><cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" style="font-size:90%;">[</span><span class="ltx_ref ltx_missing_citation ltx_ref_self">lte-jaewon-lee</span><span class="ltx_text" style="font-size:90%;">]</span></cite>
+</th>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#0000FF;">40.1913</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#0000FF;">37.1062</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">31.2708</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">28.4518</span></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r">
+<span class="ltx_text" style="font-size:90%;">E-DIINN </span><cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" style="font-size:90%;">[</span><span class="ltx_ref ltx_missing_citation ltx_ref_self">nguyen2023single</span><span class="ltx_text" style="font-size:90%;">]</span></cite>
+</th>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">40.1781</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r"><span class="ltx_text" style="font-size:90%;">37.0943</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">32.1410</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">30.4560</span></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><span class="ltx_text" style="font-size:90%;">E-ARASFSR</span></th>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#FF0000;">40.1954</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#FF0000;">37.1097</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#FF0000;">32.4799</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#FF0000;">30.9148</span></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r ltx_border_t">
+<span class="ltx_text" style="font-size:90%;">R-LIIF </span><cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" style="font-size:90%;">[</span><span class="ltx_ref ltx_missing_citation ltx_ref_self">DBLP:journals/corr/abs-2012-09161</span><span class="ltx_text" style="font-size:90%;">]</span></cite>
+</th>
+<td class="ltx_td ltx_align_center ltx_border_t"><span class="ltx_text" style="font-size:90%;">40.2433</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:90%;">37.1188</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#0000FF;">32.3950</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#0000FF;">30.7763</span></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r">
+<span class="ltx_text" style="font-size:90%;">R-LTE </span><cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" style="font-size:90%;">[</span><span class="ltx_ref ltx_missing_citation ltx_ref_self">lte-jaewon-lee</span><span class="ltx_text" style="font-size:90%;">]</span></cite>
+</th>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">40.2813</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#FF0000;">37.2104</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">31.9483</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">29.9873</span></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r">
+<span class="ltx_text" style="font-size:90%;">R-DIINN </span><cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" style="font-size:90%;">[</span><span class="ltx_ref ltx_missing_citation ltx_ref_self">nguyen2023single</span><span class="ltx_text" style="font-size:90%;">]</span></cite>
+</th>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#0000FF;">40.3033</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r"><span class="ltx_text" style="font-size:90%;">37.1676</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">32.0622</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">30.6020</span></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><span class="ltx_text" style="font-size:90%;">R-ARASFSR</span></th>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#FF0000;">40.3100</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#0000FF;">37.1830</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#FF0000;">32.4987</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#FF0000;">30.9741</span></td>
+</tr>
+</tbody>
+</table>
+</figure>
+<div id="S4.SS2.p1" class="ltx_para">
+<p class="ltx_p">Since CelebAHQ is a high-quality dataset with pre-aligned faces, no further alignment is necessary. For Helen and SCface, we align and crop all facial images with respect to their landmarks using MTCNN <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">7553523</span>]</cite>. In FSR, an LR face image of size <math id="S4.SS2.p1.m1" class="ltx_Math" alttext="L_{r}" display="inline" intent=":literal"><semantics><msub><mi>L</mi><mi>r</mi></msub><annotation encoding="application/x-tex">L_{r}</annotation></semantics></math>×<math id="S4.SS2.p1.m2" class="ltx_Math" alttext="L_{r}" display="inline" intent=":literal"><semantics><msub><mi>L</mi><mi>r</mi></msub><annotation encoding="application/x-tex">L_{r}</annotation></semantics></math> is mapped to its HR counterpart of size <math id="S4.SS2.p1.m3" class="ltx_Math" alttext="H_{r}" display="inline" intent=":literal"><semantics><msub><mi>H</mi><mi>r</mi></msub><annotation encoding="application/x-tex">H_{r}</annotation></semantics></math>×<math id="S4.SS2.p1.m4" class="ltx_Math" alttext="H_{r}" display="inline" intent=":literal"><semantics><msub><mi>H</mi><mi>r</mi></msub><annotation encoding="application/x-tex">H_{r}</annotation></semantics></math>. To evaluate the effectiveness of different up-sampling scales, multiple LR-HR pairs are required. To achieve this, the ground-truth images (<math id="S4.SS2.p1.m5" class="ltx_Math" alttext="D^{GT}" display="inline" intent=":literal"><semantics><msup><mi>D</mi><mrow><mi>G</mi><mo lspace="0em" rspace="0em">​</mo><mi>T</mi></mrow></msup><annotation encoding="application/x-tex">D^{GT}</annotation></semantics></math>) (e.g., 1024×1024 high-quality images in CelebAHQ) are down-sampled using bicubic interpolation to produce the corresponding HR images (<math id="S4.SS2.p1.m6" class="ltx_Math" alttext="D^{HR}" display="inline" intent=":literal"><semantics><msup><mi>D</mi><mrow><mi>H</mi><mo lspace="0em" rspace="0em">​</mo><mi>R</mi></mrow></msup><annotation encoding="application/x-tex">D^{HR}</annotation></semantics></math>) at variant target HR levels <math id="S4.SS2.p1.m7" class="ltx_Math" alttext="\{H_{r}\}" display="inline" intent=":literal"><semantics><mrow><mo stretchy="false">{</mo><msub><mi>H</mi><mi>r</mi></msub><mo stretchy="false">}</mo></mrow><annotation encoding="application/x-tex">\{H_{r}\}</annotation></semantics></math>. Similarly, we attain LR images (<math id="S4.SS2.p1.m8" class="ltx_Math" alttext="D^{LR}" display="inline" intent=":literal"><semantics><msup><mi>D</mi><mrow><mi>L</mi><mo lspace="0em" rspace="0em">​</mo><mi>R</mi></mrow></msup><annotation encoding="application/x-tex">D^{LR}</annotation></semantics></math>) at different target LR levels <math id="S4.SS2.p1.m9" class="ltx_Math" alttext="\{L_{r}\}" display="inline" intent=":literal"><semantics><mrow><mo stretchy="false">{</mo><msub><mi>L</mi><mi>r</mi></msub><mo stretchy="false">}</mo></mrow><annotation encoding="application/x-tex">\{L_{r}\}</annotation></semantics></math> by using either bicubic or nearest-neighbor down-sampling with augmented JPEG compression noise. However, to validate model generalization across input resolution, we fix the target <math id="S4.SS2.p1.m10" class="ltx_Math" alttext="L_{r}" display="inline" intent=":literal"><semantics><msub><mi>L</mi><mi>r</mi></msub><annotation encoding="application/x-tex">L_{r}</annotation></semantics></math> level and vary the target <math id="S4.SS2.p1.m11" class="ltx_Math" alttext="H_{r}" display="inline" intent=":literal"><semantics><msub><mi>H</mi><mi>r</mi></msub><annotation encoding="application/x-tex">H_{r}</annotation></semantics></math> level according to up-sampling scales during training. Furthermore, we use Charbonnier loss <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">lai2017deep</span>]</cite> and Adam optimizer <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">kingma2014adam</span>]</cite>. The models are trained for 200 epochs with a batch size of 16. The initial learning rate is 1e-4 and is reduced by a factor of 0.1 at epoch 100.</p>
+</div>
+</section>
+<section id="S4.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.3 </span>Comparison with State-of-the-Arts</h3>
+
+<section id="S4.SS3.SSS1" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">4.3.1 </span>Comparison with INR-based SISR methods</h4>
+
+<div id="S4.SS3.SSS1.p1" class="ltx_para">
+<p class="ltx_p">We compare our proposed method with SOTA INR-based SISR methods such as LIIF <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">DBLP:journals/corr/abs-2012-09161</span>]</cite>, LTE <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">lte-jaewon-lee</span>]</cite>, and DIINN <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">nguyen2023single</span>]</cite>, on different scenarios.</p>
+</div>
+<figure id="S4.F3" class="ltx_figure"><img src="/html/2511.16341/assets/celebAHQ_ideal.png" id="S4.F3.g1" class="ltx_graphics ltx_centering ltx_img_square" width="598" height="553" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">Figure 3</span>: </span><span class="ltx_text" style="font-size:90%;">Visual comparison on CelebAHQ with INR-based SISR methods.</span></figcaption>
+</figure>
+<div id="S4.SS3.SSS1.p2" class="ltx_para ltx_noindent">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Evaluation on CelebAHQ:</span> To evaluate the performance of <em class="ltx_emph ltx_font_italic">various up-sampling scales</em> with INR-based SISR methods, we assess up-sampling tasks involving both in-distribution and out-of-distribution scales. Considering that the average image resolution of large face datasets, such as Vggface2 <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">Vggface2</span>]</cite>, is typically below 180×180 pixels without background cropping, we uniformly sample up-sampling scales within <math id="S4.SS3.SSS1.p2.m1" class="ltx_math_unparsed" alttext="\{\times 1\sim\times 2\}" display="inline" intent=":literal"><semantics><mrow><mo stretchy="false">{</mo><mo lspace="0em" rspace="0.222em">×</mo><mn>1</mn><mo rspace="0em">∼</mo><mo lspace="0em" rspace="0.222em">×</mo><mn>2</mn><mo stretchy="false">}</mo></mrow><annotation encoding="application/x-tex">\{\times 1\sim\times 2\}</annotation></semantics></math> and set <math id="S4.SS3.SSS1.p2.m2" class="ltx_Math" alttext="L_{r}=64" display="inline" intent=":literal"><semantics><mrow><msub><mi>L</mi><mi>r</mi></msub><mo>=</mo><mn>64</mn></mrow><annotation encoding="application/x-tex">L_{r}=64</annotation></semantics></math> and <math id="S4.SS3.SSS1.p2.m3" class="ltx_Math" alttext="H_{r}\in\{64\sim 128\}" display="inline" intent=":literal"><semantics><mrow><msub><mi>H</mi><mi>r</mi></msub><mo>∈</mo><mrow><mo stretchy="false">{</mo><mrow><mn>64</mn><mo>∼</mo><mn>128</mn></mrow><mo stretchy="false">}</mo></mrow></mrow><annotation encoding="application/x-tex">H_{r}\in\{64\sim 128\}</annotation></semantics></math> during training. During testing, we evaluate our method with much larger up-sampling scales within <math id="S4.SS3.SSS1.p2.m4" class="ltx_math_unparsed" alttext="\{\times 1.5\sim\times 8\}" display="inline" intent=":literal"><semantics><mrow><mo stretchy="false">{</mo><mo lspace="0em" rspace="0.222em">×</mo><mn>1.5</mn><mo rspace="0em">∼</mo><mo lspace="0em" rspace="0.222em">×</mo><mn>8</mn><mo stretchy="false">}</mo></mrow><annotation encoding="application/x-tex">\{\times 1.5\sim\times 8\}</annotation></semantics></math>. Table <a href="#S4.T1" title="Table 1 ‣ 4.2 Implementation Details ‣ 4 Experiments ‣ Arbitrary-Resolution and Arbitrary-Scale Face Super-Resolution with Implicit Representation Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a> presents a quantitative comparison on CelebAHQ. The top and bottom rows show the results when EDSR <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">lim2017enhanced</span>]</cite> and RDN <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">zhang2018residual</span>]</cite> are used as encoders, respectively. ARASFSR achieves comparable performance for in-distribution scales and outperforms other methods for out-of-distribution scales. This demonstrates the superior generalizability of ARASFSR to arbitrary precision, which is crucial in real-world applications where the desired up-scaling factor may not be known beforehand.
+Furthermore, Fig. <a href="#S4.F3" title="Figure 3 ‣ 4.3.1 Comparison with INR-based SISR methods ‣ 4.3 Comparison with State-of-the-Arts ‣ 4 Experiments ‣ Arbitrary-Resolution and Arbitrary-Scale Face Super-Resolution with Implicit Representation Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a> presents a visual comparison using RDN as the encoder. As the up-sampling scale increases, we find that INR-based SISR methods produce SR results with blocking artifacts when zooming into the SR images. In contrast, ARASFSR generates stable results with plausible details.
+<span class="ltx_text ltx_font_bold">Real-world case on CelebAHQ-NN-JPEG:</span>
+To evaluate the effectiveness in real-world scenarios, we assess the performance of INR-based SISR methods on CelebAHQ-NN-JPEG, synthesized by performing nearest neighbor down-sampling and augmenting with JPEG compression artifacts to mimic surveillance faces. We train the up-sampling scales within <math id="S4.SS3.SSS1.p2.m5" class="ltx_math_unparsed" alttext="\{\times 1\sim\times 2\}" display="inline" intent=":literal"><semantics><mrow><mo stretchy="false">{</mo><mo lspace="0em" rspace="0.222em">×</mo><mn>1</mn><mo rspace="0em">∼</mo><mo lspace="0em" rspace="0.222em">×</mo><mn>2</mn><mo stretchy="false">}</mo></mrow><annotation encoding="application/x-tex">\{\times 1\sim\times 2\}</annotation></semantics></math> with a resolution setting of <math id="S4.SS3.SSS1.p2.m6" class="ltx_Math" alttext="L_{r}=32" display="inline" intent=":literal"><semantics><mrow><msub><mi>L</mi><mi>r</mi></msub><mo>=</mo><mn>32</mn></mrow><annotation encoding="application/x-tex">L_{r}=32</annotation></semantics></math> and <math id="S4.SS3.SSS1.p2.m7" class="ltx_Math" alttext="H_{r}" display="inline" intent=":literal"><semantics><msub><mi>H</mi><mi>r</mi></msub><annotation encoding="application/x-tex">H_{r}</annotation></semantics></math><math id="S4.SS3.SSS1.p2.m8" class="ltx_Math" alttext="{\in}\{32\sim 64\}" display="inline" intent=":literal"><semantics><mrow><mi></mi><mo>∈</mo><mrow><mo stretchy="false">{</mo><mrow><mn>32</mn><mo>∼</mo><mn>64</mn></mrow><mo stretchy="false">}</mo></mrow></mrow><annotation encoding="application/x-tex">{\in}\{32\sim 64\}</annotation></semantics></math>. To compare the performance of <em class="ltx_emph ltx_font_italic">different input LR resolutions</em> during testing, we evaluate the models on the following <math id="S4.SS3.SSS1.p2.m9" class="ltx_Math" alttext="\times 2" display="inline" intent=":literal"><semantics><mrow><mi></mi><mo lspace="0.222em" rspace="0.222em">×</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">\times 2</annotation></semantics></math> super-resolution scenarios, using different input resolutions of 64(LR)-128(HR). Fig. <a href="#S4.F4" title="Figure 4 ‣ 4.3.1 Comparison with INR-based SISR methods ‣ 4.3 Comparison with State-of-the-Arts ‣ 4 Experiments ‣ Arbitrary-Resolution and Arbitrary-Scale Face Super-Resolution with Implicit Representation Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a> offers a visual comparison with EDSR employed as the encoder. Previous works have encountered artifacts when the input resolution of facial images changes, as the implicit image function is constrained to a local view. The arrows indicate misplaced landmarks (such as smaller eyes) and artifacts (such as distortions in the nose). In contrast, our results display clear facial landmarks.</p>
+</div>
+<figure id="S4.F4" class="ltx_figure"><img src="/html/2511.16341/assets/celebAHQ_real.png" id="S4.F4.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="598" height="426" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">Figure 4</span>: </span><span class="ltx_text" style="font-size:90%;">Visual comparison of real world case on CelebAHQ-NN-JPEG with INR-based SISR methods.</span></figcaption>
+</figure>
+<div id="S4.SS3.SSS1.p3" class="ltx_para ltx_noindent">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Real-world case on SCface:</span> To further support the effectiveness in surveillance scenarios, we evaluate our approach using the d1 subset of SCface. This subset contains images captured by surveillance cameras from a distance of 4.2m, which is the most challenging subset in SCface. The visual comparison in Fig. <a href="#S4.F5" title="Figure 5 ‣ 4.3.2 Comparison with FSR methods ‣ 4.3 Comparison with State-of-the-Arts ‣ 4 Experiments ‣ Arbitrary-Resolution and Arbitrary-Scale Face Super-Resolution with Implicit Representation Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">5</span></a> shows the SR results of LR probes using different methods. Their HR gallery images are provided for comparison. It is evident from the comparison that existing methods encounter challenges in accurately preserving and reconstructing facial features, especially the eyes. In contrast, our method demonstrates exceptional performance in retaining and restoring fine facial details.</p>
+</div>
+</section>
+<section id="S4.SS3.SSS2" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">4.3.2 </span>Comparison with FSR methods</h4>
+
+<div id="S4.SS3.SSS2.p1" class="ltx_para">
+<p class="ltx_p">We present a comparative analysis of our proposed method with SOTA FSR methods such as FSRNet <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">CT-FSRNet-2018</span>]</cite>, PFSRNet <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">progressive-face-sr</span>]</cite>, DICNet <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">ma2020deep</span>]</cite>, SPARNet <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">ChenSPARNet</span>]</cite>, SISN <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">lu2021face</span>]</cite> and MRRNet <cite class="ltx_cite ltx_citemacro_cite">[<span class="ltx_ref ltx_missing_citation ltx_ref_self">MRRNet</span>]</cite>.
+In our comparison with FSR methods, we utilize RDN as a encoder. Since FSR methods focus on fixed-scale up-sampling, we train the networks for <math id="S4.SS3.SSS2.p1.m1" class="ltx_Math" alttext="\times 8" display="inline" intent=":literal"><semantics><mrow><mi></mi><mo lspace="0.222em" rspace="0.222em">×</mo><mn>8</mn></mrow><annotation encoding="application/x-tex">\times 8</annotation></semantics></math> super-resolution with
+<math id="S4.SS3.SSS2.p1.m2" class="ltx_Math" alttext="L_{r}=16" display="inline" intent=":literal"><semantics><mrow><msub><mi>L</mi><mi>r</mi></msub><mo>=</mo><mn>16</mn></mrow><annotation encoding="application/x-tex">L_{r}=16</annotation></semantics></math> and <math id="S4.SS3.SSS2.p1.m3" class="ltx_Math" alttext="H_{r}=128" display="inline" intent=":literal"><semantics><mrow><msub><mi>H</mi><mi>r</mi></msub><mo>=</mo><mn>128</mn></mrow><annotation encoding="application/x-tex">H_{r}=128</annotation></semantics></math>. However, during testing, we evaluate not only the match scenario (i.e., 16(LR)-128(HR)) but also the mismatch cases (i.e, 12(LR)-96(HR) and 64(LR)-128(HR)). As there is no standardized benchmark for comparing FSR methods, we take the following approach to ensure a fair comparison. For methods that provide training codes, we retrain these models using our training set on CelebAHQ and Helen. For methods that do not provide training codes, we test these models using their pretrained weights on CelebA in our CelebAHQ experiments. However, we do not evaluate the performance of these models on Helen since their training codes or pre-trained weights are not available.</p>
+</div>
+<figure id="S4.F5" class="ltx_figure"><img src="/html/2511.16341/assets/scface.png" id="S4.F5.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="598" height="238" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">Figure 5</span>: </span><span class="ltx_text" style="font-size:90%;">Visual comparison of real-world case on SCface with INR-based SISR methods. Please zoom in for details.</span></figcaption>
+</figure>
+<figure id="S4.T2" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering" style="font-size:90%;"><span class="ltx_tag ltx_tag_table">Table 2: </span>Quantitative comparison on CelebAHQ and Helen with FSR methods. The best and second best performances are highlighted in <span class="ltx_text" style="--ltx-fg-color:#FF0000;">red</span> and <span class="ltx_text" style="--ltx-fg-color:#0000FF;">blue</span> colors, respectively.</figcaption>
+<table class="ltx_tabular ltx_centering ltx_align_middle">
+<tbody class="ltx_tbody">
+<tr class="ltx_tr">
+<td class="ltx_td ltx_border_r"></td>
+<td class="ltx_td ltx_align_center ltx_border_r" colspan="6"><span class="ltx_text" style="font-size:90%;">CelebAHQ</span></td>
+<td class="ltx_td ltx_align_center" colspan="2"><span class="ltx_text" style="font-size:90%;">Helen</span></td>
+<td class="ltx_td"></td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_border_r"></td>
+<td class="ltx_td ltx_align_center ltx_border_t" colspan="2"><span class="ltx_text" style="font-size:90%;">mismatch</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" colspan="2"><span class="ltx_text" style="font-size:90%;">match</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" colspan="2"><span class="ltx_text" style="font-size:90%;">mismatch</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" colspan="2"><span class="ltx_text" style="font-size:90%;">match</span></td>
+<td class="ltx_td"></td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_r"><span class="ltx_text" style="font-size:90%;">Method</span></td>
+<td class="ltx_td ltx_align_center" colspan="2"><span class="ltx_text" style="font-size:90%;">×8</span></td>
+<td class="ltx_td ltx_align_center" colspan="2"><span class="ltx_text" style="font-size:90%;">×8</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r" colspan="2"><span class="ltx_text" style="font-size:90%;">×8</span></td>
+<td class="ltx_td ltx_align_center" colspan="2"><span class="ltx_text" style="font-size:90%;">×8</span></td>
+<td class="ltx_td"></td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_border_r"></td>
+<td class="ltx_td ltx_align_center" colspan="2"><span class="ltx_text" style="font-size:90%;">12-96</span></td>
+<td class="ltx_td ltx_align_center" colspan="2"><span class="ltx_text" style="font-size:90%;">16-128</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r" colspan="2"><span class="ltx_text" style="font-size:90%;">32-256</span></td>
+<td class="ltx_td ltx_align_center" colspan="2"><span class="ltx_text" style="font-size:90%;">16-128</span></td>
+<td class="ltx_td"></td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_border_r"></td>
+<td class="ltx_td ltx_align_center ltx_border_t"><span class="ltx_text" style="font-size:90%;">PSNR</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t"><span class="ltx_text" style="font-size:90%;">SSIM</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t"><span class="ltx_text" style="font-size:90%;">PSNR</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t"><span class="ltx_text" style="font-size:90%;">SSIM</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t"><span class="ltx_text" style="font-size:90%;">PSNR</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:90%;">SSIM</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t"><span class="ltx_text" style="font-size:90%;">PSNR</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t"><span class="ltx_text" style="font-size:90%;">SSIM</span></td>
+<td class="ltx_td"></td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t">
+<span class="ltx_text" style="font-size:90%;">FSRNet </span><cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" style="font-size:90%;">[</span><span class="ltx_ref ltx_missing_citation ltx_ref_self">CT-FSRNet-2018</span><span class="ltx_text" style="font-size:90%;">]</span></cite>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_t"><span class="ltx_text" style="font-size:90%;">22.4421</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t"><span class="ltx_text" style="font-size:90%;">0.6562</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t"><span class="ltx_text" style="font-size:90%;">24.4323</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t"><span class="ltx_text" style="font-size:90%;">0.7512</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t"><span class="ltx_text" style="font-size:90%;">25.1409</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:90%;">0.7479</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t"><span class="ltx_text" style="font-size:90%;">-</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t"><span class="ltx_text" style="font-size:90%;">-</span></td>
+<td class="ltx_td ltx_border_t"></td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_r">
+<span class="ltx_text" style="font-size:90%;">PFSRNet </span><cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" style="font-size:90%;">[</span><span class="ltx_ref ltx_missing_citation ltx_ref_self">progressive-face-sr</span><span class="ltx_text" style="font-size:90%;">]</span></cite>
+</td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">22.6620</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">0.6440</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">20.0664</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">0.5545</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">22.2394</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r"><span class="ltx_text" style="font-size:90%;">0.6108</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">-</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">-</span></td>
+<td class="ltx_td"></td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_r">
+<span class="ltx_text" style="font-size:90%;">DICNet </span><cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" style="font-size:90%;">[</span><span class="ltx_ref ltx_missing_citation ltx_ref_self">ma2020deep</span><span class="ltx_text" style="font-size:90%;">]</span></cite>
+</td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">22.4446</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">0.6112</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">26.4781</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">0.7758</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">27.2324</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r"><span class="ltx_text" style="font-size:90%;">0.7631</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">25.1722</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">0.7265</span></td>
+<td class="ltx_td"></td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_r">
+<span class="ltx_text" style="font-size:90%;">SPARNet </span><cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" style="font-size:90%;">[</span><span class="ltx_ref ltx_missing_citation ltx_ref_self">ChenSPARNet</span><span class="ltx_text" style="font-size:90%;">]</span></cite>
+</td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">24.5753</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">0.7086</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">26.5321</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">0.7792</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">28.2184</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r"><span class="ltx_text" style="font-size:90%;">0.7907</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#0000FF;">25.5450</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#FF0000;">0.7509</span></td>
+<td class="ltx_td"></td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_r">
+<span class="ltx_text" style="font-size:90%;">SISN </span><cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" style="font-size:90%;">[</span><span class="ltx_ref ltx_missing_citation ltx_ref_self">lu2021face</span><span class="ltx_text" style="font-size:90%;">]</span></cite>
+</td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">24.7083</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">0.7166</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#FF0000;">26.6575</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#0000FF;">0.7807</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#0000FF;">28.3367</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#0000FF;">0.7946</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">24.9867</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">0.7160</span></td>
+<td class="ltx_td"></td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_r">
+<span class="ltx_text" style="font-size:90%;">MRRNet </span><cite class="ltx_cite ltx_citemacro_cite"><span class="ltx_text" style="font-size:90%;">[</span><span class="ltx_ref ltx_missing_citation ltx_ref_self">MRRNet</span><span class="ltx_text" style="font-size:90%;">]</span></cite>
+</td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#0000FF;">24.7207</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#0000FF;">0.7192</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">26.5140</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">0.7755</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#FF0000;">28.3538</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r"><span class="ltx_text" style="font-size:90%;">0.7943</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">25.1263</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">0.7260</span></td>
+<td class="ltx_td"></td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_r"><span class="ltx_text" style="font-size:90%;">ARASFSR</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#FF0000;">24.7712</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#FF0000;">0.7214</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#0000FF;">26.6400</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#FF0000;">0.7813</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">28.3088</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#FF0000;">0.7948</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#FF0000;">25.6002</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;--ltx-fg-color:#0000FF;">0.7445</span></td>
+<td class="ltx_td"></td>
+</tr>
+</tbody>
+</table>
+</figure>
+<figure id="S4.F6" class="ltx_figure"><img src="/html/2511.16341/assets/celebAHQ_fsr.png" id="S4.F6.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="598" height="165" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">Figure 6</span>: </span><span class="ltx_text" style="font-size:90%;">Visual comparison on CelebAHQ with FSR methods.</span></figcaption>
+</figure>
+<div id="S4.SS3.SSS2.p2" class="ltx_para ltx_noindent">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Evaluation on CelebAHQ:</span>
+We first conduct experiments on CelebAHQ. The quantitative results presented in Table <a href="#S4.T2" title="Table 2 ‣ 4.3.2 Comparison with FSR methods ‣ 4.3 Comparison with State-of-the-Arts ‣ 4 Experiments ‣ Arbitrary-Resolution and Arbitrary-Scale Face Super-Resolution with Implicit Representation Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a> indicate that our method produces comparable performance to other FSR methods in both the match and mismatch scenarios. The visual comparison shown in Fig. <a href="#S4.F6" title="Figure 6 ‣ 4.3.2 Comparison with FSR methods ‣ 4.3 Comparison with State-of-the-Arts ‣ 4 Experiments ‣ Arbitrary-Resolution and Arbitrary-Scale Face Super-Resolution with Implicit Representation Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6</span></a> illustrates that our method produces high-quality results with minimal artifacts and clearer facial features. Unlike existing FSR methods that are only suitable for fixed up-sampling scales and input resolutions, our method can super-resolve images at any desired scale and is robust to input resolution, making it more versatile.</p>
+</div>
+<div id="S4.SS3.SSS2.p3" class="ltx_para ltx_noindent">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Evaluation on Helen:</span>
+We conducted additional experiments on Helen in the match scenario (i.e., 16(LR)-128(HR)). The quantitative results in Table <a href="#S4.T2" title="Table 2 ‣ 4.3.2 Comparison with FSR methods ‣ 4.3 Comparison with State-of-the-Arts ‣ 4 Experiments ‣ Arbitrary-Resolution and Arbitrary-Scale Face Super-Resolution with Implicit Representation Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a> demonstrate that our method achieves results comparable to those of other FSR methods. Notably, our method can also be used with a stronger encoder to achieve even better results.</p>
+</div>
+<figure id="S4.T3" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering" style="font-size:90%;"><span class="ltx_tag ltx_tag_table">Table 3: </span>Quantitative Ablation study of ARASFSR on CelebAHQ (PSNR(dB)).</figcaption>
+<table class="ltx_tabular ltx_centering ltx_guessed_headers ltx_align_middle">
+<tbody class="ltx_tbody">
+<tr class="ltx_tr">
+<th class="ltx_td ltx_th ltx_th_row ltx_border_r"></th>
+<td class="ltx_td ltx_align_center ltx_border_r" colspan="2"><span class="ltx_text" style="font-size:90%;">In-distribution</span></td>
+<td class="ltx_td ltx_align_center" colspan="2"><span class="ltx_text" style="font-size:90%;">Out-of-distribution</span></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><span class="ltx_text" style="font-size:90%;">Method</span></th>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">×1.5</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r"><span class="ltx_text" style="font-size:90%;">×2</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">×4</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">×8</span></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_th ltx_th_row ltx_border_r"></th>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">64-96</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r"><span class="ltx_text" style="font-size:90%;">64-128</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">64-256</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">64-512</span></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:90%;">ARASFSR</span></th>
+<td class="ltx_td ltx_align_center ltx_border_t"><em class="ltx_emph ltx_font_italic" style="font-size:90%;">40.1954</em></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><em class="ltx_emph ltx_font_italic" style="font-size:90%;">37.1097</em></td>
+<td class="ltx_td ltx_align_center ltx_border_t"><em class="ltx_emph ltx_font_italic" style="font-size:90%;">32.4799</em></td>
+<td class="ltx_td ltx_align_center ltx_border_t"><em class="ltx_emph ltx_font_italic" style="font-size:90%;">30.9148</em></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><span class="ltx_text" style="font-size:90%;">ARASFSR(-L)</span></th>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">40.1827</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r"><span class="ltx_text" style="font-size:90%;">37.0936</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">32.3301</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">30.6935</span></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><span class="ltx_text" style="font-size:90%;">ARASFSR(-G)</span></th>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">40.1666</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r"><span class="ltx_text" style="font-size:90%;">37.0848</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">32.3210</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">30.6504</span></td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_center ltx_th ltx_th_row ltx_border_r"><span class="ltx_text" style="font-size:90%;">ARASFSR(-S)</span></th>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">40.1336</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r"><span class="ltx_text" style="font-size:90%;">36.9969</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">32.3958</span></td>
+<td class="ltx_td ltx_align_center"><span class="ltx_text" style="font-size:90%;">30.8488</span></td>
+</tr>
+</tbody>
+</table>
+</figure>
+<figure id="S4.F7" class="ltx_figure"><img src="/html/2511.16341/assets/ablation.png" id="S4.F7.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="598" height="443" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">Figure 7</span>: </span><span class="ltx_text" style="font-size:90%;">Qualitative ablation study of ARASFSR on CelebAHQ (LR-HR: 32-256). For a better view of the details, please zoom in.</span></figcaption>
+</figure>
+</section>
+</section>
+<section id="S4.SS4" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.4 </span>Ablation Study</h3>
+
+<div id="S4.SS4.p1" class="ltx_para">
+<p class="ltx_p">ARASFSR comprises implicit representation networks with three primary modules. We retrain the model with EDSR for three variants: ARASFSR without the local frequency estimation module (-L), ARASFSR without the global coordinate modulation module (-G), and ARASFSR without a skip connection (-S). To assess the effectiveness of each module, we conduct a quantitative ablation study, with the results presented in Table <a href="#S4.T3" title="Table 3 ‣ 4.3.2 Comparison with FSR methods ‣ 4.3 Comparison with State-of-the-Arts ‣ 4 Experiments ‣ Arbitrary-Resolution and Arbitrary-Scale Face Super-Resolution with Implicit Representation Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a>. Additionally, a qualitative ablation study depicted in Fig. <a href="#S4.F7" title="Figure 7 ‣ 4.3.2 Comparison with FSR methods ‣ 4.3 Comparison with State-of-the-Arts ‣ 4 Experiments ‣ Arbitrary-Resolution and Arbitrary-Scale Face Super-Resolution with Implicit Representation Networks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">7</span></a> examines the super-resolved results and the difference maps between the bicubic up-sampled results and the super-resolved results.</p>
+</div>
+<div id="S4.SS4.p2" class="ltx_para">
+<p class="ltx_p">Our findings reveal that the local frequency estimation module plays a crucial role in capturing frequency information for facial texture, as evidenced by the comparison between ARASFSR and ARASFSR(-L). Moreover, the use of global coordinate modulation provides valuable guidance for fusing local features and global facial landmark priors, as demonstrated by the contrast between ARASFSR and ARASFSR(-G). Finally, we observe that the incorporation of a skip connection consistently enhances the quality of ARASFSR compared to ARASFSR(-S).</p>
+</div>
+</section>
+</section>
+<section id="S5" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">5 </span>Conclusion</h2>
+
+<div id="S5.p1" class="ltx_para">
+<p class="ltx_p">In this paper, we proposed an Arbitrary-Resolution and Arbitrary-Scale FSR method. Our framework employs an implicit image function that can effectively handle changes in the up-sampling scale. Furthermore, our approach incorporates a local frequency estimation module to capture high-frequency information for facial texture and a global coordinate modulation module to guide the facial structure, ensuring effective operation across various input sizes. Through quantitative and qualitative experiments, we demonstrated the robustness and superiority of our proposed method compared to state-of-the-art methods.</p>
+</div>
+<div id="S5.p2" class="ltx_para ltx_noindent">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Acknowledgements.</span>
+Thanks to Yi-ren Ye and Hsuan-Tung Liu for valuable discussions of this work. This work was funded in part by E-SUN COMMERCIAL BANK, LTD. and also supported in part by the National Science and Technology Council, Taiwan, under Grant NSTC-112-2221-E-A49-089-MY3, Grant NSTC-110-2221-E-A49-066-MY3, Grant NSTC-111-2634-F-A49-010, Grant NSTC-112-2425-H-A49-001, and in part by the Higher Education Sprout Project of the National Yang Ming Chiao Tung University and the Ministry of Education (MOE), Taiwan.</p>
+</div>
+<div class="ltx_pagination ltx_role_newpage"></div>
+</section>
+</article>
+</div>
+<div class="ar5iv-footer"><a href="/html/2511.16340" class="ar5iv-nav-button ar5iv-nav-button-prev">◄</a>
+    <a class="ar5iv-home-button" href="/"><img height="40" alt="ar5iv homepage" src="/assets/ar5iv.png"></a>
+    <a href="/feeling_lucky" class="ar5iv-text-button">Feeling<br>lucky?</a>
+    <a href="/land_of_honey_and_milk" rel="nofollow" aria-hidden="true" tabindex="-1"></a>
+    <a href="/log/2511.16341" class="ar5iv-text-button ar5iv-severity-warning">Conversion<br>report</a>
+    <a class="ar5iv-text-button" target="_blank" href="https://github.com/dginev/ar5iv/issues/new?template=improve-article--arxiv-id-.md&title=Improve+article+2511.16341">Report<br>an issue</a>
+    <a href="https://arxiv.org/abs/2511.16341" class="ar5iv-text-button arxiv-ui-theme">View&nbsp;original<br>on&nbsp;arXiv</a><a href="/html/2511.16342" class="ar5iv-nav-button ar5iv-nav-button-next">►</a>
+</div><footer class="ltx_page_footer">
+<a class="ar5iv-toggle-color-scheme" href="javascript:toggleColorScheme()" title="Toggle ar5iv color scheme"><span class="color-scheme-icon"></span></a>
+<a class="ar5iv-footer-button" href="https://arxiv.org/help/license" target="_blank">Copyright</a>
+<a class="ar5iv-footer-button" href="https://arxiv.org/help/policies/privacy_policy" target="_blank">Privacy Policy</a>
+
+<div class="ltx_page_logo">Generated  on Fri Dec  5 18:15:03 2025 by <a target="_blank" href="http://dlmf.nist.gov/LaTeXML/" class="ltx_LaTeXML_logo"><span style="letter-spacing:-0.2em; margin-right:0.1em;">L<span class="ltx_font_smallcaps" style="position:relative; bottom:2.2pt;">a</span>T<span class="ltx_font_smallcaps" style="font-size:120%;position:relative; bottom:-0.2ex;">e</span></span><span style="font-size:90%; position:relative; bottom:-0.2ex;">XML</span><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAOCAYAAAD5YeaVAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wKExQZLWTEaOUAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBHSU1Q72QlbgAAAdpJREFUKM9tkL+L2nAARz9fPZNCKFapUn8kyI0e4iRHSR1Kb8ng0lJw6FYHFwv2LwhOpcWxTjeUunYqOmqd6hEoRDhtDWdA8ApRYsSUCDHNt5ul13vz4w0vWCgUnnEc975arX6ORqN3VqtVZbfbTQC4uEHANM3jSqXymFI6yWazP2KxWAXAL9zCUa1Wy2tXVxheKA9YNoR8Pt+aTqe4FVVVvz05O6MBhqUIBGk8Hn8HAOVy+T+XLJfLS4ZhTiRJgqIoVBRFIoric47jPnmeB1mW/9rr9ZpSSn3Lsmir1fJZlqWlUonKsvwWwD8ymc/nXwVBeLjf7xEKhdBut9Hr9WgmkyGEkJwsy5eHG5vN5g0AKIoCAEgkEkin0wQAfN9/cXPdheu6P33fBwB4ngcAcByHJpPJl+fn54mD3Gg0NrquXxeLRQAAwzAYj8cwTZPwPH9/sVg8PXweDAauqqr2cDjEer1GJBLBZDJBs9mE4zjwfZ85lAGg2+06hmGgXq+j3+/DsixYlgVN03a9Xu8jgCNCyIegIAgx13Vfd7vdu+FweG8YRkjXdWy329+dTgeSJD3ieZ7RNO0VAXAPwDEAO5VKndi2fWrb9jWl9Esul6PZbDY9Go1OZ7PZ9z/lyuD3OozU2wAAAABJRU5ErkJggg==" alt="Mascot Sammy"></a>
+</div></footer>
+</div>
+
+    <script>
+      var canMathML = typeof(MathMLElement) == "function";
+      if (!canMathML) {
+        var body = document.querySelector("body");
+        body.firstElementChild.setAttribute('style', 'opacity: 0;');
+        var loading = document.createElement("div");
+        loading.setAttribute("id", "mathjax-loading-spinner");
+        var message = document.createElement("div");
+        message.setAttribute("id", "mathjax-loading-message");
+        message.innerText = "Typesetting Equations...";
+        body.prepend(loading);
+        body.prepend(message);
+
+        var el = document.createElement("script");
+        el.src = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js";
+        document.querySelector("head").appendChild(el);
+
+        window.MathJax = {
+          startup: {
+            pageReady: () => {
+              return MathJax.startup.defaultPageReady().then(() => {
+                body.removeChild(loading);
+                body.removeChild(message);
+                body.firstElementChild.removeAttribute('style');
+              }); } } };
+      }
+    </script>
+    <script>
+    // Auxiliary function, building the preview feature when
+    // an inline citation is clicked
+    function clicked_cite(e) {
+      e.preventDefault();
+      let cite = this.closest('.ltx_cite');
+      let next = cite.nextSibling;
+      if (next && next.nodeType == Node.ELEMENT_NODE && next.getAttribute('class') == "ar5iv-bibitem-preview") {
+        next.remove();
+        return; }
+      // Before adding a preview modal,
+      // cleanup older previews, in case they're still open
+      document.querySelectorAll('span.ar5iv-bibitem-preview').forEach(function(node) {
+        node.remove();
+      })
+
+      // Create the preview
+      preview = document.createElement('span');
+      preview.setAttribute('class','ar5iv-bibitem-preview');
+      let target = document.getElementById(this.getAttribute('href').slice(1));
+      target.childNodes.forEach(function (child) {
+        preview.append(child.cloneNode(true));
+      });
+      let close_x = document.createElement('button');
+      close_x.setAttribute("aria-label","Close modal for bibliography item preview");
+      close_x.textContent = "×";
+      close_x.setAttribute('class', 'ar5iv-button-close-preview');
+      close_x.setAttribute('onclick','this.parentNode.remove()');
+      preview.append(close_x);
+      preview.querySelectorAll('.ltx_tag_bibitem').forEach(function(node) {
+        node.remove();
+      });
+      cite.parentNode.insertBefore(preview, cite.nextSibling);
+      return;
+    }
+    // Global Document initialization:
+    // - assign the preview feature to all inline citation links
+    document.querySelectorAll(".ltx_cite .ltx_ref").forEach(function (link) {
+      link.addEventListener("click", clicked_cite);
+    });
+    </script>
+    </body>
+</html>

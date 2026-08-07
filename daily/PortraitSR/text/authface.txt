@@ -1,0 +1,939 @@
+=== PAGE 1 ===
+AuthFace: Towards Authentic Blind Face Restoration with
+Face-oriented Generative Diffusion Prior
+Guoqiang Liang∗
+Hong Kong University of Science and
+Technology (Guangzhou)
+Guangzhou, China
+gliang041@connect.hkust-gz.edu.cn
+Qingnan Fan†
+vivo Mobile Communication Co., Ltd
+Hangzhou, China
+fqnchina@gmail.com
+Bingtao Fu
+Ant Group
+Hangzhou, China
+bingtaofu93@gmail.com
+Jinwei Chen
+vivo Mobile Communication Co., Ltd
+Hangzhou, China
+jinwei.chen@vivo.com
+Hong Gu
+vivo Mobile Communication Co., Ltd
+Hangzhou, China
+guhong@vivo.com
+Lin Wang†
+Nanyang Technological University
+Singapore
+linwang@ntu.edu.sg
+Abstract
+Blind face restoration (BFR) is a fundamental and challenging prob-
+lem in computer vision. To faithfully restore high-quality (HQ)
+photos from poor-quality ones, recent research endeavors predom-
+inantly rely on facial image priors from the powerful pretrained
+text-to-image (T2I) diffusion models. However, such priors often
+lead to the incorrect generation of non-facial features and insuf-
+ficient facial details, thus rendering them less practical for real-
+world applications. In this paper, we propose a novel framework,
+namelyAuthFacethat achieves highly authentic face restoration
+results by exploring a face-oriented generative diffusion prior. To
+learn such a prior, we first collect a dataset of1.5Khigh-quality
+images, with resolutions exceeding 8K, captured by professional
+photographers. Based on the dataset, we then introduce a novel face-
+oriented restoration-tuning pipeline that fine-tunes a pretrained
+T2I model. The photography-guided annotation system and facial
+prior refinements fully explore the potential of these high-quality
+photographic images. In this way, the potent natural image pri-
+ors from pretrained T2I diffusion models can be subtly harnessed,
+specifically enhancing their capability in facial detail restoration.
+Moreover, to minimize artifacts in critical facial areas, such as
+eyes and mouth, we propose a time-aware latent facial feature
+loss to learn the authentic face restoration process. Extensive exper-
+iments on the synthetic and real-world BFR datasets demonstrate
+the superiority of our approach. Code and models are available at
+https://github.com/EthanLiang99/AuthFace.
+CCS Concepts
+•Computing methodologies→Computer vision tasks.
+∗Work done during internship at vivo. †Corresponding authors.
+Permission to make digital or hard copies of all or part of this work for personal or
+classroom use is granted without fee provided that copies are not made or distributed
+for profit or commercial advantage and that copies bear this notice and the full citation
+on the first page. Copyrights for components of this work owned by others than the
+author(s) must be honored. Abstracting with credit is permitted. To copy otherwise, or
+republish, to post on servers or to redistribute to lists, requires prior specific permission
+and/or a fee. Request permissions from permissions@acm.org.
+MM ’25, Dublin, Ireland.
+©2025 Copyright held by the owner/author(s). Publication rights licensed to ACM.
+ACM ISBN 979-8-4007-2035-2/2025/10
+https://doi.org/10.1145/3746027.3755165
+Keywords
+Text-to-image Diffusion Model; Blind Face Restoration
+ACM Reference Format:
+Guoqiang Liang, Qingnan Fan†, Bingtao Fu, Jinwei Chen, Hong Gu, and Lin
+Wang†. 2025. AuthFace: Towards Authentic Blind Face Restoration with
+Face-oriented Generative Diffusion Prior. InProceedings of the 33rd ACM
+International Conference on Multimedia (MM ’25), October 27–31, 2025, Dublin,
+Ireland.ACM, New York, NY, USA, 10 pages. https://doi.org/10.1145/3746027.
+3755165
+1 Introduction
+Face images captured in natural settings often exhibit various forms
+of degradation, including compression, blur, and noise [ 52, 59].
+Capturing high-quality (HQ) face images is crucial, as humans
+are highly sensitive to subtle facial details. Blind face restoration
+(BFR) aims to reconstruct HQ images from degraded inputs and
+has rapidly progressed in recent years due to significant research
+interest. However, BFR remains an ill-posed problem due to the
+unknown degradation and the loss of valuable information resulting
+from these complex conditions [74].
+Sufficient prior information is critical for HQ reconstruction.
+Researchers have used geometric and reference priors from sources
+like [4, 6, 9, 12, 20, 24, 27–29, 35, 40, 45, 63, 67, 75] to guide face
+restoration. These priors, however, are limited by their sensitiv-
+ity to degradation and inability to capture fine facial details, and
+can even result in corrupted texture details due to incorrect prior
+information [34]. With advancements in generative models, such
+as StyleGAN [22] and VQVAE [39], recent works [5, 6, 27, 28, 30,
+49, 52, 54, 56–58, 62, 74] have leveraged pretrained networks to
+derive facial priors, achieving superior results compared to earlier
+methods. Nonetheless, these approaches still face significant per-
+formance declines in handling unseen cases. Denoising diffusion
+probabilistic models (DDPMs) [17] have shown promise as an al-
+ternative to generative adversarial networks (GANs) [46] in image
+generation. Some approaches [ 59, 68] use pretrained DDPMs to
+diffuse and then denoise degraded inputs. However, their practical
+application is hindered by the loss of original identity and detailed
+facial features [36], with pretrained DDPMs also facing limitations
+in representational capacity.
+arXiv:2410.09864v2  [cs.CV]  6 Mar 2026
+
+=== PAGE 2 ===
+MM ’25, October 27–31, 2025, Dublin, Ireland. Guoqiang Liang et al.
+(c) DiffBIR(d) Ours
+(a) Input
+(b) CodeFormer
+Figure 1: Compared to CodeFormer [ 74] and DiffBIR [31], our method more effectively captures and renders fine-grained facial
+details on the real-world datasets. Please zoom in for a closer view.
+The remarkable success of large-scale pretrained text-to-image
+(T2I) models [41, 43] has provided another promising prior. Many re-
+searchers explore the potential of StableDiffusion (SD) models [47]
+as the powerful prior in challenging low-level vision tasks, including
+real-world image super-resolution [31, 51, 60, 66] and BFR [8, 13].
+Since the face details are often lost due to the degradation and down-
+sampling processes of VAE [41] in SD models, BFRffusion [8] and
+DiffMAC [13] rely on the facial priors within SD models to recreate
+these details. However, being designed for general text-to-image
+tasks, SD models often fail to retain essential facial details, like skin
+texture (see Fig. 2 (b)). Therefore, these methods typically produce
+overly smooth images in the T2I task. Moreover, their extensive
+image priors can lead to the incorrect generation of non-facial fea-
+tures, resulting in artifacts, especially for images with ambiguous
+degradation.These specific limitations – incorrect generation of non-
+facial features and missing facial details (orange arrowsat Fig. 1)–
+severely limit the practical deployment of these models in real-world
+applications.
+To tackle these problems, we proposeAuthface, a novel BFR
+method with face-oriented generative diffusion prior, designed to
+restore highly authentic face images. Thehighlightof our Authface
+is that it brings a paradigm shift for BFR – with a two-stage training
+pipeline: 1)Face-oriented Fine-tuning on Pretrained T2I Model, and 2)
+Highly Authentic Face Restoration.The underlying premise for Stage
+I is that pretrained T2I modelse.g., SD models, can serve as effective
+generative diffusion priors for restoration tasks (Sec. 3.1). They can
+be customized for face-centric applications via fine-tuning while
+retaining their generation capabilities.
+In analyzing key factors for fine-tuning pretrained T2I models
+to meet human preferences for authentic facial images, we identify
+three key criteria as our face-oriented generative diffusion prior:
+1)Quality-first image collection. Contrary to training T2I base
+models with large datasets like LAION-5B [44], the quality of the
+dataset, rather than its size, dictates the generation quality in the
+fine-tuning process. 2)Photography-guided image annotation.
+Fine-tuning the pretrained T2I models for HQ facial tasks requires
+more than just basic annotations like human accessories, especially
+
+=== PAGE 3 ===
+AuthFace: Towards Authentic Blind Face Restoration with Face-oriented Generative Diffusion Prior MM ’25, October 27–31, 2025, Dublin, Ireland.
+Semantic Tag:
+• Person type:
+Close-up portrait
+• Gender: Male
+• Age: Young adult
+• Clothe: Black T-
+shirt
+• Background: Dark
+background
+Photographic
+Tag:
+• Expression:
+Serious expression
+• Light:
+Bi-color lighting,
+Blue light,
+Red light,
+Shadowing on face,
+Mood lighting
+• Photographic:
+Sharp focus,
+Photography,
+Frontal view,
+High resolution,
+Intense gaze
+• Facial detail:
+Stubble,
+Skin texture
+(a)
+Text descriptions:
+Asian Female, Floral Headpiece, Yellow
+Roses, Neutral Makeup, Black Hair,
+Black Top, Delicate Necklace, Close-Up,
+Serious Expression, Studio Lighting,
+High-Resolution Image, Gray Background,
+Fashionable, Natural Skin Tone, Focused
+Gaze, Fashion Photography, Minimalistic
+Style, Slight Shadow, Clean Composition,
+Sharp Focus, Color Contrast, Face Shot
+Text descriptions:
+Female, Portrait, Rainbow Makeup,
+Colorful Eyeshadow, High-Resolution,
+Studio Shot, Neutral Background, Front
+View, Young Adult, Creative Makeup,
+Vivid Colors, Natural Skin, Close-Up,
+Serious Expression, Beauty Shot, Makeup
+Artistry, Bare Shoulders, Artistic,
+Professional Lighting, Sharp Detail,
+Brown Hair, Pulled-Back Hairstyle
+SDXL
+(b)
+Ours
+Figure 2: (a) A HQ face image with its paired tags generated through photography-guided image annotation. Specifically, we
+provide an additional photographic tag (blue box) beyond the semantic tags used in previous methods (gray box). (b) Qualitative
+comparison between StableDiffusion-XL (SDXL) [ 38] and our fine-tuned model, which is exclusively trained on the collected
+high-quality dataset, in the T2I task. Notably, SDXL tends to generate over-smooth skin even when given prompts specifying
+sharp details and sharp focus. Zoom in for more details.
+for HQ face images with a pronounced stylistic orientation (see
+Fig. 2 (a)). In line with our established criteria, we collect a curated
+dataset of1.5KHQ face images – each enriched with detailed
+photographic annotations – to fine-tune the pretrained T2I models
+for the first stage. With the curated dataset, we are able to fine-
+tune the T2I models following their original optimization strategies,
+as illustrated in Stage I in Fig. 3. With fine-tuning, the pretrained
+T2I model is required with the detailed facial prior, which can be
+demonstrated with the T2I task as shown in Fig. 2 (b). 3)Facial
+Prior Refinements. A facial prior refinement pipeline is designed
+to learn fine-grained features by associating a face identifier prompt
+with the face regions of HQ images and leveraging T2I models’
+inherent high-quality generative capabilities.
+To achieve the goal of highly authentic face restoration in Stage
+II, we leverage the ControlNet [69] for training (Sec. 3.2). However,
+directly following the protocol of training ControlNet with the
+MSE loss tends to contribute to the loss of key facial details, such as
+eyes and mouths. To resolve this issue, we propose atime-aware
+latent facial feature lossto directly constrain the regions where
+humans are sensitive in the latent space. Our extensive experiments
+demonstrate the superior authentic detail generation performance
+on synthetic and real-world datasets.
+2 Related Works
+Prior-based Blind Face RestorationBlind face restoration (BFR)
+employs a variety of priors, classified into geometric, reference,
+and generative categories. Geometric priors, such as facial land-
+marks [4, 9, 24, 35], face parsing maps [6, 9, 45, 63], facial component
+heatmaps [67], and 3D face shapes [20, 40, 75], provide crucial struc-
+tural information for restoring degraded faces. Reference-based
+methods use images to deliver identity information, enhancing
+the fidelity of the restored faces [ 12, 27–29]. Moreover, some re-
+searchers have implemented generative facial priors, like Style-
+GAN [22], to refine facial details [5, 6, 52, 54, 62]. Another approach
+involves using pretrained Vector-Quantize codebooks that contain
+detailed facial information [49, 56, 74]. Given their remarkable per-
+formance in image generation, denoising diffusion probabilistic
+models [17] have become increasingly popular in BFR. Notable
+examples, such as DifFace [68], DR2 [59], and PGDiff [64], utilize
+denoising U-Nets pretrained on HQ face datasets to achieve face
+restoration at pixel level. Specifically, Zhaoet al. [ 71] attempts
+to improve the authentic performance via feeding network with
+enhanced ground-truth images. Recently, large-scale pretrained
+text-to-image models like StableDiffusion (SD)[47] have been em-
+ployed to address the BFR problem. DiffBIR [31] leverages SD priors
+for real-world image super-resolution and BFR by incorporating
+degraded input image information in the latent space. Specifically
+targeting BFR, BFRfusion [8] extracts multi-scale facial features in
+the latent space from low-quality face images.However, achieving
+authentic BFR with pretrained T2I models in the latent space remains
+underexplored.
+Fine-TuningFine-tuning is widely used to align pretrained large
+language models (LLMs) with human preferences, improving their
+effectiveness [3]. This technique, successful in LLMs with small,
+HQ datasets [48, 73], has been adapted to text-to-image models to
+enhance text-image alignment [11, 25, 26]. For example, Emu [11]
+improves aesthetic alignment using fine-tuned HQ image-text pairs.
+Playground v2.5 [ 25] enhances human features using a quality-
+controlled dataset, and CosmicMan [26] generates superior human-
+centric content with large, refined datasets. Recently, RAP-SR [50]
+demonstrated the potential of restoration-oriented prompt opti-
+mization by fine-tuning pretrained text-to-image models with care-
+fully curated positive and negative samples.However, these methods
+often produce overly smooth images, which may not be ideal for BFR
+tasks where authentic and realistic images are essential.
+
+=== PAGE 4 ===
+MM ’25, October 27–31, 2025, Dublin, Ireland. Guoqiang Liang et al.
+Stage I: Face-oriented Fine-tuning
+Face iden)ﬁer 𝑃!+ Seman)c prompt 𝑃"
+Added noise𝜖#$
+Seman)c/Photographic/Nega)ve prompts 𝑃%/'/(
+𝜖$)*+(𝑋$,𝑃!+𝑃%,𝑡
+Added noise𝜖#$
+𝜖!+,𝑋$,𝑃%,𝑡+𝜖!+,𝑋$,𝑃',𝑡−𝜖!+,𝑋$,𝑃(,𝑡
+Noised latent 𝑋$
+SDXL UNet
+SDXL UNet
+VAE Encoder
+❄
+🔥
+Face Map𝑀!*-.
+Input image
+Trainable
+❄
+🔥
+❄Frozen
+Stage II: Highly Authen7c Face Restora7on
+Face iden)ﬁer 𝑃!
+Added noise 𝜖#$
+Noisedlatent 𝑋$VAE Encoder
+❄
+GT image
+ L2 loss
+ConvGroupNormConv
+𝑡𝑒𝑚𝑏𝑝./.%/012$3
+𝑝./.%/012$3
+Trainable
+🔥
+❄Frozen
+SDXL UNet
+🔥ControlNet
+Predicted noise 𝜖').4
+Added noise 𝜖#$
+🔥
+🔥Time condi)onblock
+Time-aware regionaldiscriminator Posi)on𝑃./.%,𝑃012$3
+Time embedding 𝑡𝑒𝑚𝑏
+(a) Overall Architecture(b) Time condi6on blockLQ input
+L2 loss
+L2 loss
+Figure 3: An overview of our framework consisting Stage I & II. Denoising UNet, carried over from Stage I, maintains its facial
+priors by freezing its parameters, while ControlNet acts as an adapter for handling degraded inputs.
+3 Methodology
+The goal of our work is to achieve authentic face restoration by
+minimizing unrealistic outcomes and enhancing the rendition of
+human-preferred features. It is structured into two distinct stages:
+1)Face-oriented Tuning on Pre-trained T2I Model. We integrate super-
+vised fine-tuning [37] and quality-tuning [11] strategies to refine
+StableDiffusion-XL (SDXL), enhancing it with detailed facial fea-
+tures as our face-oriented generative diffusion prior (Sec. 3.1);2)
+Highly Authentic Face Restoration. Utilizing the face-oriented gen-
+erative diffusion prior, we implement ControlNet [ 69] to direct
+the restoration process based on the quality of input degradation
+(Sec.3.2). Moreover, we introduce a time-aware latent facial feature
+loss to improve key facial features during restoration (Sec.3.2).
+3.1 Stage I: Face-oriented Fine-tuning on
+Pre-trained T2I Model
+In the following section, we introduce the two main components of
+our face-oriented tuning procedure: (1) photography-guided data
+annotation that goes beyond basic semantic labels, and (2) facial
+prior refinements that leverage our high-quality dataset to enhance
+the original SDXL model.Please refer to the supplementary material
+for details on how we collected the HQ dataset under a quality-first
+principle.
+Photography-guided Image Annotation.The quality of prompts
+is essential for both training [3] and fine-tuning [26] pretrained T2I
+models. For example, CosmicMan [26] fine-tunes SDXL for human-
+centric content generation by breaking human parsing maps into
+several parts to provide detailed annotations. However, for face-
+oriented tuning tasks, densely annotated images are less effective.
+After cropping and alignment, the semantic information in facial
+images is limited, often capturing only overall human attributes.
+This differs significantly from other tasks where densely packed se-
+mantic information is prevalent. For face-oriented tuning, capturing
+stylistic information beyond basic semantics is crucial. In portrait
+photography, this includes expressions, skin texture, makeup, and
+lighting, essential for authentic face restoration.
+Therefore, we apply photography-guided data annotation to
+generate prompts for our fine-tuning dataset, especially given that
+our dataset consists of HQ portraits by professional photographers
+with strong stylistic tendencies. We follow previous methods [ 3,
+26] to realize automatic captioning tasks with Vision-Language
+Models (VLMs). Specifically, we leverage the pretrained Qwen2.5-
+VL-7B-Instruct [2] as the automatic caption to generate a tag-style
+prompt to avoid redundant prepositions and adverbs [16]. Fig. 2 (a)
+illustrates some examples of photography-guided data annotation.
+
+=== PAGE 5 ===
+AuthFace: Towards Authentic Blind Face Restoration with Face-oriented Generative Diffusion Prior MM ’25, October 27–31, 2025, Dublin, Ireland.
+Facial Prior Refinements.Our primary goal in refining the fa-
+cial prior is to enhance the generation of authentic facial details
+while suppressing common artifacts in Blind Face Restoration (BFR).
+To achieve this, we propose a facial prior refinement pipeline de-
+signed to learn fine-grained features (e.g., skin texture, hair strands)
+from high-quality datasets. Concurrently, this pipeline leverages
+the robust generative capabilities of the pre-trained SDXL model
+to mitigate the generation of low-quality or unrealistic outputs.
+While techniques like DreamBooth [ 42] have gained popularity
+for personalizing generative models to specific subjects or styles
+within the generative AI community, their direct application of-
+ten falls short for BFR tasks. Specifically, there remains a gap in
+methods that explicitly link textual prompts to the synthesis of
+fine-grained facial attributes, such as realistic skin textures and hair
+details, which are crucial for high-fidelity restoration.
+To address this, we first associate a dedicated positive prompt,
+denotedP 𝑓 (e.g., "A hyper-realistic portrait"), with high-quality
+face images during training. This prompt guides the model towards
+generating outputs with desired aesthetic qualities. Crucially, to
+focus the learning process on intricate facial details, we employ
+a spatially masked loss function. We generate a binary face mask
+M𝑓 𝑎𝑐𝑒 from corresponding face parsing maps for each training
+image. The L2 loss between added noise 𝜖𝑔𝑡 and predicted noise
+from trainable UNet 𝜖𝑡𝑟𝑎𝑖𝑛 (X𝑡, P𝑓 + P𝑠, t) is then calculated only
+within the facial regions defined byM 𝑓 𝑎𝑐𝑒:
+L𝑚𝑎𝑠𝑘 =∥ (𝜖 𝑔𝑡 −𝜖 𝑡𝑟𝑎𝑖𝑛 (X𝑡,P 𝑓 +P 𝑠, 𝑡)) ⊙M 𝑓 𝑎𝑐𝑒 ∥2,(1)
+whereX 𝑡 is the noised input at timestep𝑡,P 𝑠 is the sematic prompt,
+and⊙denotes element-wise multiplication.
+Furthermore, inspired by Classifier-Free Guidance (CFG) [18],
+which is typically employed during inference to enhance prompt
+adherence and sample quality, we introduce a training objective that
+incorporates negative guidance. This mechanism aims to actively
+steer the model during training away from generating undesirable
+features commonly observed in prior BFR results (e.g., blurriness,
+unrealistic textures, artifacts). We define a set of negative prompts,
+P𝑛, describing these unwanted characteristics. We then formulate a
+guidance loss term:
+L𝑐 𝑓 𝑔 =∥𝜖 𝑓 𝑖𝑥 (X𝑡 ,P 𝑠,t) +𝜖 𝑓 𝑖𝑥 (X𝑡 ,P 𝑝,t) −𝜖 𝑓 𝑖𝑥 (X𝑡 ,P 𝑛,t)
+−𝜖𝑡𝑟𝑎𝑖𝑛 (X𝑡 ,P 𝑓 +P 𝑠, 𝑡)) ∥2, (2)
+where𝜖 𝑓 𝑖𝑥 is predicted noise from the frozen UNet.
+The total loss for this Face-oriented Fine-tuning stage (Stage I) is
+a weighted sum of the masked reconstruction loss and the negative
+guidance term:
+L𝑠𝑡𝑎𝑔𝑒1 =L 𝑚𝑎𝑠𝑘 +𝜆 𝑐 𝑓 𝑔L𝑐 𝑓 𝑔,(3)
+where𝜆 𝑐 𝑓 𝑔 is a hyperparameter balancing the two objectives.
+3.2 Stage II: Highly Authentic Face Restoration
+Fig. 3 illustrates the structure of stage II. Given the fine-tuned
+SDXL model as our face-oriented generative diffusion prior, we
+need an adaptor that can control the fine-tuned SDXL to generate
+high-quality facial images based on its degraded input. With the
+successful application of ControlNet [69] in real-world image super-
+resolution [60, 66], we apply it as the controller for the BFR task.
+The training of stage II is as follows. The latent representation
+of an HQ facial image is obtained by the encoder of a pretrained
+VAE, denoted asz 0. The diffusion process progressively introduces
+noise toz 0, resulting in a noisy latentz 𝑡 , where 𝑡 represents the
+randomly sampled diffusion step. The restoration is conditioned on
+the additional inputc, which is the degraded face image, guiding
+the generation process. For each diffusion step 𝑡, the noisy latent
+z𝑡 is processed together with the control conditionc, and Face
+identifierP 𝑓 ["A hyper-realistic portrait"]. We train the ControlNet
+by minimizing the 𝐿2 loss between the predicted noise 𝜖𝑝𝑟𝑒𝑑 and
+the added noise𝜖 𝑔𝑡 (𝜖∼ N (0, 𝐼)). The optimization objective is:
+L𝑛𝑜𝑖𝑠𝑒 =∥𝜖 𝑔𝑡 −𝜖 𝑝𝑟𝑒𝑑 (z𝑡 , 𝑡, 𝑃𝑓 ,c) ∥ 2.(4)
+Specifically, we freeze the parameters of our fine-tuned SDXL
+model to preserve the enhanced facial priors and its original natural
+image priors. We initialize ControlNet with the encoder from our
+fine-tuned SDXL model while solely training ControlNet.
+Time-aware Latent Facial Feature Loss.Reducing incorrect
+generation is crucial for authentic face restoration, as viewers are
+particularly sensitive to key facial features such as the eyes and
+mouth. However, the MSE loss (Eq.4) used to train ControlNet im-
+poses only a holistic constraint, with both the background and face
+in the degraded image contributing equally to the optimization
+process. Thanks to the spatially invariant properties of Control-
+Net’s conditioning embedding module, the latent space preserves
+spatial dimensions[1]. Consequently, we can precisely locate the
+facial and mouth regions in the ground-truth (GT) image using
+a pretrained face landmark detection network [72] and then map
+these pixel-level coordinates to their corresponding latent space
+locations (𝑃𝑒𝑦𝑒𝑠 , 𝑃𝑚𝑜𝑢𝑡ℎ ) by downsampling with a factor of eight.
+With these latent space positions for the eyes and mouth, we crop
+the corresponding regions from both the predicted noise 𝜖𝑝𝑟𝑒𝑑 and
+the added noise 𝜖𝑔𝑡, thereby obtaining the facial feature patches
+𝑃𝑒𝑦𝑒 ={𝑝 𝑒𝑦𝑒 , 𝑝𝑝𝑟𝑒𝑑
+𝑒𝑦𝑒 }and𝑃 𝑚𝑜𝑢𝑡ℎ ={𝑝 𝑚𝑜𝑢𝑡ℎ , 𝑝𝑝𝑟𝑒𝑑
+𝑚𝑜𝑢𝑡ℎ }.
+To enhance key facial features, we propose a time-aware latent fa-
+cial feature loss that provides additional constraints on the eyes and
+mouth using separate time-aware regional discriminators. Unlike
+GFP-GAN [52], our method integrates the diffusion and denoising
+processes of DDPMs by explicitly treating time as a variable. Previ-
+ous studies [1, 10, 51] have demonstrated that the noise distribution
+varies significantly during denoising, with generated results evolv-
+ing from coarse shapes to high-resolution details. Ignoring these
+distribution differences under various noise disturbances poses a
+significant challenge for optimizing discriminators, as also noted
+by [15]. To incorporate time embedding guidance, our time-aware
+regional discriminator is designed with dedicated time condition
+blocks, as depicted in Fig.3 Stage II (b). Specifically, we utilize the
+time embedding provided by the SDXL UNet and employ spatial
+feature transfer[53] along with group normalization [61] to endow
+the facial features𝑝 𝑒𝑦𝑒/𝑚𝑜𝑢𝑡ℎ with time information.
+The time-aware latent facial feature loss is defined as follows:
+L𝑓 𝑎𝑐𝑖𝑎𝑙 =
+∑︁
+𝑃∈𝑃 eye,𝑃mouth
+
+𝜆𝑑 E𝑝pred
+
+log(1−D 𝑃 (𝑝pred))
+
++𝜆 𝑠
+Gram(𝜓(𝑝 pred)) −Gram(𝜓(𝑝))
+
+
+,
+(5)
+
+=== PAGE 6 ===
+MM ’25, October 27–31, 2025, Dublin, Ireland. Guoqiang Liang et al.
+(a)input(b)GFP-GAN(c) CodeFormer(d) DR2
+(d) BFRffusion(e) DiffBIR(g) AuthFace(Ours)(f)GT
+(a)input(b)GFP-GAN(c) CodeFormer(d) DR2
+(d) BFRffusion(e) DiffBIR(g) AuthFace(Ours)(f)GT
+Figure 4: Qualitative results on CelebA-Test dataset. Red box areas highlight the detailed skin texture achieved by our method.
+where D𝑃 refers to the discriminators for different facial regions,
+specifically D𝑒𝑦𝑒𝑠 and D𝑚𝑜𝑢𝑡ℎ . 𝜓 represents multi-scale features of
+the regional facial feature discriminator. Gram() operation refers to
+calculating the Gram matrix static [14] 𝜆𝑑 and 𝜆𝑠 are the weights
+of the discriminative loss and the style loss, respectively.
+The total loss function of this Highly Authentic Face Restoration
+(Stage II) is defined asL total =L 𝑛𝑜𝑖𝑠𝑒 + L 𝑓 𝑎𝑐𝑖𝑎𝑙 .
+4 Experiments
+4.1 Experimental Settings
+Implementation Details:Our base model is initialized from SDXL,
+and we fine-tune the entire U-Net from this base model. We employ
+AdamW [33] optimizer with the learning rate of5 𝑒− 7during the
+finetuning process, where the batch size and the training iteration
+are set to 96 and 20k, respectively. We apply the same optimizer
+with the learning rate of2 𝑒− 5with the batch size 48 for training
+ControlNet. All experiments are conducted on four NVIDIA A100
+GPUs in the resolution of 1024 × 1024 for finetuning model and
+512×512 for training ControlNet.
+Training and Test Dataset:The training dataset for the fine-
+tuning process of our face-oriented model comprises1.5Khigh-
+quality face images, each enriched with detailed photographic
+annotations. For training our AuthFace network, we resize the
+FFHQ dataset [21] from a resolution of 1024×1024 to 512×512. To
+form training pairs, we follow the settings, including degradation
+types and degrees, as outlined in previous methods [8, 52]. Follow-
+ing [64, 71, 74], we evaluate our method on a synthetic dataset,
+CelebA-Test [32], and three real-world datasets: LFW-Test [ 52],
+WebPhoto-Test [52], and WIDER-Test [74].
+Metrics:To evaluate our method’s performance on the Celeb-
+A dataset with ground truth, we use PSNR [ 19], SSIM [ 55], and
+LPIPS [70]. We incorporate non-reference image quality metrics
+including MUSIQ [23] and ManIQA [65]. Specifically, we employ
+TOPIQ [7],which is trained on a face image quality assess-
+ment (IQA) dataset, as our face IQA metric.
+4.2 Comparison and Evaluation
+We compare our method with SOTA BFR methods in three differ-
+ent categories:(I)GAN-based methods, including GFP-GAN [ 52]
+and PSFR-GAN [6];(II)Codebook-based method, including Code-
+Former [74];(III)Diffusion-based methods, including DR2 [ 59] and
+BFRffusion [8]; Notably, we compare our method with SOTA IR
+methods, StableSR [51] and DiffBIR [31] with their face versions.
+All methods are tested with official codes.
+Comparison on Synthetic Dataset:Quantitative results in Ta-
+ble 1 show our method’s superior performance on the CelebA-
+Test dataset. It surpasses all other diffusion-based methods on non-
+reference IQA metrics, with the exception of MUSIQ. Notably, we
+achieve state-of-the-art performance in TOPIQ-FACE, a metric that
+evaluates image quality by detecting faces and masking non-face
+regions, providing strong validation for our approach to the BFR
+task. Qualitatively, as illustrated in Fig. 4, our AuthFace model de-
+livers authentic face restoration. All methods except ours fail to
+recover the face paint, and our approach yields the best hair de-
+tails. The red-boxed areas offer zoomed-in views of the skin texture,
+where our method not only reveals fine skin pores but also restores
+the wrinkles on the forehead. Moreover, even though DiffBIR em-
+ploys negative prompts such as "blurry, low-quality, " it struggles
+to reconstruct clear facial images in this case. In contrast, only our
+
+=== PAGE 7 ===
+AuthFace: Towards Authentic Blind Face Restoration with Face-oriented Generative Diffusion Prior MM ’25, October 27–31, 2025, Dublin, Ireland.
+InputDR2BFRffusionDiffBIRAuthFace(Ours)
+Figure 5: Qualitative results are presented on LFW-Test [52], WebPhoto-Test [52], and WIDER-Test [74]. Zoom in for details.
+Datasets Metrics GFPGAN PSFRGAN CodeFormer DR2 BFRffusion DiffBIR StableSR Ours
+CelebA
+PSNR↑ 24.65 24.6825.15 21.4326.1925.58 25.32 25.22
+SSIM↑ 0.66690.6322 0.6647 0.59430.68290.6737 0.6762 0.6364
+LPIPS↓ 0.2308 0.29430.2269 0.3443 0.2272 0.19690.18330.2104
+MANIQA↑ 0.53880.4838 0.5374 0.5151 0.5571 0.6179 0.56540.6246
+MUSIQ↑ 73.91 73.3975.56 70.37 71.70 74.8975.4674.66
+NIQE↓ 4.0803.9564.590 4.921 4.901 5.365 4.6584.509
+TOPIQ-FACE↑ 0.7586 0.73200.7976 0.7322 0.7286 0.8194 0.81360.8463
+LFW
+MANIQA↑ 0.52930.4881 0.5260 0.5075 0.5169 0.5955 0.54610.6036
+MUSIQ↑ 73.47 73.4375.39 70.92 69.59 74.5075.4373.83
+NIQE↓ 3.9023.976 4.448 4.989 4.912 5.677 4.4614.239
+TOPIQ-FACE↑ 0.7454 0.75250.7825 0.7328 0.6824 0.7839 0.78750.8265
+WebPhoto
+MANIQA↑ 0.51140.4450 0.5033 0.4585 0.4397 0.5654 0.51980.5742
+MUSIQ↑ 72.11 71.6773.99 67.17 62.08 72.77 73.9274.34
+NIQE↓ 4.1493.9834.626 4.993 5.556 6.007 4.7254.325
+TOPIQ-FACE↑ 0.6990 0.66950.7244 0.6463 0.5630 0.7276 0.73600.7767
+WIDER
+MANIQA↑ 0.50550.4614 0.4959 0.4746 0.4704 0.5924 0.52230.6072
+MUSIQ↑ 72.81 71.5273.42 67.21 61.87 73.24 73.5874.56
+NIQE↓ 3.8093.889 4.119 5.008 4.774 5.588 4.1563.971
+TOPIQ-FACE↑ 0.7213 0.70960.7444 0.6962 0.5894 0.7768 0.75880.8411
+Table 1: Quantitative results for blind face restoration on both synthetic and real-world datasets. The best result is highlighted
+in red while the second-best result is highlighted in blue.
+method produces realistic results in these critical regions, delivering
+superior details in the hair and skin texture.
+Comparison on Real-world Dataset:The robustness of our
+method is validated by its state-of-the-art performance across all
+
+=== PAGE 8 ===
+MM ’25, October 27–31, 2025, Dublin, Ireland. Guoqiang Liang et al.
+InputExp. aExp. bExp. c Exp. d
+Figure 6: Visualization of ablation results. Zoom in for more details.
+metrics and real-world datasets—except for the MUSIQ score in
+the LFW-Test and WebPhoto-Test datasets, as shown in Table 1.
+Notably, our TOPIQ-FACE score in the WIDER-Test dataset exceeds
+the baselines by0.0643. On the LFW-Test dataset, BFRfusion and
+DiffBIR fail to reconstruct realistic eye regions and exhibit notice-
+able artifacts (see the red box in the first row of Fig.5), while DR2
+mistakenly restores closed eyes. In contrast, as shown in the second
+row of Fig.5, our method accurately reconstructs both teeth and
+eyes without introducing artifacts around the hair, as highlighted
+by the orange arrows. On the WIDER-Test dataset, our approach
+not only precisely reconstructs fine details such as sunglasses but
+also effectively avoids artifacts around the mouth (see the red box
+areas).More visualization results are provided in the appendix and
+supplementary materials.
+4.3 Ablation Study
+We conduct experiments to demonstrate the effectiveness of the
+proposed face-oriented fine-tuning and time-aware latent facial
+feature loss, as shown in Table 2 and Fig. 6.In addition, we present
+qualitative and quantitative ablation study results for the losses used
+in face-oriented fine-tuning on the text-to-image task; please refer to
+the supplementary material for further details.
+Effectiveness of Face-oriented Fine-Tuning:We conducted an
+ablation study to evaluate the effectiveness of face-oriented tuning
+on WIDER-Test, as shown in Tab. 2 (a) and (b). In experiment (a),
+the original SDXL is used as the base model, and ControlNet is
+initialized with it. In experiment (b), the fine-tuned SDXL is used as
+the base model, and ControlNet is initialized with this fine-tuned
+version. Except for the MANIQA score, experiment (b) consistently
+outperforms experiment (a), highlighting the necessity of face-
+oriented tuning for the generative diffusion prior. Experiment (b)
+enhances facial details such as eyebrows and skin texture (red box in
+Fig. 6) and eyelashes (red box), which align the great improvemnt on
+the TOPIQ-FACE score. Additionally, it reduces errors in key facial
+features, resulting in clearer eyes than experiment (a)’s. However,
+it also results in the artifacts in the teeth areas.
+Effectiveness of Time-aware Latent Facial Feature Loss:To
+evaluate the effectiveness of the time-aware latent facial feature
+loss, we conducted experiments as shown in Table 2 (b), (c), and
+(d). Using a discriminator without time embedding (experiment (c))
+negatively impacted optimization, leading to performance drops
+across most metrics compared to experiment (b), with the exception
+of the MANIQA score. This result demonstrates the necessity of
+incorporating additional time embedding information to better
+Exp. Diffusion Prior L𝑓 𝑎𝑐𝑖𝑎𝑙 Metrics
+SDXL Ours Const. Time-aware MANIQA↑MUSIQ↑TOPIQ↑
+(a) ✓ 0.5381 72.25 0.6962
+(b) ✓ 0.5597 74.02 0.7868
+(c) ✓ ✓ 0.5802 73.66 0.7721
+(d) ✓ ✓ 0.6072 74.56 0.8411
+Table 2: Ablation studies of variant generative diffusion prior
+and time-aware latent facial feature loss. The highest result
+is highlighted in red while the second highest result is high-
+lighted in blue.
+optimize the regional discriminators. By modulating regional noise
+features with time embedding, our time-aware loss achieves the
+best performance on this real-world dataset.
+As shown in Fig. 6, incorporating the latent space facial feature
+loss in experiment (d) significantly improves the restoration of the
+eyes and mouth compared to experiment (a) (see the orange arrows).
+Notably, although experiment (c) produces some improvement in
+the restoration quality of the teeth regions, it also compromises the
+detailed skin texture observed in experiment (b). In contrast, the
+time-aware strategy in experiment (d) not only reduces artifacts
+(as indicated by the orange arrows) but also preserves fine details,
+such as delicate skin texture and sharp hair.
+5 Conclusion
+This paper presented a new approach for achieving authentic face
+restoration by avoiding incorrect generations and enhancing facial
+details. Specifically, we proposed a face-oriented restoration-tuning
+paradigm to fine-tune the pretrained T2I model with high-quality
+face images, enabling the pretrained T2I model, SDXL, to develop a
+prior for facial details. Utilizing this face-oriented generative diffu-
+sion prior, we introduced AuthFace for the blind face restoration
+task, achieving authentic face restoration. Additionally, we intro-
+duced the time-aware latent facial feature loss to further improve
+the robustness of restoration in key facial features.
+Limitation and Future Work:The data collection process is labor-
+intensive, requiring significant human resources for manual filter-
+ing; we plan to automate this by developing an aesthetic-oriented
+image quality assessment network. Regenerating unique facial de-
+tails (e.g., moles, scars) that are absent in degraded inputs remains
+a challenge. As future work, we will explore reference-based face
+restoration to address this limitation.
+
+=== PAGE 9 ===
+AuthFace: Towards Authentic Blind Face Restoration with Face-oriented Generative Diffusion Prior MM ’25, October 27–31, 2025, Dublin, Ireland.
+Acknowledgment:This paper is supported by the National Natu-
+ral Science Foundation of China (NSF) under Grant No. 62206069
+(affiliated with Guangzhou HKUST Fok Ying Tung Research Insti-
+tute) and the MOE AcRF Tier 1 SSHR-TG Incubator Grant FY24
+under Grant No. RSTG7/24.
+References
+[1] Omri Avrahami, Ohad Fried, and Dani Lischinski. 2023. Blended latent diffusion.
+ACM Transactions on Graphics (TOG)42, 4 (2023), 1–11.
+[2] Shuai Bai, Keqin Chen, Xuejing Liu, Jialin Wang, Wenbin Ge, Sibo Song, Kai
+Dang, Peng Wang, Shijie Wang, Jun Tang, et al . 2025. Qwen2. 5-vl technical
+report.arXiv preprint arXiv:2502.13923(2025).
+[3] James Betker, Gabriel Goh, Li Jing, Tim Brooks, Jianfeng Wang, Linjie Li, Long
+Ouyang, Juntang Zhuang, Joyce Lee, Yufei Guo, et al . 2023. Improving im-
+age generation with better captions.Computer Science. https://cdn. openai.
+com/papers/dall-e-3. pdf2, 3 (2023), 8.
+[4] Adrian Bulat and Georgios Tzimiropoulos. 2018. Super-fan: Integrated facial
+landmark localization and super-resolution of real-world low resolution faces
+in arbitrary poses with gans. InProceedings of the IEEE conference on computer
+vision and pattern recognition. 109–117.
+[5] Kelvin CK Chan, Xiangyu Xu, Xintao Wang, Jinwei Gu, and Chen Change Loy.
+2022. GLEAN: Generative latent bank for image super-resolution and beyond.
+IEEE Transactions on Pattern Analysis and Machine Intelligence45, 3 (2022), 3154–
+3168.
+[6] Chaofeng Chen, Xiaoming Li, Yang Lingbo, Xianhui Lin, Lei Zhang, and KKY
+Wong. 2021. Progressive Semantic-Aware Style Transformation for Blind Face
+Restoration.IEEE Conference on Computer Vision and Pattern Recognition (CVPR).
+[7] Chaofeng Chen, Jiadi Mo, Jingwen Hou, Haoning Wu, Liang Liao, Wenxiu Sun,
+Qiong Yan, and Weisi Lin. 2024. Topiq: A top-down approach from semantics to
+distortions for image quality assessment.IEEE Transactions on Image Processing
+(2024).
+[8] Xiaoxu Chen, Jingfan Tan, Tao Wang, Kaihao Zhang, Wenhan Luo, and Xiaochun
+Cao. 2024. Towards real-world blind face restoration with generative diffusion
+prior.IEEE Transactions on Circuits and Systems for Video Technology(2024).
+[9] Yu Chen, Ying Tai, Xiaoming Liu, Chunhua Shen, and Jian Yang. 2018. Fsrnet:
+End-to-end learning face super-resolution with facial priors. InProceedings of
+the IEEE conference on computer vision and pattern recognition. 2492–2501.
+[10] Jooyoung Choi, Jungbeom Lee, Chaehun Shin, Sungwon Kim, Hyunwoo Kim,
+and Sungroh Yoon. 2022. Perception prioritized training of diffusion models. In
+Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition.
+11472–11481.
+[11] Xiaoliang Dai, Ji Hou, Chih-Yao Ma, Sam Tsai, Jialiang Wang, Rui Wang, Peizhao
+Zhang, Simon Vandenhende, Xiaofang Wang, Abhimanyu Dubey, et al. 2023. Emu:
+Enhancing image generation models using photogenic needles in a haystack.
+arXiv preprint arXiv:2309.15807(2023).
+[12] Berk Dogan, Shuhang Gu, and Radu Timofte. 2019. Exemplar guided face im-
+age super-resolution without facial landmarks. InProceedings of the IEEE/CVF
+conference on computer vision and pattern recognition workshops. 0–0.
+[13] Nan Gao, Jia Li, Huaibo Huang, Zhi Zeng, Ke Shang, Shuwu Zhang, and Ran He.
+2024. DiffMAC: Diffusion Manifold Hallucination Correction for High General-
+ization Blind Face Restoration.arXiv preprint arXiv:2403.10098(2024).
+[14] Leon A Gatys, Alexander S Ecker, and Matthias Bethge. 2016. Image style transfer
+using convolutional neural networks. InProceedings of the IEEE conference on
+computer vision and pattern recognition. 2414–2423.
+[15] Xiao He, Huaao Tang, Zhijun Tu, Junchao Zhang, Kun Cheng, Hanting Chen,
+Yong Guo, Mingrui Zhu, Nannan Wang, Xinbo Gao, et al . 2024. One step
+diffusion-based super-resolution with time-aware distillation.arXiv preprint
+arXiv:2408.07476(2024).
+[16] Amir Hertz, Ron Mokady, Jay Tenenbaum, Kfir Aberman, Yael Pritch, and Daniel
+Cohen-Or. 2022. Prompt-to-prompt image editing with cross attention control.
+arXiv preprint arXiv:2208.01626(2022).
+[17] Jonathan Ho, Ajay Jain, and Pieter Abbeel. 2020. Denoising diffusion probabilistic
+models.Advances in neural information processing systems33 (2020), 6840–6851.
+[18] Jonathan Ho and Tim Salimans. 2022. Classifier-free diffusion guidance.arXiv
+preprint arXiv:2207.12598(2022).
+[19] Alain Hore and Djemel Ziou. 2010. Image quality metrics: PSNR vs. SSIM. In
+2010 20th international conference on pattern recognition. IEEE, 2366–2369.
+[20] Xiaobin Hu, Wenqi Ren, John LaMaster, Xiaochun Cao, Xiaoming Li, Zechao
+Li, Bjoern Menze, and Wei Liu. 2020. Face super-resolution guided by 3d facial
+priors. InComputer Vision–ECCV 2020: 16th European Conference, Glasgow, UK,
+August 23–28, 2020, Proceedings, Part IV 16. Springer, 763–780.
+[21] Tero Karras, Samuli Laine, and Timo Aila. 2019. A style-based generator ar-
+chitecture for generative adversarial networks. InProceedings of the IEEE/CVF
+conference on computer vision and pattern recognition. 4401–4410.
+[22] Tero Karras, Samuli Laine, Miika Aittala, Janne Hellsten, Jaakko Lehtinen, and
+Timo Aila. 2020. Analyzing and improving the image quality of stylegan. In
+Proceedings of the IEEE/CVF conference on computer vision and pattern recognition.
+8110–8119.
+[23] Junjie Ke, Qifei Wang, Yilin Wang, Peyman Milanfar, and Feng Yang. 2021. Musiq:
+Multi-scale image quality transformer. InProceedings of the IEEE/CVF international
+conference on computer vision. 5148–5157.
+[24] Deokyun Kim, Minseon Kim, Gihyun Kwon, and Dae-Shik Kim. 2019. Pro-
+gressive face super-resolution via attention to facial landmark.arXiv preprint
+arXiv:1908.08239(2019).
+[25] Daiqing Li, Aleks Kamko, Ehsan Akhgari, Ali Sabet, Linmiao Xu, and Suhail
+Doshi. 2024. Playground v2. 5: Three Insights towards Enhancing Aesthetic
+Quality in Text-to-Image Generation.arXiv preprint arXiv:2402.17245(2024).
+[26] Shikai Li, Jianglin Fu, Kaiyuan Liu, Wentao Wang, Kwan-Yee Lin, and Wayne
+Wu. 2024. CosmicMan: A Text-to-Image Foundation Model for Humans.arXiv
+preprint arXiv:2404.01294(2024).
+[27] Xiaoming Li, Chaofeng Chen, Shangchen Zhou, Xianhui Lin, Wangmeng Zuo,
+and Lei Zhang. 2020. Blind face restoration via deep multi-scale component
+dictionaries. InEuropean conference on computer vision. Springer, 399–415.
+[28] Xiaoming Li, Wenyu Li, Dongwei Ren, Hongzhi Zhang, Meng Wang, and Wang-
+meng Zuo. 2020. Enhanced blind face restoration with multi-exemplar images
+and adaptive spatial feature fusion. InProceedings of the IEEE/CVF Conference on
+Computer Vision and Pattern Recognition. 2706–2715.
+[29] Xiaoming Li, Ming Liu, Yuting Ye, Wangmeng Zuo, Liang Lin, and Ruigang Yang.
+2018. Learning warped guidance for blind face restoration. InProceedings of the
+European conference on computer vision (ECCV). 272–289.
+[30] Xiaoming Li, Shiguang Zhang, Shangchen Zhou, Lei Zhang, and Wangmeng
+Zuo. 2022. Learning dual memory dictionaries for blind face restoration.IEEE
+Transactions on Pattern Analysis and Machine Intelligence45, 5 (2022), 5904–5917.
+[31] Xinqi Lin, Jingwen He, Ziyan Chen, Zhaoyang Lyu, Bo Dai, Fanghua Yu, Yu
+Qiao, Wanli Ouyang, and Chao Dong. 2024. Diffbir: Toward blind image restora-
+tion with generative diffusion prior. InEuropean Conference on Computer Vision.
+Springer, 430–448.
+[32] Ziwei Liu, Ping Luo, Xiaogang Wang, and Xiaoou Tang. 2015. Deep learning
+face attributes in the wild. InProceedings of the IEEE international conference on
+computer vision. 3730–3738.
+[33] Ilya Loshchilov and Frank Hutter. 2017. Decoupled weight decay regularization.
+arXiv preprint arXiv:1711.05101(2017).
+[34] Tao Lu, Yuanzhi Wang, Yanduo Zhang, Yu Wang, Liu Wei, Zhongyuan Wang,
+and Junjun Jiang. 2021. Face hallucination via split-attention in split-attention
+network. InProceedings of the 29th ACM international conference on multimedia.
+5501–5509.
+[35] Cheng Ma, Zhenyu Jiang, Yongming Rao, Jiwen Lu, and Jie Zhou. 2020. Deep
+face super-resolution with iterative collaboration between attentive recovery
+and landmark estimation. InProceedings of the IEEE/CVF conference on computer
+vision and pattern recognition. 5569–5578.
+[36] Yunqi Miao, Jiankang Deng, and Jungong Han. 2024. WaveFace: Authentic Face
+Restoration with Efficient Frequency Recovery.arXiv preprint arXiv:2403.12760
+(2024).
+[37] Long Ouyang, Jeffrey Wu, Xu Jiang, Diogo Almeida, Carroll Wainwright, Pamela
+Mishkin, Chong Zhang, Sandhini Agarwal, Katarina Slama, Alex Ray, et al. 2022.
+Training language models to follow instructions with human feedback.Advances
+in neural information processing systems35 (2022), 27730–27744.
+[38] Dustin Podell, Zion English, Kyle Lacey, Andreas Blattmann, Tim Dockhorn, Jonas
+Müller, Joe Penna, and Robin Rombach. 2023. Sdxl: Improving latent diffusion
+models for high-resolution image synthesis.arXiv preprint arXiv:2307.01952
+(2023).
+[39] Ali Razavi, Aaron Van den Oord, and Oriol Vinyals. 2019. Generating diverse
+high-fidelity images with vq-vae-2.Advances in neural information processing
+systems32 (2019).
+[40] Wenqi Ren, Jiaolong Yang, Senyou Deng, David Wipf, Xiaochun Cao, and Xin
+Tong. 2019. Face video deblurring using 3D facial priors. InProceedings of the
+IEEE/CVF international conference on computer vision. 9388–9397.
+[41] Robin Rombach, Andreas Blattmann, Dominik Lorenz, Patrick Esser, and Björn
+Ommer. 2022. High-resolution image synthesis with latent diffusion models. In
+Proceedings of the IEEE/CVF conference on computer vision and pattern recognition.
+10684–10695.
+[42] Nataniel Ruiz, Yuanzhen Li, Varun Jampani, Yael Pritch, Michael Rubinstein, and
+Kfir Aberman. 2023. Dreambooth: Fine tuning text-to-image diffusion models for
+subject-driven generation. InProceedings of the IEEE/CVF conference on computer
+vision and pattern recognition. 22500–22510.
+[43] Chitwan Saharia, William Chan, Saurabh Saxena, Lala Li, Jay Whang, Emily L
+Denton, Kamyar Ghasemipour, Raphael Gontijo Lopes, Burcu Karagol Ayan, Tim
+Salimans, et al. 2022. Photorealistic text-to-image diffusion models with deep
+language understanding.Advances in neural information processing systems35
+(2022), 36479–36494.
+[44] Christoph Schuhmann, Romain Beaumont, Richard Vencu, Cade Gordon, Ross
+Wightman, Mehdi Cherti, Theo Coombes, Aarush Katta, Clayton Mullis, Mitchell
+Wortsman, et al. 2022. Laion-5b: An open large-scale dataset for training next
+
+=== PAGE 10 ===
+MM ’25, October 27–31, 2025, Dublin, Ireland. Guoqiang Liang et al.
+generation image-text models.Advances in Neural Information Processing Systems
+35 (2022), 25278–25294.
+[45] Ziyi Shen, Wei-Sheng Lai, Tingfa Xu, Jan Kautz, and Ming-Hsuan Yang. 2018.
+Deep semantic face deblurring. InProceedings of the IEEE conference on computer
+vision and pattern recognition. 8260–8269.
+[46] Jiaming Song, Chenlin Meng, and Stefano Ermon. 2020. Denoising diffusion
+implicit models.arXiv preprint arXiv:2010.02502(2020).
+[47] Stability.ai. 2024. Stable Diffusion 2. https://stability.ai/stable-diffusion-2. Ac-
+cessed: 2024-05-15.
+[48] Hugo Touvron, Thibaut Lavril, Gautier Izacard, Xavier Martinet, Marie-Anne
+Lachaux, Timothée Lacroix, Baptiste Rozière, Naman Goyal, Eric Hambro, Faisal
+Azhar, et al. 2023. Llama: Open and efficient foundation language models.arXiv
+preprint arXiv:2302.13971(2023).
+[49] Yu-Ju Tsai, Yu-Lun Liu, Lu Qi, Kelvin CK Chan, and Ming-Hsuan Yang. 2023.
+Dual Associated Encoder for Face Restoration.arXiv preprint arXiv:2308.07314
+(2023).
+[50] Jiangang Wang, Qingnan Fan, Jinwei Chen, Hong Gu, Feng Huang, and Wenqi
+Ren. 2024. RAP-SR: RestorAtion Prior Enhancement in Diffusion Models for
+Realistic Image Super-Resolution.arXiv preprint arXiv:2412.07149(2024).
+[51] Jianyi Wang, Zongsheng Yue, Shangchen Zhou, Kelvin CK Chan, and
+Chen Change Loy. 2024. Exploiting diffusion prior for real-world image super-
+resolution.International Journal of Computer Vision(2024), 1–21.
+[52] Xintao Wang, Yu Li, Honglun Zhang, and Ying Shan. 2021. Towards Real-World
+Blind Face Restoration with Generative Facial Prior. InThe IEEE Conference on
+Computer Vision and Pattern Recognition (CVPR).
+[53] Xintao Wang, Ke Yu, Chao Dong, and Chen Change Loy. 2018. Recovering
+realistic texture in image super-resolution by deep spatial feature transform. In
+Proceedings of the IEEE conference on computer vision and pattern recognition.
+606–615.
+[54] Yinhuai Wang, Yujie Hu, and Jian Zhang. 2022. Panini-net: Gan prior based
+degradation-aware feature interpolation for face restoration. InProceedings of
+the AAAI Conference on Artificial Intelligence, Vol. 36. 2576–2584.
+[55] Zhou Wang, Alan C Bovik, Hamid R Sheikh, and Eero P Simoncelli. 2004. Image
+quality assessment: from error visibility to structural similarity.IEEE transactions
+on image processing13, 4 (2004), 600–612.
+[56] Zhouxia Wang, Jiawei Zhang, Runjian Chen, Wenping Wang, and Ping Luo. 2022.
+Restoreformer: High-quality blind face restoration from undegraded key-value
+pairs. InProceedings of the IEEE/CVF conference on computer vision and pattern
+recognition. 17512–17521.
+[57] Zhouxia Wang, Jiawei Zhang, Tianshui Chen, Wenping Wang, and Ping Luo. 2023.
+RestoreFormer++: Towards real-world blind face restoration from undegraded
+key-value pairs.IEEE Transactions on Pattern Analysis and Machine Intelligence
+45, 12 (2023), 15462–15476.
+[58] Zhouxia Wang, Jiawei Zhang, Xintao Wang, Tianshui Chen, Ying Shan, Wenping
+Wang, and Ping Luo. 2024. Analysis and Benchmarking of Extending Blind Face
+Image Restoration to Videos.IEEE Transactions on Image Processing(2024).
+[59] Zhixin Wang, Ziying Zhang, Xiaoyun Zhang, Huangjie Zheng, Mingyuan Zhou,
+Ya Zhang, and Yanfeng Wang. 2023. Dr2: Diffusion-based robust degradation
+remover for blind face restoration. InProceedings of the IEEE/CVF Conference on
+Computer Vision and Pattern Recognition. 1704–1713.
+[60] Rongyuan Wu, Tao Yang, Lingchen Sun, Zhengqiang Zhang, Shuai Li, and
+Lei Zhang. 2023. SeeSR: Towards Semantics-Aware Real-World Image Super-
+Resolution.arXiv preprint arXiv:2311.16518(2023).
+[61] Yuxin Wu and Kaiming He. 2018. Group normalization. InProceedings of the
+European conference on computer vision (ECCV). 3–19.
+[62] Chengxing Xie, Qian Ning, Weisheng Dong, and Guangming Shi. 2023. Tfrgan:
+Leveraging text information for blind face restoration with extreme degrada-
+tion. InProceedings of the IEEE/CVF conference on computer vision and pattern
+recognition. 2534–2544.
+[63] Lingbo Yang, Shanshe Wang, Siwei Ma, Wen Gao, Chang Liu, Pan Wang, and
+Peiran Ren. 2020. Hifacegan: Face renovation via collaborative suppression
+and replenishment. InProceedings of the 28th ACM international conference on
+multimedia. 1551–1560.
+[64] Peiqing Yang, Shangchen Zhou, Qingyi Tao, and Chen Change Loy. 2024. PGDiff:
+Guiding Diffusion Models for Versatile Face Restoration via Partial Guidance.
+Advances in Neural Information Processing Systems36 (2024).
+[65] Sidi Yang, Tianhe Wu, Shuwei Shi, Shanshan Lao, Yuan Gong, Mingdeng Cao, Jia-
+hao Wang, and Yujiu Yang. 2022. Maniqa: Multi-dimension attention network for
+no-reference image quality assessment. InProceedings of the IEEE/CVF Conference
+on Computer Vision and Pattern Recognition. 1191–1200.
+[66] Fanghua Yu, Jinjin Gu, Zheyuan Li, Jinfan Hu, Xiangtao Kong, Xintao Wang,
+Jingwen He, Yu Qiao, and Chao Dong. 2024. Scaling Up to Excellence:
+Practicing Model Scaling for Photo-Realistic Image Restoration In the Wild.
+arXiv:2401.13627 [cs.CV]
+[67] Xin Yu, Basura Fernando, Bernard Ghanem, Fatih Porikli, and Richard Hartley.
+2018. Face super-resolution guided by facial component heatmaps. InProceedings
+of the European conference on computer vision (ECCV). 217–233.
+[68] Zongsheng Yue and Chen Change Loy. 2022. Difface: Blind face restoration with
+diffused error contraction.arXiv preprint arXiv:2212.06512(2022).
+[69] Lvmin Zhang, Anyi Rao, and Maneesh Agrawala. 2023. Adding conditional con-
+trol to text-to-image diffusion models. InProceedings of the IEEE/CVF International
+Conference on Computer Vision. 3836–3847.
+[70] Richard Zhang, Phillip Isola, Alexei A Efros, Eli Shechtman, and Oliver Wang.
+2018. The unreasonable effectiveness of deep features as a perceptual metric.
+InProceedings of the IEEE conference on computer vision and pattern recognition.
+586–595.
+[71] Yang Zhao, Tingbo Hou, Yu-Chuan Su, Xuhui Jia, Yandong Li, and Matthias
+Grundmann. 2023. Towards authentic face restoration with iterative diffusion
+models and beyond. InProceedings of the IEEE/CVF International Conference on
+Computer Vision. 7312–7322.
+[72] Yinglin Zheng, Hao Yang, Ting Zhang, Jianmin Bao, Dongdong Chen, Yangyu
+Huang, Lu Yuan, Dong Chen, Ming Zeng, and Fang Wen. 2021. General Fa-
+cial Representation Learning in a Visual-Linguistic Manner.arXiv preprint
+arXiv:2112.03109(2021).
+[73] Chunting Zhou, Pengfei Liu, Puxin Xu, Srinivasan Iyer, Jiao Sun, Yuning Mao,
+Xuezhe Ma, Avia Efrat, Ping Yu, Lili Yu, et al . 2024. Lima: Less is more for
+alignment.Advances in Neural Information Processing Systems36 (2024).
+[74] Shangchen Zhou, Kelvin C.K. Chan, Chongyi Li, and Chen Change Loy. 2022.
+Towards Robust Blind Face Restoration with Codebook Lookup TransFormer. In
+NeurIPS.
+[75] Feida Zhu, Junwei Zhu, Wenqing Chu, Xinyi Zhang, Xiaozhong Ji, Chengjie
+Wang, and Ying Tai. 2022. Blind face restoration via integrating face shape and
+generative priors. InProceedings of the IEEE/CVF conference on computer vision
+and pattern recognition. 7662–7671.

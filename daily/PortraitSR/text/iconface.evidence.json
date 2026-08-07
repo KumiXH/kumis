@@ -1,0 +1,212 @@
+{
+  "key": "iconface",
+  "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\03_reference_identity\\iconface_2605.02814.pdf",
+  "page_count": 25,
+  "first_page_excerpt": "IConFace: Fine-Grained Identity Conditioning for\nReference-Aware Face Restoration\nAxi Niu*, Jinyang Zhang*, Senyan Qing\nNorthwestern Polytechnical University\nnax@nwpu.edu.cn zhangjinyang@mail.nwpu.edu.cn qingsenyan@nwpu.edu.cn\nHomepage: https://cosmicrealm.github.io/IConFace/\nAbstract\nSeverefacedegradationcanremoveperson-specificevidence,\nmaking restoration underdetermined. A generative prior may\nrecover a sharp, plausible face yet miss localized traits that\npersist across images of the same person. Same-identity ref-\nerences supply this missing evidence, while the degraded ob-\nservation anchors target structure. We proposeIConFace, a\nfine-grained identity-conditioned framework that optionally\nconditionsrestorationonuptothreesame-identityreferences.\nIts hybrid concat backbone retains degraded and reference\nobservations as dense visual tokens, preserving localized\nreference evidence. An identity pathway provides compact\nmulti-reference guidance, while a degraded-structure path-\nway injects full-field and local-residual memories to rein-\nforce target-aligned structure. We also introduce a human-\nauditedbenchmarkthatmeasureswhetherpersistentlocalized\nidentity details survive restoration. IConFace achieves lead-\ning reference compatibility, especially under severe degra-\ndation, and the highest observed preservation rate on this\nbenchmark. Without references, it achieves leading learned\nperceptual quality across five blind-restoration benchmarks.\nJoint reference-based and paired-target evaluations show that\nreference-supported identity recovery and exact target agree-\nment are complementary.\nIntroduction\nBlind face restoration (BFR) recovers a high-quality face\nfrom an observation corrupted by unknown and potentially\nseveredegradations.Low-levelrestorationbenefitsfromfea-\nture and attention modeling (Niu et al. 2025, 2024b) and\ndiffusion-based priors (Niu et al. 2024a; Tu et al. 2026). For\nfaces,generative,codebook,transformer,anddiffusionpriors\nhave substantially improved sharpness and realism (Menon\net al. 2020; Wang et al. 2021a; Gu et al. 2022; Zhou et al.\n2022; Wang et al. 2022; Lin et al. 2024; Miao et al. 2025).\nYetseveredegradationcaneraseperson-specificevidence:a\npopulation prior may synthesize a plausible face but cannot\ndetermine which traits were present before degradation. We\nfocus onpersistent localized identity details, such as moles,\nscars, freckle patterns, and pigmentation regions that recur\nacross captures (Fig. 1).\nSame-identityreferencescansupplyevidencethatisweak\normissinginthedegradedobservation(Lietal.2018,2020b,\n*These authors contributed equally.\nRef1 Ref2 Ref3 LQ\nCodeFormer (blind) RefSTAR (ref.) Ours GT\nFigure 1:Reference-supported detail with target-aligned\nstructure (FFHQ-Ref Moderate, case 19802).Ref1 and\nthe paired GT show a forehead mark largely obscured in\nthe degraded observation. IConFace recovers this cue more\nclearlythanCodeFormerandRefSTARwhilepreservingGT-\nconsistent periocular structure.\n2022; Hsiao et al. 2024; Liu et al. 2025; Chong et al. 2025;\nYin et al. 2026). Multiple captures help separate recurring\nidentity cues from incidental appearance, but also encode\ncapture-specific pose, expression, illumination, and texture,\nrisking reference-state transfer. The degraded observation\nremains target-aligned and anchors pose, expression, and\nrecoverable structure.\nWe proposeIConFace(Fig. 2) to combine these two ev-\nidence sources. Its hybrid concat backbone retains the de-\ngraded observation and optional references as dense visual-\ntoken segments alongside the noisy scene latent. A norm-\nweightedidentitypathwayprovidescompactmulti-reference\nguidance,whileadegraded-structurepathwayrepeatedlyre-\ninforces target-aligned evidence through an input residual\narXiv:2605.02814v2  [cs.CV]  5 Aug 2026",
+  "figure_candidates": [
+    {
+      "page": 1,
+      "caption": "Figure 1:Reference-supported detail with target-aligned"
+    },
+    {
+      "page": 2,
+      "caption": "Figure 2:IConFace framework.The current noisy scene latent is concatenated with VAE-encoded degraded-image and"
+    },
+    {
+      "page": 4,
+      "caption": "Figure 3:Reference-aware qualitative comparisons on three benchmarks.Each row shows one displayed reference, LQ,"
+    },
+    {
+      "page": 4,
+      "caption": "Figure 4:Localized-detail preservation.Rates over 167"
+    },
+    {
+      "page": 5,
+      "caption": "Figure 5:Localized-detail preservation.IConFace preserves the three-mole cheek pattern and its spatial arrangement more"
+    },
+    {
+      "page": 5,
+      "caption": "Figure6:No-referencecomparisonsonfivebenchmarks.RowsshowLQandsixoutputs.Acrossvariedages,poses,occlusions,"
+    },
+    {
+      "page": 5,
+      "caption": "Figure7:Qualitativecomponentablations.ArclabelscomparewithdisplayedRef 1;headlineidentitymetricsuseallprotocol"
+    },
+    {
+      "page": 7,
+      "caption": "Figure3providesqualitativecomparisons;onSevere,sup-"
+    },
+    {
+      "page": 15,
+      "caption": "Figure1:Reference-awarecomparisonsonnineCelebA-Test-Refcases,includingsubstantialRef 1–GTcross-capturedifferences"
+    },
+    {
+      "page": 16,
+      "caption": "Figure 2: Reference-aware comparisons on nine FFHQ-Ref Moderate cases combining Ref1–GT cross-capture variation with"
+    },
+    {
+      "page": 17,
+      "caption": "Figure3:Reference-awarecomparisonsonnineFFHQ-RefSeverecasescombiningpronouncedreference–targetvariationwith"
+    },
+    {
+      "page": 18,
+      "caption": "Figure 4: Expanded localized identity-detail examples from PID-167. Columns show Ref1, Ref2, LQ, representative reference-"
+    },
+    {
+      "page": 19,
+      "caption": "Figure5:Extendedno-referencecomparisonsonninepairedCelebA-Testcases.Paired-targetreconstructionmetricsarereported"
+    },
+    {
+      "page": 20,
+      "caption": "Figure 6: Extended no-reference comparisons on nine LFW cases spanning varied pose, expression, occlusion, and image"
+    },
+    {
+      "page": 21,
+      "caption": "Figure 7: Extended no-reference comparisons on nine CelebChild cases covering both child and adult images."
+    },
+    {
+      "page": 22,
+      "caption": "Figure 8: Extended no-reference comparisons on nine WebPhoto cases with low resolution, illumination variation, color shifts,"
+    },
+    {
+      "page": 23,
+      "caption": "Figure 9: Extended no-reference comparisons on nine Wider-Test cases with strong blur, low resolution, and pose variation."
+    },
+    {
+      "page": 24,
+      "caption": "Figure 10: Qualitative component ablations on nine FFHQ-Ref Moderate cases. The five output columns correspond to the"
+    },
+    {
+      "page": 25,
+      "caption": "Figure 11: Qualitative component ablations on nine FFHQ-Ref Severe cases. Separating the Severe examples from Fig. 10"
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 6,
+      "caption": "Table 1: Reference-aware comparison under each method’s official reference configuration; RefAvg uses only its supplied"
+    },
+    {
+      "page": 6,
+      "caption": "Table 2: Paired-GT similarity to protocol references. Similarities are averaged per sample; Moderate and Severe share the"
+    },
+    {
+      "page": 6,
+      "caption": "Table 3: No-reference restoration on five benchmarks; all three columns are learned perceptual-quality metrics."
+    },
+    {
+      "page": 7,
+      "caption": "Table 3 compares IConFace with five established blind face"
+    },
+    {
+      "page": 7,
+      "caption": "Table 4 reveals a clear division of roles between the two"
+    },
+    {
+      "page": 12,
+      "caption": "Table 2: Reference-count diagnostic on fixed three-reference subsets: 1,921 CelebA-Test-Ref samples and 841 samples from"
+    },
+    {
+      "page": 13,
+      "caption": "Table 3: Paired-target fidelity on the reference-aware benchmarks. GT ArcFace/MagFace measure identity agreement with the"
+    },
+    {
+      "page": 13,
+      "caption": "Table 4 yields positive median margins and majority tar-"
+    },
+    {
+      "page": 13,
+      "caption": "Table 4: Target-versus-reference state alignment of ICon-"
+    },
+    {
+      "page": 14,
+      "caption": "Table 5: PID-167 construction and retained-set sources."
+    },
+    {
+      "page": 14,
+      "caption": "Table 6: Human-verified PID-167 preservation by source"
+    },
+    {
+      "page": 14,
+      "caption": "Table 7: No-reference paired-target reconstruction on"
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      1,
+      2,
+      3,
+      7,
+      8
+    ],
+    "identity": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      10,
+      11,
+      12,
+      13,
+      14,
+      18,
+      25
+    ],
+    "portrait_detail": [
+      1,
+      2,
+      4,
+      8,
+      9,
+      10,
+      11,
+      13
+    ],
+    "efficiency": [
+      1,
+      2,
+      3,
+      4,
+      9,
+      10,
+      11,
+      14,
+      18
+    ],
+    "datasets": [
+      1,
+      2,
+      4,
+      5,
+      6,
+      7,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      19,
+      21,
+      24,
+      25
+    ],
+    "limitations": []
+  },
+  "source_urls": [
+    {
+      "page": 10,
+      "url": "https://cosmicrealm.github.io/IConFace/"
+    },
+    {
+      "page": 8,
+      "url": "https://bfl.ai/blog/flux-2"
+    }
+  ],
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\iconface.txt"
+}

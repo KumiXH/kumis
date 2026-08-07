@@ -1,0 +1,103 @@
+{
+  "key": "cfrnet",
+  "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\05_efficiency\\cfrnet_2606.06850.pdf",
+  "page_count": 11,
+  "first_page_excerpt": "1\nCFRNet: Cycle-Consistent Fixed-Point Training for\nReal-Time Blind Face Restoration on Consumer\nEmbedded NPUs\nFuchen Li, Xinyang Wang, Yahui Zhang, Yuhan Chen, Jiahong Guo, Zhuohan Qin, and Wenbo Ma\nAbstract—Blind face restoration on consumer devices has\nto balance image quality against speed and memory. Strong\nmethods such as GFPGAN and CodeFormer give good perceptual\nquality, but they rely on large pretrained generative priors and\non operators such as attention, codebook lookup, and style\nmodulation that are hard to compile and quantize on the small\nneural processing units (NPUs) used in consumer hardware.\nSmall convolutional restorers run fast enough, but they tend\nto over-smooth and to leave artifacts around the eyes, nose,\nand mouth. We present CFRNet, a 2.0 M-parameter ResNet-style\nrestorer for on-device use at256×256, the common face-crop\nsize on consumer NPUs. The main idea is Cycle-Consistent Fixed-\nPoint Training (CCFP). Instead of training the network for one\npass and then running it several times by hand, we train it to act\nas a fixed-point operator, so that applying it again to a restored\nface does not change the face. CCFP uses three training losses,\nnamely progressive multi-cycle supervision, an idempotence loss,\nand a re-degradation cycle loss, and it adds no cost at inference.\nTo compare fairly under our deployment limits, we retrain all\nbaselines from scratch at the same256×256resolution. On\na 300-image test set, CFRNet reaches the best perceptual score\n(LPIPS 0.250 at three cycles, which is 31% lower than one cycle)\nand also the best PSNR and SSIM at two cycles. It runs in about\n23 ms per cycle in INT8 on a HiSilicon Hi3402 NPU, while the\nsame baselines cannot be compiled to that chip. The cycle count\nkacts as a simple quality knob that needs no retraining: PSNR\nis best atk= 2and LPIPS keeps improving up tok= 3. We\nfurther show that the same idea works with a plain CNN that is\neven easier to deploy, and we run the model in real time on an\nin-car driver-monitoring board.\nIndex Terms—Blind face restoration, cyclical inference, fixed-\npoint training, cycle consistency, lightweight neural networks,\nembedded NPU, consumer electronics, on-device inference.\nI. INTRODUCTION\nB\nLIND face restoration takes a degraded face image,\nwhich may have blur, downsampling, noise, and com-\npression artifacts, and recovers a clean and identity-consistent\nface. The task matters for many consumer products: photo\nand video apps on phones, video calls, smart cameras and\ndoorbells, and in-car driver-monitoring systems [1], [2]. In\nthese products the input is often captured in poor conditions,\nF. Li and X. Wang contributed equally to this work.(Corresponding author:\nFuchen Li, (e-mail: fuchen.li@ufl.edu).)\nF. Li, X. Wang, and J. Guo are with the University of Florida, Gainesville,\nFL, USA.\nY . Zhang is with the University of Southampton, Southampton, UK.\nY . Chen is with Chongqing University, Chongqing, China.\nZ. Qin is with Qingdao University, Qingdao, China.\nW. Ma is with Intel Asia-Pacific Research & Development Ltd, Shanghai,\nChina.\nand the model has to run on a small NPU with a tight\nlatency and memory budget. Recent prior-guided methods\nsuch as GFPGAN [3], GPEN [4], RestoreFormer [5], and\nCodeFormer [6] give very good perceptual quality. They do\nthis with pretrained StyleGAN2 generators, transformer mod-\nules, or learned codebooks. The cost is size and complexity.\nCounting the frozen priors, these systems often have 70–85 M\nparameters, and they use operators such as style modulation,\nmulti-head attention, and codebook lookup. These operators\nare hard to compile and to quantize to INT8 on the NPUs\nfound in consumer devices. Small CNN restorers [7], [8] fit\nthe latency budget, but they have two common problems: they\nover-smooth high-frequency texture, and they leave artifacts\naround the eyes, nose, and mouth. One way to make a small\nnetwork better without making it larger is to run it more than\nonce at test time. Earlier work on iterative super-resolution [9],\n[10] and recurrent restoration [11] ran a single network several\ntimes. But these methods train the network for a single forward\npass and then reuse it in a heuristic way. This leaves a basic\nquestion open: why should running a single-pass network\nagain make the result better instead of worse? What stops the\nsecond pass from harming a face that is already restored? If\nGis trained only to map a degraded imagexto a clean image\ny, then feeding ity ′ ≈yis out of distribution. The network\nwas never asked to keep a good image good, so further passes\nmay over-sharpen, add detail that is not there, or oscillate. We\ncall this the training-inference gap.\nThis paper closes that gap. We present CFRNet, a small\nrestorer for consumer NPUs, and Cycle-Consistent Fixed-Point\nTraining (CCFP). Rather than trainGfor one mapping and\nreuse it by hand, CCFP trainsGto be a fixed-point operator\non the set of natural faces. Three losses work together:\n•Progressive supervision. We supervise the output of every\ncycleG (i)(x),i= 1,2,3, against the ground truth, with\nlarger weight on later cycles. This teachesGa coarse-to-\nfine refinement instead of a one-shot mapping.\n•Idempotence. A loss∥G(G (k)(x))−G (k)(x)∥1 pushes\nthe last output toward a fixed point ofG, so one more\npass does not change it.\n•Re-degradation cycle. If we degrade a restored face again\nwith the degradation modelDand restore it, we should\nget the same restored face:G(D(G (k)(x)))≈G (k)(x).\nThis pushesGto learn the inverse of the degradation\nprocess, not to memorize training pairs.\nCCFP only changes training. The deployed network is the\narXiv:2606.06850v1  [cs.CV]  5 Jun 2026",
+  "figure_candidates": [
+    {
+      "page": 2,
+      "caption": "Fig. 1 shows CFRNet. It has three parts: a small genera-"
+    },
+    {
+      "page": 3,
+      "caption": "Fig. 1. CFRNet and CCFP training. The same 2.0 M-parameter generatorGis runk= 3times with shared weights. Progressive supervision compares each"
+    },
+    {
+      "page": 4,
+      "caption": "Fig. 2. Distance to the clean image as a function of the cycle count. A single-"
+    },
+    {
+      "page": 5,
+      "caption": "Fig. 3 compares CFRNet (k= 3) with the retrained Lite"
+    },
+    {
+      "page": 6,
+      "caption": "Fig. 3. Qualitative comparison on the FFHQ-256 test set. Left to right: degraded input, CodeFormer-Lite, GPEN-Lite, GFPGAN-Lite, CFRNet (k=3), ground"
+    },
+    {
+      "page": 7,
+      "caption": "Fig. 4. Cycle-by-cycle output of one trained CFRNet. Left to right: degraded input,k= 1,k= 2,k= 3,k= 4, ground truth. Every cycle reuses the same"
+    },
+    {
+      "page": 7,
+      "caption": "Fig. 5. Component-level comparison with zoom-ins. Yellow box: eye region;"
+    },
+    {
+      "page": 8,
+      "caption": "Fig. 6. The plain variant on a hard real-world input (heavy haze, low contrast,"
+    },
+    {
+      "page": 8,
+      "caption": "Fig. 6 shows a hard real-world example. One pass (direct-1)"
+    },
+    {
+      "page": 8,
+      "caption": "Fig. 7. Real-time output on the embedded board in a driver-monitoring setting."
+    },
+    {
+      "page": 8,
+      "caption": "Fig. 7 shows a frame captured and restored in real time on"
+    }
+  ],
+  "table_candidates": [],
+  "keyword_pages": {
+    "architecture": [
+      2,
+      5,
+      8,
+      9,
+      10
+    ],
+    "identity": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      8
+    ],
+    "portrait_detail": [
+      1,
+      2,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "efficiency": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "datasets": [
+      4,
+      5,
+      6,
+      8,
+      9
+    ],
+    "limitations": [
+      8
+    ]
+  },
+  "source_urls": [],
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\cfrnet.txt"
+}
