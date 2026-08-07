@@ -1,0 +1,236 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3600" height="3200" viewBox="0 0 3600 3200">
+<defs>
+<style>
+text{font-family:"Microsoft YaHei","Noto Sans CJK SC",Arial,sans-serif;fill:#15212b;letter-spacing:0}.title{font-size:42px;font-weight:700}.subtitle{font-size:17px;fill:#52636f}.section{font-size:27px;font-weight:700}.moduleTitle{font-size:20px;font-weight:700}.label{font-size:16px;font-weight:700}.text{font-size:14px}.small{font-size:12px;fill:#40535f}.tiny{font-size:11px;fill:#526773}.panel{fill:#fff;stroke:#91a0aa;stroke-width:2;stroke-dasharray:8 6}.module{fill:#f8fafb;stroke:#435662;stroke-width:3}.io{fill:#f6f8f9;stroke:#526a78;stroke-width:2}.linear{fill:#d8ebf7;stroke:#1479ad;stroke-width:2}.norm{fill:#e7f1fa;stroke:#5b94b8;stroke-width:2}.attention{fill:#fbe6c4;stroke:#dc8500;stroke-width:2}.activation{fill:#fff3b8;stroke:#b79500;stroke-width:2}.operator{fill:#edf0f2;stroke:#687984;stroke-width:2}.condition{fill:#dff3e9;stroke:#07845f;stroke-width:2}.special{fill:#eee6f7;stroke:#8052a5;stroke-width:2}.shape{fill:#fff;stroke:#aab4ba;stroke-width:1}.main{fill:none;stroke:#26343d;stroke-width:3;marker-end:url(#arrow)}.branch{fill:none;stroke:#007d5d;stroke-width:3;marker-end:url(#greenArrow)}.condBus{fill:none;stroke:#007d5d;stroke-width:3}.residual{fill:none;stroke:#7c4da0;stroke-width:3;stroke-dasharray:9 6;marker-end:url(#purpleArrow)}.zero{stroke-dasharray:7 5}.node{rx:6}.circle{fill:#edf0f2;stroke:#687984;stroke-width:2}.axisNote{font-size:11px;fill:#526773;font-style:italic}
+</style>
+<marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0 0L10 3L0 6Z" fill="#26343d"/></marker>
+<marker id="greenArrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0 0L10 3L0 6Z" fill="#007d5d"/></marker>
+<marker id="purpleArrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0 0L10 3L0 6Z" fill="#7c4da0"/></marker>
+</defs>
+<rect width="3600" height="3200" fill="#fff"/>
+<text x="1800" y="58" text-anchor="middle" class="title">DiT-XL/2 实现级网络架构 · 纵向展开版</text>
+<text x="1800" y="91" text-anchor="middle" class="subtitle">Implementation-Level Architecture · all expanded module data flows read from top to bottom</text>
+
+<!-- LEFT: ABSTRACT MAIN FLOW -->
+<rect x="35" y="125" width="1230" height="3000" class="panel node"/>
+<text x="65" y="165" class="section">A. 主干数据流 / Main Data Flow</text>
+<text x="65" y="192" class="small">左侧只保留模块接口；右侧用同一编号按自上而下顺序展开。</text>
+
+<rect x="335" y="235" width="310" height="100" class="io node"/>
+<text x="490" y="270" text-anchor="middle" class="moduleTitle">Noised latent z_t</text><text x="490" y="300" text-anchor="middle" class="text">Diffusion state / 带噪潜变量</text><text x="490" y="324" text-anchor="middle" class="small">[B,4,32,32]</text>
+
+<rect x="335" y="395" width="310" height="105" class="module node"/>
+<text x="490" y="430" text-anchor="middle" class="moduleTitle">M1 · PatchEmbed</text><text x="490" y="460" text-anchor="middle" class="text">2×2 latent patches → tokens</text><text x="490" y="485" text-anchor="middle" class="small">Conv2d projection</text>
+<path d="M490 335V395" class="main"/><rect x="665" y="350" width="190" height="38" class="shape node"/><text x="760" y="375" text-anchor="middle" class="small">[B,4,32,32]</text>
+
+<rect x="335" y="560" width="310" height="95" class="operator node"/>
+<text x="490" y="595" text-anchor="middle" class="moduleTitle">Add Position</text><text x="490" y="625" text-anchor="middle" class="text">X = x_embed + pos_embed</text><text x="490" y="648" text-anchor="middle" class="small">fixed 2D sin-cos</text>
+<path d="M490 500V560" class="main"/><rect x="665" y="512" width="210" height="38" class="shape node"/><text x="770" y="537" text-anchor="middle" class="small">[B,256,1152]</text>
+
+<!-- Left condition branches -->
+<rect x="70" y="350" width="210" height="85" class="io node"/><text x="175" y="382" text-anchor="middle" class="moduleTitle">timestep t</text><text x="175" y="413" text-anchor="middle" class="small">[B] scalar indices</text>
+<rect x="70" y="480" width="210" height="85" class="module node"/><text x="175" y="512" text-anchor="middle" class="moduleTitle">M2 · TimeEmbed</text><text x="175" y="542" text-anchor="middle" class="small">[B] → [B,1152]</text>
+<path d="M175 435V480" class="branch"/>
+<rect x="70" y="650" width="210" height="85" class="io node"/><text x="175" y="682" text-anchor="middle" class="moduleTitle">class y</text><text x="175" y="713" text-anchor="middle" class="small">[B] class ids</text>
+<rect x="70" y="780" width="210" height="85" class="module node"/><text x="175" y="812" text-anchor="middle" class="moduleTitle">M3 · LabelEmbed</text><text x="175" y="842" text-anchor="middle" class="small">[B] → [B,1152]</text>
+<path d="M175 735V780" class="branch"/>
+<circle cx="175" cy="930" r="30" class="circle"/><text x="175" y="939" text-anchor="middle" class="moduleTitle">+</text>
+<text x="175" y="978" text-anchor="middle" class="small">c = t_emb + y_emb</text>
+<path d="M280 522H305V930H205" class="branch"/><path d="M175 865V900" class="branch"/>
+<rect x="70" y="995" width="210" height="38" class="shape node"/><text x="175" y="1020" text-anchor="middle" class="small">c [B,1152]</text>
+
+<rect x="335" y="875" width="310" height="125" class="module node"/>
+<text x="490" y="910" text-anchor="middle" class="moduleTitle">M4 · DiTBlock × 28</text><text x="490" y="940" text-anchor="middle" class="text">adaLN-Zero Transformer block</text><text x="490" y="968" text-anchor="middle" class="small">same format, independent parameters</text><text x="490" y="991" text-anchor="middle" class="small">X_l → X_(l+1)</text>
+<path d="M490 655V875" class="main"/><rect x="665" y="810" width="210" height="38" class="shape node"/><text x="770" y="835" text-anchor="middle" class="small">X [B,256,1152]</text>
+<path d="M205 930H335" class="branch"/><text x="70" y="1058" class="small">condition side path; never concatenated with image tokens</text>
+
+<rect x="335" y="1070" width="310" height="110" class="module node"/>
+<text x="490" y="1105" text-anchor="middle" class="moduleTitle">M5 · FinalLayer</text><text x="490" y="1135" text-anchor="middle" class="text">final adaLN + Linear</text><text x="490" y="1163" text-anchor="middle" class="small">token decoder (zero-init)</text>
+<path d="M490 1000V1070" class="main"/><rect x="665" y="1015" width="210" height="38" class="shape node"/><text x="770" y="1040" text-anchor="middle" class="small">[B,256,1152]</text>
+<path d="M205 930H300V1120H335" class="branch"/><text x="70" y="1090" class="small">same c also modulates FinalLayer</text>
+
+<rect x="335" y="1250" width="310" height="110" class="module node"/>
+<text x="490" y="1285" text-anchor="middle" class="moduleTitle">M6 · Unpatchify</text><text x="490" y="1315" text-anchor="middle" class="text">tokens → spatial prediction</text><text x="490" y="1343" text-anchor="middle" class="small">reshape + einsum + reshape</text>
+<path d="M490 1180V1250" class="main"/><rect x="665" y="1193" width="200" height="38" class="shape node"/><text x="765" y="1218" text-anchor="middle" class="small">[B,256,32]</text>
+
+<rect x="335" y="1430" width="310" height="115" class="io node"/>
+<text x="490" y="1464" text-anchor="middle" class="moduleTitle">Model output</text><text x="490" y="1495" text-anchor="middle" class="text">ε / covariance channels</text><text x="490" y="1523" text-anchor="middle" class="small">[B,8,32,32]</text>
+<path d="M490 1360V1430" class="main"/><rect x="665" y="1375" width="220" height="38" class="shape node"/><text x="775" y="1400" text-anchor="middle" class="small">[B,8,32,32]</text>
+
+<rect x="335" y="1620" width="310" height="120" class="special node"/>
+<text x="490" y="1655" text-anchor="middle" class="moduleTitle">M7 · CFG Combine</text><text x="490" y="1685" text-anchor="middle" class="text">ε_u + s(ε_c − ε_u)</text><text x="490" y="1713" text-anchor="middle" class="small">official reproducibility: first 3 channels only</text>
+<path d="M490 1545V1620" class="main"/><rect x="665" y="1565" width="220" height="38" class="shape node"/><text x="775" y="1590" text-anchor="middle" class="small">cond/uncond batches</text>
+
+<rect x="335" y="1810" width="310" height="115" class="special node"/>
+<text x="490" y="1845" text-anchor="middle" class="moduleTitle">Sampler update</text><text x="490" y="1875" text-anchor="middle" class="text">z_t → z_(t−1)</text><text x="490" y="1903" text-anchor="middle" class="small">repeat denoiser over timesteps</text>
+<path d="M490 1740V1810" class="main"/>
+<path d="M645 1865H1035V285H645" class="residual"/><text x="890" y="1835" class="small">diffusion recurrence / 采样循环</text>
+
+<rect x="335" y="2000" width="310" height="110" class="io node"/>
+<text x="490" y="2035" text-anchor="middle" class="moduleTitle">Denoised latent z_0</text><text x="490" y="2065" text-anchor="middle" class="text">[B,4,32,32]</text><text x="490" y="2092" text-anchor="middle" class="small">after final sampling step</text>
+<path d="M490 1925V2000" class="main"/>
+
+<rect x="335" y="2180" width="310" height="110" class="module node"/>
+<text x="490" y="2215" text-anchor="middle" class="moduleTitle">Frozen VAE Decoder</text><text x="490" y="2245" text-anchor="middle" class="text">latent → RGB image</text><text x="490" y="2273" text-anchor="middle" class="small">×8 spatial upsample</text>
+<path d="M490 2110V2180" class="main"/><rect x="665" y="2123" width="190" height="38" class="shape node"/><text x="760" y="2148" text-anchor="middle" class="small">[B,4,32,32]</text>
+
+<rect x="335" y="2360" width="310" height="100" class="io node"/>
+<text x="490" y="2395" text-anchor="middle" class="moduleTitle">Generated image</text><text x="490" y="2427" text-anchor="middle" class="text">[B,3,256,256]</text>
+<path d="M490 2290V2360" class="main"/>
+
+<!-- Left configuration summary -->
+<rect x="70" y="2550" width="740" height="490" class="io node"/>
+<text x="95" y="2585" class="moduleTitle">DiT-XL/2 实现参数 / Configuration</text>
+<text x="95" y="2630" class="text">Input latent</text><text x="365" y="2630" class="small">4 × 32 × 32</text>
+<text x="95" y="2670" class="text">Patch / token grid</text><text x="365" y="2670" class="small">p=2 → 16 × 16 = 256 tokens</text>
+<text x="95" y="2710" class="text">Hidden / depth</text><text x="365" y="2710" class="small">1152 / 28 blocks</text>
+<text x="95" y="2750" class="text">Attention</text><text x="365" y="2750" class="small">16 heads × 72 dimensions</text>
+<text x="95" y="2790" class="text">Pointwise MLP</text><text x="365" y="2790" class="small">1152 → 4608 → 1152</text>
+<text x="95" y="2830" class="text">Condition</text><text x="365" y="2830" class="small">t_emb + y_emb → c [B,1152]</text>
+<text x="95" y="2870" class="text">Block modulation</text><text x="365" y="2870" class="small">6 × 1152, zero initialized</text>
+<text x="95" y="2910" class="text">Output</text><text x="365" y="2910" class="small">8 channels because learn_sigma=True</text>
+<text x="95" y="2965" class="tiny">LayerNorm: elementwise_affine=False, eps=1e-6. qkv_bias=True.</text>
+<text x="95" y="2995" class="tiny">All 28 blocks have identical structure but independent trainable parameters.</text>
+
+<!-- Legend -->
+<rect x="850" y="2550" width="355" height="490" class="io node"/>
+<text x="875" y="2585" class="moduleTitle">统一颜色 / Layer Legend</text>
+<rect x="875" y="2610" width="38" height="25" class="linear node"/><text x="930" y="2628" class="text">Linear / Conv</text>
+<rect x="875" y="2650" width="38" height="25" class="norm node"/><text x="930" y="2668" class="text">LayerNorm</text>
+<rect x="875" y="2690" width="38" height="25" class="attention node"/><text x="930" y="2708" class="text">Attention</text>
+<rect x="875" y="2730" width="38" height="25" class="activation node"/><text x="930" y="2748" class="text">Activation</text>
+<rect x="875" y="2770" width="38" height="25" class="operator node"/><text x="930" y="2788" class="text">Add / Mul / Reshape</text>
+<rect x="875" y="2810" width="38" height="25" class="condition node"/><text x="930" y="2828" class="text">Condition feature</text>
+<rect x="875" y="2850" width="38" height="25" class="special node"/><text x="930" y="2868" class="text">Zero-init / diffusion</text>
+<path d="M875 2910H935" class="residual"/><text x="950" y="2915" class="text">Residual bypass</text>
+<path d="M875 2960H935" class="branch"/><text x="950" y="2965" class="text">Condition branch</text>
+
+<!-- RIGHT: ALL MODULES TOP TO BOTTOM -->
+<rect x="1300" y="125" width="2265" height="3000" class="panel node"/>
+<text x="1330" y="165" class="section">B. 抽象模块详细设计 / Expanded Modules</text>
+<text x="1330" y="192" class="small">每个模块均从上到下阅读；紫色 residual 走左旁路，绿色 condition 从右侧汇入。</text>
+
+<!-- Row 1: input modules -->
+<rect x="1335" y="225" width="700" height="410" class="module node"/>
+<text x="1360" y="258" class="moduleTitle">M1 · PatchEmbed</text><text x="2005" y="258" text-anchor="end" class="axisNote">top ↓ bottom</text>
+<rect x="1555" y="275" width="260" height="48" class="io node"/><text x="1685" y="297" text-anchor="middle" class="label">Input z_t</text><text x="1685" y="316" text-anchor="middle" class="tiny">[B,4,32,32]</text>
+<rect x="1515" y="342" width="340" height="62" class="linear node"/><text x="1685" y="366" text-anchor="middle" class="label">Conv2d projection</text><text x="1685" y="387" text-anchor="middle" class="tiny">4→1152, k=2, s=2, bias=True · [B,1152,16,16]</text>
+<rect x="1555" y="423" width="260" height="48" class="operator node"/><text x="1685" y="445" text-anchor="middle" class="label">Flatten HW</text><text x="1685" y="464" text-anchor="middle" class="tiny">[B,1152,256]</text>
+<rect x="1555" y="490" width="260" height="48" class="operator node"/><text x="1685" y="512" text-anchor="middle" class="label">Transpose</text><text x="1685" y="531" text-anchor="middle" class="tiny">[B,256,1152]</text>
+<rect x="1485" y="557" width="400" height="52" class="operator node"/><text x="1685" y="579" text-anchor="middle" class="label">Add fixed pos_embed</text><text x="1685" y="599" text-anchor="middle" class="tiny">[B,256,1152] + [1,256,1152] → X [B,256,1152]</text>
+<path d="M1685 323V342M1685 404V423M1685 471V490M1685 538V557" class="main"/>
+
+<rect x="2065" y="225" width="700" height="410" class="module node"/>
+<text x="2090" y="258" class="moduleTitle">M2 · TimestepEmbedder</text><text x="2735" y="258" text-anchor="end" class="axisNote">top ↓ bottom</text>
+<rect x="2285" y="275" width="260" height="45" class="io node"/><text x="2415" y="297" text-anchor="middle" class="label">timestep t [B]</text>
+<rect x="2245" y="337" width="340" height="54" class="operator node"/><text x="2415" y="359" text-anchor="middle" class="label">Sin/Cos frequency embedding</text><text x="2415" y="380" text-anchor="middle" class="tiny">dim=256, max_period=10000 · [B,256]</text>
+<rect x="2285" y="408" width="260" height="48" class="linear node"/><text x="2415" y="430" text-anchor="middle" class="label">Linear 256→1152</text><text x="2415" y="449" text-anchor="middle" class="tiny">[B,1152]</text>
+<rect x="2285" y="473" width="260" height="45" class="activation node"/><text x="2415" y="501" text-anchor="middle" class="label">SiLU</text>
+<rect x="2285" y="535" width="260" height="48" class="linear node"/><text x="2415" y="557" text-anchor="middle" class="label">Linear 1152→1152</text><text x="2415" y="576" text-anchor="middle" class="tiny">t_emb [B,1152]</text>
+<path d="M2415 320V337M2415 391V408M2415 456V473M2415 518V535" class="main"/>
+
+<rect x="2795" y="225" width="735" height="410" class="module node"/>
+<text x="2820" y="258" class="moduleTitle">M3 · LabelEmbedder</text><text x="3500" y="258" text-anchor="end" class="axisNote">top ↓ bottom</text>
+<rect x="3035" y="275" width="260" height="45" class="io node"/><text x="3165" y="297" text-anchor="middle" class="label">class y [B]</text>
+<rect x="2995" y="337" width="340" height="58" class="special node"/><text x="3165" y="359" text-anchor="middle" class="label">Label dropout</text><text x="3165" y="381" text-anchor="middle" class="tiny">p=0.1 → null class id=1000</text>
+<rect x="2995" y="414" width="340" height="58" class="linear node"/><text x="3165" y="436" text-anchor="middle" class="label">Embedding table [1001,1152]</text><text x="3165" y="458" text-anchor="middle" class="tiny">y_emb [B,1152]</text>
+<rect x="3035" y="491" width="260" height="48" class="io node"/><text x="3165" y="513" text-anchor="middle" class="label">Output y_emb</text><text x="3165" y="532" text-anchor="middle" class="tiny">[B,1152]</text>
+<text x="3165" y="584" text-anchor="middle" class="tiny">Training uses classifier-free label dropout; inference can provide null id explicitly.</text>
+<path d="M3165 320V337M3165 395V414M3165 472V491" class="main"/>
+
+<!-- Row 2: DiTBlock vertical -->
+<rect x="1335" y="670" width="2195" height="1050" class="module node"/>
+<text x="1360" y="705" class="moduleTitle">M4 · DiTBlock(hidden=1152, heads=16, mlp_ratio=4) · repeated 28×</text>
+<text x="3495" y="705" text-anchor="end" class="axisNote">token main axis: top ↓ bottom</text>
+
+<!-- Token main axis -->
+<rect x="2070" y="735" width="300" height="52" class="io node"/><text x="2220" y="758" text-anchor="middle" class="label">Input X_l</text><text x="2220" y="779" text-anchor="middle" class="tiny">[B,256,1152]</text>
+<rect x="2070" y="815" width="300" height="52" class="norm node"/><text x="2220" y="838" text-anchor="middle" class="label">LayerNorm 1</text><text x="2220" y="859" text-anchor="middle" class="tiny">affine=False, eps=1e-6</text>
+<rect x="2070" y="895" width="300" height="48" class="operator node"/><text x="2220" y="925" text-anchor="middle" class="label">Mul (1 + scale_msa)</text>
+<rect x="2070" y="970" width="300" height="48" class="operator node"/><text x="2220" y="1000" text-anchor="middle" class="label">Add shift_msa</text>
+<rect x="2030" y="1045" width="380" height="65" class="attention node"/><text x="2220" y="1070" text-anchor="middle" class="label">M8 · Multi-Head Self-Attention</text><text x="2220" y="1094" text-anchor="middle" class="tiny">16 heads × 72 dims · [B,256,1152] → same</text>
+<rect x="2070" y="1138" width="300" height="48" class="operator node"/><text x="2220" y="1168" text-anchor="middle" class="label">Mul gate_msa</text>
+<circle cx="2220" cy="1237" r="27" class="circle"/><text x="2220" y="1246" text-anchor="middle" class="label">+</text><text x="2260" y="1242" class="tiny">residual add 1</text>
+<rect x="2070" y="1292" width="300" height="52" class="norm node"/><text x="2220" y="1315" text-anchor="middle" class="label">LayerNorm 2</text><text x="2220" y="1336" text-anchor="middle" class="tiny">affine=False, eps=1e-6</text>
+<rect x="2070" y="1370" width="300" height="48" class="operator node"/><text x="2220" y="1400" text-anchor="middle" class="label">Mul (1 + scale_mlp)</text>
+<rect x="2070" y="1445" width="300" height="48" class="operator node"/><text x="2220" y="1475" text-anchor="middle" class="label">Add shift_mlp</text>
+<rect x="2030" y="1520" width="380" height="65" class="module node"/><text x="2220" y="1545" text-anchor="middle" class="label">M9 · Pointwise MLP</text><text x="2220" y="1569" text-anchor="middle" class="tiny">1152→4608→1152 independently per token</text>
+<rect x="2070" y="1613" width="300" height="48" class="operator node"/><text x="2220" y="1643" text-anchor="middle" class="label">Mul gate_mlp</text>
+<circle cx="2220" cy="1705" r="27" class="circle"/><text x="2220" y="1714" text-anchor="middle" class="label">+</text><text x="2260" y="1710" class="tiny">residual add 2 / output X_(l+1)</text>
+<path d="M2220 787V815M2220 867V895M2220 943V970M2220 1018V1045M2220 1110V1138M2220 1186V1210M2220 1264V1292M2220 1344V1370M2220 1418V1445M2220 1493V1520M2220 1585V1613M2220 1661V1678" class="main"/>
+<text x="2370" y="812" class="tiny">all black-axis token features: [B,256,1152]</text>
+
+<!-- Residual bypasses on the left -->
+<path d="M2070 761H1745V1237H2193" class="residual"/>
+<text x="1770" y="785" class="tiny">Residual 1: X_l [B,256,1152]</text>
+<path d="M2193 1237H1845V1705H2193" class="residual"/>
+<text x="1870" y="1270" class="tiny">Residual 2: attention-updated state</text>
+
+<!-- Condition branch on the right -->
+<rect x="2870" y="745" width="400" height="58" class="condition node"/><text x="3070" y="768" text-anchor="middle" class="label">c = t_emb + y_emb</text><text x="3070" y="791" text-anchor="middle" class="tiny">[B,1152]</text>
+<rect x="2940" y="830" width="260" height="48" class="activation node"/><text x="3070" y="860" text-anchor="middle" class="label">SiLU</text>
+<rect x="2880" y="905" width="380" height="68" class="linear special zero node"/><text x="3070" y="930" text-anchor="middle" class="label">Linear · ZERO INIT</text><text x="3070" y="955" text-anchor="middle" class="tiny">1152→6912 = 6×1152 · weight=0, bias=0</text>
+<rect x="2840" y="1000" width="460" height="125" class="condition node"/><text x="3070" y="1027" text-anchor="middle" class="label">Chunk(6, dim=1)</text><text x="3070" y="1053" text-anchor="middle" class="tiny">shift_msa, scale_msa, gate_msa</text><text x="3070" y="1077" text-anchor="middle" class="tiny">shift_mlp, scale_mlp, gate_mlp</text><text x="3070" y="1103" text-anchor="middle" class="tiny">each [B,1152] → [B,1,1152], broadcast over 256 tokens</text>
+<path d="M3070 803V830M3070 878V905M3070 973V1000" class="branch"/>
+<path d="M2840 1025H2735V919H2370M2840 1045H2700V994H2370M2840 1065H2670V1162H2370M3300 1045H3370V1394H2370M3300 1065H3400V1469H2370M3300 1085H3430V1637H2370" class="branch"/>
+<text x="2420" y="910" class="tiny">scale_msa [B,1,1152]</text><text x="2420" y="985" class="tiny">shift_msa [B,1,1152]</text><text x="2420" y="1153" class="tiny">gate_msa [B,1,1152]</text>
+<text x="2420" y="1385" class="tiny">scale_mlp [B,1,1152]</text><text x="2420" y="1460" class="tiny">shift_mlp [B,1,1152]</text><text x="2420" y="1628" class="tiny">gate_mlp [B,1,1152]</text>
+<text x="3310" y="1150" text-anchor="end" class="tiny">Green paths are broadcast modulation only; they never concatenate with token features.</text>
+
+<!-- Row 3: detailed submodules, each vertical -->
+<rect x="1335" y="1755" width="1050" height="850" class="module node"/>
+<text x="1360" y="1790" class="moduleTitle">M8 · Multi-Head Self-Attention Detailed</text><text x="2350" y="1790" text-anchor="end" class="axisNote">top ↓ bottom</text>
+<rect x="1600" y="1820" width="360" height="45" class="io node"/><text x="1780" y="1848" text-anchor="middle" class="label">Input [B,256,1152]</text>
+<rect x="1570" y="1882" width="420" height="58" class="linear node"/><text x="1780" y="1905" text-anchor="middle" class="label">qkv Linear 1152→3456, bias=True</text><text x="1780" y="1927" text-anchor="middle" class="tiny">[B,256,3456]</text>
+<rect x="1570" y="1957" width="420" height="58" class="operator node"/><text x="1780" y="1980" text-anchor="middle" class="label">Reshape + permute + split Q,K,V</text><text x="1780" y="2002" text-anchor="middle" class="tiny">3×[B,16,256,72]</text>
+<rect x="1570" y="2032" width="420" height="58" class="attention node"/><text x="1780" y="2055" text-anchor="middle" class="label">Scaled logits Q @ Kᵀ / √72</text><text x="1780" y="2077" text-anchor="middle" class="tiny">[B,16,256,256]</text>
+<rect x="1600" y="2107" width="360" height="48" class="attention node"/><text x="1780" y="2137" text-anchor="middle" class="label">Softmax(dim=-1)</text>
+<rect x="1570" y="2172" width="420" height="58" class="attention node"/><text x="1780" y="2195" text-anchor="middle" class="label">Attention weights @ V</text><text x="1780" y="2217" text-anchor="middle" class="tiny">[B,16,256,72]</text>
+<rect x="1570" y="2247" width="420" height="58" class="operator node"/><text x="1780" y="2270" text-anchor="middle" class="label">Transpose + concat 16 heads</text><text x="1780" y="2292" text-anchor="middle" class="tiny">16×72→1152 · [B,256,1152]</text>
+<rect x="1570" y="2322" width="420" height="58" class="linear node"/><text x="1780" y="2345" text-anchor="middle" class="label">Output Linear 1152→1152</text><text x="1780" y="2367" text-anchor="middle" class="tiny">[B,256,1152]</text>
+<rect x="1600" y="2397" width="360" height="48" class="operator node"/><text x="1780" y="2427" text-anchor="middle" class="label">Projection Dropout p=0</text>
+<rect x="1600" y="2462" width="360" height="48" class="io node"/><text x="1780" y="2490" text-anchor="middle" class="label">Attention output [B,256,1152]</text>
+<path d="M1780 1865V1882M1780 1940V1957M1780 2015V2032M1780 2090V2107M1780 2155V2172M1780 2230V2247M1780 2305V2322M1780 2380V2397M1780 2445V2462" class="main"/>
+<text x="2030" y="1875" class="tiny">No causal mask</text><text x="2030" y="1902" class="tiny">attn_drop=0</text><text x="2030" y="1929" class="tiny">all 256 latent tokens attend globally</text>
+<text x="1360" y="2565" class="tiny">Equivalent to timm Attention(hidden_size=1152, num_heads=16, qkv_bias=True, attn_drop=0, proj_drop=0).</text>
+
+<rect x="2410" y="1755" width="1120" height="850" class="module node"/>
+<text x="2435" y="1790" class="moduleTitle">M9 · Pointwise MLP Detailed</text><text x="3495" y="1790" text-anchor="end" class="axisNote">top ↓ bottom</text>
+<rect x="2800" y="1840" width="340" height="50" class="io node"/><text x="2970" y="1863" text-anchor="middle" class="label">Input token features</text><text x="2970" y="1882" text-anchor="middle" class="tiny">[B,256,1152]</text>
+<rect x="2760" y="1920" width="420" height="62" class="linear node"/><text x="2970" y="1944" text-anchor="middle" class="label">Linear fc1</text><text x="2970" y="1968" text-anchor="middle" class="tiny">[B,256,1152] → [B,256,4608]</text>
+<rect x="2800" y="2012" width="340" height="58" class="activation node"/><text x="2970" y="2035" text-anchor="middle" class="label">GELU</text><text x="2970" y="2057" text-anchor="middle" class="tiny">approximate=&quot;tanh&quot; · [B,256,4608]</text>
+<rect x="2800" y="2100" width="340" height="50" class="operator node"/><text x="2970" y="2130" text-anchor="middle" class="label">Dropout p=0</text>
+<rect x="2760" y="2180" width="420" height="62" class="linear node"/><text x="2970" y="2204" text-anchor="middle" class="label">Linear fc2</text><text x="2970" y="2228" text-anchor="middle" class="tiny">[B,256,4608] → [B,256,1152]</text>
+<rect x="2800" y="2272" width="340" height="50" class="operator node"/><text x="2970" y="2302" text-anchor="middle" class="label">Dropout p=0</text>
+<rect x="2800" y="2352" width="340" height="50" class="io node"/><text x="2970" y="2375" text-anchor="middle" class="label">Output token features</text><text x="2970" y="2394" text-anchor="middle" class="tiny">[B,256,1152]</text>
+<path d="M2970 1890V1920M2970 1982V2012M2970 2070V2100M2970 2150V2180M2970 2242V2272M2970 2322V2352" class="main"/>
+<rect x="2540" y="2450" width="860" height="105" class="operator node"/><text x="2570" y="2480" class="label">Implementation semantics</text><text x="2570" y="2510" class="text">The same MLP weights are applied independently to each of the 256 token positions.</text><text x="2570" y="2538" class="small">No spatial convolution and no token mixing occur inside this branch; token mixing is handled by MHA.</text>
+
+<!-- Row 4: output modules, each vertical -->
+<rect x="1335" y="2640" width="1050" height="440" class="module node"/>
+<text x="1360" y="2675" class="moduleTitle">M5 · FinalLayer</text><text x="2350" y="2675" text-anchor="end" class="axisNote">top ↓ bottom</text>
+<rect x="1535" y="2700" width="300" height="48" class="io node"/><text x="1685" y="2722" text-anchor="middle" class="label">X_28</text><text x="1685" y="2741" text-anchor="middle" class="tiny">[B,256,1152]</text>
+<rect x="1535" y="2765" width="300" height="48" class="norm node"/><text x="1685" y="2787" text-anchor="middle" class="label">LayerNorm</text><text x="1685" y="2806" text-anchor="middle" class="tiny">affine=False, eps=1e-6</text>
+<rect x="1535" y="2830" width="300" height="45" class="operator node"/><text x="1685" y="2858" text-anchor="middle" class="label">Mul (1 + scale)</text>
+<rect x="1535" y="2892" width="300" height="45" class="operator node"/><text x="1685" y="2920" text-anchor="middle" class="label">Add shift</text>
+<rect x="1495" y="2954" width="380" height="62" class="linear special zero node"/><text x="1685" y="2978" text-anchor="middle" class="label">Output Linear · ZERO INIT</text><text x="1685" y="3002" text-anchor="middle" class="tiny">1152→p²·out_ch=32 · [B,256,32]</text>
+<rect x="1535" y="3033" width="300" height="35" class="io node"/><text x="1685" y="3056" text-anchor="middle" class="label">Token output [B,256,32]</text>
+<path d="M1685 2748V2765M1685 2813V2830M1685 2875V2892M1685 2937V2954M1685 3016V3033" class="main"/>
+<rect x="1990" y="2700" width="300" height="45" class="condition node"/><text x="2140" y="2728" text-anchor="middle" class="label">condition c [B,1152]</text>
+<rect x="2030" y="2762" width="220" height="42" class="activation node"/><text x="2140" y="2789" text-anchor="middle" class="label">SiLU</text>
+<rect x="1970" y="2821" width="340" height="62" class="linear special zero node"/><text x="2140" y="2845" text-anchor="middle" class="label">Linear · ZERO INIT 1152→2304</text><text x="2140" y="2869" text-anchor="middle" class="tiny">split shift, scale; each [B,1152]</text>
+<path d="M2140 2745V2762M2140 2804V2821" class="branch"/><path d="M1970 2842H1905V2852H1835M1970 2862H1930V2914H1835" class="branch"/>
+
+<rect x="2410" y="2640" width="1120" height="440" class="module node"/>
+<text x="2435" y="2675" class="moduleTitle">M6 · Unpatchify + Output Semantics</text><text x="3495" y="2675" text-anchor="end" class="axisNote">top ↓ bottom</text>
+<rect x="2800" y="2700" width="340" height="45" class="io node"/><text x="2970" y="2728" text-anchor="middle" class="label">Token output [B,256,32]</text>
+<rect x="2760" y="2762" width="420" height="56" class="operator node"/><text x="2970" y="2784" text-anchor="middle" class="label">Reshape</text><text x="2970" y="2806" text-anchor="middle" class="tiny">[B,16,16,2,2,8], h=w=√256=16</text>
+<rect x="2760" y="2835" width="420" height="56" class="operator node"/><text x="2970" y="2857" text-anchor="middle" class="label">einsum permutation nhwpqc→nchpwq</text><text x="2970" y="2879" text-anchor="middle" class="tiny">[B,8,16,2,16,2]</text>
+<rect x="2760" y="2908" width="420" height="56" class="operator node"/><text x="2970" y="2930" text-anchor="middle" class="label">Final reshape</text><text x="2970" y="2952" text-anchor="middle" class="tiny">[B,8,32,32]</text>
+<rect x="2800" y="2981" width="340" height="45" class="io node"/><text x="2970" y="3009" text-anchor="middle" class="label">Spatial prediction [B,8,32,32]</text>
+<path d="M2970 2745V2762M2970 2818V2835M2970 2891V2908M2970 2964V2981" class="main"/>
+<text x="2450" y="3048" class="tiny">Channels 0:4 = ε / mean parameterization; channels 4:8 = learned covariance.</text>
+<text x="2450" y="3070" class="tiny">Official forward_with_cfg guides only [:,:3]; remaining output channels pass through unchanged.</text>
+
+<text x="1800" y="3165" text-anchor="middle" class="tiny">Implementation reference: facebookresearch/DiT models.py. Diagram v3 uses a unified top-to-bottom reading direction for every expanded module.</text>
+</svg>
