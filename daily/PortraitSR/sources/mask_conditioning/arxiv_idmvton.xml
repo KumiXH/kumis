@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/5j9+6rjI8KSBXSzrcPEfMTNE2KA</id>
+  <title>arXiv Query: search_query=ti:"Improving Diffusion Models for Authentic Virtual Try-on in the Wild"&amp;id_list=&amp;start=0&amp;max_results=5</title>
+  <updated>2026-08-07T04:04:45Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=ti:%22Improving+Diffusion+Models+for+Authentic+Virtual+Try-on+in+the+Wild%22&amp;start=0&amp;max_results=5&amp;id_list=" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>5</opensearch:itemsPerPage>
+  <opensearch:totalResults>1</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/2403.05139v3</id>
+    <title>Improving Diffusion Models for Authentic Virtual Try-on in the Wild</title>
+    <updated>2024-07-29T09:15:33Z</updated>
+    <link href="https://arxiv.org/abs/2403.05139v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2403.05139v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>This paper considers image-based virtual try-on, which renders an image of a person wearing a curated garment, given a pair of images depicting the person and the garment, respectively. Previous works adapt existing exemplar-based inpainting diffusion models for virtual try-on to improve the naturalness of the generated visuals compared to other methods (e.g., GAN-based), but they fail to preserve the identity of the garments. To overcome this limitation, we propose a novel diffusion model that improves garment fidelity and generates authentic virtual try-on images. Our method, coined IDM-VTON, uses two different modules to encode the semantics of garment image; given the base UNet of the diffusion model, 1) the high-level semantics extracted from a visual encoder are fused to the cross-attention layer, and then 2) the low-level features extracted from parallel UNet are fused to the self-attention layer. In addition, we provide detailed textual prompts for both garment and person images to enhance the authenticity of the generated visuals. Finally, we present a customization method using a pair of person-garment images, which significantly improves fidelity and authenticity. Our experimental results show that our method outperforms previous approaches (both diffusion-based and GAN-based) in preserving garment details and generating authentic virtual try-on images, both qualitatively and quantitatively. Furthermore, the proposed customization method demonstrates its effectiveness in a real-world scenario. More visualizations are available in our project page: https://idm-vton.github.io</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-03-08T08:12:18Z</published>
+    <arxiv:comment>ECCV 2024</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Yisol Choi</name>
+    </author>
+    <author>
+      <name>Sangkyung Kwak</name>
+    </author>
+    <author>
+      <name>Kyungmin Lee</name>
+    </author>
+    <author>
+      <name>Hyungwon Choi</name>
+    </author>
+    <author>
+      <name>Jinwoo Shin</name>
+    </author>
+  </entry>
+</feed>

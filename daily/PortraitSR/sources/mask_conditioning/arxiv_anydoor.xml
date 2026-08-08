@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/EJyWNzm1cBYiuEMVAUzXAiSkiJA</id>
+  <title>arXiv Query: search_query=ti:"AnyDoor"&amp;id_list=&amp;start=0&amp;max_results=5</title>
+  <updated>2026-08-07T04:04:32Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=ti:%22AnyDoor%22&amp;start=0&amp;max_results=5&amp;id_list=" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>5</opensearch:itemsPerPage>
+  <opensearch:totalResults>1</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/2307.09481v2</id>
+    <title>AnyDoor: Zero-shot Object-level Image Customization</title>
+    <updated>2024-05-08T03:21:34Z</updated>
+    <link href="https://arxiv.org/abs/2307.09481v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2307.09481v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>This work presents AnyDoor, a diffusion-based image generator with the power to teleport target objects to new scenes at user-specified locations in a harmonious way. Instead of tuning parameters for each object, our model is trained only once and effortlessly generalizes to diverse object-scene combinations at the inference stage. Such a challenging zero-shot setting requires an adequate characterization of a certain object. To this end, we complement the commonly used identity feature with detail features, which are carefully designed to maintain texture details yet allow versatile local variations (e.g., lighting, orientation, posture, etc.), supporting the object in favorably blending with different surroundings. We further propose to borrow knowledge from video datasets, where we can observe various forms (i.e., along the time axis) of a single object, leading to stronger model generalizability and robustness. Extensive experiments demonstrate the superiority of our approach over existing alternatives as well as its great potential in real-world applications, such as virtual try-on and object moving. Project page is https://damo-vilab.github.io/AnyDoor-Page/.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2023-07-18T17:59:02Z</published>
+    <arxiv:comment>CVPR2024</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Xi Chen</name>
+    </author>
+    <author>
+      <name>Lianghua Huang</name>
+    </author>
+    <author>
+      <name>Yu Liu</name>
+    </author>
+    <author>
+      <name>Yujun Shen</name>
+    </author>
+    <author>
+      <name>Deli Zhao</name>
+    </author>
+    <author>
+      <name>Hengshuang Zhao</name>
+    </author>
+  </entry>
+</feed>

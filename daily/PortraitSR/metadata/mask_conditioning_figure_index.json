@@ -1,0 +1,122 @@
+[
+  {
+    "key": "brushnet_architecture",
+    "paper": "brushnet_2403.06976.pdf",
+    "page": 6,
+    "purpose": "BrushNet dual-branch mask conditioning",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\07_mask_conditioning\\brushnet_2403.06976.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\mask_conditioning\\brushnet_architecture_page_06.png"
+  },
+  {
+    "key": "powerpaint_tasks",
+    "paper": "powerpaint_2312.03594.pdf",
+    "page": 5,
+    "purpose": "PowerPaint task-prompt architecture",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\07_mask_conditioning\\powerpaint_2312.03594.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\mask_conditioning\\powerpaint_tasks_page_05.png"
+  },
+  {
+    "key": "anydoor_architecture",
+    "paper": "anydoor_2307.09481.pdf",
+    "page": 3,
+    "purpose": "AnyDoor ID, detail-map and shape-mask conditioning",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\07_mask_conditioning\\anydoor_2307.09481.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\mask_conditioning\\anydoor_architecture_page_03.png"
+  },
+  {
+    "key": "cosmicman_parsing",
+    "paper": "cosmicman_2404.01294.pdf",
+    "page": 5,
+    "purpose": "CosmicMan human parsing and region-text labels",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\07_mask_conditioning\\cosmicman_2404.01294.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\mask_conditioning\\cosmicman_parsing_page_05.png"
+  },
+  {
+    "key": "stableviton_architecture",
+    "paper": "stableviton_2312.01725.pdf",
+    "page": 4,
+    "purpose": "StableVITON agnostic mask and semantic correspondence",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\07_mask_conditioning\\stableviton_2312.01725.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\mask_conditioning\\stableviton_architecture_page_04.png"
+  },
+  {
+    "key": "idm_vton_architecture",
+    "paper": "idm_vton_2403.05139.pdf",
+    "page": 5,
+    "purpose": "IDM-VTON garment conditioning architecture",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\07_mask_conditioning\\idm_vton_2403.05139.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\mask_conditioning\\idm_vton_architecture_page_05.png"
+  },
+  {
+    "key": "sapiens_parsing",
+    "paper": "sapiens_2408.12569.pdf",
+    "page": 6,
+    "purpose": "Sapiens 28-class human parsing",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\07_mask_conditioning\\sapiens_2408.12569.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\mask_conditioning\\sapiens_parsing_page_06.png"
+  },
+  {
+    "key": "matanyone_architecture",
+    "paper": "matanyone_2501.14677.pdf",
+    "page": 4,
+    "purpose": "MatAnyone alpha-matting memory architecture",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\07_mask_conditioning\\matanyone_2501.14677.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\mask_conditioning\\matanyone_architecture_page_04.png"
+  },
+  {
+    "key": "matanyone_results",
+    "paper": "matanyone_2501.14677.pdf",
+    "page": 6,
+    "purpose": "MatAnyone temporal matting results",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\07_mask_conditioning\\matanyone_2501.14677.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\mask_conditioning\\matanyone_results_page_06.png"
+  },
+  {
+    "key": "synthlight_architecture",
+    "paper": "synthlight_2501.09756.pdf",
+    "page": 4,
+    "purpose": "SynthLight synthetic-to-real relighting training",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\07_mask_conditioning\\synthlight_2501.09756.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\mask_conditioning\\synthlight_architecture_page_04.png"
+  },
+  {
+    "key": "synthlight_results",
+    "paper": "synthlight_2501.09756.pdf",
+    "page": 6,
+    "purpose": "SynthLight portrait relighting effects",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\07_mask_conditioning\\synthlight_2501.09756.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\mask_conditioning\\synthlight_results_page_06.png"
+  },
+  {
+    "key": "compose_architecture",
+    "paper": "compose_2406.12013.pdf",
+    "page": 4,
+    "purpose": "COMPOSE portrait shadow editing pipeline",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\07_mask_conditioning\\compose_2406.12013.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\mask_conditioning\\compose_architecture_page_04.png"
+  },
+  {
+    "key": "compose_results",
+    "paper": "compose_2406.12013.pdf",
+    "page": 11,
+    "purpose": "COMPOSE controllable shadow editing",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\07_mask_conditioning\\compose_2406.12013.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\mask_conditioning\\compose_results_page_11.png"
+  },
+  {
+    "key": "softshadow_architecture",
+    "paper": "softshadow_2409.07041.pdf",
+    "page": 3,
+    "purpose": "SoftShadow soft-mask architecture and losses",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\07_mask_conditioning\\softshadow_2409.07041.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\mask_conditioning\\softshadow_architecture_page_03.png"
+  },
+  {
+    "key": "softshadow_results",
+    "paper": "softshadow_2409.07041.pdf",
+    "page": 7,
+    "purpose": "SoftShadow penumbra-aware results",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\07_mask_conditioning\\softshadow_2409.07041.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\mask_conditioning\\softshadow_results_page_07.png"
+  }
+]

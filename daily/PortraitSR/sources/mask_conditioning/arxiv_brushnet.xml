@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/oI+NkDT6+k9ltgKIpPGAyafRBAs</id>
+  <title>arXiv Query: search_query=ti:"BrushNet"&amp;id_list=&amp;start=0&amp;max_results=5</title>
+  <updated>2026-08-07T04:04:24Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=ti:%22BrushNet%22&amp;start=0&amp;max_results=5&amp;id_list=" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>5</opensearch:itemsPerPage>
+  <opensearch:totalResults>2</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/2403.06976v1</id>
+    <title>BrushNet: A Plug-and-Play Image Inpainting Model with Decomposed Dual-Branch Diffusion</title>
+    <updated>2024-03-11T17:59:31Z</updated>
+    <link href="https://arxiv.org/abs/2403.06976v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2403.06976v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Image inpainting, the process of restoring corrupted images, has seen significant advancements with the advent of diffusion models (DMs). Despite these advancements, current DM adaptations for inpainting, which involve modifications to the sampling strategy or the development of inpainting-specific DMs, frequently suffer from semantic inconsistencies and reduced image quality. Addressing these challenges, our work introduces a novel paradigm: the division of masked image features and noisy latent into separate branches. This division dramatically diminishes the model's learning load, facilitating a nuanced incorporation of essential masked image information in a hierarchical fashion. Herein, we present BrushNet, a novel plug-and-play dual-branch model engineered to embed pixel-level masked image features into any pre-trained DM, guaranteeing coherent and enhanced image inpainting outcomes. Additionally, we introduce BrushData and BrushBench to facilitate segmentation-based inpainting training and performance assessment. Our extensive experimental analysis demonstrates BrushNet's superior performance over existing models across seven key metrics, including image quality, mask region preservation, and textual coherence.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-03-11T17:59:31Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Xuan Ju</name>
+    </author>
+    <author>
+      <name>Xian Liu</name>
+    </author>
+    <author>
+      <name>Xintao Wang</name>
+    </author>
+    <author>
+      <name>Yuxuan Bian</name>
+    </author>
+    <author>
+      <name>Ying Shan</name>
+    </author>
+    <author>
+      <name>Qiang Xu</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2603.14850v1</id>
+    <title>From Artefact to Insight: Efficient Low-Rank Adaptation of BrushNet for Scanning Probe Microscopy Image Restoration</title>
+    <updated>2026-03-16T05:48:58Z</updated>
+    <link href="https://arxiv.org/abs/2603.14850v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2603.14850v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Scanning Probe Microscopy or SPM offers nanoscale resolution but is frequently marred by structured artefacts such as line scan dropout, gain induced noise, tip convolution, and phase hops. While most available methods treat SPM artefact removal as isolated denoising or interpolation tasks, the generative inpainting perspective remains largely unexplored. In this work, we introduce a diffusion based inpainting framework tailored to scientific grayscale imagery. By fine tuning less than 0.2 percent of BrushNet weights with rank constrained low rank adaptation (LoRA), we adapt a pretrained diffusion model using only 7390 artefact, clean pairs distilled from 739 experimental scans. On our forthcoming public SPM InpBench benchmark, the LoRA enhanced model lifts the Peak Signal to Noise Ratio or PSNR by 6.61 dB and halves the Learned Perceptual Image Patch Similarity or LPIPS relative to zero-shot inference, while matching or slightly surpassing the accuracy of full retraining, trainable on a single GPU instead of four high-memory cards. The approach generalizes across various SPM image channels including height, amplitude and phase, faithfully restores subtle structural details, and suppresses hallucination artefacts inherited from natural image priors. This lightweight framework enables efficient, scalable recovery of irreplaceable SPM images and paves the way for a broader diffusion model adoption in nanoscopic imaging analysis.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cond-mat.mes-hall" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-03-16T05:48:58Z</published>
+    <arxiv:comment>37 pages, 7 figures, 7 tables, jounral paper</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Ziwei Wei</name>
+    </author>
+    <author>
+      <name>Yao Shen</name>
+    </author>
+    <author>
+      <name>Wanheng Lu</name>
+    </author>
+    <author>
+      <name>Ghim Wei Ho</name>
+    </author>
+    <author>
+      <name>Kaiyang Zeng</name>
+    </author>
+  </entry>
+</feed>

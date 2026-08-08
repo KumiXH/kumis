@@ -1,0 +1,927 @@
+=== PAGE 1 ===
+SynthLight: Portrait Relighting with Diffusion Model
+by Learning to Re-render Synthetic Faces
+Sumit Chaturvedi1∗ Mengwei Ren2 Yannick Hold-Geoffroy2 Jingyuan Liu2
+Julie Dorsey1 Zhixin Shu2†
+1 Yale University 2 Adobe
+Figure 1. SynthLight relights portraits using environment map lighting. By learning to re-render synthetic human faces, it produces realistic
+illumination on real portraits, such as distinct cast shadows on the neck and natural specular highlights on the skin. Despite training solely
+on synthetic headshots, it generalizes to half-body portraits and full-body figurines.
+Abstract
+We introduce SynthLight, a diffusion model for portrait
+relighting. We frame image relighting as a re-rendering
+problem, where pixels are transformed in response to
+changes in environmental lighting. Using a physically-
+based rendering engine, we create a dataset to simulate
+this lighting-conditioned transformation with 3D head as-
+sets under varying lighting. We propose training and in-
+ference strategies to bridge the gap between the synthetic
+and real image domains: (1) multi-task training leveraging
+real human portraits without lighting labels; (2) an infer-
+ence time diffusion sampling scheme based on classifier-
+free guidance leveraging the input portrait to better pre-
+serve details. Our method generalizes to diverse real por-
+traits and produces realistic illumination effects, includ-
+ing specular highlights and cast shadows, while preserving
+identity. Our quantitative experiments on light stage data
+demonstrate results comparable to state-of-the-art relight-
+ing methods. Our qualitative results on in-the-wild images
+showcase rich and unprecedented illumination effects.
+*Work done as an intern at Adobe Research.
+†Corresponding author.
+1. Introduction
+Lighting is fundamental to portrait photography, yet ma-
+nipulating it after capture remains challenging. Recent ad-
+vances in generative imaging models have shown promise
+for controlling lighting in existing images [14, 18, 34,
+58, 60], but these typically require labeled training data.
+For portrait relighting specifically, the most effective re-
+sults have come from training on light stage data—portraits
+rendered with linear combinations of one-light-at-a-time
+(OLAT) captures. While powerful, light stage setups are
+constrained by physical limitations in light source den-
+sity and require specialized artificial lighting equipment.
+In contrast, 3D workflows in VFX and gaming have long
+treated lighting as a straightforward endeavor through mod-
+ern physically based rendering engines, where lighting con-
+trol is nearly arbitrary. To relight a rendering, artists simply
+adjust the lighting configurations and re-render the scene.
+Given a sceneS and lighting L1, we denote the rendering
+as I1 = fr(S, L1). The inverse graphics problem aims to
+find S from I1: S = finv(I1, L1) with known or unknown
+lighting. To relight renderingI1 to I2 under lighting L2, one
+aims to compute: I2 = fr(S, L2). Given only I1, a relight-
+This CVPR paper is the Open Access version, provided by the Computer Vision Foundation.
+Except for this watermark, it is identical to the accepted version;
+the final published version of the proceedings is available on IEEE Xplore.
+369
+
+=== PAGE 2 ===
+ing procedure seeks: I2 = fr(finv(I1), L2) = fre(I1, L2),
+where fre is the relighting/re-rendering function. Previ-
+ous approaches [21, 28, 57] have tackled this problem
+through inverse graphics, explicitly or implicitly, by es-
+timating lighting-invariant intrinsic scene representations
+such as depth, surface normals, and albedo. This imposes
+limitations on subsequent rendering functions and fails to
+capture complex illumination effects like inter-reflections,
+occlusion shadows and subsurface scattering. In this paper,
+we propose bypassing inverse rendering by learning the re-
+lighting function using physically based 3D renderings of
+human heads. We render pairs of portrait images in Blender
+(Cycles) (I1, L1) and (I2, L2) and train a diffusion model
+to directly learn to “re-render” I2 from I1 and L2.
+However, this approach introduces an inevitable domain
+gap between 3D renders and real photographs. To address
+this challenge, we leverage a latent diffusion model pre-
+trained on vast internet images for text-to-image generation.
+We propose to finetune the network with our face render-
+ings and introduce simple yet effective schemes to narrow
+the gap between training data and in-the-wild images. Dur-
+ing training, we propose multi-task training that incorpo-
+rates in-the-wild images without ground truth relighting in-
+formation. This allows the model to learn relighting from
+our synthetic dataset while maintaining knowledge of the
+real image domain, preventing distributional drift. We fur-
+ther observe that input portraits contain rich textural infor-
+mation. Leveraging the flexibility of diffusion model in-
+ference, we design an inference adaptation scheme that
+effectively preserves input portrait details in the relit result.
+We evaluate our methods on in-the-wild portrait images,
+demonstrating highly detailed illumination effects that ac-
+curately capture interactions between the portrait scene and
+lighting. Our results produce realistic cast shadows and
+specular highlights on the skin. For the first time, we
+demonstrate an end-to-end system capable of non-trivial
+lighting effects including catch lights in eyes, subsurface
+scattering in ears, and inter-reflections with clothing. No-
+tably, despite training only on simple headshot renderings
+of 3D faces without accessories, facial hair, or hats, our
+network generalizes to complex portrait images, including
+half-body shots and multi-person photographs.
+We quantitatively evaluate our method on a test set of our
+synthetic faces dataset and on a light stage OLAT dataset.
+Despite using no light stage data for training, our method
+achieves comparable or superior results to state-of-the-art
+portrait relighting methods trained on OLAT data. User
+studies show our results are preferred across all evaluated
+aspects: perceptual lighting accuracy, identity preservation,
+and overall image quality.
+We summarize our contributions as follows:
+1. We propose modeling portrait relighting as a task of
+learning to re-render a portrait scene in 3D. Using phys-
+ically based renderings of human heads under varying
+lighting conditions, we train a diffusion model to learn
+pixel transformations conditioned on lighting.
+2. We introduce two techniques enabling synthetic data
+learning while minimizing domain gap with real images,
+through a training-time multi-task strategy that incorpo-
+rates real images through a text-to-image task, and an
+inference-time approach based on classifier-free guid-
+ance that preserves portrait details in the relit result.
+3. Through extensive qualitative and quantitative evalua-
+tions, we demonstrate state-of-the-art portrait relight-
+ing results, achieving high-quality lighting effects pre-
+viously unattainable by existing methods.
+2. Related Work
+2.1. Portrait Relighting
+Portrait relighting has been explored in both 2D [18,21, 28,
+29, 34, 44, 47, 53, 58, 60] and 3D [3, 6, 33, 49, 50, 52, 62],
+with 2D image-based methods being more relevant to our
+work. Due to the under-constrained nature of 2D portrait
+relighting, various priors have been proposed, including
+morphable 3D face models [4, 43], explicit inverse render-
+ing [2, 41], and style transfer [42].
+Recently, deep learning methods [27,47] trained on light
+stage data [9] have advanced the state-of-the-art. Total Re-
+lighting [28] is a widely adopted physics-guided method
+that decomposes images into intrinsic components condi-
+tioned on HDR environment lighting [8]. However, this
+approach has two limitations. First, its BRDF-based re-
+flectance model [7,31] neglects other significant light trans-
+port modes such as subsurface scattering prevalent in cer-
+tain skin types [11, 22, 26], and struggles with albedo esti-
+mation in cases involving face accessories, inter-reflections,
+and face paint [21, 57]. Second, light stage setups inher-
+ently limit captured lighting complexity due to restricted
+intensity and resolution [47, 48], affecting the modeling of
+complex effects such as subsurface scattering.
+Motivated by these constraints, we employ diffusion
+models for face relighting, without predefined appearance
+assumptions. We use synthetic datasets rendered with
+physically-based methods to provide paired supervision.
+Our approach can synthesize advanced illumination effects
+in human portraits, such as hard cast shadows, subsurface
+scattering, and inter-reflections.
+2.2. Diffusion Models for Relighting
+Diffusion models [1, 10, 19, 20, 35, 37, 38, 45, 46] have
+become standard for text-to-image generation, image trans-
+lation, and appearance editing. Their scalability on large
+datasets and adaptability of pretrained weights [17, 35, 59]
+make them particularly effective. Additionally, flexible
+sampling mechanisms can enhance image quality [15, 24].
+370
+
+=== PAGE 3 ===
+Recent diffusion-based relighting methods include Di-
+LightNet [58], which provides fine-grained control of object
+lighting but relies on error-prone scene reconstruction [51],
+and Neural Gaffer [18], which utilizes HDR environment
+maps for object relighting. For portraits, Relightful Har-
+monization [34] and IC-Light [60] train on high-quality
+data (light stage captures, Objaverse renders, composited
+shadow materials) for background-harmonized outputs, us-
+ing background as lighting condition. Diffusion Face Re-
+lighting [32] employs conditional diffusion implicit models
+with spherical harmonic lighting but is limited to tight fa-
+cial crops. In contrast, we approach portrait relighting by
+learning to re-render synthetic faces. Leveraging pretrained
+models and our multi-task training strategy, we preserve fa-
+cial priors, while classifier-free guidance [15] on the input
+portrait enhances textures and details in the relit results.
+2.3. Domain Adaptation
+Training naively on synthetic data creates a domain gap
+for in-the-wild portraits, harming identity preservation and
+photo-realism. Prior diffusion-based domain adaptation
+methods [12, 17, 36, 56, 59] primarily target style transfer
+or specific editing, not relighting.
+DifFRelight [14] trains personalized diffusion models
+per subject, preserving identity but requires light stage cap-
+ture and dedicated per-subject training. Other approaches
+use real data to reduce the synthetic-to-real gap: Switch-
+Light [21] pre-trains a masked-autoencoder [13] on real
+images before light stage training to learn visual features
+essential for relighting (e.g., structure, color, texture); Re-
+lightful Harmonization [34] bootstraps from a light stage
+trained model to pseudo-label in-the-wild images, then fine-
+tunes on these labels; IC-Light [60] employs extensive
+data augmentation; and Lumos [57] finetunes its albedo-
+prediction branch on real images but struggles with face
+paint, accessories, or strong shadows.
+We propose a multi-task scheme combining text-to-
+image and relighting, enabling diffusion model training
+with real and synthetic images. Our classifier-free guidance
+inference preserves input portrait details. Our user study
+demonstrates superior visual quality, identity preservation,
+and lighting compared to existing methods.
+3. Method
+Given a portrait image I captured under unknown lighting,
+our goal is to synthesize a relit portraitIR under target light-
+ing specified by a panoramic environment map E. The relit
+portrait IR should (1) preserve the subject’s identity and fa-
+cial characteristics from I; (2) reflect the lighting defined
+by E; and (3) maintain photorealism. We first simulate this
+re-rendering in Blender to build a synthetic portrait dataset.
+Figure 2. Subjects are rendered under various lighting conditions.
+We present two examples, each showing a subject rendered with
+two different environment maps. SynthLight learns to re-render
+synthetic faces, transforming a subject rendered with one environ-
+ment map to another.
+3.1. Synthetic Data for Relighting
+We build a 3D human portrait generation pipeline similar to
+FaceSynthetics [54]. Our system begins with artist-created
+3D head meshes, enhanced with detailed facial components,
+including eyes, teeth, gums, and hair. We augment these
+base models through rigging for pose variation and blend-
+shape deformation for diverse facial expressions. For re-
+alistic rendering, we use high-quality PBR texture maps,
+including albedo, normal, roughness, specular, and subsur-
+face scattering. We combine the head with random clothing
+meshes to build portrait scenes using Blender and render
+images with Cycles.
+To train our networks, we render images (samples in
+Fig. 2) at 512×512 resolution from 350 subjects, each
+with roughly 10 varied appearances, including different
+hairstyles, skin tones, expressions, clothes, and poses. Each
+sample is rendered with 10 random HDR environment
+maps, rotated evenly 36 times from a random initial rota-
+tion. In total, the dataset contains approximately 1.26 mil-
+lion images. See supplemental material for more samples.
+3.2. Modeling Relighting with Diffusion Model
+We build on top of Stable Diffusion [35], a text-to-image
+foundation model pretrained with vast internet data. As
+shown in Fig.3, we incorporate the input portrait I and the
+target environment map E to the input of the network back-
+bone by expanding the number of channels in the first con-
+volutional layer of the Unet as per Palette[37], and we train
+the diffusion model to generate IR, the relit portrait.
+To generate training samples (I, E, T, I R), where T is a
+text prompt, we render portrait images from a subject with
+different HDR maps to obtain portraits n portraits I1 · · · In.
+We use an off-the-shelf image captioning model [25] to cap-
+tion these images. Training samples are constructed by
+sampling two indices i, j ∈ { 1 · · · n}, using them to se-
+lect input portrait, environment map, text prompt and tar-
+get portrait as (Ii, Ej, Tj, Ij). We use the sample to su-
+pervise our diffusion model in the following manner. First,
+we convert the HDR environment map into LDR by tone-
+mapping similar to Neural Gaffer [18]. The LDR envi-
+ronment map along with the input and target portraits are
+371
+
+=== PAGE 4 ===
+Unet
+Unet
+Task 1: Relighting
+!"#$% &"'()# Relit
+Prompt:
+"a woman with brown
+hair looking at the camera"
+Task 2: Text-to-Portrait Prompt:
+"A bride and groom hugging each
+other on a beach" Generated
+Drop
+Envmap
+Drop
+image
+input
+Figure 3. SynthLight training pipeline. We first train the diffu-
+sion backbone using synthetic relighting tuples (Task 1, top row;
+Sec.3.2). To reduce the synthetic-to-real domain gap, we jointly
+train on a text-to-image task (Task 2, bottom row; Sec.3.3). Our
+model is built on LDM [35], comprising a Unet and a V AE (omit-
+ted here for simplicity).
+encoded using the encoder Enc of Stable Diffusion’s V AE,
+i.e., ˆIi = Enc(Ii), ˆEj = Enc(ELDR
+j ), ˆIj = Enc(Ij ).
+Following the DDPM formulation [16], we randomly
+sample Gaussian noise ϵ and a diffusion timestep t to add
+noise to the relit image latent ˆIj to obtain the noised latent
+ˆIt
+j . We concatenate ˆIi, ˆEj , ˆIt
+j along the channel axis and
+feed it to the Unet. We train ϵθ with the DDPM objective:
+min
+θ
+Ex∈Enc(IR ),t,ϵ∈N (0,I)∥ϵθ (xt,I,E ,T ) − ϵ∥ (1)
+3.3. Multitask Training
+Fine-tuning a diffusion model on synthetic data creates a
+domain gap when applied to in-the-wild images, degrading
+output quality. For instance, the model often fails to repro-
+duce critical details, such as textures in clothing, jewelry
+and accessories, which are absent in the synthetic data dis-
+tribution (e.g., as seen in the Base result in Fig. 9).
+To address this, we propose multitask training to miti-
+gate distribution drift toward synthetic renderings. Similar
+strategies have been applied in the context of inpainting [55]
+to compensate for limited training data diversity.
+Specifically, we incorporate a text-to-portrait generation
+task that constrains the diffusion model to produce realis-
+tic portrait images from input prompts. This task is trained
+alongside the original relighting task. As both tasks share
+the same network architecture, we simply replace the image
+and LDR inputs with two black images, as shown in Fig. 3.
+For text-to-portrait training, we curate a subset of hu-
+man portraits from the LAION [40] dataset, filtered with a
+face detector. Details on detection and filtering are provided
+in the supplementary material. During training, we set the
+sampling ratio of synthetic to real data to 0.7 and 0.3, re-
+spectively. Incorporating real images significantly improves
+Unet
+Unet
+Input !
+Drop
+image
+input
+"A beautiful woman"
+Noise
+Envmap "
+Figure 4. We apply image-conditioned classifier-free guidance
+during inference to balance between identity preservation and re-
+lighting effects, computing the score estimate as per Eq. (2).
+identity preservation and photorealism. This aligns with
+findings from Relightful Harmonization [34], where a boot-
+strapped dataset enhances generalization in image harmo-
+nization, highlighting the importance of data diversity.
+(a) Input Portrait
+(b) Environment map
+and Reference
+(c) Varying Guidance Scale
+!! " # !! " $
+!! " % !! " &
+(d) Effect on detail preservation
+Input
+Portrait !! " $ !! " #
+(e) Effect on shadow artifacts
+from input portrait
+!! " &
+Input
+Portrait !! " $
+Figure 5. Effect of portrait guidance λI : (a) Input portrait. (b)
+Lighting and Blender-rendered reference. (c) Outputs with vary-
+ing λI . (d) λI =1 (no Inference Adaptation) distorts eye shape
+(red boxes). (e) Higher λI cause lighting from the input (such as
+shadows) to leak into the output (yellow boxes).
+3.4. Inference Adaptation
+We employ a simple, effective inference scheme that bal-
+ances identity preservation and relighting strength. Inspired
+by dual-conditioning classifier-free guidance [15] from In-
+structPix2Pix [5], we define a similar concept in our infer-
+ence. As shown in Fig. 4, at each diffusion step, the dif-
+fusion score combines score estimates from both image-
+conditioned and unconditioned model evaluations, where
+for unconditional evaluation, we drop the input image while
+keeping the LDR and text prompt unchanged.
+Formally, the score at timestep t is:
+ϵ
+t = ϵθ (xt+1,φ ,E ,φ )
++ λT (ϵθ (xt+1,I,E ,T ) − ϵθ (xt+1,I,E ,φ ))
++ λI (ϵθ (xt+1,I,E ,φ ) − ϵθ (xt+1,φ ,E ,φ )) . (2)
+372
+
+=== PAGE 5 ===
+Ours SwitchLight
+[21]
+IC-Light
+[60]
+DiLightNet
+[58]
+Neural Gaffer
+[18]
+Test Synthetic
+LPIPS↓ 0.063 0.088 0.108 0.128 0.102
+SSIM↑ 0.945 0.911 0.874 0.860 0.900
+PSNR↑ 29.57 21.43 20.28 22.99 25.33
+FaceNet↓ 0.165 0.198 0.284 0.333 0.357
+Test Light Stage
+LPIPS↓ 0.165 0.141 0.172 0.245 0.196
+SSIM↑ 0.813 0.853 0.789 0.703 0.788
+PSNR↑ 19.70 20.30 17.44 16.62 19.31
+FaceNet↓ 0.173 0.152 0.195 0.576 0.247
+Table 1. We compare against baselines on a held-out set of our
+synthetic dataset (Test Synthetic) and data rendered through a light
+stage (Test Light Stage). While trained only on synthetic data, our
+model performs comparably to SwitchLight [21], a commercial
+relighting method trained with light stage data.
+IC-Light[60] SwitchLight[21] Neural Gaffer[18]
+Lighting 92% 56% 65%
+Quality 57% 64% 73%
+Identity 52% 70% 65%
+Table 2. User preference rates indicate how often SynthLight was
+preferred over baselines; e.g., our method was preferred 92% of
+times in terms of lighting over IC-Light [60]. SynthLight outper-
+forms baselines in lighting, image quality, and subject identity as
+all preference rates exceed 50%.
+λT and λI are guidance parameters: λT controls text
+adherence, while λI controls portrait guidance strength.
+Using these scores, we compute latents via DDIM [46]:
+xt = DDIM(xt+1, ϵt). Empirically we choose λI ∈ [2, 3]
+balances detail, identity preservation, and relighting quality.
+Fig. 5 shows that smaller λI improves relighting but re-
+duce visual quality and facial details, while larger λI better
+preserve identity but cause lighting information, such as in-
+put shadows, to leak into outputs.
+4. Experiments
+4.1. Setup and Metrics
+We create three test sets for evaluating our method: (a) 300
+light stage rendered relighting pairs, (b) a held out subset of
+our synthetic faces dataset consisting of 500 images, (c) in-
+the-wild portraits for qualitative evaluation of visual quality.
+We use quantitative metrics such as SSIM, PSNR, LPIPS
+[61] to evaluate image fidelity and face embedding distance
+from FaceNet [39] to evaluate identity preservation. We
+train on the entire synthetic dataset but withhold 20% of the
+environment maps to create the light stage test set. We also
+hold out 10% of the subjects and 10% of the environment
+maps for the synthetic test set, ensuring they remain unseen
+during training.
+4.2. Implementation details
+We implement our model in PyTorch [30] and train on 32×
+40GB A100 GPUs. We use a batch size of 192, a learning
+rate of 10−5, and the Adam optimizer [23]. Training (in-
+cluding ablations) runs for 40K steps, taking about 1 day.
+Model Initialization We initialize our model using either
+the IC-Light checkpoint [60] or the Stable Diffusion 1.5
+checkpoint [35]. Although both initializations yield visu-
+ally similar results on in-the-wild data and our light stage
+test set (Fig. 10), the model initialized from the Stable Dif-
+fusion 1.5 checkpoint achieves slightly lower scores on both
+the synthetic and light stage test sets (Tab.3). Consequently,
+results in this paper are from our model initialized with the
+IC-Light checkpoint, unless otherwise specified.
+4.3. Evaluation Results
+We compare our method to state-of-the-art approaches in
+portrait harmonization [60], portrait relighting [21], and ob-
+ject relighting [18, 58], evaluating both quantitatively (see
+Tab.1) on the synthetic and light stage test sets, and qualita-
+tively (see Fig. 7 and Fig. 8). Quantitative evaluation shows
+that our method outperforms baselines on the synthetic test
+set and performs comparably to state-of-the-art portrait re-
+lighting methods like SwitchLight on the light stage test set.
+While our results do not always achieve the highest PSNR,
+they exhibit better visual relighting quality than baselines.
+In Fig. 7, we show the input image (left), the environment
+map (top), and the corresponding 3D model rendered in
+Blender (bottom). In Fig. 8, the left side shows the envi-
+ronment map (top) and input portrait (bottom).
+We conduct a user study (see Tab.2) to evaluate percep-
+tual preference in relighting. We select 40 held-out stock
+portraits, each paired with a randomly sampled environment
+map from a test set of 200. Each portrait is relit under 12
+evenly spaced rotations of the environment map, generat-
+ing 480 relit images per method. For the study, we ran-
+domly sample 30 image pairs per participant, each compar-
+ing our method to a baseline. Participants answer three 2-
+alternative forced-choice questions assessing (1) lighting,
+(2) image quality, and (3) identity preservation. We col-
+lect 482 responses from 20 participants. Results show our
+method is consistently preferred across all criteria. See the
+supplementary for screenshots illustrating our user study.
+4.4. Ablations
+We conduct an ablation study to evaluate the contribution of
+our two key domain adaptation methods: Multi-task train-
+ing (see Sec. 3.3) and inference adaptation (see Sec. 3.4).
+We start with a Base configuration that excludes both
+techniques. We then assess each method individually: Base
++ Multi-Task adds multi-task training, and Base + Infer-
+ence Adaptation adds inference adaptation. Our full model,
+373
+
+=== PAGE 6 ===
+(a) Our method effectively relights subjects under outdoor (left) and indoor (right) illumination. Outdoors, it accurately renders cast shadows from facial
+features and glasses (see inset). Indoors, it captures complex lighting effects such as neon illumination.
+(b) Our method captures interesting lighting effects for portraits, synthesizing fine details like catch light in the eye for realistic relighting (left, see inset)
+and subsurface scattering in the ear under strong backlight conditions, such as sunlight (right, see inset).
+(c)
+Our method enables studio-style lighting for portraits, creating dramatic effects in studio settings (left). Using hand-crafted environment maps, we relight
+with two presets (right): Backlight, with a light behind the subject to define edges and create a rim effect (see inset); and Rembrandt, with angled lighting
+illuminating one side of the face and casting the other in shadow for depth and contrast, also revealing inter-reflections from clothing (rightmost, see inset).
+(d)
+Our method generalizes to out-of-distribution images for relighting, such as image of a clown (portrait with heavy makeup), portrait of multiple people,
+and a teddy-bear (non-human subject).
+Figure 6. Real-world results show our method’s ability to handle diverse lighting scenarios. Each example includes the input portrait (left),
+the environment map used for relighting (top right), and the relit output (bottom right).
+combining both, is referred to as Ours. Finally, we examine
+the effect of adding light stage data to each training batch,
+denoted as Ours + Light Stage. See the supplementary for
+details on the light stage data.
+Fig. 9 illustrates the effect of each configuration. We
+show the input image (leftmost), the environment map (top)
+and a 3D model rendered in Blender for reference (bottom).
+Base loses important details and fails to produce textures
+in clothing and accessories. Multi-task training in Base +
+Multi-Task helps partially recover details. Base + Inference
+Adaptation enhances finer details by leveraging informa-
+tion present in the input but lacks photo-realism. Adding
+light stage data during training (Ours + Light Stage) ad-
+dresses identity and texture issues but cannot remove strong
+shadows in the input while relighting. We conjecture this
+occurs because strong shadows are rare in light stage cap-
+tures. The model also produces oversaturated images un-
+der strong sunlight (see supplementary). Similar artifacts
+appear in other light stage-trained methods (e.g., Switch-
+Light). Finally, Ours relights portraits with plausible light-
+ing and preserves important details from the input portrait.
+These findings are supported by our evaluation in Tab.3.
+374
+
+=== PAGE 7 ===
+DiLightNet [58] IC-Light [60] Neural Gaffer [18] Total Relighting [28] SwitchLight [21] Ours
+Figure
+7. In-the-wild portrait results. DiLightNet [58] produces severe artifacts. IC-Light [60] does not relight due to background lighting
+condition. Neural Gaffer [18] generates inaccurate shadows on faces. Total Relighting [28] and SwitchLight [21] produce soft shadows
+even under strong sunlight and alter skin tones. Our method achieves superior relighting while also better preserving subject identity.
+Inputs DiLightNet [58] IC-Light [60] Neural Gaffer [18] Total Relighting [28] SwitchLight [21] Ours Ground Truth
+Figure
+8. We compare of relighting the input portrait (bottom left) using environment map (top left) on a light stage test set.
+4.5. Effect of Lighting Condition
+We train two variants of our model: one conditioned on
+background and the other on the environment map for light-
+ing. While the background-conditioned model often pro-
+duces plausible lighting (e.g., strong cast shadows) and
+appears well harmonized with the background, rotating
+the environment map reveals lighting inconsistencies (see
+Fig. 11). Although generating realistic shadows caused by
+self-occlusion is challenging for background-conditioned
+relighting methods such as IC-Light [60], leveraging our
+synthetic dataset enables us to address this effectively.
+375
+
+=== PAGE 8 ===
+Base Base + Multi-Task Base + Inference
+Adaptation Ours + Light Stage Ours
+Figure 9. Training without our Multi-Task or Inference Adaptation techniques (Base) alters identity and loses textures. Base + Multi-Task
+recovers some details (e.g., skin tone, yellow box). Base + Inference Adaptation removes accessories (e.g., cigarette, green box) and
+generates unnatural skin textures (yellow box). Ours (Base + Multi-Task + Inference Adaptation) achieves plausible lighting effects while
+preserving portrait details. Ours + Light Stage improves details but fails to remove strong shadows from the input (red box).
+Base Base+MT Base+IA Ours Ours+LS Ours+SD 1.5
+Test Synthetic
+LPIPS↓ 0.066 0.066 0.062 0.063 0.065 0.069
+SSIM↑ 0.942 0.942 0.946 0.945 0.942 0.937
+PSNR↑ 29.13 29.05 29.64 29.57 29.13 28.30
+FaceNet↓ 0.193 0.196 0.163 0.165 0.171 0.195
+Test Light Stage
+LPIPS↓ 0.210 0.186 0.178 0.165 0.156 0.177
+SSIM↑ 0.790 0.797 0.810 0.813 0.822 0.808
+PSNR↑ 18.92 19.18 19.48 19.70 20.14 19.32
+FaceNet↓ 0.295 0.242 0.179 0.173 0.149 0.188
+Table 3. We evaluate the contribution of each component: Multi-
+Task training ( Base+MT), inference adaptation (Base+IA), and
+their combination (Ours). Adding light stage data (Ours+LS ) fur-
+ther improves performance on the light stage test set. Initializ-
+ing with Stable Diffusion 1.5 (Ours+SD 1.5) yields slightly lower
+quantitative scores than Ours (initialized with IC-Light).
+IC-Light
+Initialization
+SD 1.5
+Initialization
+(4)
+(2)(1)
+ (3)
+Figure 10. We compare SynthLight initialized with IC-Light [60]
+and with SD 1.5. Both yield similar visual quality and realistic
+lighting on in-the-wild subjects (col. 1–3) and the light stage set
+(col. 4), but IC-Light initialization performs better quantitatively.
+(1) (3)(2)
+Our Model
+Environment Map
+Conditioned
+Our Model
+Background
+Conditioned
+Background
+Conditioned
+IC-Light
+Reference,
+Background,
+Environment Map
+(a)
+(b)
+(c)
+(d)
+Figure 11. Effect of Lighting condition. Limited lighting cues
+in background cause inaccurate shadow directions (e.g., (1)-(c))
+compared to environment map. But synthetic data training still
+yields stronger, more plausible shadows than IC-Light [60].
+5. Conclusion
+We present SynthLight, a portrait relighting diffusion model
+capable of relighting in-the-wild portraits while garnering
+lighting supervision only from synthetic data. Our method
+demonstrates strong generalization capabilities, underscor-
+ing the potential of synthetic data to achieve plausible light-
+ing effects such as strong cast shadows, realistic catch lights
+in the eyes, and natural inter-reflections. We discuss limita-
+tions and future work in the supplementary.
+376
+
+=== PAGE 9 ===
+Acknowledgement
+We thank Weijie Lyu, Ziwen Chen, Haian Jin, Vikas
+Thamizharasan, Natalia Pacheco-Tallaj, Ryusuke Sugimoto
+and Christophe Bolduc for their insightful discussions and
+the many participants in our user study. We thank David
+Futschik for running the Total Relighting evaluation. We
+also thank Kalyan Sunkavalli and Nathan Carr for their sup-
+port.
+References
+[1] Yogesh Balaji, Seungjun Nah, Xun Huang, Arash Vahdat,
+Jiaming Song, Qinsheng Zhang, Karsten Kreis, Miika Ait-
+tala, Timo Aila, Samuli Laine, Bryan Catanzaro, Tero Kar-
+ras, and Ming-Yu Liu. eDiff-I: Text-to-Image Diffusion
+Models with Ensemble of Expert Denoisers. arXiv preprint
+arXiv:2211.01324, 2022. 2
+[2] Jonathan T. Barron and Jitendra Malik. Shape, Illumination,
+and Reflectance from Shading. IEEE Trans. Pattern Anal.
+Mach. Intell., 37(8):1670–1687, 2015. 2
+[3] Sai Bi, Stephen Lombardi, Shunsuke Saito, Tomas Simon,
+Shih-En Wei, Kevyn Mcphail, Ravi Ramamoorthi, Yaser
+Sheikh, and Jason Saragih. Deep relightable appearance
+models for animatable faces. ACM Trans. Graph., 40(4),
+2021. 2
+[4] V olker Blanz and Thomas Vetter. A morphable model for
+the synthesis of 3D faces. In Proceedings of the 26th Annual
+Conference on Computer Graphics and Interactive Tech-
+niques, page 187–194, USA, 1999. ACM Press/Addison-
+Wesley Publishing Co. 2
+[5] Tim Brooks, Aleksander Holynski, and Alexei A. Efros. In-
+structPix2Pix: Learning to Follow Image Editing Instruc-
+tions. In 2023 IEEE/CVF Conference on Computer Vision
+and Pattern Recognition (CVPR), pages 18392–18402, 2023.
+4
+[6] Ziqi Cai, Kaiwen Jiang, Shu-Yu Chen, Yu-Kun Lai, Hongbo
+Fu, Boxin Shi, and Lin Gao. Real-Time 3D-aware Portrait
+Video Relighting. In 2024 IEEE/CVF Conference on Com-
+puter Vision and Pattern Recognition (CVPR), pages 6221–
+6231, 2024. 2
+[7] R. L. Cook and K. E. Torrance. A Reflectance Model for
+Computer Graphics. ACM Trans. Graph., 1(1):7–24, 1982.
+2
+[8] Paul Debevec. Rendering synthetic objects into real scenes:
+bridging traditional and image-based graphics with global
+illumination and high dynamic range photography. In
+Proceedings of the 25th Annual Conference on Computer
+Graphics and Interactive Techniques, page 189–198, New
+York, NY , USA, 1998. Association for Computing Machin-
+ery. 2
+[9] Paul Debevec, Tim Hawkins, Chris Tchou, Haarm-Pieter
+Duiker, Westley Sarokin, and Mark Sagar. Acquiring the
+reflectance field of a human face. In Proceedings of the
+27th annual conference on Computer graphics and interac-
+tive techniques, pages 145–156, 2000. 2
+[10] Prafulla Dhariwal and Alex Nichol. Diffusion Models Beat
+GANs on Image Synthesis. In Proceedings of the 35th Inter-
+national Conference on Neural Information Processing Sys-
+tems, Red Hook, NY , USA, 2021. Curran Associates Inc.2
+[11] Craig Donner and Henrik Wann Jensen. A spectral BSS-
+RDF for shading human skin. In Proceedings of the 17th
+Eurographics Conference on Rendering Techniques, page
+409–417, Goslar, DEU, 2006. Eurographics Association. 2
+[12] Rinon Gal, Yuval Alaluf, Yuval Atzmon, Or Patashnik,
+Amit Haim Bermano, Gal Chechik, and Daniel Cohen-or.
+An Image is Worth One Word: Personalizing Text-to-Image
+Generation using Textual Inversion. InInternational Confer-
+ence on Learning Representations, 2023. 3
+[13] Kaiming He, Xinlei Chen, Saining Xie, Yanghao Li, Pi-
+otr Doll ´ar, and Ross Girshick. Masked Autoencoders Are
+Scalable Vision Learners. In 2022 IEEE/CVF Conference
+on Computer Vision and Pattern Recognition (CVPR), pages
+15979–15988, 2022. 3
+[14] Mingming He, Pascal Clausen, Ahmet Levent Tas ¸el, Li
+Ma, Oliver Pilarski, Wenqi Xian, Laszlo Rikker, Xueming
+Yu, Ryan Burgert, Ning Yu, and Paul Debevec. DifFRe-
+light: Diffusion-based facial performance relighting. In SIG-
+GRAPH Asia 2024 Conference Papers, New York, NY , USA,
+2024. Association for Computing Machinery. 1, 3
+[15] Jonathan Ho and Tim Salimans. Classifier-Free Diffusion
+Guidance. In NeurIPS 2021 Workshop on Deep Generative
+Models and Downstream Applications, 2021. 2, 3, 4
+[16] Jonathan Ho, Ajay Jain, and Pieter Abbeel. Denoising Diffu-
+sion Probabilistic Models. In Proceedings of the 34th Inter-
+national Conference on Neural Information Processing Sys-
+tems, Red Hook, NY , USA, 2020. Curran Associates Inc.4
+[17] Edward J Hu, yelong shen, Phillip Wallis, Zeyuan Allen-
+Zhu, Yuanzhi Li, Shean Wang, Lu Wang, and Weizhu Chen.
+LoRA: Low-Rank adaptation of Large Language Models.
+In International Conference on Learning Representations,
+2022. 2, 3
+[18] Haian Jin, Yuan Li, Fujun Luan, Yuanbo Xiangli, Sai Bi,
+Kai Zhang, Zexiang Xu, Jin Sun, and Noah Snavely. Neural
+Gaffer: Relighting Any Object via Diffusion. In Advances in
+Neural Information Processing Systems, 2024. 1, 2, 3, 5, 7
+[19] Tero Karras, Miika Aittala, Samuli Laine, and Timo Aila.
+Elucidating the Design Space of Diffusion-Based Generative
+Models. In Proceedings of the 36th International Conference
+on Neural Information Processing Systems, Red Hook, NY ,
+USA, 2022. Curran Associates Inc. 2
+[20] Tero Karras, Miika Aittala, Jaakko Lehtinen, Janne Hellsten,
+Timo Aila, and Samuli Laine. Analyzing and Improving the
+Training Dynamics of Diffusion Models. In2024 IEEE/CVF
+Conference on Computer Vision and Pattern Recognition
+(CVPR), pages 24174–24184, 2024. 2
+[21] Hoon Kim, Minje Jang, Wonjun Yoon, Jisoo Lee, Donghyun
+Na, and Sanghyun Woo. SwitchLight: Co-design of Physics-
+driven Architecture and Pre-training Framework for Human
+Portrait Relighting. In 2024 IEEE/CVF Conference on Com-
+puter Vision and Pattern Recognition (CVPR), pages 25096–
+25106, 2024. 2, 3, 5, 7
+[22] Theodore Kim, Holly Rushmeier, Julie Dorsey, Derek
+Nowrouzezahrai, Raqi Syed, Wojciech Jarosz, and A.M.
+Darke. Countering racial bias in computer graphics research.
+377
+
+=== PAGE 10 ===
+In ACM SIGGRAPH 2022 Talks, New York, NY , USA, 2022.
+Association for Computing Machinery. 2
+[23] Diederik P Kingma and Jimmy Ba. Adam: A method for
+stochastic optimization. arXiv preprint arXiv:1412.6980,
+2014. 5
+[24] Tuomas Kynk ¨a¨anniemi, Miika Aittala, Tero Karras, Samuli
+Laine, Timo Aila, and Jaakko Lehtinen. Applying Guid-
+ance in a Limited Interval Improves Sample and Distribu-
+tion Quality in Diffusion Models. In Proceedings of the 38th
+International Conference on Neural Information Processing
+Systems, 2024. 2
+[25] Haotian Liu, Chunyuan Li, Qingyang Wu, and Yong Jae Lee.
+Visual instruction tuning. In Proceedings of the 37th Inter-
+national Conference on Neural Information Processing Sys-
+tems, Red Hook, NY , USA, 2023. Curran Associates Inc.3
+[26] Tomohiro Mashita, Yasuhiro Mukaigawa, and Yasushi Yagi.
+Measuring and modeling of multi-layered subsurface scat-
+tering for human skin. In Virtual and Mixed Reality-New
+Trends: International Conference, Virtual and Mixed Reality
+2011, Held as Part of HCI International 2011, Orlando, FL,
+USA, July 9-14, 2011, Proceedings, Part I 4, pages 335–344.
+Springer, 2011. 2
+[27] Thomas Nestmeyer, Jean-Franc ¸ois Lalonde, Iain Matthews,
+and Andreas Lehrmann. Learning Physics-Guided Face
+Relighting Under Directional Light. In 2020 IEEE/CVF
+Conference on Computer Vision and Pattern Recognition
+(CVPR), pages 5123–5132, 2020. 2
+[28] Rohit Pandey, Sergio Orts Escolano, Chloe Legendre, Chris-
+tian H ¨ane, Sofien Bouaziz, Christoph Rhemann, Paul De-
+bevec, and Sean Fanello. Total relighting: learning to relight
+portraits for background replacement. ACM Trans. Graph.,
+40(4), 2021. 2, 7
+[29] Sylvain Paris, Franc ¸ois X Sillion, and Long Quan.
+Lightweight face relighting. In 11th Pacific Conference on
+Computer Graphics and Applications, 2003. Proceedings.,
+pages 41–50. IEEE, 2003. 2
+[30] Adam Paszke, Sam Gross, Francisco Massa, Adam Lerer,
+James Bradbury, Gregory Chanan, Trevor Killeen, Zeming
+Lin, Natalia Gimelshein, Luca Antiga, Alban Desmaison,
+Andreas K ¨opf, Edward Yang, Zach DeVito, Martin Raison,
+Alykhan Tejani, Sasank Chilamkurthy, Benoit Steiner, Lu
+Fang, Junjie Bai, and Soumith Chintala. PyTorch: an Im-
+perative Style, High-Performance Deep Learning Library.
+Curran Associates Inc., Red Hook, NY , USA, 2019.5
+[31] Bui Tuong Phong. Illumination for computer generated pic-
+tures, page 95–101. Association for Computing Machinery,
+New York, NY , USA, 1998.2
+[32] Puntawat Ponglertnapakorn, Nontawat Tritrong, and Supa-
+sorn Suwajanakorn. DiFaReli: Diffusion face relighting. In
+2023 IEEE/CVF International Conference on Computer Vi-
+sion (ICCV), pages 22589–22600, 2023. 3
+[33] Pramod Rao, Gereon Fox, Abhimitra Meka, Mallikar-
+jun BR, Fangneng Zhan, Tim Weyrich, Bernd Bickel,
+Hanspeter Pfister, Wojciech Matusik, Mohamed Elgharib,
+et al. Lite2Relight: 3D-aware Single Image Portrait Relight-
+ing. In ACM SIGGRAPH 2024 Conference Papers , pages
+1–12, 2024. 2
+[34] Mengwei Ren, Wei Xiong, Jae Shin Yoon, Zhixin Shu, Jian-
+ming Zhang, HyunJoon Jung, Guido Gerig, and He Zhang.
+Relightful Harmonization: Lighting-Aware Portrait Back-
+ground Replacement. In 2024 IEEE/CVF Conference on
+Computer Vision and Pattern Recognition (CVPR), pages
+6452–6462, 2024. 1, 2, 3, 4
+[35] Robin Rombach, Andreas Blattmann, Dominik Lorenz,
+Patrick Esser, and Bj ¨orn Ommer. High-Resolution Image
+Synthesis with Latent Diffusion Models. In 2022 IEEE/CVF
+Conference on Computer Vision and Pattern Recognition
+(CVPR), pages 10674–10685, 2022. 2, 3, 4, 5
+[36] Nataniel Ruiz, Yuanzhen Li, Varun Jampani, Yael Pritch,
+Michael Rubinstein, and Kfir Aberman. DreamBooth: Fine
+Tuning Text-to-Image Diffusion Models for Subject-Driven
+Generation. In 2023 IEEE/CVF Conference on Computer Vi-
+sion and Pattern Recognition (CVPR), pages 22500–22510,
+2023. 3
+[37] Chitwan Saharia, William Chan, Huiwen Chang, Chris Lee,
+Jonathan Ho, Tim Salimans, David Fleet, and Mohammad
+Norouzi. Palette: Image-to-Image Diffusion Models. In
+ACM SIGGRAPH 2022 Conference Proceedings, New York,
+NY , USA, 2022. Association for Computing Machinery.2, 3
+[38] Chitwan Saharia, William Chan, Saurabh Saxena, Lala
+Lit, Jay Whang, Emily Denton, Seyed Kamyar Seyed
+Ghasemipour, Burcu Karagol Ayan, S. Sara Mahdavi,
+Raphael Gontijo-Lopes, Tim Salimans, Jonathan Ho, David J
+Fleet, and Mohammad Norouzi. Photorealistic Text-to-
+Image Diffusion Models with Deep Language Understand-
+ing. In Proceedings of the 36th International Conference
+on Neural Information Processing Systems, Red Hook, NY ,
+USA, 2022. Curran Associates Inc. 2
+[39] Florian Schroff, Dmitry Kalenichenko, and James Philbin.
+FaceNet: A Unified Embedding for Face Recognition and
+Clustering. In 2015 IEEE Conference on Computer Vision
+and Pattern Recognition (CVPR), pages 815–823, 2015. 5
+[40] Christoph Schuhmann, Romain Beaumont, Richard Vencu,
+Cade W Gordon, Ross Wightman, Mehdi Cherti, Theo
+Coombes, Aarush Katta, Clayton Mullis, Mitchell Worts-
+man, Patrick Schramowski, Srivatsa R Kundurthy, Katherine
+Crowson, Ludwig Schmidt, Robert Kaczmarczyk, and Jenia
+Jitsev. LAION-5b: An open large-scale dataset for training
+next generation image-text models. In Proceedings of the
+36th International Conference on Neural Information Pro-
+cessing Systems Datasets and Benchmarks Track, 2022. 4
+[41] Soumyadip Sengupta, Angjoo Kanazawa, Carlos D. Castillo,
+and David W. Jacobs. SfSNet: Learning Shape, Refectance
+and Illuminance of Faces in the Wild. In 2018 IEEE/CVF
+Conference on Computer Vision and Pattern Recognition,
+pages 6296–6305, 2018. 2
+[42] YiChang Shih, Sylvain Paris, Connelly Barnes, William T.
+Freeman, and Fr´edo Durand. Style transfer for headshot por-
+traits. ACM Trans. Graph., 33(4), 2014. 2
+[43] Zhixin Shu, Sunil Hadap, Eli Shechtman, Kalyan Sunkavalli,
+Sylvain Paris, and Dimitris Samaras. Portrait Lighting Trans-
+fer Using a Mass Transport Approach. ACM Trans. Graph.,
+37(1), 2017. 2
+[44] Zhixin Shu, Ersin Yumer, Sunil Hadap, Kalyan Sunkavalli,
+Eli Shechtman, and Dimitris Samaras. Neural Face Editing
+378
+
+=== PAGE 11 ===
+with Intrinsic Image Disentangling. In 2017 IEEE Confer-
+ence on Computer Vision and Pattern Recognition (CVPR),
+pages 5444–5453, 2017. 2
+[45] Jascha Sohl-Dickstein, Eric Weiss, Niru Maheswaranathan,
+and Surya Ganguli. Deep Unsupervised Learning using
+Nonequilibrium Thermodynamics. In Proceedings of the
+32nd International Conference on Machine Learning, pages
+2256–2265, Lille, France, 2015. PMLR. 2
+[46] Jiaming Song, Chenlin Meng, and Stefano Ermon. Denois-
+ing Diffusion Implicit Models. In International Conference
+on Learning Representations, 2021. 2, 5
+[47] Tiancheng Sun, Jonathan T. Barron, Yun-Ta Tsai, Zexiang
+Xu, Xueming Yu, Graham Fyffe, Christoph Rhemann, Jay
+Busch, Paul Debevec, and Ravi Ramamoorthi. Single image
+portrait relighting. ACM Trans. Graph., 38(4), 2019. 2
+[48] Tiancheng Sun, Zexiang Xu, Xiuming Zhang, Sean Fanello,
+Christoph Rhemann, Paul Debevec, Yun-Ta Tsai, Jonathan T.
+Barron, and Ravi Ramamoorthi. Light stage super-
+resolution: continuous high-frequency relighting. ACM
+Trans. Graph., 39(6), 2020. 2
+[49] Tiancheng Sun, Kai-En Lin, Sai Bi, Zexiang Xu, and Ravi
+Ramamoorthi. NeLF: Neural Light-transport Field for Por-
+trait View Synthesis and Relighting. In Eurographics Sym-
+posium on Rendering, 2021. 2
+[50] Feitong Tan, Sean Fanello, Abhimitra Meka, Sergio Orts-
+Escolano, Danhang Tang, Rohit Pandey, Jonathan Taylor,
+Ping Tan, and Yinda Zhang. VoLux-GAN: A Generative
+Model for 3D Face Synthesis with HDRI Relighting. InACM
+SIGGRAPH 2022 Conference Proceedings, New York, NY ,
+USA, 2022. Association for Computing Machinery. 2
+[51] Shuzhe Wang, Vincent Leroy, Yohann Cabon, Boris
+Chidlovskii, and Jerome Revaud. DUSt3R: Geometric 3D
+Vision Made Easy. In 2024 IEEE/CVF Conference on Com-
+puter Vision and Pattern Recognition (CVPR), pages 20697–
+20709, 2024. 3
+[52] Yifan Wang, Aleksander Holynski, Xiuming Zhang, and Xu-
+aner Zhang. SunStage: Portrait Reconstruction and Relight-
+ing Using the Sun as a Light Stage. In 2023 IEEE/CVF
+Conference on Computer Vision and Pattern Recognition
+(CVPR), pages 20792–20802, 2023. 2
+[53] Zhibo Wang, Xin Yu, Ming Lu, Quan Wang, Chen Qian, and
+Feng Xu. Single Image Portrait Relighting via Explicit Mul-
+tiple Reflectance Channel Modeling. ACM Trans. Graph.,
+39(6), 2020. 2
+[54] Erroll Wood, Tadas Baltru ˇsaitis, Charlie Hewitt, Sebastian
+Dziadzio, Thomas J. Cashman, and Jamie Shotton. Fake it
+till you make it: face analysis in the wild using synthetic
+data alone. In 2021 IEEE/CVF International Conference on
+Computer Vision (ICCV), pages 3661–3671, 2021. 3
+[55] Shaoan Xie, Zhifei Zhang, Zhe Lin, Tobias Hinz, and Kun
+Zhang. SmartBrush: Text and Shape Guided Object Inpaint-
+ing with Diffusion Model. In 2023 IEEE/CVF Conference
+on Computer Vision and Pattern Recognition (CVPR), pages
+22428–22437, 2023. 4
+[56] Hu Ye, Jun Zhang, Sibo Liu, Xiao Han, and Wei
+Yang. IP-adapter: Text Compatible Image Prompt Adapter
+for Text-to-Image Diffusion Models. arXiv preprint
+arXiv:2308.06721, 2023. 3
+[57] Yu-Ying Yeh, Koki Nagano, Sameh Khamis, Jan Kautz,
+Ming-Yu Liu, and Ting-Chun Wang. Learning to Relight
+Portrait Images via a Virtual Light Stage and Synthetic-to-
+Real Adaptation. ACM Trans. Graph., 41(6), 2022. 2, 3
+[58] Chong Zeng, Yue Dong, Pieter Peers, Youkang Kong,
+Hongzhi Wu, and Xin Tong. DiLightNet: Fine-grained
+Lighting Control for Diffusion-based Image Generation. In
+ACM SIGGRAPH 2024 Conference Papers, New York, NY ,
+USA, 2024. Association for Computing Machinery. 1, 2, 3,
+5, 7
+[59] Lvmin Zhang, Anyi Rao, and Maneesh Agrawala. Adding
+Conditional Control to Text-to-Image Diffusion Models. In
+2023 IEEE/CVF International Conference on Computer Vi-
+sion (ICCV), pages 3813–3824, 2023. 2, 3
+[60] Lvmin Zhang, Anyi Rao, and Maneesh Agrawala. Scaling
+In-the-Wild Training for Diffusion-based Illumination Har-
+monization and Editing by Imposing Consistent Light Trans-
+port. In International Conference on Learning Representa-
+tions, 2025. 1, 2, 3, 5, 7, 8
+[61] Richard Zhang, Phillip Isola, Alexei A. Efros, Eli Shecht-
+man, and Oliver Wang. The Unreasonable Effectiveness of
+Deep Features as a Perceptual Metric. In 2018 IEEE/CVF
+Conference on Computer Vision and Pattern Recognition,
+pages 586–595, 2018. 5
+[62] Hao Zhou, Sunil Hadap, Kalyan Sunkavalli, and David Ja-
+cobs. Deep Single-Image Portrait Relighting. In 2019
+IEEE/CVF International Conference on Computer Vision
+(ICCV), pages 7193–7201, 2019. 2
+379

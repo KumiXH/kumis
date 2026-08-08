@@ -1,0 +1,1302 @@
+[
+  {
+    "key": "anydoor",
+    "title": "AnyDoor: Zero-shot Object-level Image Customization",
+    "arxiv_id": "2307.09481",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\07_mask_conditioning\\anydoor_2307.09481.pdf",
+    "page_count": 10,
+    "sha256": "8ec79877d00f611803e01f2487d141cf246ef9bbaa84c4e0de13d1c7cd21e861",
+    "source_url": "https://openaccess.thecvf.com/content/CVPR2024/papers/Chen_AnyDoor_Zero-shot_Object-level_Image_Customization_CVPR_2024_paper.pdf",
+    "first_page_excerpt": "AnyDoor: Zero-shot Object-level Image Customization\nXi Chen1 Lianghua Huang2 Yu Liu2 Yujun Shen3 Deli Zhao2 Hengshuang Zhao1∗\n1The University of Hong Kong 2Alibaba Group 3Ant Group\nShapeEditing ObjectSwapping\nMulti-subject Composition\nFigure 1. Fantastic applications of our proposed AnyDoor without any parameter tuning. Our model allows users to customize an image\nby placing an object at specific locations, with optional shape controls (top row). It can be extended to handle multiple objects (middle\nrow) and also supports seamlessly editing the shape of the object or swapping objects within real scenes (bottom row).\nAbstract\nThis work presents AnyDoor, a diffusion-based im-\nage generator with the power to teleport target objects\nto new scenes at user-specified locations with desired\nshapes. Instead of tuning parameters for each object,\nour model is trained only once and effortlessly general-\nizes to diverse object-scene combinations at the inference\nstage. Such a challenging zero-shot setting requires an\nadequate characterization of a certain object. To this end,\nwe complement the commonly used identity feature with\n*Corresponding author.\ndetail features, which are carefully designed to maintain\nappearance details yet allow versatile local variations (e.g.,\nlighting, orientation, posture, etc.), supporting the object in\nfavorably blending with different surroundings. We further\npropose to borrow knowledge from video datasets, where\nwe can observe various forms (i.e., along the time axis) of\na single object, leading to stronger model generalizability\nand robustness. Extensive experiments demonstrate the\nsuperiority of our approach over existing alternatives as\nwell as its great potential in real-world applications, such\nas virtual try-on, shape editing, and object swapping. Code\nis released at github.com/ali-vilab/AnyDoor.\nThis CVPR paper is the Open Access version, provided by the Computer Vision Foundation.\nExcept for this watermark, it is identical to the accepted version;\nthe final published version of the proceedings is available on IEEE Xplore.\n6593",
+    "figure_candidates": [
+      {
+        "page": 1,
+        "caption": "Figure 1. Fantastic applications of our proposed AnyDoor without any parameter tuning. Our model allows users to customize an image"
+      },
+      {
+        "page": 2,
+        "caption": "Fig. 1, AnyDoor shows promising performance for the"
+      },
+      {
+        "page": 3,
+        "caption": "Figure 2. Overall pipeline of AnyDoor, which is designed to teleport an object to a scene with the desired location and shape. A"
+      },
+      {
+        "page": 4,
+        "caption": "Figure 3. Visualization of the focus region of ID extractor and"
+      },
+      {
+        "page": 4,
+        "caption": "Figure 4. Data preparation pipeline for videos. Given a clip, we"
+      },
+      {
+        "page": 5,
+        "caption": "Figure 5. Qualitative comparison with reference-based image generation methods , including Stable Diffusion [41], IP-Adapter [58],"
+      },
+      {
+        "page": 5,
+        "caption": "Fig. 4, where we leverage video segmentation/tracking data"
+      },
+      {
+        "page": 6,
+        "caption": "Figure 6. Qualitative comparisons with existing alternatives for multi-subject composition , including DreamBooth [42], Custom"
+      },
+      {
+        "page": 7,
+        "caption": "Figure 7. Qualitative ablation studies on the core components"
+      },
+      {
+        "page": 7,
+        "caption": "Figure 8. Qualitative analysis of using different backbones for"
+      },
+      {
+        "page": 8,
+        "caption": "Figure 9. Qualitative analysis of using different collages to"
+      },
+      {
+        "page": 8,
+        "caption": "Figure 10. Performance of AnyDoor on virtual try-on on"
+      },
+      {
+        "page": 8,
+        "caption": "Figure 11. Demonstrations for more applications of AnyDoor,"
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 4,
+        "caption": "Table 1. Statistics of datasets used for training. “Variation”"
+      },
+      {
+        "page": 6,
+        "caption": "Table 2. User study on the comparison between our AnyDoor"
+      },
+      {
+        "page": 7,
+        "caption": "Table 3. Quantitative analysis of using different backbones for"
+      },
+      {
+        "page": 8,
+        "caption": "Table 4. Quantitative analysis of using different collages to"
+      }
+    ],
+    "keyword_pages": {
+      "mask_representation": [
+        2,
+        3,
+        4,
+        5,
+        7,
+        8,
+        9,
+        10
+      ],
+      "conditioning": [
+        2,
+        3,
+        4,
+        6,
+        8,
+        9,
+        10
+      ],
+      "loss": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "data": [
+        1,
+        3,
+        4,
+        5,
+        8,
+        9,
+        10
+      ],
+      "limitations": [
+        8
+      ]
+    },
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\mask_anydoor.txt"
+  },
+  {
+    "key": "brushnet",
+    "title": "BrushNet: A Plug-and-Play Image Inpainting Model with Decomposed Dual-Branch Diffusion",
+    "arxiv_id": "2403.06976",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\07_mask_conditioning\\brushnet_2403.06976.pdf",
+    "page_count": 18,
+    "sha256": "158561e4d512440d0c878b6e39a0f65109245ac5093dc724aafd7d568adb4ef1",
+    "source_url": "https://www.ecva.net/papers/eccv_2024/papers_ECCV/papers/03014.pdf",
+    "first_page_excerpt": "BrushNet: A Plug-and-Play Image Inpainting\nModel with Decomposed Dual-Branch Diffusion\nXuan Ju1,2, Xian Liu1,2, Xintao Wang1⋆, Yuxuan Bian2, Ying Shan1, and Qiang Xu2⋆\n1ARC Lab, Tencent PCG2The Chinese University of Hong Kong\nhttps://github.com/TencentARC/BrushNet\nA\n bed\n with\n quilt\n and\n a\n chair with\nblanketa\n A\n\ncartoon\n girl\n with\n long\n hair\n and\n backpack\nA\n woman\n holding\n a\n rainbow\n flag\n in\n the\n air\nA\n cat\n looking\n at\n a\n fish\n bowl\n with\n goldfish\nA\n woman\n in\n golden\n dress\n holding\n an\n apple\nM\nona\n L\nisa\n by\n Leonardo\n Da\n Vinci\nA\n black\n and\n red\n mountain\n bike\n besides a\n building\nA\n woman\n in\n a\n lotus\n position\nⅠ\nⅡ\nⅢ\nⅣ\n(a) Mask (b) BLD (c) SDI (d) HDP (e) PP (f) CNI (g) Ours\n (a) Mask (b) BLD (c) SDI (d) HDP (e) PP (f) CNI (g) Ours\nFig.1: Performance comparisons ofBrushNet and previous image inpaint-\ning methodsacross various inpainting tasks: (I) Random Mask (< 50% masked), (II)\nRandom Mask (> 50% masked), (III) Segmentation Mask Inside-Inpainting, (IV) Seg-\nmentation Mask Outside-Inpainting. Each group of results contains an artificial image\n(left) and a natural image (right) with6 inpainting methods: (b) Blended Latent Diffu-\nsion (BLD) [1], (c) Stable Diffusion Inpainting (SDI) [33], (d) HD-Painter (HDP) [25],\n(e) PowerPaint (PP) [56], (f) ControlNet-Inpainting (CNI) [51], and (g) Ours.\nAbstract. Image inpainting, the process of restoring corrupted images,\nhas seen significant advancements with the advent of diffusion models\n(DMs). Despite these advancements, current DM adaptations for in-\npainting, which involve modifications to the sampling strategy or the\ndevelopment of inpainting-specific DMs, frequently suffer from seman-\ntic inconsistencies and reduced image quality. Addressing these chal-\nlenges, our work introduces a novel paradigm: the division of masked\nimage features and noisy latent into separate branches. This division\ndramatically diminishes the model’s learning load, facilitating a nuanced\nincorporation of essential masked image information in a hierarchical\nfashion. Herein, we presentBrushNet, a novel plug-and-play dual-branch\nmodel engineered to embed pixel-level masked image features into any\npre-trained DM, guaranteeing coherent and enhanced image inpainting\noutcomes. Additionally, we introduce BrushData and BrushBench to\nfacilitate segmentation-based inpainting training and performance as-\nsessment. Our extensive experimental analysis demonstrates BrushNet’s\nsuperior performance over existing models across seven key metrics, in-\ncluding image quality, mask region preservation, and textual coherence.\nKeywords: Image Inpainting · Diffusion Models · Image Generation\n⋆ Corresponding author.",
+    "figure_candidates": [
+      {
+        "page": 1,
+        "caption": "Fig.1: Performance comparisons ofBrushNet and previous image inpaint-"
+      },
+      {
+        "page": 2,
+        "caption": "Fig.2: Comparison of previous inpainting architectures andBrushNet."
+      },
+      {
+        "page": 6,
+        "caption": "Fig.3: Model overview.Our model outputs an inpainted image given the mask and"
+      },
+      {
+        "page": 9,
+        "caption": "Fig.4: Benchmark overview.I and II separately show natural and artificial images,"
+      },
+      {
+        "page": 11,
+        "caption": "Fig. 1. We provide results on artificial images and natural images across various"
+      },
+      {
+        "page": 12,
+        "caption": "Fig.5:Comparisonofpreviousinpaintingmethodsand BrushNet onvarious"
+      },
+      {
+        "page": 12,
+        "caption": "Fig. 6 and Fig. 7 illustrate the flexible control provided byBrushNet in two"
+      },
+      {
+        "page": 13,
+        "caption": "Fig.6: Integrating BrushNet to community fine-tuned diffusion models.We"
+      },
+      {
+        "page": 13,
+        "caption": "Fig.7: Flexible control scale of BrushNet. (a) shows the given masked image,"
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 10,
+        "caption": "Table 2: Quantitative comparisons amongBrushNet and other diffusion-"
+      },
+      {
+        "page": 11,
+        "caption": "Table 3: Quantitative comparisons amongBrushNet and other diffusion-"
+      },
+      {
+        "page": 13,
+        "caption": "Table 4: Ablation on dual-branch design.Stable Diffusion Inpainting (SDI) use"
+      },
+      {
+        "page": 14,
+        "caption": "Table 5: Ablation on model architecture.We ablate on the following components:"
+      }
+    ],
+    "keyword_pages": {
+      "mask_representation": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "conditioning": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        10,
+        11,
+        14,
+        17
+      ],
+      "loss": [
+        2,
+        3,
+        4,
+        5,
+        7,
+        9,
+        10,
+        11,
+        13,
+        14,
+        18
+      ],
+      "data": [
+        3,
+        8,
+        9,
+        14,
+        15,
+        16,
+        17
+      ],
+      "limitations": [
+        4,
+        14
+      ]
+    },
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\mask_brushnet.txt"
+  },
+  {
+    "key": "compose",
+    "title": "COMPOSE: Comprehensive Portrait Shadow Editing",
+    "arxiv_id": "2406.12013",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\07_mask_conditioning\\compose_2406.12013.pdf",
+    "page_count": 17,
+    "sha256": "7ee30a78df35845fca7e5b93a6fbcbe23a38a4932e8adf1a5adb9e7359a5939d",
+    "source_url": "https://arxiv.org/abs/2406.12013",
+    "first_page_excerpt": "COMPOSE: Comprehensive Portrait Shadow\nEditing\nAndrew Hou1,2, Zhixin Shu2, Xuaner Zhang2, He Zhang2, Yannick\nHold-Geoffroy2, Jae Shin Yoon2, and Xiaoming Liu1\n1 Michigan State University\n{houandr1,liuxm}@msu.edu\n2 Adobe Research\n{zshu,cezhang,hezhan,holdgeof,jaeyoon}@adobe.com\nAbstract. Existing portrait relighting methods struggle with precise\ncontrol over facial shadows, particularly when faced with challenges such\nas handling hard shadows from directional light sources or adjusting\nshadows while remaining in harmony with existing lighting conditions.\nIn many situations, completely altering input lighting is undesirable for\nportrait retouching applications: one may want to preserve some authen-\nticity in the captured environment. Existing shadow editing methods\ntypically restrict their application to just the facial region and often of-\nfer limited lighting control options, such as shadow softening or rotation.\nIn this paper, we introduce COMPOSE: a novel shadow editing pipeline\nfor human portraits, offering precise control over shadow attributes such\nas shape, intensity, and position, all while preserving the original envi-\nronmental illumination of the portrait. This level of disentanglement and\ncontrollability is obtained thanks to a novel decomposition of the envi-\nronment map representation into ambient light and an editable gaussian\ndominant light source. COMPOSE is a four-stage pipeline that consists\nof light estimation and editing, light diffusion, shadow synthesis, and\nfinally shadow editing. We define facial shadows as the result of a dom-\ninant light source, encoded using our novel gaussian environment map\nrepresentation. Utilizing an OLAT dataset, we have trained models to:\n(1) predict this light source representation from images, and (2) gen-\nerate realistic shadows using this representation. We also demonstrate\ncomprehensive and intuitive shadow editing with our pipeline. Through\nextensive quantitativeand qualitative evaluations,wehavedemonstrated\nthe robust capability of our system in shadow editing.\nKeywords: Face Relighting· Shadow Editing· Lighting Decomposition\n1 Introduction\nSingle-image portrait relighting is a well-studied problem with steady interest\nfrom the computer vision and graphics communities. Portrait relighting has a",
+    "figure_candidates": [
+      {
+        "page": 2,
+        "caption": "Fig. 1: Overview.COMPOSEisthefirstsingle-imageportraitshadoweditingmethod"
+      },
+      {
+        "page": 4,
+        "caption": "Fig. 2: Method Overview . COMPOSE is a4-stage shadow editing method consist-"
+      },
+      {
+        "page": 7,
+        "caption": "Fig. 3: Shadow Synthesis Pipeline . Our shadow synthesis step consists of two"
+      },
+      {
+        "page": 10,
+        "caption": "Fig. 4: Shadow Synthesis . Our model synthesizes more plausible shadows than the"
+      },
+      {
+        "page": 11,
+        "caption": "Fig. 5: Shadow Editing . Our method achieves complete shadow editing control, in-"
+      },
+      {
+        "page": 12,
+        "caption": "Fig. 6: Degree of Shadow Editing . We demonstrate COMPOSE’s controllable"
+      },
+      {
+        "page": 12,
+        "caption": "Fig. 5, COMPOSE properly edits the shadows of in-the-wild images. To soften"
+      },
+      {
+        "page": 13,
+        "caption": "Fig. 7: Controllable Shadow Softening. For each subject, we show the shadow soft-"
+      }
+    ],
+    "table_candidates": [],
+    "keyword_pages": {
+      "mask_representation": [
+        6
+      ],
+      "conditioning": [
+        1,
+        2,
+        6,
+        7,
+        9,
+        11,
+        13,
+        14,
+        15
+      ],
+      "loss": [
+        7,
+        8,
+        10,
+        14,
+        17
+      ],
+      "data": [
+        1,
+        3,
+        8,
+        9,
+        10,
+        14,
+        15,
+        16,
+        17
+      ],
+      "limitations": [
+        3,
+        14
+      ]
+    },
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\mask_compose.txt"
+  },
+  {
+    "key": "cosmicman",
+    "title": "CosmicMan: A Text-to-Image Foundation Model for Humans",
+    "arxiv_id": "2404.01294",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\07_mask_conditioning\\cosmicman_2404.01294.pdf",
+    "page_count": 11,
+    "sha256": "a1beedd4c3d1f65950dd50c81f92b1668c8c1611567d79689d4cec89328154cf",
+    "source_url": "https://openaccess.thecvf.com/content/CVPR2024/papers/Li_CosmicMan_A_Text-to-Image_Foundation_Model_for_Humans_CVPR_2024_paper.pdf",
+    "first_page_excerpt": "CosmicMan: A Text-to-Image Foundation Model for Humans\nShikai Li∗, Jianglin Fu ∗, Kaiyuan Liu ∗, Wentao Wang ∗, Kwan-Yee Lin †, Wayne Wu †\nShanghai AI Laboratory\n{lishikai, fujianglin, wangwentao }@pjlab.org.cn\n1154864382@mail.dlut.edu.cn linjunyi9335@gmail.com wuwenyan0503@gmail.com\nText Descriptions:\nA close up portrait shot, a\nadult Caucasian male, fit,\nnatural landscape, short sleeve\nnormal cotton blue t-shirt,\nwavy blonde above eyes hair,\nwoven hat\nText Descriptions:\nA portrait shot, an adult Caucasian female, fit,\na wooden fence and a building, mesh belt,\nsleeveless mesh solid color wedding dress,\nblonde bun above chin hair\nText Descriptions:\nA headshot, a Caucasian child\nmale, fit, a white wall, normal\nlong sleeve cotton black graphic\nsolid color sweatshirt, blonde\nabove eyes straight hair\nText Descriptions:\nA close up portrait shot, an\nadult Indian female, fit, a beige\nwall, above chest brown bun\nhair, short sleeve saree\nFigure 1. CosmicMan. High-fidelity images generated by our proposed human-specialized text-to-image foundation model CosmicMan.\nThe results are with meticulous appearance, reasonable structure, and precise text-image alignment with detailed dense descriptions.\nAbstract\nWe present CosmicMan, a text-to-image foundation\nmodel specialized for generating high-fidelity human im-\nages. Unlike current general-purpose foundation mod-\nels that are stuck in the dilemma of inferior quality and\ntext-image misalignment for humans, CosmicMan enables\ngenerating photo-realistic human images with meticulous\nappearance, reasonable structure, and precise text-image\nalignment with detailed dense descriptions.\nAt the heart of CosmicMan’s success are the new reflec-\ntions and perspectives on data and models: (1) We found\nthat data quality and a scalable data production flow are es-\nsential for the final results from trained models. Hence, we\npropose a new data production paradigm, Annotate Any-\none, which serves as a perpetual data flywheel to produce\nhigh-quality data with accurate yet cost-effective annota-\n*Joint first authors.\n†Equal advising.\ntions over time. Based on this, we constructed a large-scale\ndataset, CosmicMan-HQ 1.0 , with 6 Million high-quality\nreal-world human images in a mean resolution of 1488 ×\n1255, and attached with precise text annotations deriving\nfrom 115 Million attributes in diverse granularities. (2) We\nargue that a text-to-image foundation model specialized for\nhumans must be pragmatic – easy to integrate into down-\nstreaming tasks while effective in producing high-quality\nhuman images. Hence, we propose to model the relation-\nship between dense text descriptions and image pixels in\na decomposed manner, and presentDecomposed-Attention-\nRefocusing (Daring) training framework. It seamlessly de-\ncomposes the cross-attention features in existing text-to-\nimage diffusion model, and enforces attention refocusing\nwithout adding extra modules. Through Daring, we show\nthat explicitly discretizing continuous text space into several\nbasic groups that align with human body structure is the key\nto tackling the misalignment problem in a breeze. Project\npage:https://cosmicman-cvpr2024.github.io/.\nThis CVPR paper is the Open Access version, provided by the Computer Vision Foundation.\nExcept for this watermark, it is identical to the accepted version;\nthe final published version of the proceedings is available on IEEE Xplore.\n6955",
+    "figure_candidates": [
+      {
+        "page": 1,
+        "caption": "Figure 1. CosmicMan. High-fidelity images generated by our proposed human-specialized text-to-image foundation model CosmicMan."
+      },
+      {
+        "page": 4,
+        "caption": "Figure 2. Data Production Paradigm. (a) Data production by"
+      },
+      {
+        "page": 5,
+        "caption": "Figure 3. Parsing Examples from CosmicMan-HQ.The parsing"
+      },
+      {
+        "page": 6,
+        "caption": "Figure 4. Daring Training Framework. It includes two parts: (1)"
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 5,
+        "caption": "Table 1. Dataset Comparison. The statistical comparison between publicly available human-related datasets and CosmicMan-HQ 1.0."
+      },
+      {
+        "page": 7,
+        "caption": "Table 2. Quantitative Comparison to SOTA Text-to-Image Models.The best and second-best results are marked with Red and Green."
+      },
+      {
+        "page": 8,
+        "caption": "Table 3. Ablation on Training Data. “AltText” refers to Web"
+      },
+      {
+        "page": 8,
+        "caption": "Table 4. Ablation on Training Strategy. “Baseline” refers to the"
+      },
+      {
+        "page": 8,
+        "caption": "Table 5. Quantitative Comparison on 2D Human Editing and"
+      }
+    ],
+    "keyword_pages": {
+      "mask_representation": [
+        2,
+        3,
+        5,
+        6,
+        9
+      ],
+      "conditioning": [
+        1,
+        2,
+        3,
+        6,
+        7,
+        10,
+        11
+      ],
+      "loss": [
+        3,
+        6,
+        7,
+        11
+      ],
+      "data": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        8,
+        9,
+        10
+      ],
+      "limitations": []
+    },
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\mask_cosmicman.txt"
+  },
+  {
+    "key": "idm_vton",
+    "title": "Improving Diffusion Models for Authentic Virtual Try-on in the Wild",
+    "arxiv_id": "2403.05139",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\07_mask_conditioning\\idm_vton_2403.05139.pdf",
+    "page_count": 30,
+    "sha256": "403b586fe202d19c773e1b62abd42c10939a0bc9b7383a74deb83bd6323712be",
+    "source_url": "https://arxiv.org/abs/2403.05139",
+    "first_page_excerpt": "Improving Diffusion Models for Authentic\nVirtual Try-on in the Wild\nYisol Choi1, Sangkyung Kwak1, Kyungmin Lee1,\nHyungwon Choi2, and Jinwoo Shin1\n1 Korea Advanced Institute of Science and Technology (KAIST)\n{yisol.choi, skkwak9806, kyungmnlee, jinwoos}@kaist.ac.kr\n2 OMNIOUS.AI\nhyungwon.choi@omnious.com\nFig.1: Virtual try-on images generated by using our IDM–VTON on VITON-HD [3]\n(top row, first and second column), DressCode [32] (top row, third and fourth column),\nand collected In-the-Wild dataset (bottom row). Best viewed on a zoomed, color monitor.\nAbstract. This paper considers image-based virtual try-on, which ren-\nders an image of a person wearing a curated garment, given a pair of\nimages depicting the person and the garment, respectively. Previous\nworks adapt existing exemplar-based inpainting diffusion models for vir-\ntual try-on to improve the naturalness of the generated visuals compared\nto other methods (e.g., GAN-based), but they fail to preserve the iden-\ntity of the garments. To overcome this limitation, we propose a novel\ndiffusion model that improves garment fidelity and generates authen-\ntic virtual try-on images. Our method, coinedIDM–VTON, uses two\ndifferent modules to encode the semantics of garment image; given the\nbase UNet of the diffusion model, 1) the high-level semantics extracted\nfrom a visual encoder are fused to the cross-attention layer, and then\n2) the low-level features extracted from parallel UNet are fused to the\nself-attention layer. In addition, we provide detailed textual prompts\nfor both garment and person images to enhance the authenticity of the\ngenerated visuals. Finally, we present a customization method using a",
+    "figure_candidates": [
+      {
+        "page": 1,
+        "caption": "Fig.1: Virtual try-on images generated by using our IDM–VTON on VITON-HD [3]"
+      },
+      {
+        "page": 5,
+        "caption": "Fig.2: Overview of IDM–VTON.We demonstrate the proposed model architecture"
+      },
+      {
+        "page": 7,
+        "caption": "Fig.3: Comparisons between datasets used in our experiments.For evaluation,"
+      },
+      {
+        "page": 8,
+        "caption": "Fig.4: Qualitative results on VITON-HD and DressCode dataset.We show"
+      },
+      {
+        "page": 10,
+        "caption": "Fig.5: Qualitative comparisons on In-the-Wild dataset.We show generated"
+      },
+      {
+        "page": 12,
+        "caption": "Fig.6: Effect of GarmentNet.We compare the generated virtual try-on images"
+      },
+      {
+        "page": 13,
+        "caption": "Fig.7: Effect of detailed caption for garment.We compare the generated virtual"
+      },
+      {
+        "page": 19,
+        "caption": "Fig.8: Examples of In-the-Wild dataset. We collect pairs of garment and human"
+      },
+      {
+        "page": 20,
+        "caption": "Fig.9: Illustration of generating detailed captions of garments. We utilize"
+      },
+      {
+        "page": 21,
+        "caption": "Fig. 9. Subsequently, we generate captions based on this feature information, for"
+      },
+      {
+        "page": 21,
+        "caption": "Fig.10: Comparison between IDM–VTON and OOTDiffusion [55] on VITON-"
+      },
+      {
+        "page": 22,
+        "caption": "Fig. 10 and Fig. 11 present qualitative comparisons of OOTDiffusion and"
+      },
+      {
+        "page": 23,
+        "caption": "Fig.11: Comparison between IDM–VTON and OOTDiffusion [55] on In-the-"
+      },
+      {
+        "page": 24,
+        "caption": "Fig.12: Qualitative comparison on VITON-HD and DressCode dataset.As"
+      },
+      {
+        "page": 25,
+        "caption": "Fig.13: Qualitative comparison on In-the-Wild dataset.While baselines fail"
+      },
+      {
+        "page": 26,
+        "caption": "Fig.14: Try-on results on VITON-HD test data by IDM–VTON trained on VITON-HD"
+      },
+      {
+        "page": 27,
+        "caption": "Fig.15: Try-on results on DressCode test data by IDM–VTON trained on VITON-HD"
+      },
+      {
+        "page": 28,
+        "caption": "Fig.16: Try-on results on In-the-Wild dataset by IDM–VTON trained on VITON-HD"
+      },
+      {
+        "page": 29,
+        "caption": "Fig.17: Try-on results on In-the-Wild dataset by IDM–VTON trained on VITON-HD"
+      },
+      {
+        "page": 30,
+        "caption": "Fig.18: Try-on results on In-the-Wild dataset by IDM–VTON trained on VITON-HD"
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 9,
+        "caption": "Table 1: Quantitative results on VITON-HD dataset.We evaluate the recon-"
+      },
+      {
+        "page": 11,
+        "caption": "Table 2: Quantitative results on In-the-Wild dataset.We compare IDM–VTON"
+      },
+      {
+        "page": 13,
+        "caption": "Table 3: Ablation on GarmentNet."
+      },
+      {
+        "page": 13,
+        "caption": "Table 4: Ablation on customization."
+      },
+      {
+        "page": 22,
+        "caption": "Table 5: Quantitative results of models trained on VITON-HD training"
+      },
+      {
+        "page": 22,
+        "caption": "Table 6: Quantitative results of models trained on DressCode training"
+      },
+      {
+        "page": 23,
+        "caption": "Table 7: Quantitative results on In-the-Wild dataset.We compare IDM–VTON"
+      }
+    ],
+    "keyword_pages": {
+      "mask_representation": [
+        4,
+        5,
+        6,
+        12,
+        14,
+        16,
+        17,
+        18,
+        20
+      ],
+      "conditioning": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        10,
+        14,
+        16,
+        17,
+        18,
+        20
+      ],
+      "loss": [
+        2,
+        3,
+        4,
+        9,
+        10,
+        11,
+        13,
+        14,
+        15,
+        16,
+        18,
+        22,
+        23
+      ],
+      "data": [
+        1,
+        3,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        18,
+        19,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "limitations": [
+        1,
+        2,
+        14
+      ]
+    },
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\mask_idm_vton.txt"
+  },
+  {
+    "key": "matanyone",
+    "title": "MatAnyone: Stable Video Matting with Consistent Memory Propagation",
+    "arxiv_id": "2501.14677",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\07_mask_conditioning\\matanyone_2501.14677.pdf",
+    "page_count": 10,
+    "sha256": "ebee69bbf4c08d15936ae7135fab94011fe1d04d8fd6c45273f3eae090579c14",
+    "source_url": "https://openaccess.thecvf.com/content/CVPR2025/papers/Yang_MatAnyone_Stable_Video_Matting_with_Consistent_Memory_Propagation_CVPR_2025_paper.pdf",
+    "first_page_excerpt": "MatAnyone: Stable Video Matting with Consistent Memory Propagation\nPeiqing Y ang1 Shangchen Zhou1 Jixin Zhao1 Qingyi Tao2 Chen Change Loy1\n1S-Lab, Nanyang Technological University 2SenseTime Research, Singapore\nhttps://pq-yang.github.io/projects/MatAnyone\nInputOurs\nOursRVM\nFigure 1. Our MatAnyone is capable of producing highly detailed and temporally consistent alpha mattes throughout a video. (a) It adapts\nto a variety of frame sizes and media types ( e.g., ﬁlms, games, smartphone videos), achieving ﬁne-grained details at the image-matting\nlevel. (b) RVM [ 30], an auxiliary-free video matting method, struggles with complex or ambiguous backgrounds. In contrast, our method\neffectively isolates the target object from such distractors, preserving a clean background and complete foreground parts. (c) Our method\nalso excels at consistently tracking the target ( i.e., the lady in pink) even in scenes containing multiple salient objects ( i.e., the man and the\nlady). It accurately distinguishes between them even during their interactions. (Zoom-in for best view)\nAbstract\nAuxiliary-free human video matting methods, which rely\nsolely on input frames, often struggle with complex or am-\nbiguous backgrounds. To address this, we propose MatAny-\none, a robust framework tailored for target-assigned\nvideo matting. Speciﬁcally, building on a memory-based\nparadigm, we introduce a consistent memory propagation\nmodule via region-adaptive memory fusion, which adap-\ntively integrates memory from the previous frame. This\nensures semantic stability in core regions while preserv-\ning ﬁne-grained details along object boundaries. F or ro-\nbust training, we present a larger , high-quality, and diverse\ndataset for video matting. Additionally, we incorporate a\nnovel training strategy that efﬁciently leverages large-scale\nsegmentation data, boosting matting stability. With this new\nThis CVPR paper is the Open Access version, provided by the Computer Vision Foundation.\nExcept for this watermark, it is identical to the accepted version;\nthe final published version of the proceedings is available on IEEE Xplore.\n7299",
+    "figure_candidates": [
+      {
+        "page": 1,
+        "caption": "Figure 1. Our MatAnyone is capable of producing highly detailed and temporally consistent alpha mattes throughout a video. (a) It adapts"
+      },
+      {
+        "page": 4,
+        "caption": "Figure 3. An overview of MatAnyone. MatAnyone is a memory-based framework for video matting. Given a target segmentation map"
+      },
+      {
+        "page": 4,
+        "caption": "Fig. 2(a), a query frame can be divided into core and bound-"
+      },
+      {
+        "page": 7,
+        "caption": "Figure 4. Qualitative comparisons on real-world videos. Our MatAnyone signiﬁcantly outperforms existing auxiliary-free (RVM [ 30]) and"
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 6,
+        "caption": "Table 1. Quantitative comparisons on different video matting benchmarks from diverse sources. The best and second-best performances"
+      },
+      {
+        "page": 7,
+        "caption": "Table 2. Quantitative comparisons on real-world benchmark [ 30]."
+      },
+      {
+        "page": 7,
+        "caption": "Table 3. Ablation study of the new training dataset (New Data),"
+      }
+    ],
+    "keyword_pages": {
+      "mask_representation": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "conditioning": [],
+      "loss": [
+        2,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "data": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "limitations": [
+        2,
+        4,
+        5,
+        6
+      ]
+    },
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\mask_matanyone.txt"
+  },
+  {
+    "key": "powerpaint",
+    "title": "A Task Is Worth One Word: Learning with Task Prompts for High-Quality Versatile Image Inpainting",
+    "arxiv_id": "2312.03594",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\07_mask_conditioning\\powerpaint_2312.03594.pdf",
+    "page_count": 17,
+    "sha256": "b4aed609bb965ff01e9a93da630660428f016e212a17b643d3e2824e8dbfc6e2",
+    "source_url": "https://www.ecva.net/papers/eccv_2024/papers_ECCV/papers/07554.pdf",
+    "first_page_excerpt": "A Task is Worth One Word:\nLearning with Task Prompts for High-Quality\nVersatile Image Inpainting\nJunhao Zhuang1* Yanhong Zeng2 Wenran Liu2 Chun Yuan1† Kai Chen2†\n1 Tsinghua Shenzhen International Graduate School, Tsinghua University\n2 Shanghai Artificial Intelligence Laboratory\n{zhuangjh23@mails, yuanc@sz}.tsinghua.edu.cn\n{zengyanhong, liuwenran, chenkai}@pjlab.org.cn\nInput + Mask Bald eagle Electric bulb Glass vase Gundam robot Hot air balloon Ice-cream Penguin\nInput + Mask SD-Inpainting Adobe Firefly PowerPaint Input + Mask 𝛼𝛼= 0.98 Input + Mask 𝛼𝛼= 0.5\nFig. 1: PowerPaint is the first versatile image inpainting model that simultaneously\nachievesstate-of-the-artresultsinvariousinpaintingtasks,includingtext-guidedobject\ninpainting, object removal, shape-guided object inpainting with controllable shape-\nfitting, outpainting, etc. [Best viewed in color with zoom-in]\nAbstract. Advancing image inpainting is challenging as it requires fill-\ning user-specified regions for various intents, such as background filling\nand object synthesis. Existing approaches focus on either context-aware\nfilling or object synthesis using text descriptions. However, achieving\nboth tasks simultaneously is challenging due to differing training strate-\ngies. To overcome this challenge, we introducePowerPaint, the first\nhigh-quality and versatile inpainting model that excels in multiple in-\npainting tasks. First, we introduce learnable task prompts along with\ntailored fine-tuning strategies to guide the model’s focus on different\ninpainting targets explicitly. This enables PowerPaint to accomplish var-\nious inpainting tasks by utilizing different task prompts, resulting in\nstate-of-the-art performance. Second, we demonstrate the versatility of\n* Work done during an internship in Shanghai Artificial Intelligence Lab.\n† Corresponding authors.",
+    "figure_candidates": [
+      {
+        "page": 1,
+        "caption": "Fig. 1: PowerPaint is the first versatile image inpainting model that simultaneously"
+      },
+      {
+        "page": 5,
+        "caption": "Fig. 2: Overview . PowerPaint fine-tunes a text-to-image model with two learnable"
+      },
+      {
+        "page": 6,
+        "caption": "Fig. 3: To remove objects from crowded image context, the commercial product, Adobe"
+      },
+      {
+        "page": 7,
+        "caption": "Fig. 4: Illustration of prompt interpolation. To enable object inpainting with a"
+      },
+      {
+        "page": 11,
+        "caption": "Fig. 5: Compared with SOTA approaches, PowerPaint shows better text alignment"
+      },
+      {
+        "page": 11,
+        "caption": "Fig. 6: Compared with SOTA approaches, PowerPaint shows better context alignment"
+      },
+      {
+        "page": 12,
+        "caption": "Fig. 7: Compared with SOTA approaches, PowerPaint shows more pleasing results for"
+      },
+      {
+        "page": 14,
+        "caption": "Fig. 8: Object removal in comparison with Adobe Firefly [1]."
+      },
+      {
+        "page": 14,
+        "caption": "Fig. 9: Application of shape-guided object inpainting."
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 10,
+        "caption": "Table 3 demonstrate that PowerPaint guided by a task-specific prompt, outper-"
+      }
+    ],
+    "keyword_pages": {
+      "mask_representation": [
+        1,
+        2,
+        3,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        13,
+        14,
+        16
+      ],
+      "conditioning": [
+        3,
+        5,
+        6,
+        7,
+        8,
+        9,
+        13,
+        17
+      ],
+      "loss": [
+        3,
+        5,
+        8,
+        9,
+        10,
+        13,
+        15,
+        16,
+        17
+      ],
+      "data": [
+        8,
+        9,
+        13,
+        15,
+        16
+      ],
+      "limitations": [
+        7,
+        13,
+        14
+      ]
+    },
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\mask_powerpaint.txt"
+  },
+  {
+    "key": "sapiens",
+    "title": "Sapiens: Foundation for Human Vision Models",
+    "arxiv_id": "2408.12569",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\07_mask_conditioning\\sapiens_2408.12569.pdf",
+    "page_count": 22,
+    "sha256": "714d027af128c2c17d05a1e591edcbb83fc8be74b8f4042944b39f3cae3b78dc",
+    "source_url": "https://arxiv.org/abs/2408.12569",
+    "first_page_excerpt": "Sapiens: Foundation for Human Vision Models\nRawal Khirodkar, Timur Bagautdinov, Julieta Martinez, Su Zhaoen, Austin\nJames, Peter Selednik, Stuart Anderson, Shunsuke Saito\nCodec Avatars Lab, Meta\nAbstract. We presentSapiens, a family of models for four fundamental\nhuman-centric vision tasks – 2D pose estimation, body-part segmenta-\ntion, depth estimation, and surface normal prediction. Our models na-\ntively support 1K high-resolution inference and are extremely easy to\nadapt for individual tasks by simply fine-tuning foundation models pre-\ntrained on over300 million in-the-wild human images. We observe that,\ngiven the same computational budget, self-supervised pretraining on a\ncurated dataset of human images significantly boosts the performance\nfor a diverse set of human-centric tasks. The resulting models exhibit\nremarkable generalization to in-the-wild data, even when labeled data is\nscarce or entirely synthetic. Our simple model design also brings scal-\nability – model performance across tasks significantly improves as we\nscale the number of parameters from 0.3 to 2 billion. Sapiens consis-\ntently surpasses existing complex baselines across various human-centric\nbenchmarks. Specifically, we achieve significant improvements over the\nprior state-of-the-art on Humans-5K (pose) by 7.6 mAP, Humans-2K\n(part-seg) by 17.1 mIoU, Hi4D (depth) by 22.4% relative RMSE, and\nTHuman2 (normal) by53.5% relative angular error.\nKeywords: Human-centric, Large-scale pretraining, In-the-wild\n“Sapiens—pertaining to, or resembling modern humans.”\n1 Introduction\nRecentyearshavewitnessedremarkablestridestowardsgeneratingphotorealistic\nhumans in 2D [17,28,50,118] and 3D [69,89,102,109]. The success of these\nmethods is greatly attributed to the robust estimation of various assets such as\n2D keypoints [14,67], fine-grained body-part segmentation [119], depth [113], and\nsurface normals [89,108]. However, robust and accurate estimation of these assets\nis still an active research area, and complicated systems to boost performance\nfor individual tasks often hinder wider adoption. Moreover, obtaining accurate\nground-truth annotation in-the-wild is notoriously difficult to scale. Our goal is\nto provide a unified framework and models to infer these assets in-the-wild to\nunlock a wide range of human-centric applications for everybody.\nWe argue that such human-centric models should satisfy three criteria: gener-\nalization,broadapplicability,andhighfidelity.Generalizationensuresrobustness\nto unseen conditions, enabling the model to perform consistently across varied\nenvironments. Broad applicability indicates the versatility of the model, making\nit suitable for a wide range of tasks with minimal modifications. High fidelity\ndenotes the ability of the model to produce precise, high-resolution outputs,",
+    "figure_candidates": [
+      {
+        "page": 2,
+        "caption": "Fig. 1: Sapiens models are finetuned for four human tasks - 2D pose estimation, body-"
+      },
+      {
+        "page": 5,
+        "caption": "Fig. 2: Overview of number"
+      },
+      {
+        "page": 6,
+        "caption": "Fig. 3: In-the-wild generalization ofSapiens on unseen images.Top: Each triplet illus-"
+      },
+      {
+        "page": 6,
+        "caption": "Fig.3 (Bottom) shows that even with an increased mask ratio of95%, our model"
+      },
+      {
+        "page": 7,
+        "caption": "Fig. 4: Ground-truth annotations for 2D pose estimation and body-part segmentation."
+      },
+      {
+        "page": 8,
+        "caption": "Fig. 5: Ground-truth synthetic annotations for depth and surface normal estimation."
+      },
+      {
+        "page": 10,
+        "caption": "Fig. 6: Pose estimation with Sapiens-1B for 308 keypoints on in-the-wild images."
+      },
+      {
+        "page": 10,
+        "caption": "Fig. 7: Human segmentation with Sapiens-1B for 28 categories on in-the-wild images."
+      },
+      {
+        "page": 11,
+        "caption": "Fig. 8: We compare our depth prediction with DepthAnything [113]. To showcase the"
+      },
+      {
+        "page": 12,
+        "caption": "Fig. 9: Qualitative comparison of Sapiens-1B with PIFuHD [89] and ECON [108] for"
+      },
+      {
+        "page": 13,
+        "caption": "Fig. 10: Sapiens-0.3B’s normal estima-"
+      },
+      {
+        "page": 14,
+        "caption": "Fig. 11: Sapiens achieve broad generalization via large human-centric pretraining."
+      },
+      {
+        "page": 14,
+        "caption": "Fig. 12: Image synthesis using ControlNet [118] trained on Sapiens pose predictions."
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 11,
+        "caption": "Table 5 compares our models with existing state-of-the-art monocular depth"
+      },
+      {
+        "page": 13,
+        "caption": "Table 7 showcases the comparison of pretraining outcomes. We report mAP for"
+      }
+    ],
+    "keyword_pages": {
+      "mask_representation": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        13,
+        14,
+        16,
+        17,
+        19,
+        21,
+        22
+      ],
+      "conditioning": [
+        1,
+        13,
+        14,
+        22
+      ],
+      "loss": [
+        6,
+        7,
+        8
+      ],
+      "data": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        16,
+        17,
+        20
+      ],
+      "limitations": [
+        14
+      ]
+    },
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\mask_sapiens.txt"
+  },
+  {
+    "key": "softshadow",
+    "title": "SoftShadow: Leveraging Soft Masks for Penumbra-Aware Shadow Removal",
+    "arxiv_id": "2409.07041",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\07_mask_conditioning\\softshadow_2409.07041.pdf",
+    "page_count": 10,
+    "sha256": "7ece34f31b8458368827b6f026196e1b15e1acd69ee9babe4ea9c63b7407b4ee",
+    "source_url": "https://arxiv.org/abs/2409.07041",
+    "first_page_excerpt": "SoftShadow: Leveraging Soft Masks for Penumbra-Aware Shadow Removal\nXinrui Wang1*, Lanqing Guo2*, Xiyu Wang1, Siyu Huang3, Bihan Wen1†\n1Nanyang Technological University, Singapore\n2The University of Texas at Austin, USA\n3Clemson University, USA\n{xinrui.wang, bihan.wen }@ntu.edu.sg, xiyu004@e.ntu.edu.sg,\nlanqing.guo@austin.utexas.edu, siyuh@clemson.edu\nAbstract\nRecent advancements in deep learning have yielded promis-\ning results for the image shadow removal task. However,\nmost existing methods rely on binary pre-generated shadow\nmasks. The binary nature of such masks could potentially\nlead to artifacts near the boundary between shadow and\nnon-shadow areas. In view of this, inspired by the physical\nmodel of shadow formation, we introduce novel soft shadow\nmasks specifically designed for shadow removal. To achieve\nsuch soft masks, we propose a SoftShadow framework by\nleveraging the prior knowledge of pretrained SAM and in-\ntegrating physical constraints. Specifically, we jointly tune\nthe SAM and the subsequent shadow removal network us-\ning penumbra formation constraint loss, mask reconstruc-\ntion loss, and shadow removal loss. This framework en-\nables accurate predictions of penumbra (partially shaded)\nand umbra (fully shaded) areas while simultaneously fa-\ncilitating end-to-end shadow removal. Through extensive\nexperiments on popular datasets, we found that our Soft-\nShadow framework, which generates soft masks, can better\nrestore boundary artifacts, achieve state-of-the-art perfor-\nmance, and demonstrate superior generalizability.\n1. Introduction\nShadow removal aims to restore content obscured in shadow\nregions and correct degraded illumination. Recently, deep\nlearning methods have shown excellent performance in\nshadow removal tasks relying on large-scale training data.\nHowever, one of the main challenges in shadow removal\narises in images with soft shadows, where the shadow edges\nare blurred rather than sharp. This blurred area, known as\nthe penumbra area, occurs due to partial occlusion of light,\ncreating a transition zone where illumination varies signif-\n*Equal contribution for both authors\n†Corresponding author\nFigure 1. Illustration of soft shadow removal results using our\nproposed SoftShadow with soft shadow mask compared to the re-\ncent competing methods BMNet [39], SG-ShadowNet [30] and\nHomoFormer [34] using hard shadow masks. The second rows\nare sharpened versions of results for better visualization.\nicantly. Removing shadows in these regions is challenging\nbecause the gradual light-to-shadow transition often leads to\nboundary artifacts, compromising the quality of the shadow\nremoval results.\nA few methods rely on hard shadow masks (binary\nmasks) to indicate the shadow regions [8, 9, 34, 39]. These\nbinary shadow masks are either manually annotated [23,\n31], or predicted by off-the-shelf shadow detectors [3]. Ob-\ntaining such shadow masks can be costly and complicated,\nand the choice of shadow detector can significantly impact\nshadow removal performance. Moreover, hard masks fall\nshort of representing the penumbra area, causing boundary\nartifacts in removal results, especially when the penumbra\nareas are highly pronounced. As shown in Figure 1, when\nthe input image contains penumbra regions, the previous\nstate-of-the-art (SOTA) method [34] suffers from boundary\nartifacts. Other approaches attempt shadow removal with-\nout explicitly extracting the shadow mask. Instead, they in-\ncorporate semantic parsing modules into shadow removal\nnetworks. For instance, some approaches involve predict-\nThis CVPR paper is the Open Access version, provided by the Computer Vision Foundation.\nExcept for this watermark, it is identical to the accepted version;\nthe final published version of the proceedings is available on IEEE Xplore.\n23217",
+    "figure_candidates": [
+      {
+        "page": 1,
+        "caption": "Figure 1. Illustration of soft shadow removal results using our"
+      },
+      {
+        "page": 2,
+        "caption": "Figure 2. (a) Illustration of the shadow formation geometry that"
+      },
+      {
+        "page": 3,
+        "caption": "Figure 3. Illustration of the proposed SoftShadow. The left box illustrates the SoftShadow networks, where a shadow image y is input"
+      },
+      {
+        "page": 4,
+        "caption": "Figure 4. Illustrate the concept of Penumbra Formation Constraint."
+      },
+      {
+        "page": 7,
+        "caption": "Figure 5. Examples of soft shadow image removal results on the SRD dataset [27]. The input shadow image, the estimated results of (a)"
+      },
+      {
+        "page": 7,
+        "caption": "Figure 6. Examples of soft shadow removal results on SRD"
+      },
+      {
+        "page": 7,
+        "caption": "Figure 7. Examples of shadow removal results on the LRSS"
+      },
+      {
+        "page": 8,
+        "caption": "Figure 8. Visual comparison of results from our framework with"
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 6,
+        "caption": "Table 1. The quantitative results of shadow removal using our SoftShadow and recent methods on SRD and ISTD+ datasets. The “Input"
+      },
+      {
+        "page": 6,
+        "caption": "Table 2. The quantitative results of shadow removal using our"
+      },
+      {
+        "page": 6,
+        "caption": "Table 3. The quantitative results in the penumbra area. The"
+      },
+      {
+        "page": 6,
+        "caption": "Table 2 shows the generalizability of our methods. We"
+      },
+      {
+        "page": 6,
+        "caption": "Table 4. The mask sensitivity evaluation on ISTD+ dataset. The"
+      },
+      {
+        "page": 8,
+        "caption": "Table 5. The ablation studies for the shadow removal loss Lrem,"
+      }
+    ],
+    "keyword_pages": {
+      "mask_representation": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "conditioning": [
+        4,
+        5
+      ],
+      "loss": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        7,
+        8,
+        9,
+        10
+      ],
+      "data": [
+        1,
+        2,
+        3,
+        5,
+        6,
+        7,
+        8
+      ],
+      "limitations": []
+    },
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\mask_softshadow.txt"
+  },
+  {
+    "key": "stableviton",
+    "title": "StableVITON: Learning Semantic Correspondence with Latent Diffusion Model for Virtual Try-On",
+    "arxiv_id": "2312.01725",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\07_mask_conditioning\\stableviton_2312.01725.pdf",
+    "page_count": 10,
+    "sha256": "dfc01773b010cd3b055daad1aa5a1599caedde706d5732da98656cc337032cd4",
+    "source_url": "https://openaccess.thecvf.com/content/CVPR2024/papers/Kim_StableVITON_Learning_Semantic_Correspondence_with_Latent_Diffusion_Model_for_Virtual_CVPR_2024_paper.pdf",
+    "first_page_excerpt": "StableVITON: Learning Semantic Correspondence\nwith Latent Diffusion Model for Virtual Try-On\nJeongho Kim Gyojung Gu Minho Park Sunghyun Park Jaegul Choo\nKAIST, Daejeon, South Korea\n{rlawjdghek, gyojung.gu, m.park, psh01087, jchoo }@kaist.ac.kr\n\\\nFigure 1. Generated results of StableVITON: VITON-HD (the ﬁrst row), SHHQ-1.0 (the ﬁrst two images in the second row), and web-\ncrawled images (the last two images in the second row). All results are generated using StableVITON trained on VITON-HD dataset.\nAbstract\nGiven a clothing image and a person image, an image-\nbased virtual try-on aims to generate a customized image\nthat appears natural and accurately reﬂects the character-\nistics of the clothing image. In this work, we aim to ex-\npand the applicability of the pre-trained diffusion model so\nthat it can be utilized independently for the virtual try-on\ntask. The main challenge is to preserve the clothing details\nwhile effectively utilizing the robust generative capability\nof the pre-trained model. In order to tackle these issues,\nwe propose StableVITON, learning the semantic correspon-\ndence between the clothing and the human body within the\nlatent space of the pre-trained diffusion model in an end-to-\nend manner . Our proposed zero cross-attention blocks not\nonly preserve the clothing details by learning the semantic\ncorrespondence but also generate high-ﬁdelity images by\nutilizing the inherent knowledge of the pre-trained model\nin the warping process. Through our proposed novel at-\ntention total variation loss and applying augmentation, we\nachieve the sharp attention map, resulting in a more pre-\ncise representation of clothing details. StableVITON out-\nperforms the baselines in qualitative and quantitative eval-\nuation, showing promising quality in arbitrary person im-\nages. Our code is available at\nhttps://github.com/\nrlawjdghek/StableVITON .\nThis CVPR paper is the Open Access version, provided by the Computer Vision Foundation.\nExcept for this watermark, it is identical to the accepted version;\nthe final published version of the proceedings is available on IEEE Xplore.\n8176",
+    "figure_candidates": [
+      {
+        "page": 1,
+        "caption": "Figure 1. Generated results of StableVITON: VITON-HD (the ﬁrst row), SHHQ-1.0 (the ﬁrst two images in the second row), and web-"
+      },
+      {
+        "page": 2,
+        "caption": "Figure 2. Visualization of the semantic correspondence learned by"
+      },
+      {
+        "page": 4,
+        "caption": "Figure 3. For the virtual try-on task, StableVITON additionally takes three conditions: agnostic map, agnostic mask, and dense pose, as"
+      },
+      {
+        "page": 5,
+        "caption": "Figure 4. Visualization of attention map from a zero cross-attention block of 32 resolution."
+      },
+      {
+        "page": 6,
+        "caption": "Figure 5. Qualitative comparison with baselines in a single dataset setting (VITON-HD / VITON-HD). Best viewed when zoomed in."
+      },
+      {
+        "page": 6,
+        "caption": "Figure 6. Qualitative comparison with baselines in a cross dataset setting (VITON-HD / DressCode). Best viewed when zoomed in."
+      },
+      {
+        "page": 7,
+        "caption": "Figure 7. Qualitative comparison with baselines in a cross dataset setting (VITON-HD / SHHQ-1.0). Best viewed when zoomed in."
+      },
+      {
+        "page": 7,
+        "caption": "Figure 8. User study results. We compare our StableVITON with"
+      },
+      {
+        "page": 8,
+        "caption": "Fig 10(a) and (b), we observe that detailed features such as"
+      },
+      {
+        "page": 8,
+        "caption": "Figure 9. Comparison our StableVITON to ControlNets under the"
+      },
+      {
+        "page": 8,
+        "caption": "Figure 10. Visual comparisons according to our training compo-"
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 6,
+        "caption": "Table 1. Quantitative comparisons in single dataset settings, VITON-HD and DressCode upper-body (D.C. Upper) datasets. Bold and"
+      },
+      {
+        "page": 7,
+        "caption": "Table 2. Quantitative comparisons in cross dataset settings. We train the models on VITON-HD and DressCode upper-body (D.C. Upper)"
+      },
+      {
+        "page": 8,
+        "caption": "Table 3. Quantitative comparison results between our zero cross-"
+      },
+      {
+        "page": 8,
+        "caption": "Table 4. Ablation study of our proposed training components on"
+      }
+    ],
+    "keyword_pages": {
+      "mask_representation": [
+        3,
+        4,
+        5,
+        9,
+        10
+      ],
+      "conditioning": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        8,
+        9,
+        10
+      ],
+      "loss": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10
+      ],
+      "data": [
+        1,
+        2,
+        3,
+        5,
+        6,
+        7,
+        8,
+        10
+      ],
+      "limitations": [
+        2,
+        4,
+        7,
+        8
+      ]
+    },
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\mask_stableviton.txt"
+  },
+  {
+    "key": "synthlight",
+    "title": "SynthLight: Portrait Relighting with Diffusion Model by Learning to Re-render Synthetic Faces",
+    "arxiv_id": "2501.09756",
+    "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\07_mask_conditioning\\synthlight_2501.09756.pdf",
+    "page_count": 11,
+    "sha256": "7d8418b84d3c4b8f1346c9e75b5ff6bfd39947fd1702f4d61584555bc54c5a35",
+    "source_url": "https://openaccess.thecvf.com/content/CVPR2025/papers/Chaturvedi_SynthLight_Portrait_Relighting_with_Diffusion_Model_by_Learning_to_Re-render_CVPR_2025_paper.pdf",
+    "first_page_excerpt": "SynthLight: Portrait Relighting with Diffusion Model\nby Learning to Re-render Synthetic Faces\nSumit Chaturvedi1∗ Mengwei Ren2 Yannick Hold-Geoffroy2 Jingyuan Liu2\nJulie Dorsey1 Zhixin Shu2†\n1 Yale University 2 Adobe\nFigure 1. SynthLight relights portraits using environment map lighting. By learning to re-render synthetic human faces, it produces realistic\nillumination on real portraits, such as distinct cast shadows on the neck and natural specular highlights on the skin. Despite training solely\non synthetic headshots, it generalizes to half-body portraits and full-body figurines.\nAbstract\nWe introduce SynthLight, a diffusion model for portrait\nrelighting. We frame image relighting as a re-rendering\nproblem, where pixels are transformed in response to\nchanges in environmental lighting. Using a physically-\nbased rendering engine, we create a dataset to simulate\nthis lighting-conditioned transformation with 3D head as-\nsets under varying lighting. We propose training and in-\nference strategies to bridge the gap between the synthetic\nand real image domains: (1) multi-task training leveraging\nreal human portraits without lighting labels; (2) an infer-\nence time diffusion sampling scheme based on classifier-\nfree guidance leveraging the input portrait to better pre-\nserve details. Our method generalizes to diverse real por-\ntraits and produces realistic illumination effects, includ-\ning specular highlights and cast shadows, while preserving\nidentity. Our quantitative experiments on light stage data\ndemonstrate results comparable to state-of-the-art relight-\ning methods. Our qualitative results on in-the-wild images\nshowcase rich and unprecedented illumination effects.\n*Work done as an intern at Adobe Research.\n†Corresponding author.\n1. Introduction\nLighting is fundamental to portrait photography, yet ma-\nnipulating it after capture remains challenging. Recent ad-\nvances in generative imaging models have shown promise\nfor controlling lighting in existing images [14, 18, 34,\n58, 60], but these typically require labeled training data.\nFor portrait relighting specifically, the most effective re-\nsults have come from training on light stage data—portraits\nrendered with linear combinations of one-light-at-a-time\n(OLAT) captures. While powerful, light stage setups are\nconstrained by physical limitations in light source den-\nsity and require specialized artificial lighting equipment.\nIn contrast, 3D workflows in VFX and gaming have long\ntreated lighting as a straightforward endeavor through mod-\nern physically based rendering engines, where lighting con-\ntrol is nearly arbitrary. To relight a rendering, artists simply\nadjust the lighting configurations and re-render the scene.\nGiven a sceneS and lighting L1, we denote the rendering\nas I1 = fr(S, L1). The inverse graphics problem aims to\nfind S from I1: S = finv(I1, L1) with known or unknown\nlighting. To relight renderingI1 to I2 under lighting L2, one\naims to compute: I2 = fr(S, L2). Given only I1, a relight-\nThis CVPR paper is the Open Access version, provided by the Computer Vision Foundation.\nExcept for this watermark, it is identical to the accepted version;\nthe final published version of the proceedings is available on IEEE Xplore.\n369",
+    "figure_candidates": [
+      {
+        "page": 1,
+        "caption": "Figure 1. SynthLight relights portraits using environment map lighting. By learning to re-render synthetic human faces, it produces realistic"
+      },
+      {
+        "page": 3,
+        "caption": "Figure 2. Subjects are rendered under various lighting conditions."
+      },
+      {
+        "page": 3,
+        "caption": "Fig. 2) at 512×512 resolution from 350 subjects, each"
+      },
+      {
+        "page": 4,
+        "caption": "Figure 3. SynthLight training pipeline. We first train the diffu-"
+      },
+      {
+        "page": 4,
+        "caption": "Figure 4. We apply image-conditioned classifier-free guidance"
+      },
+      {
+        "page": 4,
+        "caption": "Figure 5. Effect of portrait guidance λI : (a) Input portrait. (b)"
+      },
+      {
+        "page": 5,
+        "caption": "Fig. 5 shows that smaller λI improves relighting but re-"
+      },
+      {
+        "page": 6,
+        "caption": "Figure 6. Real-world results show our method’s ability to handle diverse lighting scenarios. Each example includes the input portrait (left),"
+      },
+      {
+        "page": 6,
+        "caption": "Fig. 9 illustrates the effect of each configuration. We"
+      },
+      {
+        "page": 7,
+        "caption": "Figure 7. In-the-wild portrait results. DiLightNet [58] produces severe artifacts. IC-Light [60] does not relight due to background lighting"
+      },
+      {
+        "page": 7,
+        "caption": "Figure 8. We compare of relighting the input portrait (bottom left) using environment map (top left) on a light stage test set."
+      },
+      {
+        "page": 7,
+        "caption": "Fig. 11). Although generating realistic shadows caused by"
+      },
+      {
+        "page": 8,
+        "caption": "Figure 9. Training without our Multi-Task or Inference Adaptation techniques (Base) alters identity and loses textures. Base + Multi-Task"
+      },
+      {
+        "page": 8,
+        "caption": "Figure 10. We compare SynthLight initialized with IC-Light [60]"
+      },
+      {
+        "page": 8,
+        "caption": "Figure 11. Effect of Lighting condition. Limited lighting cues"
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 5,
+        "caption": "Table 1. We compare against baselines on a held-out set of our"
+      },
+      {
+        "page": 5,
+        "caption": "Table 2. User preference rates indicate how often SynthLight was"
+      },
+      {
+        "page": 8,
+        "caption": "Table 3. We evaluate the contribution of each component: Multi-"
+      }
+    ],
+    "keyword_pages": {
+      "mask_representation": [
+        3,
+        9
+      ],
+      "conditioning": [
+        1,
+        2,
+        3,
+        4,
+        6,
+        7,
+        8,
+        11
+      ],
+      "loss": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        11
+      ],
+      "data": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "limitations": [
+        1,
+        2,
+        4,
+        6,
+        8
+      ]
+    },
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\mask_synthlight.txt"
+  }
+]

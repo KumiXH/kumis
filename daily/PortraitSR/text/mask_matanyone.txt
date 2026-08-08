@@ -1,0 +1,833 @@
+=== PAGE 1 ===
+MatAnyone: Stable Video Matting with Consistent Memory Propagation
+Peiqing Y ang1 Shangchen Zhou1 Jixin Zhao1 Qingyi Tao2 Chen Change Loy1
+1S-Lab, Nanyang Technological University 2SenseTime Research, Singapore
+https://pq-yang.github.io/projects/MatAnyone
+InputOurs
+OursRVM
+Figure 1. Our MatAnyone is capable of producing highly detailed and temporally consistent alpha mattes throughout a video. (a) It adapts
+to a variety of frame sizes and media types ( e.g., ﬁlms, games, smartphone videos), achieving ﬁne-grained details at the image-matting
+level. (b) RVM [ 30], an auxiliary-free video matting method, struggles with complex or ambiguous backgrounds. In contrast, our method
+effectively isolates the target object from such distractors, preserving a clean background and complete foreground parts. (c) Our method
+also excels at consistently tracking the target ( i.e., the lady in pink) even in scenes containing multiple salient objects ( i.e., the man and the
+lady). It accurately distinguishes between them even during their interactions. (Zoom-in for best view)
+Abstract
+Auxiliary-free human video matting methods, which rely
+solely on input frames, often struggle with complex or am-
+biguous backgrounds. To address this, we propose MatAny-
+one, a robust framework tailored for target-assigned
+video matting. Speciﬁcally, building on a memory-based
+paradigm, we introduce a consistent memory propagation
+module via region-adaptive memory fusion, which adap-
+tively integrates memory from the previous frame. This
+ensures semantic stability in core regions while preserv-
+ing ﬁne-grained details along object boundaries. F or ro-
+bust training, we present a larger , high-quality, and diverse
+dataset for video matting. Additionally, we incorporate a
+novel training strategy that efﬁciently leverages large-scale
+segmentation data, boosting matting stability. With this new
+This CVPR paper is the Open Access version, provided by the Computer Vision Foundation.
+Except for this watermark, it is identical to the accepted version;
+the final published version of the proceedings is available on IEEE Xplore.
+7299
+
+=== PAGE 2 ===
+network design, dataset, and training strategy, MatAnyone
+delivers robust and accurate video matting results in diverse
+real-world scenarios, outperforming existing methods.
+1. Introduction
+Auxiliary-free human video matting (VM) is widely recog-
+nized for its convenience [ 21, 24, 30], as it only requires
+input frames without additional annotations. However, its
+performance often deteriorates in complex or ambiguous
+backgrounds, especially when similar objects, i.e., other hu-
+mans, appear in the background (Fig. 2(b)). We consider
+auxiliary-free video matting to be under-deﬁned, as their
+results can be uncertain without a clear target object.
+In this work, we focus on a problem that is more appli-
+cable to real-world video applications: video matting fo-
+cused on pre-assigned target object(s), with the target seg-
+mentation mask provided in the ﬁrst frame. This enables
+the model to perform stable matting via consistent object
+tracking throughout the entire video, while offering bet-
+ter interactivity. The setting is well-studied in Video Ob-
+ject Segmentation (VOS), where it is referred to as “semi-
+supervised” [ 10, 17, 34]. A common strategy is to use
+a memory-based paradigm [ 8, 12, 34, 46], encoding past
+frames and corresponding segmentation results into mem-
+ory, from which a new frame retrieves relevant information
+for its mask prediction. This allows a lightweight network
+to achieve consistent and accurate tracking of the target ob-
+ject. Inspired by this, we adapt the memory-based paradigm
+for video matting, leveraging its stability across frames.
+Video matting poses additional challenges compared to
+VOS, as it requires not only accurate semantic detection in
+core regions but also high-quality detail extraction along the
+boundary (e.g., hair), as deﬁned in Fig. 2(a). A straightfor-
+ward approach is to ﬁne-tune matting details using matting
+data, based on segmentation priors from VOS. Recent ap-
+proaches attempt to achieve both goals, either in a coupled
+or decoupled manner. For instance, AdaM [ 28] and FTP-
+VM [ 19] reﬁne the memory-based segmentation mask for
+each frame via a decoder to produce alpha mattes, while
+MaGGIe [20] devises a separate reﬁner network to process
+segmentation masks across all frames from an off-the-shelf
+VOS model. However, these methods often lead to subop-
+timal results due to limitations in the available video mat-
+ting data: (i) the quality of VideoMatte240K [ 29], the most
+widely used human video matting dataset, is suboptimal.
+Its ground-truth alpha mattes exhibit problematic semantic
+accuracy in core areas ( e.g., interior holes) and lack ﬁne de-
+tails along the boundaries ( e.g., blurry hair); (ii) video mat-
+ting datasets are much smaller in scale compared to VOS
+datasets; and (iii) video matting data are synthetic due to the
+extreme difﬁculty of human annotations, limiting their gen-
+eralizability to real-world cases [ 30]. Consequently, ﬁne-
+tuning a strong VOS prior for video matting with existing
+video matting data usually disrupts this prior. While bound-
+ary details may show improvement compared to segmenta-
+tion results, the matting quality in terms of semantic stabil-
+ity in core areas and details in boundary areas remain unsat-
+isfactory, as shown by the results of MaGGIe in Fig. 2(b).
+Producing matting-level details while maintaining se-
+mantic stability of a memory-based approach is challeng-
+ing, especially training with suboptimal video matting data.
+To tackle this, we focus on several key aspects:
+Network - we introduce a consistent memory propagation
+mechanism in the memory space. For each current frame,
+the alpha value change relative to the previous frame is esti-
+mated for every token. This estimation guides the adaptive
+integration of information from the previous frame. The
+“large-change” regions rely more on the current frame’s in-
+formation queried from the memory bank, while “small-
+change” regions tend to retain the memory from the previ-
+ous frame. This region-adaptive memory fusion inherently
+stabilizes memory propagation throughout the video, im-
+proving matting quality with ﬁne details and temporal con-
+sistency. Speciﬁcally, it encourages the network to focus
+on boundary regions during training to capture ﬁne details,
+while “small-change” tokens in the core regions preserve
+internally complete foreground and clean background (see
+our results in Fig. 2(b)).
+Data - we collect a new training dataset, named VM800,
+which is twice as large, more diverse, and of higher quality
+in both core and boundary regions compared to the Video-
+Matte240K dataset [ 29], greatly enhancing robust train-
+ing for video matting. In addition, we introduce a more
+challenging test dataset, named YoutubeMatte, featuring
+more diverse foreground videos and improved detail qual-
+ity. These new datasets offer a solid foundation for robust
+training and reliable evaluation in video matting.
+Training Strategy - the lack of real video matting data re-
+mains a signiﬁcant limitation, affecting both stability and
+generalizability. We address this problem by leveraging
+large-scale real segmentation data via a novel training strat-
+egy. Unlike common practices [ 19, 20, 30] that train with
+segmentation data on a separate prediction head parallel
+to the matting head, we propose using segmentation data
+within the same head as matting for more effective supervi-
+sion. This is achieved by applying region-speciﬁc losses –
+for core regions, we apply a pixel-wise loss to ensure stabil-
+ity and generalization in semantics; for boundary regions,
+where segmentation data lacks alpha labels, we employ an
+improved DDC loss [ 32], scaled to make edges resemble
+matting rather than segmentation.
+In summary, our main contributions are as follows:
+• We propose MatAnyone, a practical human video mat-
+ting framework supporting target assignment, with sta-
+ble performance in both semantics of core regions and
+ﬁne-grained boundary details. Target object(s) can be
+easily assigned using off-the-shelf segmentation methods,
+and reliable tracking is achieved even in long videos with
+7300
+
+=== PAGE 3 ===
+OursRVMMaGGIe(a) Definitions for MattingCore AreasInputBoundary Area
+(b) Issues:               Segmentation prior broken                 Confused by ambiguous backgroundMaGGIeRVM Figure 2. Deﬁnitions and motivations for MatAnyone. (a) In a matting frame, the image can be broadly divided into two areas based on
+the alpha value: the core (semantic) and the boundary (ﬁne-details). The core includes the background (alpha values of 0) and the solid
+foreground (alpha values of 1), while the boundary (highlighted in pink) encompasses areas with alpha values between 0 and 1. (b) Due to
+the under-deﬁned setting, auxiliary-free methods like RVM [ 30] are easily confused by ambiguous background. Meanwhile, mask-guided
+methods like MaGGIe [ 20] tend to break the segmentation prior they aim to leverage, due to the deﬁciency in video matting data.
+complex and ambiguous backgrounds.
+• We introduce a consistent memory propagation mecha-
+nism via region-adaptive memory fusion, improving sta-
+bility in core regions and quality in boundary details.
+• We contribute larger and higher-quality datasets for train-
+ing and testing, offering a solid foundation for robust
+training and reliable evaluation in video matting.
+• To overcome the scarcity of real video matting data, we
+leverage real segmentation data for core-area supervision,
+largely improving semantic stability over prior methods.
+2. Related Work
+Video Matting. Due to the intrinsic ambiguity in the
+auxiliary-free setting [ 21, 24, 30, 35, 51, 56], such tasks
+generally are object-speciﬁc. Among them, human video
+matting [21, 24, 39, 56] without auxiliary inputs is popular
+due to its wide applications. Challenging as the auxiliary-
+free setting, being in the video domain brings in additional
+difﬁculties in temporal coherency. MODNet [ 21] extends
+its portrait matting setting to video domain with a ﬂicker-
+ing reduction trick (non-learning) within a local sequence.
+RVM [ 30] steps further to design for videos speciﬁcally
+with ConvGRU [ 1] as its recurrent architecture. Robust
+as RVM, it is still easy to be confused by humans in the
+background. With the success of promptable segmenta-
+tion [ 22, 36, 52, 57], obtaining segmentation mask for a
+target human object only requires minimal human efforts.
+Recent mask-guided image [ 3, 26, 49, 50] and video mat-
+ting [ 19, 20, 25, 28] thus leverages this convenience for
+a more robust performance. Adam [ 28] propagates the
+ﬁrst-frame segmentation mask across all frames while FTP-
+VM [19] propagates the ﬁrst-frame trimap. Taking the prop-
+agated mask as a rough result, their decoder serves for mat-
+ting details reﬁnement. MaGGIe [ 20] enjoys a stronger
+prior by taking the segmentation mask across all frames in-
+stead of the ﬁrst one. Taking all the segmentation masks at a
+time, the network is able to perform bidirectional temporal
+fusion for coherency. To mitigate the poor generalizabil-
+ity of synthetic video matting data, a common practice is to
+simultaneously train with real segmentation data for seman-
+tics supervision [19, 28, 30].
+Memory-based VOS. Semi-supervised VOS segments the
+target object with a ﬁrst-frame annotation across frames [ 8–
+12, 16, 27, 33, 38]. The memory matching paradigm
+by Space-Time Correspondence Network (STCN) [ 10] is
+widely followed by current VOS methods [ 8, 12, 41, 46],
+and achieves good performance. We thus take the memory-
+based paradigm as our framework since it is similar to our
+setting except that our outputs are alpha mattes.
+Video Consistency in Low-level Vision. To enhance
+temporal consistency across adjacent frames, the recurrent
+frame fusion [ 42, 53] and optical ﬂow-guided propaga-
+tion [ 4–6, 54] are commonly utilized in the video restora-
+tion networks. Recent methods also employ temporal lay-
+ers such as 3D convolution [ 2, 43] and temporal atten-
+tion [2, 7, 44, 55] during training, while other training-free
+methods resorts to cross-frame attention [ 45, 48] and ﬂow-
+guided attention [ 13, 15] in the pretrained models. In this
+work, we ﬁnd that the memory-based paradigm is effective
+enough to maintain video consistency for video matting.
+3. Methodology
+Overview. Achieving matting-level details while preserv-
+ing the semantic stability of a memory-based approach
+poses challenges, especially when training with suboptimal
+video matting data. To tackle this, we propose our MatAny-
+one, as illustrated in Fig. 3. Similar to semi-supervised
+VOS, MatAnyone only requires the segmentation mask for
+the ﬁrst frame as a target assignment ( e.g., the yellow mask
+in Fig. 3(a)). The alpha matte for the assigned object is then
+generated frame by frame in a sequential manner. Specif-
+ically, for an incoming frame t, it is ﬁrst encoded into F t
+as ⇥ 16 downsampled feature representation, which is then
+transformed into key and query for consistent memory prop-
+agation (Sec. 3.1), and output the pixel memory readout P t.
+We employ the object transformer proposed by Cutie [ 12]
+to group the pixel memory by object-level semantics for ro-
+bustness against noise brought by low-level pixel matching.
+7301
+
+=== PAGE 4 ===
+(a)OverallFramework
+(c)TrainingStrategy
+(b)ConsistentMemoryPropagation
+EncoderObject Transformer
+ConsistentMemoryPropagation!!"!
+#!
+#0
+#t
+#N……$!DecoderV alueEncoderUpdate AlphaMemory%!
+MattingDatasyntheticsmallscalew/mattingdetails
+Segment.Datareallargescalew/omattingdetails
+Segmentation Data(w/o GT alpha matte)
+Matting Data(w/ GT alpha matte)
+MattingLoss
+Output
+GT
+GT
+OutputUncertainLossMatAnyone
+CertainLoss&"'#,)#*"Attention+"
+keyvaluekeyqueryCurrentFrameLastFrameMemory'"'"$%)"$%UpdateAlphaMemory!!(every frame)
+UpdateAlphaMemory!!(every r-thframe))"#,"keyvalueAlphaMemoryBank
+Uncertainty Prediction
+MatAnyone
+Figure 3. An overview of MatAnyone. MatAnyone is a memory-based framework for video matting. Given a target segmentation map
+in the ﬁrst frame, our model achieves stable and high-quality matting through consistent memory propagation, with a region-adaptive
+memory fusion module to combine information from the previous and current frame. To overcome the scarcity of real video matting data,
+we incorporate a new training strategy that effectively leverages matting data for ﬁne-grained matting details and segmentation data for
+semantic stability, with designed losses separately.
+The reﬁned memory readout Ot acts as the ﬁnal feature to
+be sent into the decoder for alpha matte prediction. The pre-
+dicted alpha matte M t is then encoded to memory value V t,
+which is used to update the alpha memory bank.
+Due to limitations in the quality and quantity of video
+matting data, training with such data makes it difﬁcult to
+achieve satisfactory stability in core regions. To mitigate
+this, RVM [30] proposes a parallel head for real segmenta-
+tion data alongside the matting head, guiding the network
+to be robust in real-world cases. However, this is not sufﬁ-
+cient, as the matting head itself cannot receive supervision
+from real data. Inspired by the DDC loss [ 32] designed for
+alpha-free image matting, we devise a training strategy for
+core regions, which provides direct supervision to the mat-
+ting head with segmentation data (Sec. 3.2), leading to sub-
+stantial improvements in semantic stability.
+We also propose a practical inference strategy that allow
+for ﬂexible application: a recurrent reﬁnement approach
+applied to the ﬁrst frame, based on the memory-driven
+paradigm, enhancing robustness to the given mask and re-
+ﬁning matting details (Sec. 3.3).
+3.1. Consistent Memory Propagation
+Alpha Memory Bank. In this study, we introduce a con-
+sistent memory propagation (CMP) module speciﬁcally de-
+signed for video matting, as illustrated in Fig. 3(b). Exist-
+ing memory-based VM methods store either segmentation
+masks [ 28] or trimaps [ 19] in memory and use a decoder
+to reﬁne the matting details. Such approaches do not fully
+leverage the stability provided by the memory paradigm
+in boundary regions, leading to instability such as ﬂicker-
+ing. To address this, building on the memory-based frame-
+work [10], our MatAnyone stores the alpha matte in an al-
+pha memory bank to enhance stability in boundary regions.
+Region-Adaptive Memory Fusion. Given the inherent dif-
+ference between the segmentation map (values of 0 or 1)
+and the matting map (values between 0 and 1), the memory-
+matching approach needs to be adjusted. Speciﬁcally, in
+STCN [ 10], memory values for the query frame are based
+on the similarity between query and memory key, assum-
+ing equal importance for all query tokens. However, this
+assumption does not hold for video matting. As shown in
+Fig. 2(a), a query frame can be divided into core and bound-
+ary regions. When compared with frame t  1, only a small
+fraction of tokens in frame t change signiﬁcantly in alpha
+values, with these “large-change” tokens mainly located in
+object boundaries, while the “small-change” tokens reside
+in the core regions. This highlights the need to treat core
+and boundary regions separately to enforce stability.
+Speciﬁcally, we introduce a boundary-area prediction
+module to estimate the change probability Ut of each query
+token for adaptive memory fusion, where higher Ut indi-
+7302
+
+=== PAGE 5 ===
+cates “large-change” regions and lower Ut indicates “small-
+change” regions. The prediction module is lightweight,
+consisting of three convolution layers. We formulate the
+prediction as a binary segmentation problem with loss
+Lbin seg and use the actual alpha change between frame
+t  1 and t as supervision. Speciﬁcally, we deﬁne U GT
+t :
+|M GT
+t1  M GT
+t | >= , where  is a threshold. Using the
+output of the module ˆUt, we compute the binary cross en-
+tropy loss against U GT
+t . During the region-adaptive mem-
+ory fusion process, we apply the sigmoid function on ˆUt to
+transform it as a probability. The ﬁnal pixel memory read-
+out is a soft merge:
+Pt = V m
+t ⇤ Ut + Vt1 ⇤ (1  Ut), (1)
+where Ut 2 [0, 1], V m
+t are current values queried from
+memory bank, and Vt1 are values propagated from the
+last frame. This approach signiﬁcantly improves stability
+in core regions by maintaining internal completeness and a
+clean background (Fig. 2(b) and Fig. 4). It also enhances
+stability in boundary regions, as it directs the network to fo-
+cus on object boundaries with soft alpha values, while the
+memory-based paradigm inherently stabilizes the matched
+values (see Table 3(c)). A detailed analysis is provided in
+the ablation study of Sec. 5.2 and Sec. D.2 (supplementary).
+3.2. Core-area Supervision via Segmentation
+New Training Scheme. Most recent video matting meth-
+ods follow RVM’s approach of using real segmentation data
+to address the limitations of video matting data. In these
+methods, segmentation and matting data are fed to the main
+shared network, but are directed to produce outputs at sep-
+arate heads. Although segmentation data do supervise the
+main network to empower generalizability and robustness
+to the matting model, the stability they provide falls short
+of what a VOS model could achieve. As shown in Fig. 2,
+both RVM and MaGGIe perform signiﬁcantly worse than
+the VOS outputs (white masks on inputs) by XMem [ 8] in
+core areas, where semantic information is key. We believe
+the parallel head training scheme may not fully exploit the
+rich segmentation prior in the data. To address this, we pro-
+pose to supervise the matting head directly with segmenta-
+tion data. Speciﬁcally, we predict the alpha matte for seg-
+mentation inputs and optimize the matting outputs accord-
+ingly, as illustrated in Fig. 3(c).
+Scaled DDC Loss. A natural challenge arises with the
+aforementioned approach: how can we compute the loss
+on matting outputs for segmentation data when there is no
+ground truth (GT) alpha matte? For core areas, the GT la-
+bels are readily available in the segmentation data, where
+an l1 loss sufﬁces, and we denote it as Lcore . The real dif-
+ﬁculty lies in the boundary region. A recent paper proposes
+DDC loss [ 32], which supervises boundary areas using the
+input image without requiring a GT alpha matte.
+LDDC = 1
+N
+NP
+i
+P
+j
+|↵i  ↵j k Ii  Ij k2|,
+j 2 argtopk{kIi  Ij k2}.
+(2)
+However, we ﬁnd that the underlying assumption of this de-
+sign, that k↵i  ↵j k2 = kIi  Ij k2 for ↵i >↵ j , does
+not always hold true. For two image pixels Ii and Ij , their
+difference is given by:
+Ii  Ij =[ ↵iFi +( 1 ↵i)Bi]  [↵j Fj +( 1 ↵j )Bj ], (3)
+where Fi, Bi represent the foreground and background val-
+ues at pixel i, and similarly for Fj and Bj at pixel j. Since
+we impose the constraint j 2 argtopk{kIi  Ij k2}, we
+can assume Fi = Fj = F , Bi = Bj = B within a small
+window. This simpliﬁes Eq. ( 3) to:
+Ii  Ij =( ↵i  ↵j )(F  B). (4)
+This shows that the assumptions for DDC loss hold only
+when |F  B| =1 . To account for this, we devise a scaled
+version as our boundary loss Lboundary :
+Lboundary = 1
+N
+NP
+i
+P
+j
+|(↵i  ↵j )(F  B) k Ii  Ij k2|,
+j 2 argtopk{kIi  Ij k2},
+(5)
+where F is approximated by the average of the top k largest
+pixel values in the small window, and B by the average
+of the top k smallest pixel values. In the ablation study
+(Sec. 5.2), we show that training with our scaled DDC loss
+(Eq. ( 5)) yields more natural matting results than training
+with the original version (Eq. ( 2)), which tends to produce
+segmentation-like jagged and stair-stepped edges.
+3.3. Recurrent Reﬁnement During Inference
+The ﬁrst-frame matte is predicted from the given ﬁrst-frame
+segmentation mask, and its quality will affect the matte pre-
+diction for the subsequent frames. The sequential predic-
+tion in the memory-based paradigm enables recurrent re-
+ﬁnement during inference. Leveraging this mechanism, we
+introduce an optional ﬁrst-frame warm-up module for infer-
+ence. Speciﬁcally, we repeat the ﬁrst frame n times, treating
+each repetition as the initial frame, and use only the nth al-
+pha output as the ﬁrst frame to initialize the alpha memory
+bank. This (1) enhances robustness against the given seg-
+mentation mask and (2) reﬁnes matting details in the ﬁrst
+frame to achieve image-matting quality (see Fig. 6 and Fig.
+E in the supplementary).
+4. Data
+We brieﬂy introduce our new training datasets and bench-
+marks for evaluation, including both synthetic and real-
+world. More details are provided in the appendix (Sec. C).
+7303
+
+=== PAGE 6 ===
+Table 1. Quantitative comparisons on different video matting benchmarks from diverse sources. The best and second-best performances
+are marked in red and orange , respectively. † indicates that MaGGIe [ 20] requires the instance mask as guidance for each frame, while
+our method only requires it in the ﬁrst frame.
+Metrics Auxiliary-free (AF) Methods Mask-guided Methods
+MODNet [21] RVM [ 30] RVM-Large [ 30] AdaM [28] FTP-VM [ 18] MaGGIe † [20] Ours
+VideoMatte(512⇥ 288)
+MAD# 9.41 6.08 5.32 5.30 6.13 5.49 5.15
+MSE# 4.30 1.47 0.62 0.78 1.31 0.60 0.93
+Grad# 1.89 0.88 0.59 0.72 1.14 0.57 0.67
+dtSSD# 2.23 1.36 1.24 1.33 1.60 1.39 1.18
+Conn# 0.81 0.41 0.30 0.30 0.41 0.31 0.26
+VideoMatte(1920⇥ 1080)
+MAD# 11.13 6.57 5.81 4.42 8.00 4.42 4.24
+MSE# 5.54 1.93 0.97 0.39 3.24 0.40 0.33
+Grad# 15.30 10.55 9.65 5.12 23.75 4.03 4.00
+dtSSD# 3.08 1.90 1.78 1.39 2.37 1.31 1.19
+Y outubeMatte(512⇥ 288)
+MAD# 19.37 4.08 3.36 - 3.08 3.54 2.72
+MSE# 16.21 1.97 1.04 - 1.29 1.23 1.01
+Grad# 2.05 1.34 1.03 - 1.16 1.10 0.97
+dtSSD# 2.79 1.81 1.62 - 1.83 1.88 1.60
+Conn# 2.68 0.60 0.50 - 0.41 0.49 0.39
+Y outubeMatte(1920⇥ 1080)
+MAD# 15.29 4.37 3.58 - 6.49 2.37 1.99
+MSE# 12.68 2.25 1.23 - 4.58 0.98 0.71
+Grad# 8.42 15.1 12.97 - 29.78 7.69 8.91
+dtSSD# 2.74 2.28 2.04 - 2.41 1.77 1.65
+4.1. Training Datasets
+To address limitations in video matting datasets in both
+quality and quantity, we collect abundant green screen
+videos, process them with Adobe After Effects, and conduct
+manual selection to remove common artifacts also found in
+VideoMatte240K [ 29] (see Fig. A). Compared to Video-
+Matte240K, our dataset, VM800, is (1) twice as large, (2)
+more diverse in terms of hairstyles, outﬁts, and motion, and
+(3) higher in quality. Ablation studies (Table 3(b) and Sec.
+D.1) further demonstrate the advantages of our dataset.
+4.2. Synthetic Benchmark
+The standard benchmark, VideoMatte [ 29], derived from
+VideoMatte240K, includes only 5 unique foreground
+videos, which is under representative. Additionally, their
+foregrounds lack sufﬁcient boundary details, limiting their
+ability to discern matting precision in boundary regions. To
+create a more comprehensive benchmark, we compile 32
+distinct 1920 ⇥ 1080 green-screen foreground videos from
+Y ouTube, and process them similarly to our training dataset.
+Our benchmark, YouTubeMatte, provides enhanced detail
+representation, as reﬂected by higher Grad [ 37] values.
+4.3. Real-world Benchmark and Metric
+Real-world benchmarks are essential to facilitate the prac-
+tical use of video matting models. Although real-world
+videos lack ground truth (GT) alpha mattes, we can generate
+frame-wise segmentation masks as GT for core areas ben-
+eﬁting from the high capability of existing VOS methods.
+Speciﬁcally, we select a subset of 25 real-world videos [ 30]
+(100 frames each) with high-quality core GT masks veriﬁed
+manually. MAD, MSE, and dtSSD [ 14] are then calculated
+at the core region as core region metrics, representing se-
+mantic stability that is critical for visual perception.
+5. Experiments
+Training Schedule. Stage 1. Following the practice of
+RVM [ 30], we start by training the entire model on our
+VM800 for 80k iterations. The sequence length is initially
+set to 3 and extended to 8 with increasing sampling intervals
+for more complex scenarios. Stage 2. As the key stage, we
+apply the core supervision training strategy introduced in
+Section 3.2. Real segmentation data COCO [ 31], SPD [ 40]
+and Y ouTubeVIS [47] are added for supervising the matting
+head. The loss function applied are speciﬁed in Section 3.2.
+Stage 3. Finally, we ﬁne-tune the model with image matting
+data D646 [35] and AIM [ 23] for ﬁner matting details.
+7304
+
+=== PAGE 7 ===
+VideoFrameRVMFTP-VMMaGGIeOurs
+FrametFramet+5
+Figure 4. Qualitative comparisons on real-world videos. Our MatAnyone signiﬁcantly outperforms existing auxiliary-free (RVM [ 30]) and
+mask-guided (FTP-VM [19] and MaGGIe [20]) approaches in both detail extraction and semantic accuracy. For the lowest row, while other
+methods all miss out on important body parts ( i.e., head) and mistakenly take background pixels as foreground (due to similar colors), thus
+generating messy outputs, our method presents an accurate and visually clean output by even identifying the shadow near the boundary.
+5.1. Comparisons
+We compare MatAnyone with several state-of-the-art meth-
+ods, including auxiliary-free (AF) methods: MODNet [ 21],
+RVM [30], and RVM-Large [ 30], and mask-guided meth-
+ods: AdaM [ 28], FTP-VM [ 19], and MaGGIe [ 20].
+Table 2. Quantitative comparisons on real-world benchmark [ 30].
+The best and second performances are marked in red and
+orange , respectively.
+Methods MAD# MSE# dtSSD#
+Auxiliary-free
+MODNet [21] 11.67 10.12 3.37
+RVM [30] 1.21 0.77 1.43
+RVM-Large [30] 0.95 0.50 1.30
+Mask-guided
+FTP-VM [19] 4.77 4.11 1.68
+MaGGIe [20] 1.94 1.53 1.63
+MatAnyone (Ours) 0.14 0.10 0.89
+5.1.1 Quantitative Evaluations
+Synthetic Benchmarks. For a comprehensive evaluation
+on synthetic benchmarks, we employ MAD (mean abso-
+lute difference) and MSE (mean squared error) for seman-
+tic accuracy, Grad (spatial gradient) [ 37] for detail extrac-
+tion, Conn (connectivity) [ 37] for perceptual quality, and
+dtSSD [14] for temporal coherence. In Table 1, our method
+achieves the best MAD and dtSSD across all datasets at both
+high and low resolutions, demonstrating exceptional spatial
+accuracy for alpha mattes and remarkable temporal stabil-
+ity. Apart from accuracy and stability, our method achieves
+the best Conn on both benchmarks, indicating its superior
+visual quality (Fig. 4 and Sec. D.5 in the appendix).
+Real Benchmark. For evaluation on real benchmarks, we
+use the core region metrics in Section 4.3. In Table 2,
+Table 3. Ablation study of the new training dataset (New Data),
+consistent memory propagation module (CMP), and new training
+scheme (New Training) on real benchmark (about 1080p).
+Exp. New Data CMP New TrainingMAD# MSE# dtSSD#
+(a) 3.16 2.65 1.37
+(b) X 2.55 2.25 1.36
+(c) XX 1.85 1.67 1.25
+(d) XX X 0.42 0.34 0.94
+our method demonstrates superior generalizability on real
+cases, achieving the best metric values with a substantial
+margin over both auxiliary-free and mask-guided methods.
+5.1.2 Qualitative Evaluations
+Visual results on real-world videos are in Fig. 4 and Fig. 5.
+General Video Matting. MatAnyone outperforms existing
+auxiliary-free and mask-guided approaches in both detail
+extraction (boundary) and semantic accuracy ( core). Fig. 4
+shows that MatAnyone excels at ﬁne-grained details ( e.g.,
+hair in the middle row) and differentiates full human body
+against complicated or ambiguous backgrounds when fore-
+ground and background colors are similar ( e.g., last row).
+Instance Video Matting. The assignment of target object
+at the ﬁrst frame gives us ﬂexibility for instance video mat-
+ting. In Fig. 5, although MaGGIe [ 20] beneﬁts from us-
+ing instance masks as guidance for each frame, our method
+demonstrates superior performance in instance video mat-
+ting, particularly in maintaining object tracking stability and
+preserving ﬁne-grained details of alpha mattes.
+5.2. Ablation Study
+Enhancement from New Training Data. In Table 3, by
+comparing (a) and (b), it is observed that training with
+new data noticeably improves the semantic performance
+7305
+
+=== PAGE 8 ===
+MaGGIeOursVideoFrameInstance#1
+#1#3#2Instance#2Instance#3
+#1#3#2
+MaGGIeOursVideoFrameInstance#1Instance#2Instance#3Figure 5. Quantitative comparisons with MaGGIe [ 20] on instance video matting. Despite MaGGIe using instance mask as guidance for
+each frame, our method shows better performance, achieving better stability in object tracking and ﬁner alpha matte details.
+VideoFrameSegmentationMask
+!!=1!!=2!!=5!!=10Figure 6. Improvement with Recurrent reﬁnement. (Zoom-in for best view)
+VideoFramesDDCLoss
+ScaledDDClossFigure 7. Comparison of matting results training with original
+DDC loss [ 32] and with scaled DDC loss, where the latter gives
+more stable and natural matting results.
+with decreased MAD and MSE, showing that our newly-
+collected VM800 indeed contributes to robust training with
+its upgraded quantity, quality, and diversity.
+Effectiveness of Consistent Memory Propagation. We
+further investigate the effectiveness of the consistent mem-
+ory propagation (CMP) module. From Table 3 (b) to (c), im-
+provement can be seen across all metrics with CMP added,
+indicating its effectiveness in improving semantic stability
+and temporal coherency. In particular, dtSSD in (c) is al-
+ready lower than all the other methods in Table 2, showing
+the superiority of CMP in terms of temporal consistency.
+Effectiveness of New Training Scheme. Our new training
+scheme brings our model to the next level with a noticeable
+improvement in all metrics. It already outperforms all the
+other methods in Table 2 without further ﬁne-tuning.
+Scaled DDC Loss. We examine the merit of the scaled
+version of DDC loss by training with Lcore and Lboundary
+only to maximize its effect. In Fig. 7, training with vanilla
+DDC loss produces segmentation-like jaggedness, espe-
+cially among the boundary region. Our scaled DDC loss
+yields more stable and natural matting results.
+Effectiveness of Recurrent Reﬁnement. Fig. 6 shows the
+effectiveness of recurrent reﬁnement in a progressive man-
+ner. Given a rough segmentation mask, our method can pro-
+duce alpha matte with descent details within 10 iterations.
+6. Conclusion
+We introduce MatAnyone, a practical framework for target-
+assigned human video matting that ensures stable and ac-
+curate results across diverse real-world scenarios. Our
+method leverages a region-adaptive memory fusion ap-
+proach, which combines memory from previous frames to
+maintain semantic consistency in core areas while preserv-
+ing ﬁne details along object boundaries. With a new train-
+ing dataset that is larger, high-quality, and diverse and a
+novel training strategy that effectively leverages segmenta-
+tion data, MatAnyone achieves robust and stable matting
+performance, even with complex backgrounds. These ad-
+vancements position MatAnyone a practical solution for
+real-world video matting, also setting a solid foundation for
+future research in memory-based video processing.
+7306
+
+=== PAGE 9 ===
+Acknowledgement. This study is supported under the
+RIE2020 Industry Alignment Fund – Industry Collabora-
+tion Projects (IAF-ICP) Funding Initiative, as well as cash
+and in-kind contribution from the industry partner(s).
+References
+[1] Nicolas Ballas, Li Y ao, Christopher J Pal, and Aaron
+Courville. Delving deeper into convolutional networks for
+learning video representations. In ICLR, 2016. 3
+[2] Andreas Blattmann, Robin Rombach, Huan Ling, Tim Dock-
+horn, Seung Wook Kim, Sanja Fidler, and Karsten Kreis.
+Align your Latents: High-resolution video synthesis with la-
+tent diffusion models. In CVPR, 2023. 3
+[3] Huanqia Cai, Fanglei Xue, Lele Xu, and Lili Guo. Trans-
+Matting: Enhancing transparent objects matting with trans-
+formers. In ECCV, 2022. 3
+[4] Kelvin C.K. Chan, Xintao Wang, Ke Y u, Chao Dong, and
+Chen Change Loy. BasicVSR: The search for essential com-
+ponents in video super-resolution and beyond. In CVPR,
+2021. 3
+[5] Kelvin CK Chan, Shangchen Zhou, Xiangyu Xu, and
+Chen Change Loy. Improving video super-resolution with
+enhanced propagation and alignment. In CVPR, 2022.
+[6] Kelvin CK Chan, Shangchen Zhou, Xiangyu Xu, and
+Chen Change Loy. Investigating tradeoffs in real-world
+video super-resolution. In CVPR, 2022. 3
+[7] Haoxin Chen, Menghan Xia, Yingqing He, Y ong Zhang,
+Xiaodong Cun, Shaoshu Y ang, Jinbo Xing, Y aofang Liu,
+Qifeng Chen, Xintao Wang, et al. VideoCrafter1: Open
+diffusion models for high-quality video generation. arXiv
+preprint arXiv:2310.19512, 2023. 3
+[8] Ho Kei Cheng and Alexander G. Schwing. XMem: Long-
+term video object segmentation with an atkinson-shiffrin
+memory model. In ECCV, 2022. 2, 3, 5
+[9] Ho Kei Cheng, Y u-Wing Tai, and Chi-Keung Tang. Modular
+interactive video object segmentation: Interaction-to-mask,
+propagation and difference-aware fusion. In CVPR, 2021.
+[10] Ho Kei Cheng, Y u-Wing Tai, and Chi-Keung Tang. Rethink-
+ing space-time networks with improved memory coverage
+for efﬁcient video object segmentation. In NeurIPs, 2021. 2,
+3, 4
+[11] Ho Kei Cheng, Seoung Wug Oh, Brian Price, Alexander
+Schwing, and Joon-Y oung Lee. Tracking anything with de-
+coupled video segmentation. In ICCV, 2023.
+[12] Ho Kei Cheng, Seoung Wug Oh, Brian Price, Joon-Y oung
+Lee, and Alexander Schwing. Putting the object back into
+video object segmentation. In CVPR, 2024. 2, 3
+[13] Y uren Cong, Mengmeng Xu, Christian Simon, Shoufa Chen,
+Jiawei Ren, Y anping Xie, Juan-Manuel Perez-Rua, Bodo
+Rosenhahn, Tao Xiang, and Sen He. FLA TTEN: optical
+ﬂow-guided attention for consistent text-to-video editing. In
+ICLR, 2024. 3
+[14] Mikhail Erofeev, Y ury Gitman, Dmitriy S V atolin, Alexey
+Fedorov, and Jue Wang. Perceptually motivated benchmark
+for video matting. In BMVC, 2015. 6, 7
+[15] Michal Geyer, Omer Bar-Tal, Shai Bagon, and Tali Dekel.
+TokenFlow: Consistent diffusion features for consistent
+video editing. In ICLR, 2024. 3
+[16] Li Hu, Peng Zhang, Bang Zhang, Pan Pan, Yinghui Xu,
+and Rong Jin. Learning position and target consistency for
+memory-based video object segmentation. In CVPR, 2021.
+3
+[17] Y uan-Ting Hu, Jia-Bin Huang, and Alexander Schwing.
+MaskRNN: Instance level video object segmentation. In
+NeurIPS, 2017. 2
+[18] Wei-Lun Huang and Ming-Sui Lee. End-to-end video mat-
+ting with trimap propagation. In CVPR, 2023. 6
+[19] Wei-Lun Huang and Ming-Sui Lee. End-to-end video mat-
+ting with trimap propagation. In CVPR, 2023. 2, 3, 4, 7
+[20] Chuong Huynh, Seoung Wug Oh, , Abhinav Shrivastava, and
+Joon-Y oung Lee. MaGGIe: Masked guided gradual human
+instance matting. In CVPR, 2024. 2, 3, 6, 7, 8
+[21] Zhanghan Ke, Jiayu Sun, Kaican Li, Qiong Y an, and Ryn-
+son W.H. Lau. MODNet: Real-time trimap-free portrait mat-
+ting via objective decomposition. In AAAI, 2022. 2, 3, 6, 7
+[22] Alexander Kirillov, Eric Mintun, Nikhila Ravi, Hanzi Mao,
+Chloe Rolland, Laura Gustafson, Tete Xiao, Spencer White-
+head, Alexander C Berg, Wan-Y en Lo, et al. Segment any-
+thing. In ICCV, 2023. 3
+[23] Jizhizi Li, Jing Zhang, and Dacheng Tao. Deep automatic
+natural image matting. In IJCAI, 2021. 6
+[24] Jiachen Li, Vidit Goel, Marianna Ohanyan, Shant
+Navasardyan, Y unchao Wei, and Humphrey Shi. VMFormer:
+End-to-end video matting with transformer. In WACV, 2024.
+2, 3
+[25] Jiachen Li, Roberto Henschel, Vidit Goel, Marianna
+Ohanyan, Shant Navasardyan, and Humphrey Shi. Video
+instance matting. In WACV, 2024. 3
+[26] Jiachen Li, Jitesh Jain, and Humphrey Shi. Matting Any-
+thing. In CVPR, 2024. 3
+[27] Xiangtai Li, Haobo Y uan, Wenwei Zhang, Guangliang
+Cheng, Jiangmiao Pang, and Chen Change Loy. Tube-link:
+A ﬂexible cross tube framework for universal video segmen-
+tation. In ICCV, 2023. 3
+[28] Chung-Ching Lin, Jiang Wang, Kun Luo, Kevin Lin, Linjie
+Li, Lijuan Wang, and Zicheng Liu. Adaptive human matting
+for dynamic videos. In CVPR, 2023. 2, 3, 4, 6, 7
+[29] Shanchuan Lin, Andrey Ryabtsev, Soumyadip Sengupta,
+Brian L Curless, Steven M Seitz, and Ira Kemelmacher-
+Shlizerman. Real-time high-resolution background matting.
+In CVPR, 2021. 2, 6
+[30] Shanchuan Lin, Linjie Y ang, Imran Saleemi, and Soumyadip
+Sengupta. Robust high-resolution video matting with tempo-
+ral guidance. In WACV, 2022. 1, 2, 3, 4, 6, 7
+[31] Tsung-Yi Lin, Michael Maire, Serge Belongie, James Hays,
+Pietro Perona, Deva Ramanan, Piotr Doll ´ar, and C Lawrence
+Zitnick. Microsoft coco: Common objects in context. In
+ECCV, 2014. 6
+[32] Wenze Liu, Zixuan Y e, Hao Lu, Zhiguo Cao, and Xiangyu
+Y ue. Training matting models without alpha labels. arXiv
+preprint arXiv:2408.10539, 2024. 2, 4, 5, 8
+[33] Seoung Wug Oh, Joon-Y oung Lee, Ning Xu, and Seon Joo
+Kim. Video object segmentation using space-time memory
+networks. In ICCV, 2019. 3
+[34] Seoung Wug Oh, Joon-Y oung Lee, Ning Xu, and Seon Joo
+Kim. Video object segmentation using space-time memory
+networks. In ICCV, 2019. 2
+7307
+
+=== PAGE 10 ===
+[35] Y u Qiao, Y uhao Liu, Xin Y ang, Dongsheng Zhou, Mingliang
+Xu, Qiang Zhang, and Xiaopeng Wei. Attention-guided hier-
+archical structure aggregation for image matting. In CVPR,
+2020. 3, 6
+[36] Nikhila Ravi, V alentin Gabeur, Y uan-Ting Hu, Ronghang
+Hu, Chaitanya Ryali, Tengyu Ma, Haitham Khedr, Roman
+R¨adle, Chloe Rolland, Laura Gustafson, Eric Mintun, Junt-
+ing Pan, Kalyan V asudev Alwala, Nicolas Carion, Chao-
+Y uan Wu, Ross Girshick, Piotr Doll´ar, and Christoph Feicht-
+enhofer. SAM 2: Segment anything in images and videos.
+arXiv preprint arXiv:2408.00714, 2024. 3
+[37] Christoph Rhemann, Carsten Rother, Jue Wang, Margrit
+Gelautz, Pushmeet Kohli, and Pamela Rott. A perceptually
+motivated online benchmark for image matting. In CVPR,
+2009. 6, 7
+[38] Hongje Seong, Junhyuk Hyun, and Euntai Kim. Kernelized
+memory network for video object segmentation. In ECCV,
+2020. 3
+[39] Xiaoyong Shen, Xin Tao, Hongyun Gao, Chao Zhou, and
+Jiaya Jia. Deep automatic portrait matting. In ECCV, 2016.
+3
+[40] Pavel Tokmakov, Karteek Alahari, and Cordelia Schmid.
+Learning video object segmentation with visual memory. In
+ICCV, 2017. 6
+[41] Haochen Wang, Xiaolong Jiang, Haibing Ren, Y ao Hu, and
+Song Bai. Swiftnet: Real-time video object segmentation. In
+CVPR, 2021. 3
+[42] Xintao Wang, Kelvin C.K. Chan, Ke Y u, Chao Dong, and
+Chen Change Loy. EDVR: Video restoration with enhanced
+deformable convolutional networks. In CVPRW, 2019. 3
+[43] Xiang Wang, Hangjie Y uan, Shiwei Zhang, Dayou Chen, Ji-
+uniu Wang, Yingya Zhang, Y ujun Shen, Deli Zhao, and Jin-
+gren Zhou. VideoComposer: Compositional video synthesis
+with motion controllability. In NeurIPS, 2024. 3
+[44] Y aohui Wang, Xinyuan Chen, Xin Ma, Shangchen Zhou,
+Ziqi Huang, Yi Wang, Ceyuan Y ang, Yinan He, Jiashuo Y u,
+Peiqing Y ang, Y uwei Guo, Tianxing Wu, Chenyang Si, Y um-
+ing Jiang, Cunjian Chen, Chen Change Loy, Bo Dai, Dahua
+Lin, Y u Qiao, and Ziwei Liu. LaVie: High-quality video
+generation with cascaded latent diffusion models. In IJCV,
+2024. 3
+[45] Jay Zhangjie Wu, Yixiao Ge, Xintao Wang, Stan Weixian
+Lei, Y uchao Gu, Y ufei Shi, Wynne Hsu, Ying Shan, Xiaohu
+Qie, and Mike Zheng Shou. Tune-A-Video: One-shot tuning
+of image diffusion models for text-to-video generation. In
+ICCV, 2023. 3
+[46] Haozhe Xie, Hongxun Y ao, Shangchen Zhou, Shengping
+Zhang, and Wenxiu Sun. Efﬁcient regional memory network
+for video object segmentation. In CVPR, 2021. 2, 3
+[47] Linjie Y ang, Y uchen Fan, and Ning Xu. Video instance seg-
+mentation. In ICCV, 2019. 6
+[48] Shuai Y ang, Yifan Zhou, Ziwei Liu, , and Chen Change
+Loy. Rerender A Video: Zero-shot text-guided video-to-
+video translation. In SIGGRAPH Asia, 2023. 3
+[49] Jingfeng Y ao, Xinggang Wang, Shusheng Y ang, and
+Baoyuan Wang. ViTMatte: Boosting image matting with
+pre-trained plain vision transformers. Information Fusion ,
+2024. 3
+[50] Jingfeng Y ao, Xinggang Wang, Lang Y e, and Wenyu Liu.
+Matte Anything: Interactive natural image matting with seg-
+ment anything model. Image and Vision Computing , page
+105067, 2024. 3
+[51] Y unke Zhang, Lixue Gong, Lubin Fan, Peiran Ren, Qixing
+Huang, Hujun Bao, and Weiwei Xu. A late fusion cnn for
+digital matting. In CVPR, 2019. 3
+[52] Chong Zhou, Xiangtai Li, Chen Change Loy, and Bo Dai.
+EdgeSAM: Prompt-in-the-loop distillation for on-device de-
+ployment of sam. arXiv preprint, 2023. 3
+[53] Shangchen Zhou, Jiawei Zhang, Jinshan Pan, Haozhe Xie,
+Wangmeng Zuo, and Jimmy Ren. Spatio-temporal ﬁlter
+adaptive network for video deblurring. In ICCV, 2019. 3
+[54] Shangchen Zhou, Chongyi Li, Kelvin C. K. Chan, and
+Chen Change Loy. ProPainter: Improving propagation and
+transformer for video inpainting. In ICCV, 2023. 3
+[55] Shangchen Zhou, Peiqing Y ang, Jianyi Wang, Yihang Luo,
+and Chen Change Loy. Upscale-A-Video: Temporal-
+consistent diffusion model for real-world video super-
+resolution. In CVPR, 2024. 3
+[56] Bingke Zhu, Yingying Chen, Jinqiao Wang, Si Liu, Bo
+Zhang, and Ming Tang. Fast deep matting for portrait ani-
+mation on mobile phone. In ACMMM, 2017. 3
+[57] Xueyan Zou, Jianwei Y ang, Hao Zhang, Feng Li, Linjie Li,
+Jianfeng Wang, Lijuan Wang, Jianfeng Gao, and Y ong Jae
+Lee. Segment everything everywhere all at once. In NeurIPS,
+2024. 3
+7308

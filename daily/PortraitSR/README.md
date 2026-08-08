@@ -1,8 +1,8 @@
 # PortraitSR 人像超分与人脸细节恢复研究库
 
-截至 2026-08-06：45 篇核心候选，30 篇来自 2025-2026，18 篇 PDF 已完成
-页数与 SHA-256 校验，27 篇待处理；23 项数据集记录，20 项官方页已归档；
-12 篇论文的公司归属已经论文作者机构证据核验。
+截至 2026-08-07：在原 45 篇 PortraitSR 核心候选基础上，新增 11 篇已校验的
+mask conditioning、human parsing、matting、重光照、阴影编辑和 virtual try-on PDF；
+23 项数据集记录、20 项官方页快照及原有公司归属证据继续保留。
 
 Scope:
 
@@ -23,7 +23,7 @@ and the paper that introduced the dataset.
 ## 当前入口
 
 - [论文与数据集索引](PortraitSR论文与数据集索引.xlsx)：论文、机构/公司归属、原文证据、数据集许可和检索来源。
-- [Word 阶段性洞察](report/人像超分与人脸细节恢复_阶段性洞察_20260806.docx)：含 18 张原文架构、数据、退化、消融或效果页面；新增 LOSS、数据制作和四阶段训练章节。
+- [Word 阶段性洞察](report/人像超分与人脸细节恢复_阶段性洞察_20260806.docx)：新增 Mask 条件专章、区域 LOSS、数据制作、多任务训练及原文架构/效果页。
 - [Markdown 阶段性洞察](report/人像超分与人脸细节恢复_阶段性洞察_20260806.md)：可搜索、可追踪来源的报告正文，区分论文事实与跨论文综合建议。
 - [论文 PDF](papers/)：按任务线整理的已校验论文原文。
 - [全文与页码证据](text/)：带页码全文和每篇论文的图表候选证据。
@@ -31,6 +31,9 @@ and the paper that introduced the dataset.
 - [数据集官方页快照](datasets/official_docs/)：仅保存页面和元数据，不包含受限人脸数据。
 - [PDF 校验清单](metadata/download_manifest.json)：下载状态、页数、字节数和 SHA-256。
 - [训练证据矩阵](metadata/training_evidence_matrix.json)：11 篇重点论文的训练阶段、冻结/解冻模块、数据构造、退化、LOSS、优化器、页码和证据等级。
+- [Mask 论文 PDF](papers/07_mask_conditioning/)：已校验的空间条件、人像效果和边界建模论文原文。
+- [Mask 原文图页](figures/mask_conditioning/)：15 张架构、解析、matting、重光照和阴影效果原文页面。
+- [Mask 证据矩阵](metadata/mask_conditioning_evidence_matrix.json)：14 篇论文的 mask 表示、注入方式、LOSS、训练数据、局限和原文页码。
 
 ## Evidence rules
 

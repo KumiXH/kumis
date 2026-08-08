@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/9krnuI0E9B3DB/OZVC49NLHHpaI</id>
+  <title>arXiv Query: search_query=ti:"Generative Portrait Shadow Removal"&amp;id_list=&amp;start=0&amp;max_results=5</title>
+  <updated>2026-08-07T04:05:11Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=ti:%22Generative+Portrait+Shadow+Removal%22&amp;start=0&amp;max_results=5&amp;id_list=" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>5</opensearch:itemsPerPage>
+  <opensearch:totalResults>1</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/2410.05525v1</id>
+    <title>Generative Portrait Shadow Removal</title>
+    <updated>2024-10-07T22:09:22Z</updated>
+    <link href="https://arxiv.org/abs/2410.05525v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2410.05525v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>We introduce a high-fidelity portrait shadow removal model that can effectively enhance the image of a portrait by predicting its appearance under disturbing shadows and highlights. Portrait shadow removal is a highly ill-posed problem where multiple plausible solutions can be found based on a single image. While existing works have solved this problem by predicting the appearance residuals that can propagate local shadow distribution, such methods are often incomplete and lead to unnatural predictions, especially for portraits with hard shadows. We overcome the limitations of existing local propagation methods by formulating the removal problem as a generation task where a diffusion model learns to globally rebuild the human appearance from scratch as a condition of an input portrait image. For robust and natural shadow removal, we propose to train the diffusion model with a compositional repurposing framework: a pre-trained text-guided image generation model is first fine-tuned to harmonize the lighting and color of the foreground with a background scene by using a background harmonization dataset; and then the model is further fine-tuned to generate a shadow-free portrait image via a shadow-paired dataset. To overcome the limitation of losing fine details in the latent diffusion model, we propose a guided-upsampling network to restore the original high-frequency details (wrinkles and dots) from the input image. To enable our compositional training framework, we construct a high-fidelity and large-scale dataset using a lightstage capturing system and synthetic graphics simulation. Our generative framework effectively removes shadows caused by both self and external occlusions while maintaining original lighting distribution and high-frequency details. Our method also demonstrates robustness to diverse subjects captured in real environments.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-10-07T22:09:22Z</published>
+    <arxiv:comment>17 pages, siggraph asia, TOG</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Jae Shin Yoon</name>
+    </author>
+    <author>
+      <name>Zhixin Shu</name>
+    </author>
+    <author>
+      <name>Mengwei Ren</name>
+    </author>
+    <author>
+      <name>Xuaner Zhang</name>
+    </author>
+    <author>
+      <name>Yannick Hold-Geoffroy</name>
+    </author>
+    <author>
+      <name>Krishna Kumar Singh</name>
+    </author>
+    <author>
+      <name>He Zhang</name>
+    </author>
+  </entry>
+</feed>
