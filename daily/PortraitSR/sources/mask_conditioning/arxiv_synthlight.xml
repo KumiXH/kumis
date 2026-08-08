@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/NPG8tXI6CxGPL4A+h3HDzEgta90</id>
+  <title>arXiv Query: search_query=ti:"SynthLight"&amp;id_list=&amp;start=0&amp;max_results=5</title>
+  <updated>2026-08-07T04:05:03Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=ti:%22SynthLight%22&amp;start=0&amp;max_results=5&amp;id_list=" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>5</opensearch:itemsPerPage>
+  <opensearch:totalResults>1</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/2501.09756v1</id>
+    <title>SynthLight: Portrait Relighting with Diffusion Model by Learning to Re-render Synthetic Faces</title>
+    <updated>2025-01-16T18:59:48Z</updated>
+    <link href="https://arxiv.org/abs/2501.09756v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2501.09756v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>We introduce SynthLight, a diffusion model for portrait relighting. Our approach frames image relighting as a re-rendering problem, where pixels are transformed in response to changes in environmental lighting conditions. Using a physically-based rendering engine, we synthesize a dataset to simulate this lighting-conditioned transformation with 3D head assets under varying lighting. We propose two training and inference strategies to bridge the gap between the synthetic and real image domains: (1) multi-task training that takes advantage of real human portraits without lighting labels; (2) an inference time diffusion sampling procedure based on classifier-free guidance that leverages the input portrait to better preserve details. Our method generalizes to diverse real photographs and produces realistic illumination effects, including specular highlights and cast shadows, while preserving the subject's identity. Our quantitative experiments on Light Stage data demonstrate results comparable to state-of-the-art relighting methods. Our qualitative results on in-the-wild images showcase rich and unprecedented illumination effects. Project Page: \url{https://vrroom.github.io/synthlight/}</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.GR" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-01-16T18:59:48Z</published>
+    <arxiv:comment>27 pages, 25 figures, Project Page https://vrroom.github.io/synthlight/</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Sumit Chaturvedi</name>
+    </author>
+    <author>
+      <name>Mengwei Ren</name>
+    </author>
+    <author>
+      <name>Yannick Hold-Geoffroy</name>
+    </author>
+    <author>
+      <name>Jingyuan Liu</name>
+    </author>
+    <author>
+      <name>Julie Dorsey</name>
+    </author>
+    <author>
+      <name>Zhixin Shu</name>
+    </author>
+  </entry>
+</feed>

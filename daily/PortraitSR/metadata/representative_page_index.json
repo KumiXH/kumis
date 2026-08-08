@@ -1,0 +1,146 @@
+[
+  {
+    "key": "tiger",
+    "output_key": "tiger",
+    "page": 5,
+    "purpose": "Xiaomi TIGER architecture",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\04_video_face\\tiger_2606.24336.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\representative_pages\\tiger_page_05.png"
+  },
+  {
+    "key": "svfr",
+    "output_key": "svfr",
+    "page": 4,
+    "purpose": "Tencent SVFR pipeline",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\04_video_face\\svfr_2501.01235.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\representative_pages\\svfr_page_04.png"
+  },
+  {
+    "key": "osdface",
+    "output_key": "osdface",
+    "page": 3,
+    "purpose": "vivo OSDFace training framework",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\05_efficiency\\osdface_2411.17163.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\representative_pages\\osdface_page_03.png"
+  },
+  {
+    "key": "authface",
+    "output_key": "authface",
+    "page": 4,
+    "purpose": "vivo and Ant Group AuthFace overview",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\01_single_face\\authface_2410.09864.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\representative_pages\\authface_page_04.png"
+  },
+  {
+    "key": "hdrface",
+    "output_key": "hdrface",
+    "page": 4,
+    "purpose": "vivo HDRFace framework",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\01_single_face\\hdrface_2605.14821.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\representative_pages\\hdrface_page_04.png"
+  },
+  {
+    "key": "heads_up",
+    "output_key": "heads_up",
+    "page": 3,
+    "purpose": "Topaz Labs HeadsUp portrait SR pipeline",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\02_portrait_scene\\heads_up_2510.09924.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\representative_pages\\heads_up_page_03.png"
+  },
+  {
+    "key": "heads_up",
+    "output_key": "heads_up_results",
+    "page": 6,
+    "purpose": "HeadsUp portrait SR qualitative results",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\02_portrait_scene\\heads_up_2510.09924.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\representative_pages\\heads_up_results_page_06.png"
+  },
+  {
+    "key": "heads_up",
+    "output_key": "heads_up_training",
+    "page": 16,
+    "purpose": "HeadsUp mixed-data training and PortraitSR-4K details",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\02_portrait_scene\\heads_up_2510.09924.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\representative_pages\\heads_up_training_page_16.png"
+  },
+  {
+    "key": "heads_up",
+    "output_key": "heads_up_dataset_details",
+    "page": 17,
+    "purpose": "HeadsUp PortraitSR-4K filtering and reference-pair construction",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\02_portrait_scene\\heads_up_2510.09924.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\representative_pages\\heads_up_dataset_details_page_17.png"
+  },
+  {
+    "key": "iconface",
+    "output_key": "iconface",
+    "page": 2,
+    "purpose": "IConFace FLUX.2 framework",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\03_reference_identity\\iconface_2605.02814.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\representative_pages\\iconface_page_02.png"
+  },
+  {
+    "key": "iconface",
+    "output_key": "iconface_results",
+    "page": 5,
+    "purpose": "IConFace localized identity-detail results",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\03_reference_identity\\iconface_2605.02814.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\representative_pages\\iconface_results_page_05.png"
+  },
+  {
+    "key": "geomar",
+    "output_key": "geomar",
+    "page": 3,
+    "purpose": "GeoMAR architecture",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\01_single_face\\geomar_2608.03923.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\representative_pages\\geomar_page_03.png"
+  },
+  {
+    "key": "cfrnet",
+    "output_key": "cfrnet",
+    "page": 3,
+    "purpose": "CFRNet edge training framework",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\05_efficiency\\cfrnet_2606.06850.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\representative_pages\\cfrnet_page_03.png"
+  },
+  {
+    "key": "authface",
+    "output_key": "authface_data",
+    "page": 3,
+    "purpose": "AuthFace professional portrait data and photography annotations",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\01_single_face\\authface_2410.09864.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\representative_pages\\authface_data_page_03.png"
+  },
+  {
+    "key": "tiger",
+    "output_key": "tiger_dataset",
+    "page": 8,
+    "purpose": "TIGER video filtering and dataset construction",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\04_video_face\\tiger_2606.24336.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\representative_pages\\tiger_dataset_page_08.png"
+  },
+  {
+    "key": "tiger",
+    "output_key": "tiger_training_ablation",
+    "page": 12,
+    "purpose": "TIGER progressive training ablation",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\04_video_face\\tiger_2606.24336.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\representative_pages\\tiger_training_ablation_page_12.png"
+  },
+  {
+    "key": "restorerid",
+    "output_key": "restorerid_degradation",
+    "page": 4,
+    "purpose": "RestorerID second-order and RAW-ISP degradation",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\03_reference_identity\\restorerid_2411.14125.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\representative_pages\\restorerid_degradation_page_04.png"
+  },
+  {
+    "key": "restorerid",
+    "output_key": "restorerid_training",
+    "page": 8,
+    "purpose": "RestorerID two-stage training ablation",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\03_reference_identity\\restorerid_2411.14125.pdf",
+    "image": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\figures\\representative_pages\\restorerid_training_page_08.png"
+  }
+]

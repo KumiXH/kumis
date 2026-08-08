@@ -1,0 +1,102 @@
+{
+  "key": "personalized_fsr",
+  "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\03_reference_identity\\personalized_fsr_2508.10937.pdf",
+  "page_count": 9,
+  "first_page_excerpt": "Personalized Face Super-Resolution with Identity Decoupling and Fitting\nJiarui Yang1 2, Hang Guo2, Wen Huang2, Tao Dai3, Shutao Xia2\n1 Nankai University 2 Tsinghua University 2 Shenzhen University\nAbstract\nIn recent years, face super-resolution (FSR) methods have\nachieved remarkable progress, generally maintaining high\nimage fidelity and identity (ID) consistency under standard\nsettings. However, in extreme degradation scenarios (e.g.,\nscale > 8×), critical attributes and ID information are of-\nten severely lost in the input image, making it difficult for\nconventional models to reconstruct realistic and ID-consistent\nfaces. Existing methods tend to generate hallucinated faces\nunder such conditions, producing restored images lacking\nauthentic ID constraints. To address this challenge, we pro-\npose a novel FSR method with Identity Decoupling and Fit-\nting (IDFSR), designed to enhance ID restoration under large\nscaling factors while mitigating hallucination effects. Our ap-\nproach involves three key designs: 1) Masking the facial re-\ngion in the low-resolution (LR) image to eliminate unreliable\nID cues; 2) Warping a reference image to align with the\nLR input, providing style guidance; 3) Leveraging ID em-\nbeddings extracted from ground truth (GT) images for fine-\ngrained ID modeling and personalized adaptation. We first\npretrain a diffusion-based model to explicitly decouple style\nand ID by forcing it to reconstruct masked LR face regions\nusing both style and identity embeddings. Subsequently, we\nfreeze most network parameters and perform lightweight\nfine-tuning of the ID embedding using a small set of target\nID images. This embedding encodes fine-grained facial at-\ntributes and precise ID information, significantly improving\nboth ID consistency and perceptual quality. Extensive quan-\ntitative evaluations and visual comparisons demonstrate that\nthe proposed IDFSR substantially outperforms existing ap-\nproaches under extreme degradation, particularly achieving\nsuperior performance on ID consistency.\nIntroduction\nFace super-resolution (FSR) has significant application\nvalue in downstream tasks such as identity (ID) recognition\nand facial analysis (Jiang et al. 2021; Zhang, Wu, and Chen\n2020). In scenarios with strict ID requirements, FSR models\nmust not only enhance image quality but also maintain ID\nconsistency. Existing FSR methods are capable of produc-\ning high-fidelity, ID-consistent face images under moderate\ndegradation (Chen et al. 2018; Zhou et al. 2022). However,\nunder extreme degradation conditions (e.g., scaling factors\nCopyright © 2026, Association for the Advancement of Artificial\nIntelligence (www.aaai.org). All rights reserved.\nFigure 1: Visualization of the pretraining and finetuning\nresult. Under severe degradation, it is often impossible to re-\nconstruct fine-grained features without relying on reference\nimages. Generalized training can only ensure local ID simi-\nlarity, whereas personalized fine-tuning demonstrates strong\nconsistency in ID-related attributes.\nexceeding 8×), critical ID and attribute information in the\ninput image is often severely lost, turning the reconstruction\ntask into a highly ill-posed problem (Alekseev and Navon\n2001). In the absence of strong prior constraints, the solution\nspace becomes underdetermined, with numerous plausible\nlocal optima, making the model prone to generating “hallu-\ncinated” results that fail to accurately preserve the target ID.\nFor example, as shown in Fig. 1, the conventional method\n(CodeFormer (Zhou et al. 2022)) may erroneously recon-\nstruct a blurry tattoo region into an unrealistic dark patch.\nReference-based FSR methods (Zhao et al. 2023; Li et al.\n2020) provide a promising solution to this problem by lever-\naging high-quality (HQ) semantic information from refer-\nence images to restore missing details in low-resolution (LR)\ninputs. However, single-reference approaches are highly\nsensitive to pose, lighting, and expression variations, and\ntypically only perform well when the reference and LR im-\nages are closely aligned (Li et al. 2018; Dogan, Gu, and\nTimofte 2019). Although multi-reference methods (Li et al.\n2020; Nitzan et al. 2022) attempt to incorporate richer ID\nfeatures, most existing approaches fail to disentangle ID in-\nformation between the reference and LR images. This dis-\narXiv:2508.10937v1  [cs.CV]  13 Aug 2025",
+  "figure_candidates": [
+    {
+      "page": 1,
+      "caption": "Figure 1: Visualization of the pretraining and finetuning"
+    },
+    {
+      "page": 2,
+      "caption": "Fig. 2 illustrates the overall architecture of IDFSR. Given a"
+    },
+    {
+      "page": 3,
+      "caption": "Figure 2: A schematic diagram of single-step diffusion in IDFSR, including input preprocessing and the overall model archi-"
+    },
+    {
+      "page": 3,
+      "caption": "Fig. 3, IDFSR still generating plausible and ID-consistent"
+    },
+    {
+      "page": 4,
+      "caption": "Figure 3: Warping Analysis. From top to bottom: reference"
+    },
+    {
+      "page": 5,
+      "caption": "Figure 4: Visualization results of different methods under upsampling scales of 8 and 16, separated by double dashed lines. For"
+    },
+    {
+      "page": 6,
+      "caption": "Figure 5: Visualization of cross-ID attribute transfer. We first fit the embedding on ID A, then perform FSR using the LR"
+    },
+    {
+      "page": 6,
+      "caption": "Figure 6: Latent Editing Effects of Style Embedding. Us-"
+    },
+    {
+      "page": 7,
+      "caption": "Figure 7: Effect of Reference Image Quantity on Finetun-"
+    },
+    {
+      "page": 7,
+      "caption": "Fig. 7, we report the average values and confidence intervals"
+    },
+    {
+      "page": 7,
+      "caption": "Figure 8: Ablation Study on Model Components . Since"
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 4,
+      "caption": "Table 1: Quantitative comparison on the CelebRef-HQ dataset with upsampling scales of 8 × and 16×. FT and PT refer to"
+    },
+    {
+      "page": 5,
+      "caption": "Table 2: The qualitative comparison of face ID verifica-"
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      2,
+      3,
+      6,
+      7,
+      8,
+      9
+    ],
+    "identity": [
+      1,
+      2,
+      3,
+      6,
+      7,
+      8
+    ],
+    "portrait_detail": [
+      1,
+      2,
+      7,
+      8,
+      9
+    ],
+    "efficiency": [
+      1,
+      2,
+      3,
+      6,
+      7
+    ],
+    "datasets": [
+      2,
+      4,
+      7
+    ],
+    "limitations": []
+  },
+  "source_urls": [],
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\personalized_fsr.txt"
+}

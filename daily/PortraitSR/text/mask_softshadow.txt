@@ -1,0 +1,836 @@
+=== PAGE 1 ===
+SoftShadow: Leveraging Soft Masks for Penumbra-Aware Shadow Removal
+Xinrui Wang1*, Lanqing Guo2*, Xiyu Wang1, Siyu Huang3, Bihan Wen1†
+1Nanyang Technological University, Singapore
+2The University of Texas at Austin, USA
+3Clemson University, USA
+{xinrui.wang, bihan.wen }@ntu.edu.sg, xiyu004@e.ntu.edu.sg,
+lanqing.guo@austin.utexas.edu, siyuh@clemson.edu
+Abstract
+Recent advancements in deep learning have yielded promis-
+ing results for the image shadow removal task. However,
+most existing methods rely on binary pre-generated shadow
+masks. The binary nature of such masks could potentially
+lead to artifacts near the boundary between shadow and
+non-shadow areas. In view of this, inspired by the physical
+model of shadow formation, we introduce novel soft shadow
+masks specifically designed for shadow removal. To achieve
+such soft masks, we propose a SoftShadow framework by
+leveraging the prior knowledge of pretrained SAM and in-
+tegrating physical constraints. Specifically, we jointly tune
+the SAM and the subsequent shadow removal network us-
+ing penumbra formation constraint loss, mask reconstruc-
+tion loss, and shadow removal loss. This framework en-
+ables accurate predictions of penumbra (partially shaded)
+and umbra (fully shaded) areas while simultaneously fa-
+cilitating end-to-end shadow removal. Through extensive
+experiments on popular datasets, we found that our Soft-
+Shadow framework, which generates soft masks, can better
+restore boundary artifacts, achieve state-of-the-art perfor-
+mance, and demonstrate superior generalizability.
+1. Introduction
+Shadow removal aims to restore content obscured in shadow
+regions and correct degraded illumination. Recently, deep
+learning methods have shown excellent performance in
+shadow removal tasks relying on large-scale training data.
+However, one of the main challenges in shadow removal
+arises in images with soft shadows, where the shadow edges
+are blurred rather than sharp. This blurred area, known as
+the penumbra area, occurs due to partial occlusion of light,
+creating a transition zone where illumination varies signif-
+*Equal contribution for both authors
+†Corresponding author
+Figure 1. Illustration of soft shadow removal results using our
+proposed SoftShadow with soft shadow mask compared to the re-
+cent competing methods BMNet [39], SG-ShadowNet [30] and
+HomoFormer [34] using hard shadow masks. The second rows
+are sharpened versions of results for better visualization.
+icantly. Removing shadows in these regions is challenging
+because the gradual light-to-shadow transition often leads to
+boundary artifacts, compromising the quality of the shadow
+removal results.
+A few methods rely on hard shadow masks (binary
+masks) to indicate the shadow regions [8, 9, 34, 39]. These
+binary shadow masks are either manually annotated [23,
+31], or predicted by off-the-shelf shadow detectors [3]. Ob-
+taining such shadow masks can be costly and complicated,
+and the choice of shadow detector can significantly impact
+shadow removal performance. Moreover, hard masks fall
+short of representing the penumbra area, causing boundary
+artifacts in removal results, especially when the penumbra
+areas are highly pronounced. As shown in Figure 1, when
+the input image contains penumbra regions, the previous
+state-of-the-art (SOTA) method [34] suffers from boundary
+artifacts. Other approaches attempt shadow removal with-
+out explicitly extracting the shadow mask. Instead, they in-
+corporate semantic parsing modules into shadow removal
+networks. For instance, some approaches involve predict-
+This CVPR paper is the Open Access version, provided by the Computer Vision Foundation.
+Except for this watermark, it is identical to the accepted version;
+the final published version of the proceedings is available on IEEE Xplore.
+23217
+
+=== PAGE 2 ===
+Figure 2. (a) Illustration of the shadow formation geometry that
+creates the penumbra and umbra [26] regions; the umbra area is
+where the light is fully occluded, the penumbra area is where light
+is partially occluded, the lit area is where light is not occluded. (b)
+Examples of soft shadow images and hard shadow images from
+commonly used datasets.
+ing degradation attention [3, 27], while others utilize do-
+main classifiers [16, 17] to better understand and address
+shadow effects. However, their performance may be lim-
+ited by the lack of powerful external detectors providing
+additional shadow location information.
+In view of this, we argue that simply leveraging the
+binary mask to represent the shadow location is not
+enough. Differently, we introduce a novel soft shadow mask
+(grayscale mask) specifically designed for shadow removal
+as shown in the hard mask v.s. soft mask in Figure 1. The
+soft masks can precisely locate the inner and outer bound-
+aries of shadow and indicate the penumbra area with proper
+degradation variance. Moreover, recognizing the effective-
+ness of employing a powerful pretrained detector for pro-
+viding semantic information, we utilize the prior knowledge
+from the pretrained SAM [19]. While existing methods [35]
+have used the off-the-shelf SAM in a naive way, merely pre-
+dicting the shadow mask as input to the shadow removal
+network, we adapt SAM as a soft shadow mask predictor
+and jointly optimize it with the shadow removal network.
+In this paper, we first propose a unified shadow removal
+framework, dubbed SoftShadow, which removes shadow
+from images in an end-to-end manner without requiring in-
+put shadow masks as shown in Figure 3. We integrate the
+pretrained SAM [19] combined with Low-Rank Adaptation
+(LoRA) [13] to jointly adapt the SAM model and shadow
+removal model. The framework enables accurate predic-
+tions of soft shadow masks as intermediate results while si-
+multaneously facilitating end-to-end shadow removal. Be-
+sides, we introduce a penumbra formation constraint to as-
+sist predict soft shadow masks. This constraint regular-
+izes the gradient of the predicted mask in the penumbra
+area, resulting in more accurate predictions with detailed
+and spatially varied shadow masks. In the commonly used
+shadow removal datasets, SRD and LRSS datasets contain
+soft shadow images, which makes them more suitable for il-
+lustrating the improvements of utilizing soft shadow masks.
+Experimental results show that SoftShadow achieves supe-
+rior performance on SRD and LRSS datasets. Our main
+contributions are summarized as follows:
+• We propose a unified shadow removal framework that
+does not require additional input shadow masks. This
+framework enables accurate predictions of soft masks
+as intermediate results, which is specifically designed to
+capture detailed and spatially varied shadow location in-
+formation.
+• We introduce penumbra formation constraint inspired by
+the physical shadow formation model to further refine the
+soft mask in the penumbra area. By leveraging the con-
+straint loss and shadow removal loss, we jointly tune the
+SAM and the subsequent shadow removal network.
+• Experimental results demonstrate that SoftShadow sur-
+passes state-of-the-art shadow removal methods on the
+SRD and LRSS datasets, achieving superior performance
+and even comparable results with previous methods that
+use ground truth mask inputs.
+2. Related Work
+2.1. Shadow Removal
+The degradation of shadows varies in each image, posing
+a significant challenge for shadow image restoration. Re-
+cent deep learning-based approaches have achieved remark-
+able results in shadow removal. Some methods restore the
+shadow image with the guidance of shadow masks. For
+example, SP+M-Net [21] employs two deep networks to
+predict shadow matte and shadow parameters. Recently,
+powerful backbones such as transformers [4, 29], and dif-
+fusion models [12, 28] have been applied to the shadow
+removal task. HomoFormer [34] homogenizes the spatial
+distribution of shadow masks to uniformly recover the en-
+tire shadow image, while ShadowDiffusion [9] provides
+a robust generative prior for producing natural shadow-
+free images. Some methods aim to eliminate the depen-
+dency on shadow mask inputs. DeShadowNet [27] intro-
+duces an end-to-end shadow removal method containing
+a multi-branch fusion module. ST-CGAN [31] connects
+two GANs [6] in sequence to jointly detect and remove
+shadows. DC-ShadowNet [16] provides an unsupervised
+domain-classifier discriminator for guided shadow removal
+network. More recently, DeS3 [17] implemented a method
+capable of removing shadows that are cast on the object it-
+self without requiring shadow mask inputs. However, due
+to the absence of additional shadow location information,
+their performance may degrade, and the number of param-
+eters used could increase significantly. Different from these
+existing methods, we introduce a new concept “soft mask”,
+designed explicitly for shadow removal.
+23218
+
+=== PAGE 3 ===
+Figure 3. Illustration of the proposed SoftShadow. The left box illustrates the SoftShadow networks, where a shadow image y is input
+into SAM for detecting soft shadow masks. The shadow removal network then processes the soft mask and the shadow image to produce
+a shadow-free image. The right box shows the three losses we used in SoftShadow. From top to bottom, the shadow removal loss
+Lrem is calculated between shadow-free images and shadow-removal images. The mask reconstruction loss Lmask is calculated between
+predicted soft masks and ours ground truth soft masks. The penumbra formation constraint loss Lpen act as a regularization term. It aims
+to regularize the gradient of predicted soft masks in the penumbra area. As shown in the soft mask intensity curve, the ideal mask intensity
+in the penumbra area should not be too large and the gradient orientation should be consistence.
+2.2. Shadow Detection
+Shadow detection can be approached as a segmentation
+task, it often struggles with small shadows and indis-
+tinct shadow edges. Various methods have been proposed
+to address these challenges. BDRAR [37] introduces a
+bidirectional pyramidal architecture for shadow detection.
+DSD [36] designs a distraction-aware module to minimize
+false positives in shadow detection. Chen et al. [2] propose
+a task-specific semi-supervised learning mechanism to uti-
+lize unlabeled shadow images for detection, enhancing the
+robustness of the model. DHAN [3] is a well-used shadow
+detection model using dual hierarchical aggregation net-
+work training on synthetic shadow and shadow-free image
+pairs to improve detection accuracy. The SAM-Adapter [1]
+has been utilized to fine-tune the Segment Anything Model
+(SAM) [19] specifically for shadow detection tasks. While
+this approach improves accuracy, it demands a substantial
+number of model parameters. However, most existing meth-
+ods detect shadows as hard masks and fail to represent the
+penumbra area. In contrast, our approach leverages the
+shadow removal loss and the Penumbra Formation Con-
+straint loss, jointly training the shadow removal network
+and the shadow detection network.
+3. Methods
+In this section, we first explain the motivation behind our
+newly introduced soft shadow mask, inspired by the phys-
+ical model of shadow formation. We then propose the uni-
+fied shadow removal framework SoftShadow, which lever-
+ages the powerful segmentation capabilities of SAM to pro-
+duce the soft shadow mask and guide the removal network
+to generate better shadow-free images. Finally, to further
+mitigate boundary artifacts, we introduce the penumbra for-
+mation constraint loss which ensures a smoother transition
+between the shadow region and the non-shadow region, of-
+fering better guidance to the shadow removal network.
+3.1. Motivation
+Shadow degradations in the real world exhibit considerable
+amount of variation and can be classified into two main cat-
+egories: soft shadows and hard shadows [20]. This clas-
+sification depends on the light source and the distance be-
+tween the object and the surface, as shown in Figure 2(a).
+Soft shadows are characterized by blurry edges and grad-
+ual transitions from light to dark, creating relatively large
+penumbra areas, while hard shadows have sharp edges with
+few to none penumbra regions.
+Previous methods [5, 8, 34, 39] commonly use hard
+masks to guide the shadow removal process. The hard
+masks effectively provide positional guidance for hard
+masks with sharp edges. However, when the penumbra re-
+gions are more pronounced, as shown in Figure 2 (b), the
+boundary between the umbra and the lit region is hard to
+determine, making hard masks unsuitable for representing
+such soft shadows. Additionally, we observed that, in gen-
+eral, the brightness transition within the penumbra area can
+vary significantly, whereas the brightness of the lit and the
+umbra areas are relatively uniform.
+To this end, we instead use soft (greyscale) masks to rep-
+resent the position of the shadows. Formally, we denote
+the soft mask as s. For a given shadow-free image x, the
+23219
+
+=== PAGE 4 ===
+shadow image y can be formulated as such:
+y = a · s · x + (1 − s) · x, (1)
+where · denotes element-wise multiplication, s is the soft
+shadow mask in which constant s = 0 represents lit area,
+s = 1 represents umbra area, and s ∈ [0, 1] repre-
+sents penumbra area. a ∈ [0, 1] represents the illumina-
+tion weight in the non-lit area. Based on our experiment,
+we quantitatively and qualitatively found that the proposed
+shadow degradation model could lead to fewer boundary ar-
+tifacts and generally better shadow removal results.
+3.2. Architecture of SoftShadow
+SoftShadow is a unified framework designed to remove ob-
+ject shadows in images in an end-to-end manner. The over-
+all architecture is illustrated in Figure 3. SoftShadow con-
+tains a soft shadow detector and a subsequent shadow re-
+moval network. The soft shadow detector leverages the
+strong segmentation capabilities of SAM and further fine-
+tuning it to serve as a soft mask detector. This is because
+the pretrained SAM can fail to accurately identify shad-
+ows [15, 19]. Moreover, since SAM has noticeably more
+parameters compared to conventional shadow detection net-
+works, we use Low-Rank Adaptation (LoRA) [13] to reduce
+the number of trainable parameters. In practice, we tune
+all the self-attention blocks of image encoders using LoRA.
+Since the mask decoder is lightweight, we tune all the pa-
+rameters of it.
+SAM is mainly trained for binary predictions, unlike the
+soft masks we aim to generate. To leverage SAM to gen-
+erate continuous soft masks, we further introduce the mask
+reconstruction loss Lmask and the penumbra formation con-
+straint loss Lpen to model the characteristics of soft masks
+(details are described in Section 3.3). They encourage the
+model to detect the shadow area and produce a continuous
+soft mask rather than a binary one, thereby capturing the
+shadow position more accurately. We formulate a mask re-
+construction loss Lmask as follows:
+Lmask = En ∥ˆs − sgt∥2
+F , (2)
+where n is the index of shadow masks, ˆs is the predicted
+soft shadow mask, and sgt is the ground truth soft shadow
+mask achieved by dividing the shadow-free image y by the
+shadow image x. Specifically, we convert y and x into
+YCbCr image space, using the Y channel to illustrate the
+brightness of these images, denoted as yY and xY , respec-
+tively. We then divide theyY by xY to obtain the difference
+between them, apply a low-pass filterf to reduce noise, and
+use a threshold to eliminate outliers as follows:
+sgt = max
+
+t, f
+ xY
+yY
+
+, (3)
+Figure 4. Illustrate the concept of Penumbra Formation Constraint.
+The w0 and w1 are points in the inner boundary and the outer
+boundary of the penumbra area, respectively. In the ideal soft
+shadow mask, the intensity in the penumbra area decreases pro-
+gressively from the shadow center to the umbra area. The gradient
+orientation points from the shadow center towards the non-shadow
+area.
+where t is the threshold used to define the outer boundary
+between the penumbra area and the lit area.
+Moreover, as illustrate in Figure 3, we incorpotare the
+gradient of the shadow removal loss Lrem to jointly train
+SAM and the subsequent shadow removal network:
+Lrem = En ∥ˆ x− x∥2
+F , (4)
+where n indexes all images, ˆx is the restored shadow-free
+image, and x is the ground truth shadow-free image. To
+this end, the intermediate soft shadow masks can be refined
+using shadow removal results, with the SAM adapter op-
+timized for better location guidance in subsequent shadow
+removal.
+The overall training objective of SoftShadow is:
+L = Lmask + λ1Lpen + λ2Lrem, (5)
+where λ1 and λ2 are weighting coefficients to balance the
+influence of each term. With the merits of joint training and
+physical constraints, our SoftShadow framework effectively
+removes shadows.
+3.3. Penumbra Formation Constraint
+We introduce the Penumbra Formation Constraint to enable
+SAM to predict the soft masks more accurately. The ob-
+jective of this constraint is to regularize SAM to learn a
+mask that can reflect the illuminance change of shadow im-
+ages. To meet the objective, we present two assumptions
+for our proposed soft mask. For a given shadow image, the
+soft mask intensity in the penumbra region should gradually
+transition outward from the shadow center to the outer edge
+of the shadow. This means that the gradient direction in
+the penumbra should point from the shadow center toward
+23220
+
+=== PAGE 5 ===
+the boundary of the shadow. Additionally, since the inten-
+sity change in this area is gradual, the gradient magnitude
+should remain relatively small to reflect a smooth transition.
+Based on these assumptions, we can formulate the penum-
+bra formation constraint. For a predicted soft mask s, we
+define the penumbra area using two thresholds t1 and t2 as
+W = {(i, j) | t1 ≤ si,j ≤ t2}, (6)
+where i and j denote the spatial coordinates of pixels within
+the soft mask s. As shown in Figure 4, the center of the
+shadow area is denoted as c. c is defined as the mean of
+the x- and y- coordinates of the penumbra area. The unit
+vector representing the direction from c to a point w in the
+penumbra area W can be expressed as:
+d(w) = w − c
+∥w − c∥ , for w ∈ W , w ̸= c. (7)
+Following the assumptions we proposed, we can define the
+penumbra formation constraint loss Lpen as:
+Lpen = En,w [R (d(w) · ∇M (w))] , (8)
+where n is the index of shadow masks, the desired direc-
+tion of gradient is d(w), and · indicate the dot product. R
+refers to the ReLU function [25]. The ReLU function is ap-
+plied to filter out gradients conflict with the desired direc-
+tion. The constraint loss regularizes the magnitude of gra-
+dients in alignment with the desired direction, promoting
+a smooth intensity transition within the penumbra region.
+By penalizing quick changes in intensity, this constraint en-
+courages the detector to generate softer shadow masks.
+4. Experiments
+4.1. Experimental Setups
+Implementation details The shadow removal backbone
+in our SoftShadow framework can be any shadow removal
+network. We use ShadowDiffusion [9] as the backbone ex-
+ample for all experiments. We finetune ShadowDiffusion
+at a resolution of 256 × 256, followed by previous meth-
+ods [9]. We empirically set the thresholdt = 0.76 to get the
+ground truth soft shadow mask sgt. We employ the ViT-H
+model as the backbone for SAM [19]. A set of LoRA [13]
+layers with a rank of 8 is added to the self-attention blocks
+in the image encoder of SAM. We use Adam [18] optimizer.
+The training batch size is 16. We set λ1 = 0 .1 and λ2 = 1.
+For more training details, please refer to the supplemen-
+tary.
+Benchmark datasets We work with four benchmark
+datasets for the various shadow removal experiments. SRD
+Dataset [27] consists of 2,680 training pairs and 408 testing
+pairs of shadow and shadow-free images. Notably, the SRD
+dataset does not provide shadow masks, the previous meth-
+ods using SRD commonly using masks detected by DHAN
+[3] methods. LRSS Dataset [7] is a specifically designed
+soft shadow dataset that includes 137 images. We select
+48 paired shadow and shadow-free images as our testing
+set. UIUC Dataset [11] contains 76 pairs of images for
+testing. It features a variety of shadow types [17], includ-
+ing soft, hard, and self shadows, which provides a diverse
+and challenging set of conditions for evaluating shadow re-
+moval methods. ISTD+ Dataset [21] is adjusted ISTD
+dataset [31], consists of 1330 training pairs and 540 test-
+ing pairs of shadow and shadow-free images. ISTD+ has
+manually annotated binary masks.
+Evaluation metrics Following previous works [3, 9, 34],
+we employ the Peak Signal-to-Noise Ratio (PSNR), Struc-
+tural Similarity Index (SSIM) [32], and Mean Absolute Er-
+ror (MAE) [33] as quantitative evaluation metrics. We also
+calculate all metrics for shadow areas, non-shadow areas,
+and all pixels between ground truth shadow-free images and
+generated removal results.
+4.2. Comparison with State-of-the-Art
+We compare our proposed method with several state-of-
+the-art shadow removal methods. We include methods
+that do not require shadow masks as input, e.g., DC-
+shadowNet [16], DeS3 [17], and SAM-helps-shadow [35].
+And methods that require shadow masks, including
+DHAN [3], BMNet [39], SG-ShadowNet [30], Shadow-
+Former [8], Inpaint4Shadow [22], ShadowDiffusion [9] and
+Homoformer [34]. To demonstrate the generalizability of
+our method, we also compare it with zero-shot methods
+including BCDiff [10] and G2R-ShadowNet [24] on the
+LRSS [7] and UIUC [11] datasets.
+Quantitative results Table 1 shows the quantitative results
+of SRD and ISTD+ datasets. The SRD dataset contains
+many soft shadow images, which is more suitable for val-
+idating our methods. Specifically, we outperform all com-
+peting methods over all metrics, whether they require in-
+put shadow masks or not. Compared with the most re-
+cent work without requiring mask input, i.e., DeS3 [17], the
+PSNR is improved from 34.11 dB to 35.57 dB in whole
+images. When compared with methods that need input
+masks, we outperform the SOTA method Homoformer [34],
+which uses DHAN [3] mask as their input. On the ISTD+
+dataset, we significantly outperform DeS3 [17], increasing
+the PSNR from 31.38 dB to 35.00 dB. For methods that
+rely on the ground truth masks from the ISTD+ dataset, we
+evaluate them using masks detected by the FDRNet [38]
+followed by previous methods BMNet [39], to ensure a fair
+comparison. We outperform all competing methods under
+the condition of without ground truth manually annotated
+masks. Besides, we even achieve comparable results against
+some SOTA methods using ground truth masks.
+23221
+
+=== PAGE 6 ===
+Methods Input Masks shadow non-shadow all
+PSNR↑ SSIM↑ MAE↓ PSNR↑ SSIM↑ MAE↓ PSNR↑ SSIM↑ MAE↓
+SRD
+DHAN DHAN 33.67 0.978 8.94 34.79 0.979 4.80 30.51 0.949 5.67
+DC-ShadowNet N/A 34.00 0.975 7.70 35.53 0.981 3.65 31.53 0.955 4.65
+BMNet DHAN 35.05 0.981 6.61 36.02 0.982 3.61 31.69 0.956 4.46
+SG-ShadowNet DHAN 33.73 0.979 7.53 36.18 0.982 2.97 31.16 0.952 4.23
+ShadowFormer DHAN 35.55 0.982 6.14 36.82 0.983 3.54 32.46 0.957 4.28
+ShadowDiffusion DHAN 38.72 0.987 4.98 37.78 0.985 3.44 34.73 0.970 3.63
+Inpaint4Shadow DHAN 36.73 0.985 5.70 36.70 0.985 3.27 33.27 0.967 3.81
+DeS3 N/A 37.91 0.986 5.27 37.45 0.984 3.03 34.11 0.968 3.56
+Homoformer DHAN 38.81 0.987 4.25 39.45 0.988 2.85 35.37 0.972 3.33
+SAM-helps-shadow N/A 33.94 0.979 7.44 33.85 0.981 3.74 30.72 0.952 4.79
+ours N/A 39.08 0.989 4.33 39.36 0.992 2.58 35.57 0.975 3.11
+ISTD+
+BMNet GT 37.87 0.991 5.62 37.51 0.985 2.45 33.98 0.972 2.97
+ShadowDiffusion GT 39.69 0.992 4.97 38.89 0.987 2.28 35.67 0.975 2.72
+HomoFormer GT 39.49 0.993 4.73 38.75 0.984 2.23 35.35 0.975 2.64
+DC-ShadowNet N/A 31.06 0.976 12.62 27.03 0.961 6.82 25.03 0.926 7.77
+DeS3 N/A 36.49 0.989 6.56 34.70 0.972 3.40 31.38 0.958 3.94
+BMNet FDRNet - - 6.1 - - 2.9 - - 3.5
+ShadowDiffusion FDRNet 40.12 0.992 5.15 36.66 0.978 2.74 34.08 0.968 3.12
+HomoFormer FDRNet 38.84 0.991 5.31 34.58 0.966 3.17 32.41 0.953 3.51
+Ours N/A 40.36 0.993 4.78 37.89 0.982 2.46 35.00 0.972 2.85
+Table 1. The quantitative results of shadow removal using our SoftShadow and recent methods on SRD and ISTD+ datasets. The “Input
+Masks” column shows the different types of input masks used by these methods. “N/A” means the method does not require masks as
+input. “GT” means the method uses manually annotated ground truth mask as input. “DHAN” means using masks generated by DHAN [3]
+method. “FDRNet” means using masks generated by FDRNet [38] method. The best and the second results areboldfaced and underlined,
+respectively.
+Methods LRSS UIUC
+PSNR↑ SSIM↑ MAE↓ PSNR↑ SSIM↑ MAE↓
+DC-ShadowNet 20.89 0.902 12.55 24.85 0.849 9.51
+G2R-ShadowNet 20.90 0.901 9.99 27.56 0.858 7.43
+BCDiff 22.13 0.922 10.68 26.81 0.852 7.96
+Ours 23.32 0.933 9.77 28.85 0.903 6.48
+Table 2. The quantitative results of shadow removal using our
+SoftShadow and recent methods on the LRSS and UIUC datasets.
+The best results are boldfaced.
+Methods PSNR↑ MAE↓
+Inpaint4Shadow 39.72 5.27
+DeS3 39.28 7.07
+HomoFormer 41.11 5.91
+Ours 41.46 4.40
+Table 3. The quantitative results in the penumbra area. The
+penumbra area is calculated from our predicted soft masks. The
+best results are boldfaced.
+Table 2 shows the generalizability of our methods. We
+use our pretrained model on the SRD dataset and test it
+on LRSS and UIUC datasets without further training. The
+DeS3 [17] has better results because they train their method
+on the LRSS training set. For comparison, we chose DC-
+ShadowNet as our baseline since this method does not re-
+quire masks as input. Our results significantly outperform
+Input Masks ShadowDiffusion HomoFormerOurs
+Ground Truth mask 35.67 35.35
+35.00
+Otsu mask 35.62 33.47
+BDRAR mask 33.41 32.96
+FDRNet mask 34.08 32.41
+Pretrained SAM mask 28.45 28.16
+Mean 33.45 32.47 N/A
+Std Dev 0.912 0.993 N/A
+Table 4. The mask sensitivity evaluation on ISTD+ dataset. The
+values in the table are PSNR results. The best results are bold-
+faced. The results that are higher than ours are underlined.
+DC-ShadowNet on LRSS and UIUC datasets. Additionally,
+we compare our methods with two methods, which are de-
+signed to have better generalizability. The results demon-
+strate that our method has the best PSNR/SSIM/MAE
+among the comparison methods. These results highlight the
+robustness and adaptability of our model, even on datasets
+it was not specifically trained on.
+Qualitative evaluation To further demonstrate the effec-
+tiveness of our methods compared to other competing meth-
+ods, Figure 5 illustrates our improvements in removing soft
+shadows on the SRD dataset compared with methods us-
+ing hard shadow masks. The soft masks typically appear as
+soft boundaries of large object shadows or in small shadow
+regions. Specifically, our samples demonstrate that we ef-
+23222
+
+=== PAGE 7 ===
+Figure 5. Examples of soft shadow image removal results on the SRD dataset [27]. The input shadow image, the estimated results of (a)
+BMNet [39], (b) ShadowDiffusion [9], (c) Inpaint4Shadow [22], (d) Homoformer [34], and (e) Ours, as well as the ground truth (GT)
+image, respectively.
+Figure 6. Examples of soft shadow removal results on SRD
+datasets [27]. The input shadow image, the estimated results of
+(a) DC-ShadowNet [16], (b) DeS3 [17], and (c) Ours, as well as
+the ground truth image, respectively.
+fectively remove both types of soft shadows while preserv-
+ing the illumination transition in penumbra areas, without
+introducing obvious artifacts. Figure 6 shows our improve-
+ment in shadow area accuracy compared to other end-to-end
+methods. Our approach effectively removes all parts of the
+shadow shown in the first row of the example. In the second
+and third rows, we successfully remove shadows in regions
+with complex textures. Figure 7 highlights our method’s
+generalizability on the LRSS dataset, achieving improved
+shadow removal performance without additional training on
+LRSS dataset. These results confirm our method’s adapt-
+ability and precision in diverse shadowed scenarios.
+Figure 7. Examples of shadow removal results on the LRSS
+dataset [7]. The input shadow image, the estimated results of (a)
+DC-ShadowNet [16], (b) G2R-ShadowNet [24], (c) Ours, our pre-
+dicted soft shadow masks and ground truth image, respectively.
+5. Framework Analysis
+In this section, we provide more experiments to evaluate the
+effectiveness of our proposed SoftShadow framework. We
+discuss the performance on the penumbra area, the mask
+sensitive of previous methods, and we discuss the effective-
+ness of our provided losses in ablation study.
+Penumbra effect evaluation The penumbra region typi-
+cally occupies only a small portion of the entire image,
+so improvements within this area have a limited impact on
+overall image metrics. To further assess the improvements
+introduced by using soft masks in the penumbra region, we
+calculate the PSNR and MAE values specifically within this
+area on the SRD dataset. For a fair comparison, we define
+the penumbra region following the methods from AEF [5],
+applying ground truth soft maskssgt. The results are shown
+in Table 3. Compared with the SOTA methods like Homo-
+23223
+
+=== PAGE 8 ===
+Former [34], DeS3 [17] and Inpaint4Shadow [22]. We im-
+prove PSNR and MAE values in the penumbra area. These
+results show that on images containing soft shadows, our
+methods has better restoration performances.
+Mask sensitivity evaluation Previous shadow removal
+methods that rely on external shadow masks are sensitive
+to the accuracy of the input masks. Their performance can
+degrade when lack of ground truth mask. In contrast, end-
+to-end shadow removal methods mitigate the impact of low-
+quality masks. To further illustrate the sensitivity of prior
+SOTA methods to input masks, we evaluate their perfor-
+mance using various mask inputs.
+Specifically, we evaluate ShadowDiffusion [9] and Ho-
+moFormer [34] using a range of input masks, including
+ground truth (GT) masks, Otsu masks [14], BDRAR [37]
+detected masks, FDRNet [38] detected masks and pre-
+trained SAM [19] detected masks as inputs. The PSNR
+results on the ISTD+ [21] datasets are shown in Ta-
+ble 4. The Otsu mask follows the approach in Mask-
+ShadowGAN [14], using the difference between shadow-
+free and shadowed images to generate masks; both Otsu and
+GT masks include additional shadow-free information. Re-
+sults indicate that our methods maintain consistent perfor-
+mance across all tests, whereas ShadowDiffusion and Ho-
+moFormer have performance declines when using gener-
+ated masks. Although our method achieves slightly lower
+PSNR values than those obtained with Otsu or GT masks,
+this is reasonable given that the ISTD+ dataset contains a
+larger proportion of hard shadow images, where our method
+has less of an advantage. Our approach surpasses the rest
+results that rely on masks generated by shadow detectors.
+Ablation Study We ablate our method, SoftShadow, by
+adding three losses: the shadow removal loss Lrem, the
+mask reconstruction loss Lmask, and the penumbra forma-
+tion constraint loss Lpen, and demonstrate the results on
+SRD and LRSS datasets. First, we present the shadow re-
+moval results using the pretrained SAM and ShadowDif-
+fusion models. Next, we finetune the framework with the
+shadow removal loss Lrem. Then, we add the mask re-
+construction loss Lmask to provide SAM with more precise
+mask position guidance. Finally, we add the penumbra for-
+mation constraint loss Lpen to refine the mask boundaries
+for smoother transitions in the shadow regions.
+The results in Table 5 are based on training with the
+SRD training set and evaluating on both the SRD and LRSS
+datasets. As shown in Table 5, the shadow removal loss
+Lrem improves performance on the SRD dataset, primar-
+ily by enhancing the shadow removal network. Adding the
+mask reconstruction loss Lmask further fine-tunes SAM,
+producing more accurate shadow masks. This improvement
+of mask accuracy leads to better shadow removal results. To
+evaluate the impact of the penumbra formation constraint
+loss Lpen, we compare results with and without Lpen. The
+Methods LRSS SRD
+PSNR↑ SSIM↑ MAE↓ PSNR↑ SSIM↑ MAE↓
+Pretrained Weights21.40 0.910 12.26 31.27 0.963 4.41
+Lrem 21.78 0.913 12.07 35.27 0.973 3.32
+Lrem+Lmask 23.08 0.935 9.97 35.44 0.974 3.17
+Lrem+Lmask+Lpen 23.32 0.933 9.77 35.57 0.975 3.11
+Table 5. The ablation studies for the shadow removal loss Lrem,
+the mask reconstruction loss Lmask, and the penumbra formation
+constraint loss Lpen in LRSS and SRD datasets. The best results
+are boldfaced.
+Figure 8. Visual comparison of results from our framework with
+different configurations: using pretrained weights, finetuned with
+the loss function Lrem, Lrem + Lmask and our full configuration
+Lrem + Lmask + Lpen (Ours), respectively.
+results show that Lpen further aids in shadow removal on
+the SRD dataset, refining the shadow edges and enhancing
+the overall shadow removal quality. In the LRSS dataset,
+both Lrem and Lmask significantly improve performance,
+the Lpen improves the PSNR and MAE significantly, al-
+though it results in a slight decrease in SSIM. As shown
+in Figure 8, adding the constraint loss Lpen leads to more
+accurate and smoother soft mask predictions. The com-
+bined effects of Lmask and Lpen lead to more accurate and
+smoother soft mask predictions. Together, these losses pro-
+vide the removal framework with enhanced soft shadow de-
+tails, resulting in superior performance in shadow removal.
+6. Conclusion
+In this paper, we introduce novel soft shadow masks de-
+signed specifically for shadow removal. To achieve this,
+we propose a unified framework, SoftShadow, that elimi-
+nates the need for additional shadow mask input. By lever-
+aging a pretrained SAM with LoRA, the framework accu-
+rately predicts soft masks as intermediate results, capturing
+detailed and varied shadow information. Additionally, we
+introduce a penumbra formation constraint, inspired by the
+physical shadow formation model, to jointly tune SAM and
+the shadow removal network, refining the soft mask in the
+penumbra area and facilitating artifact-free restoration. Ex-
+tensive experiments demonstrate that our method is superior
+on various occasions, proving the validity of our method.
+23224
+
+=== PAGE 9 ===
+7. Acknowledgment
+This work was partially supported by the National Re-
+search Foundation Singapore Competitive Research Pro-
+gram (award number CRP29-2022-0003)
+References
+[1] Tianrun Chen, Lanyun Zhu, Chaotao Deng, Runlong Cao,
+Yan Wang, Shangzhan Zhang, Zejian Li, Lingyun Sun, Ying
+Zang, and Papa Mao. Sam-adapter: Adapting segment
+anything in underperformed scenes. In Proceedings of the
+IEEE/CVF International Conference on Computer Vision ,
+pages 3367–3375, 2023. 3
+[2] Zhihao Chen, Lei Zhu, Liang Wan, Song Wang, Wei
+Feng, and Pheng-Ann Heng. A multi-task mean teacher
+for semi-supervised shadow detection. In Proceedings of
+the IEEE/CVF Conference on computer vision and pattern
+recognition, pages 5611–5620, 2020. 3
+[3] Xiaodong Cun, Chi-Man Pun, and Cheng Shi. Towards
+ghost-free shadow removal via dual hierarchical aggrega-
+tion network and shadow matting gan. In Proceedings of
+the AAAI Conference on Artificial Intelligence, pages 10680–
+10687, 2020. 1, 2, 3, 5, 6
+[4] Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov,
+Dirk Weissenborn, Xiaohua Zhai, Thomas Unterthiner,
+Mostafa Dehghani, Matthias Minderer, Georg Heigold, Syl-
+vain Gelly, et al. An image is worth 16x16 words: Trans-
+formers for image recognition at scale. arXiv preprint
+arXiv:2010.11929, 2020. 2
+[5] Lan Fu, Changqing Zhou, Qing Guo, Felix Juefei-Xu,
+Hongkai Yu, Wei Feng, Yang Liu, and Song Wang. Auto-
+exposure fusion for single-image shadow removal. In Pro-
+ceedings of the IEEE/CVF conference on computer vision
+and pattern recognition, pages 10571–10580, 2021. 3, 7
+[6] Ian Goodfellow, Jean Pouget-Abadie, Mehdi Mirza, Bing
+Xu, David Warde-Farley, Sherjil Ozair, Aaron Courville, and
+Yoshua Bengio. Generative adversarial nets. Advances in
+neural information processing systems, 27, 2014. 2
+[7] Maciej Gryka, Michael Terry, and Gabriel J Brostow. Learn-
+ing to remove soft shadows. ACM Transactions on Graphics
+(TOG), 34(5):1–15, 2015. 5, 7
+[8] Lanqing Guo, Siyu Huang, Ding Liu, Hao Cheng, and Bihan
+Wen. Shadowformer: Global context helps shadow removal.
+In Proceedings of the AAAI Conference on Artificial Intelli-
+gence, pages 710–718, 2023. 1, 3, 5
+[9] Lanqing Guo, Chong Wang, Wenhan Yang, Siyu Huang,
+Yufei Wang, Hanspeter Pfister, and Bihan Wen. Shadowd-
+iffusion: When degradation prior meets diffusion model for
+shadow removal. In Proceedings of the IEEE/CVF Con-
+ference on Computer Vision and Pattern Recognition, pages
+14049–14058, 2023. 1, 2, 5, 7, 8
+[10] Lanqing Guo, Chong Wang, Wenhan Yang, Yufei Wang,
+and Bihan Wen. Boundary-aware divide and conquer: A
+diffusion-based solution for unsupervised shadow removal.
+In Proceedings of the IEEE/CVF International Conference
+on Computer Vision, pages 13045–13054, 2023. 5
+[11] Ruiqi Guo, Qieyun Dai, and Derek Hoiem. Paired regions for
+shadow detection and removal.IEEE transactions on pattern
+analysis and machine intelligence, 35(12):2956–2967, 2012.
+5
+[12] Jonathan Ho, Ajay Jain, and Pieter Abbeel. Denoising dif-
+fusion probabilistic models. Advances in neural information
+processing systems, 33:6840–6851, 2020. 2
+[13] Edward J Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-
+Zhu, Yuanzhi Li, Shean Wang, Lu Wang, and Weizhu Chen.
+Lora: Low-rank adaptation of large language models. arXiv
+preprint arXiv:2106.09685, 2021. 2, 4, 5
+[14] Xiaowei Hu, Yitong Jiang, Chi-Wing Fu, and Pheng-Ann
+Heng. Mask-shadowgan: Learning to remove shadows from
+unpaired data. In Proceedings of the IEEE/CVF interna-
+tional conference on computer vision , pages 2472–2481,
+2019. 8
+[15] Leiping Jie and Hui Zhang. When sam meets shadow detec-
+tion. arXiv preprint arXiv:2305.11513, 2023. 4
+[16] Yeying Jin, Aashish Sharma, and Robby T Tan. Dc-
+shadownet: Single-image hard and soft shadow removal
+using unsupervised domain-classifier guided network. In
+Proceedings of the IEEE/CVF International Conference on
+Computer Vision, pages 5027–5036, 2021. 2, 5, 7
+[17] Yeying Jin, Wei Ye, Wenhan Yang, Yuan Yuan, and Robby T
+Tan. Des3: Adaptive attention-driven self and soft shadow
+removal using vit similarity. In Proceedings of the AAAI
+Conference on Artificial Intelligence , pages 2634–2642,
+2024. 2, 5, 6, 7, 8
+[18] Diederik P Kingma and Jimmy Ba. Adam: A method for
+stochastic optimization. arXiv preprint arXiv:1412.6980 ,
+2014. 5
+[19] Alexander Kirillov, Eric Mintun, Nikhila Ravi, Hanzi Mao,
+Chloe Rolland, Laura Gustafson, Tete Xiao, Spencer White-
+head, Alexander C Berg, Wan-Yen Lo, et al. Segment any-
+thing. In Proceedings of the IEEE/CVF International Con-
+ference on Computer Vision, pages 4015–4026, 2023. 2, 3,
+4, 5, 8
+[20] Michael S Langer and Steven W Zucker. What is a light
+source? In Proceedings of IEEE Computer Society Con-
+ference on Computer Vision and Pattern Recognition, pages
+172–178. IEEE, 1997. 3
+[21] Hieu Le and Dimitris Samaras. Shadow removal via shadow
+image decomposition. In Proceedings of the IEEE/CVF In-
+ternational Conference on Computer Vision , pages 8578–
+8587, 2019. 2, 5, 8
+[22] Xiaoguang Li, Qing Guo, Rabab Abdelfattah, Di Lin, Wei
+Feng, Ivor Tsang, and Song Wang. Leveraging inpainting
+for single-image shadow removal. In Proceedings of the
+IEEE/CVF International Conference on Computer Vision ,
+pages 13055–13064, 2023. 5, 7, 8
+[23] Yuhao Liu, Zhanghan Ke, Ke Xu, Fang Liu, Zhenwei Wang,
+and Rynson WH Lau. Recasting regional lighting for shadow
+removal. In Proceedings of the AAAI Conference on Artifi-
+cial Intelligence, pages 3810–3818, 2024. 1
+[24] Zhihao Liu, Hui Yin, Xinyi Wu, Zhenyao Wu, Yang Mi, and
+Song Wang. From shadow generation to shadow removal.
+In Proceedings of the IEEE/CVF conference on computer vi-
+sion and pattern recognition, pages 4927–4936, 2021. 5, 7
+23225
+
+=== PAGE 10 ===
+[25] Vinod Nair and Geoffrey E Hinton. Rectified linear units im-
+prove restricted boltzmann machines. In Proceedings of the
+27th international conference on machine learning (ICML-
+10), pages 807–814, 2010. 5
+[26] Michael Nielsen and Claus B Madsen. Segmentation of soft
+shadows based on a daylight-and penumbra model. In Inter-
+national Conference on Computer Vision/Computer Graph-
+ics Collaboration Techniques and Applications, pages 341–
+352. Springer, 2007. 2
+[27] Liangqiong Qu, Jiandong Tian, Shengfeng He, Yandong
+Tang, and Rynson WH Lau. Deshadownet: A multi-context
+embedding deep network for shadow removal. In Proceed-
+ings of the IEEE conference on computer vision and pattern
+recognition, pages 4067–4075, 2017. 2, 5, 7
+[28] Chitwan Saharia, Jonathan Ho, William Chan, Tim Sali-
+mans, David J Fleet, and Mohammad Norouzi. Image super-
+resolution via iterative refinement. IEEE transactions on
+pattern analysis and machine intelligence, 45(4):4713–4726,
+2022. 2
+[29] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszko-
+reit, Llion Jones, Aidan N Gomez, Łukasz Kaiser, and Illia
+Polosukhin. Attention is all you need. Advances in neural
+information processing systems, 30, 2017. 2
+[30] Jin Wan, Hui Yin, Zhenyao Wu, Xinyi Wu, Yanting Liu, and
+Song Wang. Style-guided shadow removal. In European
+Conference on Computer Vision , pages 361–378. Springer,
+2022. 1, 5
+[31] Jifeng Wang, Xiang Li, and Jian Yang. Stacked condi-
+tional generative adversarial networks for jointly learning
+shadow detection and shadow removal. In Proceedings of
+the IEEE conference on computer vision and pattern recog-
+nition, pages 1788–1797, 2018. 1, 2, 5
+[32] Zhou Wang, Alan C Bovik, Hamid R Sheikh, and Eero P Si-
+moncelli. Image quality assessment: from error visibility to
+structural similarity. IEEE transactions on image processing,
+13(4):600–612, 2004. 5
+[33] Cort J Willmott and Kenji Matsuura. Advantages of the mean
+absolute error (mae) over the root mean square error (rmse)
+in assessing average model performance. Climate research,
+30(1):79–82, 2005. 5
+[34] Jie Xiao, Xueyang Fu, Yurui Zhu, Dong Li, Jie Huang,
+Kai Zhu, and Zheng-Jun Zha. Homoformer: Homogenized
+transformer for image shadow removal. In Proceedings of
+the IEEE/CVF Conference on Computer Vision and Pattern
+Recognition, pages 25617–25626, 2024. 1, 2, 3, 5, 7, 8
+[35] Xiaofeng Zhang, Chaochen Gu, and Shanying Zhu. Sam-
+helps-shadow: When segment anything model meet shadow
+removal. arXiv e-prints, pages arXiv–2306, 2023. 2, 5
+[36] Quanlong Zheng, Xiaotian Qiao, Ying Cao, and Rynson WH
+Lau. Distraction-aware shadow detection. In Proceedings of
+the IEEE/CVF conference on computer vision and pattern
+recognition, pages 5167–5176, 2019. 3
+[37] Lei Zhu, Zijun Deng, Xiaowei Hu, Chi-Wing Fu, Xuemiao
+Xu, Jing Qin, and Pheng-Ann Heng. Bidirectional feature
+pyramid network with recurrent attention residual modules
+for shadow detection. In Proceedings of the European Con-
+ference on Computer Vision (ECCV), pages 121–136, 2018.
+3, 8
+[38] Lei Zhu, Ke Xu, Zhanghan Ke, and Rynson WH Lau. Miti-
+gating intensity bias in shadow detection via feature decom-
+position and reweighting. In Proceedings of the IEEE/CVF
+International Conference on Computer Vision, pages 4702–
+4711, 2021. 5, 6, 8
+[39] Yurui Zhu, Jie Huang, Xueyang Fu, Feng Zhao, Qibin Sun,
+and Zheng-Jun Zha. Bijective mapping network for shadow
+removal. In Proceedings of the IEEE/CVF Conference
+on Computer Vision and Pattern Recognition , pages 5627–
+5636, 2022. 1, 3, 5, 7
+23226

@@ -1,0 +1,195 @@
+{
+  "key": "osdface",
+  "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\05_efficiency\\osdface_2411.17163.pdf",
+  "page_count": 22,
+  "first_page_excerpt": "OSDFace: One-Step Diffusion Model for Face Restoration\nJingkai Wang1*, Jue Gong 1*, Lin Zhang 1, Zheng Chen 1\nXing Liu2, Hong Gu 2, Yutong Liu 1†, Yulun Zhang 1†, Xiaokang Yang 1\n1Shanghai Jiao Tong University, 2vivo Mobile Communication Co., Ltd\nAbstract\nDiffusion models have demonstrated impressive perfor-\nmance in face restoration. Yet, their multi-step inference\nprocess remains computationally intensive, limiting their\napplicability in real-world scenarios. Moreover, existing\nmethods often struggle to generate face images that are har-\nmonious, realistic, and consistent with the subject’s identity.\nIn this work, we propose OSDFace, a novel one-step diffu-\nsion model for face restoration. Specifically, we propose\na visual representation embedder (VRE) to better capture\nprior information and understand the input face. In VRE,\nlow-quality faces are processed by a visual tokenizer and\nsubsequently embedded with a vector-quantized dictionary\nto generate visual prompts. Additionally, we incorporate a\nfacial identity loss derived from face recognition to further\nensure identity consistency. We further employ a generative\nadversarial network (GAN) as a guidance model to encour-\nage distribution alignment between the restored face and\nthe ground truth. Experimental results demonstrate that\nOSDFace surpasses current state-of-the-art (SOTA) meth-\nods in both visual quality and quantitative metrics, gen-\nerating high-fidelity, natural face images with high iden-\ntity consistency. The code and model will be released at\nhttps://github.com/jkwang28/OSDFace.\n1. Introduction\nFace restoration aims to restore high-quality (HQ) face im-\nages from degraded low-quality (LQ) inputs caused by com-\nplex degradation processes. Blur, noise, downsampling, and\nJPEG compression are common degradation types that can\nsignificantly affect the quality of face images, leading to\nan ill-posed problem. Recent advancements focus on lever-\naging CNN-based methods and Transformer-based meth-\nods [51, 58, 61, 74] to restore HQ face images, and have\nshown remarkable performance. However, due to the severe\ndegradation of face images, generative models with strong\nprior knowledge exhibit irreplaceable advantages.\nGenerative adversarial networks (GANs) [14] and dif-\n*Equal contribution.\n†Corresponding authors.\nHQ (512×512) LQ (512 ×512) PGDiff [64] DifFace [70]\nMACs (T) / Time (s) / # Steps 481.0 / 85.8 / 1,000 18.68 / 7.05 / 250\nDiffBIR [32] OSEDiff [59] OSEDiff* [59] OSDFace (ours)\n189.2 / 9.03 / 50 2.269 / 0.13 / 1 2.269 / 0.13 / 1 2.132 / 0.10 / 1\nFigure 1. Visual samples of diffusion-based face restoration meth-\nods. We provide multiply-accumulate operations (MACs), time,\nand number of timesteps during inference. Our OSDFace achieves\na more natural and faithful visual result than other ones.\nfusion models [18, 46, 47] have gained considerable at-\ntention for generating high-fidelity images with percep-\ntual details. Many efforts, such as DifFace [70] and Diff-\nBIR [32], have also been applied to restoring HQ face im-\nages [3, 6, 7, 36, 38, 49, 54, 64, 66]. However, GANs are\nchallenging to train and may encounter issues such as mode\ncollapse and training instability. Conversely, diffusion mod-\nels produce promising results but require multiple forward\npasses during inference, leading to increased computational\ncost and longer inference time.\nTo speed up the diffusion inference, one-step diffusion\n(OSD) models [28, 59] have emerged as a promising re-\nsearch topic. Benefiting from the recently developed gen-\nerative diffusion models, especially large-scale pretrained\ntext-to-image (T2I) models [40, 41], OSD models [28, 59]\nenjoy the powerful restoration capability and fast inference\nspeed. It is anticipated that OSD models could be highly\ncompetitive in face restoration practical applications.\nAs shown in Fig. 1, most diffusion-based face restora-\ntion methods can effectively recover basic facial features\nsuch as eyes, mouth, and contour. However, details, such as\nrealistic-looking hair and complex backgrounds, often re-\nmain unharmonious. The primary issue lies in the insuf-\nficient incorporation of face priors [62]. Some diffusion-\nbased methods [7, 32, 70] rely solely on the diffusion\n1\narXiv:2411.17163v2  [cs.CV]  23 Apr 2025",
+  "figure_candidates": [
+    {
+      "page": 1,
+      "caption": "Figure 1. Visual samples of diffusion-based face restoration meth-"
+    },
+    {
+      "page": 2,
+      "caption": "Figure 2. Performance comparison on the CelebA-Test. Those"
+    },
+    {
+      "page": 3,
+      "caption": "Figure 3. Training framework of OSDFace. First, to establish a visual representation embedder (VRE), we train the autoencoder and VQ"
+    },
+    {
+      "page": 4,
+      "caption": "Figure 4. Attention maps of VRE and visual comparison of prompt"
+    },
+    {
+      "page": 6,
+      "caption": "Figure 5. Visual comparison of the synthetic CelebA-Test dataset in challenging cases. Please zoom in for a better view."
+    },
+    {
+      "page": 6,
+      "caption": "Figure 6. Zero-shot results"
+    },
+    {
+      "page": 7,
+      "caption": "Figure 7. Visual comparison of the real-world datasets in challenging cases. Please zoom in for a better view."
+    },
+    {
+      "page": 12,
+      "caption": "Figure 1. Visual comparisons of various versions of OSEDiff [9]."
+    },
+    {
+      "page": 13,
+      "caption": "Figure 2. Visualization of the atmospheric tur-"
+    },
+    {
+      "page": 13,
+      "caption": "Fig. 5, and Fig. 6. Compared to other methods, OSDFace"
+    },
+    {
+      "page": 15,
+      "caption": "Figure 3. Quantitative results on the LFW dataset [4] for face recognition using the official ArcFace [2] MS1MV3 R50 model. The evaluated"
+    },
+    {
+      "page": 16,
+      "caption": "Figure 4. More visual comparison of the synthetic CelebA-Test dataset in challenging cases. Please zoom in for a better view."
+    },
+    {
+      "page": 17,
+      "caption": "Figure 5. More visual comparison of the synthetic CelebA-Test dataset in challenging cases. Please zoom in for a better view."
+    },
+    {
+      "page": 18,
+      "caption": "Figure 6. More visual comparison of the synthetic CelebA-Test dataset in challenging cases. Please zoom in for a better view."
+    },
+    {
+      "page": 19,
+      "caption": "Figure 7. More visual comparison of the real-world Wider-Test dataset in challenging cases. Please zoom in for a better view."
+    },
+    {
+      "page": 20,
+      "caption": "Figure 8. More visual comparison of the real-world LFW-Test dataset in challenging cases. Please zoom in for a better view."
+    },
+    {
+      "page": 21,
+      "caption": "Figure 9. More visual comparison of the real-world WebPhoto-Test dataset in challenging cases. Please zoom in for a better view."
+    },
+    {
+      "page": 22,
+      "caption": "Figure 10. More visual comparison of the real-world datasets in challenging cases. Please zoom in for a better view."
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 6,
+      "caption": "Table 1. Quantitative comparison on the synthetic CelebA-Test dataset with non-diffusion, multi-step diffu-"
+    },
+    {
+      "page": 7,
+      "caption": "Table 2. Quantitative comparison on real-world datasets. C-IQA stands for CLIPIQA, and M-IQA stands for MANIQA. The best and"
+    },
+    {
+      "page": 8,
+      "caption": "Table 3. Complexity comparison during inference. All models are"
+    },
+    {
+      "page": 8,
+      "caption": "Table 4. Ablation study of prompt embedding generation. The best"
+    },
+    {
+      "page": 8,
+      "caption": "Table 3 provides a detailed comparison of model complex-"
+    },
+    {
+      "page": 8,
+      "caption": "Table 5. Ablation studies on different components. The best and"
+    },
+    {
+      "page": 12,
+      "caption": "Table 1 clearly shows that OSDFace achieves high inference"
+    },
+    {
+      "page": 12,
+      "caption": "Table 1. Complexity comparison during inference. “parallelized”"
+    },
+    {
+      "page": 13,
+      "caption": "Table 2. Quantitative comparison on real-world datasets with one-step diffusion methods. C-IQA stands for CLIPIQA, and M-IQA stands"
+    },
+    {
+      "page": 13,
+      "caption": "Table 3. Quantitative comparison on the synthetic CelebA-Test dataset with one-step diffu-"
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      3,
+      4,
+      9,
+      13
+    ],
+    "identity": [
+      1,
+      2,
+      5,
+      6,
+      8
+    ],
+    "portrait_detail": [
+      1,
+      2,
+      3,
+      5,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "efficiency": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14
+    ],
+    "datasets": [
+      2,
+      4,
+      6,
+      7,
+      13,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21
+    ],
+    "limitations": [
+      2,
+      3,
+      5,
+      8,
+      12,
+      13
+    ]
+  },
+  "source_urls": [
+    {
+      "page": 1,
+      "url": "https://github.com/jkwang28/OSDFace"
+    }
+  ],
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\osdface.txt"
+}

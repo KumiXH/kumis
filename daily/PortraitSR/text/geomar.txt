@@ -1,0 +1,1683 @@
+=== PAGE 1 ===
+arXiv:2608.03923v1  [cs.CV]  4 Aug 2026
+GeoMAR: Unleashing Geometrically Aligned Features for Masked
+Autoregressive Blind Face Restoration
+Lu Gan∗
+School of Artificial Intelligence,
+Sun Yat-sen University
+Zhuhai, China
+ganlu33@mail2.sysu.edu.cn
+Hanyu Yan∗
+School of Artificial Intelligence,
+Sun Yat-sen University
+Zhuhai, China
+yanhy27@mail2.sysu.edu.cn
+Chaofeng Chen
+Institute for Math and AI, Wuhan
+School of Artificial Intelligence,
+Wuhan University
+Wuhan, China
+chaofengchen@whu.edu.cn
+Junqi Hu
+School of Artificial Intelligence,
+Sun Yat-sen University
+Zhuhai, China
+hujq28@mail2.sysu.edu.cn
+Dan Zeng†
+School of Artificial Intelligence,
+Sun Yat-sen University
+Zhuhai, China
+The Technology Innovation Center
+for Collaborative Applications of
+Natural Resources Data in GBA, MNR
+Guangzhou, China
+zengd8@mail.sysu.edu.cn
+T5 text encoder
+(b) Multi-step Code Prediction Refinement
+Step 0
+(a) Geometric Priors Extractor & Injector
+Step T-1
+One-step Prediction
+Step t
+Codebook
+0
+2
+N
+1
+...
+0
+2
+N
+1
+...
+Codebook
+0
+2
+N
+1
+...
+Step T-1
+One-step Prediction
+Step t
+Codebook
+0
+2
+N
+1
+...
+VLM
+Face shape Nose
+Mouth
+Eye
+Eyebrow
+Encoder
+Visual feature space Textual embedding spaceGeometric-aware
+feature space
+Eyebrow
+Texture and geometric
+text descriptions
+Mouth
+Eye
+Nose
+Face shape
+aligned
+Figure 1: Our motivations are twofold: (a) aligned geometry-aware feature extraction and (b) multi-step latent code refinement.
+Abstract
+Codebook-based blind face restoration (BFR) often suffers from am-
+biguous conditioning features and a fragile prediction mechanism
+under severe degradation. To address these challenges, we propose
+GeoMAR, a framework designed to unleash geometrically aligned
+features with masked autoregressive (MAR) refinement for robust
+face restoration. For feature conditioning, we introduce a dual-input
+extraction pipeline to extract component-based geometric descrip-
+tions with explicit, spatially faithful anchors. These textual priors
+are integrated with low-quality (LQ) features via an Aligned Geo-
+metric Priors Injector, which employs a KV-Q exchange strategy to
+∗Both authors contributed equally to this research.
+†Corresponding author: zengd8@mail.sysu.edu.cn.
+This work is licensed under a Creative Commons Attribution-NonCommercial-
+NoDerivatives 4.0 International License.
+MM ’26, Rio de Janeiro, Brazil
+©2026 Copyright held by the owner/author(s).
+ACM ISBN 979-8-4007-2213-4/2026/11
+https://doi.org/10.1145/3767308.3836198
+generate geometrically aligned features. For prediction mechanism,
+we reformulate the one-step mapping into a multi-step MAR pro-
+cess. This coarse-to-fine generation progressively refines complex
+facial regions based on increasingly reliable context. Experiments
+on one synthetic and three real-world benchmarks demonstrate
+that GeoMAR achieves highly competitive perceptual quality and
+coherent visual structures compared with existing methods. The
+code is available at https://github.com/BRL-SYSU/GeoMAR.git.
+CCS Concepts
+•Computing methodologies→Computer vision.
+Keywords
+blind face restoration, masked autoregressive modeling
+ACM Reference Format:
+Lu Gan, Hanyu Yan, Chaofeng Chen, Junqi Hu, and Dan Zeng. 2026. Geo-
+MAR: Unleashing Geometrically Aligned Features for Masked Autoregres-
+sive Blind Face Restoration. InProceedings of the 34th ACM International Con-
+ference on Multimedia (MM ’26), November 10–14, 2026, Rio de Janeiro, Brazil.
+ACM, New York, NY, USA, 20 pages. https://doi.org/10.1145/3767308.3836198
+
+=== PAGE 2 ===
+MM ’26, November 10–14, 2026, Rio de Janeiro, Brazil Lu Gan, Hanyu Yan, Chaofeng Chen, Junqi Hu, and Dan Zeng
+1 Introduction
+Blind Face Restoration (BFR) aims to recover high-quality (HQ)
+images from inputs degraded by complex, unknown distortions.
+This task is inherently ill-posed, as multiple plausible HQ solutions
+can correspond to the same low-quality (LQ) observation.
+Recent codebook-based methods [8, 26, 46] mitigate this ambigu-
+ity by leveraging pre-trained HQ codebooks as discrete generative
+priors and reformulating restoration as a latent code prediction
+problem. However, existing frameworks, such as CodeFormer [46]
+and DAEFR [26], typically employ a one-step mapping strategy that
+predicts the entire latent code sequence from LQ features in a for-
+ward pass. This paradigm is fragile due to unreliable conditioning
+and limited refinement capability: severe degradation may erase
+component boundaries and structural evidence from the LQ repre-
+sentation. Ambiguous features can then be mapped to inconsistent
+codes across related facial regions, while the one-step predictor
+cannot revise uncertain structures using newly recovered context.
+To overcome these limitations, we improve one-step codebook-
+based BFR from two synergistic perspectives: (1) enhancing the
+robustness of conditioning features, and (2) improving the efficacy
+of the prediction mechanism.
+Regarding strengthening the conditioning features, recent text-
+conditioned generation models [ 24] demonstrate strong capabil-
+ity in generating fine details under explicit semantic guidance.
+Since textual prompts are largely invariant to visual corruptions
+(e.g., blur, noise, and JPEG artifacts), they provide promising pri-
+ors for severely degraded face restoration. Some BFR works at-
+tempt to incorporate text through paired captions or user-specified
+prompts [16, 38]. However, generic descriptions may not fully cap-
+ture structured facial characteristics. Moreover, conventional align-
+ment mechanisms, such as Spatial Feature Transform (SFT) [ 31]
+and Cross-Attention [29], may be limited by ambiguous degraded
+visual features, hindering fine-grained semantic alignment. There-
+fore,how these textual priors are extracted and aligned with visual
+features becomes crucial. Recent studies [ 12, 44] demonstrate the
+potential of vision-language models (VLMs) to extract informative
+semantic priors from visual inputs. To better harness this capability
+for structured face restoration, we propose a dual-input extraction
+pipeline and an Aligned Geometric Priors Injector (Fig. 1 (a)). In-
+stead of relying on the RGB image alone, we condition the VLM
+on both the degraded image and its parsing map, which provides
+explicit, spatially faithful geometric anchors. This enables more
+reliable component-based descriptions while reducing structural
+hallucinations. The injector further integrates this cross-modal
+guidance by modulating LQ features via SFT and then enhances
+them through KV-Q exchange cross-attention. By using semanti-
+cally rich, prior-aligned features as queries and the original LQ
+features as keys and values, the injector retrieves relevant visual
+evidence and yields geometrically aligned representations.
+Regarding improving the prediction mechanism, mapping highly
+corrupted LQ features to HQ codes in one step requires the model
+to simultaneously capture complex global structural dependencies,
+such as facial symmetry and jawline contours. When key structural
+cues are missing, this can lead to inconsistent structures, artifacts
+or overly smoothed outputs with limited perceptual quality. To
+address this, instead of conventional one-step mapping, we adapt
+the masked autoregressive (MAR) mechanism used in MaskGIT-
+based image generation [2] to progressively refine the predictions.
+In our framework, MAR reformulates latent code prediction as a
+multi-step, progressive refinement process, where geometrically
+aligned features provide reliable structural guidance. As illustrated
+in Fig. 1 (b), instead of resolving all structural dependencies at once,
+MAR decomposes the complex task: it first predicts confident and
+structurally simple regions and then iteratively refines uncertain
+and complex regions (e.g., eyes and mouth) using increasingly reli-
+able context. This coarse-to-fine, context-aware generation strategy
+improves structural consistency and perceptual realism by progres-
+sively masking and regenerating uncertain tokens.
+In a nutshell, we propose an effective BFR framework named
+GeoMAR. Our main contributions are as follows:
+• We reformulate latent code prediction in BFR as a Masked
+Autoregressive process, enabling iterative context-aware re-
+finement of facial tokens for improved structural consistency
+and perceptual realism.
+• Our Geometric Priors Extractor & Injector employs a dual-
+input extraction pipeline and combines Spatial Feature Trans-
+form with a KV-Q exchange Cross-Attention to learn geo-
+metrically aligned features.
+• Extensive experiment results verify the effectiveness of our
+method in addressing the ambiguity of conditioning features
+and the fragility of the prediction mechanism.
+2 Related Work
+Blind face restoration.The field of BFR has evolved through
+GAN-based [3, 10, 20, 30, 42], diffusion-based [18, 19, 34, 45], and
+codebook-based paradigms. Following VQ-VAE [28] and VQGAN [7],
+codebook-based methods [8] exploit discrete latent priors for facial
+reconstruction, while RestoreFormer [ 33] and CodeFormer [ 46]
+employ Transformer-based architectures to predict latent codes
+from degraded inputs. DAEFR [26] further improves representation
+alignment via a dual-encoder design. However, these methods pre-
+dominantly rely on one-step code prediction, which limits global
+structural consistency under severe degradation.
+Vision-language models as image restoration priors.Recent im-
+age restoration methods exploit vision-language priors in different
+forms. SeeSR [37] learns degradation-aware prompt extractors from
+LR images, while SUPIR [44] and DaLPSR [12] use VLM-generated
+descriptions to guide diffusion restoration. PURE [35] instead adapts
+an autoregressive multimodal model to predict degradation char-
+acteristics and semantic descriptions before generating HQ image
+tokens. In BFR, AuthFace [17] adopts VLM-generated semantic and
+photography-aware tags to optimize face diffusion priors. However,
+these approaches mainly capture global semantics or appearance,
+while component-level facial geometry and its alignment with de-
+graded features remain underexplored.
+Autoregressive generative modeling.Autoregressive (AR) mod-
+eling has shown strong capability in visual generation, evolving
+from early pixel-level modeling approaches such as PixelRNN [27]
+and iGPT [4] to more advanced Transformer-based frameworks.
+MaskGIT [2] introduces a masked token prediction paradigm with
+
+=== PAGE 3 ===
+GeoMAR: Unleashing Geometrically Aligned Features for Masked Autoregressive Blind Face Restoration MM ’26, November 10–14, 2026, Rio de Janeiro, Brazil
+0
+1
+2
+..
+N
+0
+1
+2
+..
+N
+Mask
+LQ
+Encoder
+HQ
+Encoder
+Geometric Priors
+Extractor & Injector
+HQ
+Decoder
+Codebook
+Trainable
+ Frozen
+Masked Token
+Training only
+(b) Masked AR Transformer (T-step detail)
+Prediction
+Correct Inaccurate
+Bidirectional Attention
+Step 0
+masked tokens
+12
+12 12
+2
+3
+1
+3
+12
+5
+2
+12
+2
+Step 1 Step 2
+Intermediate
+prediction
+6
+7 8
+
+Bidirectional Attention
+Bidirectional Attention
+Masked AR Transformer
+HQ Image
+LQ Image HQ ImageParsing map
+Step T
+(a) Geometric Priors Extractor & Injector
+LQ features
+concat
+SFT Enhancer
+Cross Attention
+VLM  T5  Text
+Encoder
+Input Image
+condition
+Extractor
+LQ features
+Q
+K,V
+Injector
+GeoAware
+ features
+Parsing map
+Textual emb.
+SFT Enhancer
+Cross Attention
+VLM  T5  Text
+Encoder
+Input Image
+condition
+Extractor
+LQ features
+Q
+K,V
+Injector
+GeoAware
+ features
+Parsing map
+Textual emb.
+condition
+GeoAware features condition
+Masked HQ tokens
+Figure 2: An overview of GeoMAR, which takes LQ images and geometry-aware facial component descriptions as inputs to
+restore HQ images via (a) a Geometric Priors Extractor and Injector, and (b) a Masked Autoregressive Transformer with T-step
+detail prediction.
+bidirectional attention, enabling parallel token generation and it-
+erative refinement, followed by extensions such as VAR [25] and
+xAR [23]. These methods demonstrate that progressive, iterative
+prediction can effectively model complex dependencies and uncer-
+tainty. However, applying such masked autoregressive strategies
+to latent code prediction in BFR remains largely underexplored.
+3 Proposed Method
+As illustrated in Fig. 2, GeoMAR consists of a geometric priors
+extractor and injector and a masked autoregressive (MAR) trans-
+former. During training, LQ images are encoded into visual features
+and fused with textual priors for masked latent-code prediction. In
+the inference stage, the framework reconstructs HQ images from
+LQ inputs by iteratively predicting latent codes with the MAR
+transformer conditioned on the geometrically aligned features.
+3.1 Preliminaries
+Image tokenizer.A VQGAN-based [ 7] tokenizer contains three
+components: an encoder, a quantizer and a decoder. Given an HQ
+image 𝐼𝐻𝑄 ∈R 𝐻×𝑊×3 , the HQ encoder E𝐻 compresses it into latent
+features 𝑍𝐻𝑄 ∈R 𝑚×𝑛×𝑑 , where 𝑚 and 𝑛 indicate the spatial size
+and 𝑑 represents the dimension of the latent vector. These features
+are then quantized via a pretrained codebook C={𝑐 𝑘 ∈R 𝑑 }𝐾−1
+𝑘=0
+using the nearest neighbor lookup:
+𝑍 𝑐(𝑖,𝑗)
+𝐻𝑄 =arg min
+𝑐𝑘 ∈ C
+𝑍 (𝑖,𝑗)
+𝐻𝑄 −𝑐 𝑘
+
+2
+, 𝑘∈ [0, . . . , 𝐾−1],(1)
+where 𝑍 𝑐
+𝐻𝑄 is the quantized feature map of 𝑍𝐻𝑄 with 𝐾 codebook
+entries, which is reshaped into a sequence of target discrete indices
+𝒀=(𝑦 0, . . . , 𝑦𝐿−1 ), where𝐿=𝑚·𝑛 and 𝑦𝑖 ∈ { 0, . . . , 𝐾−1} represents
+the index of the corresponding codebook entry.
+3.2 Geometry-Aware Representation Learning
+Component-based geometric priors extractor.To obtain semanti-
+cally rich and geometrically grounded priors beyond generic cap-
+tions, we introduce a dual-input extraction pipeline. As illustrated
+in Fig. 2 (a), the VLM jointly processes the degraded RGB image and
+parsing map to generate facial descriptions, establishing a crucial
+prompt-level cross-validation mechanism. Our prompt is structured
+to generate tag-style facial attributes by adopting a component-
+based descriptive logic. For each component, geometric attributes
+(e.g., shape and state) are derived from the parsing map, while
+appearance attributes (e.g., color and texture) are extracted from
+the RGB image. This design improves robustness in two aspects as
+shown in Fig. 8 and Sec. 4.4: the parsing map provides geometric
+cues to compensate for high-frequency information lost in LQ im-
+ages, while RGB appearance cues (e.g., shadows, color gradients)
+help the VLM deduce a plausible description when severe degra-
+dation renders the parsing map unreliable in certain regions. We
+
+=== PAGE 4 ===
+MM ’26, November 10–14, 2026, Rio de Janeiro, Brazil Lu Gan, Hanyu Yan, Chaofeng Chen, Junqi Hu, and Dan Zeng
+then employ Flan-T5 [5] text encoder to extract text embeddings
+that capture rich semantic content as well as geometry-aware cues.
+Aligned geometric priors injector.To effectively integrate this
+high-level semantic guidance with the LQ visual features, we in-
+troduce the Aligned Geometric Priors Injector, which alleviates the
+ambiguity of degraded visual features. As shown in Fig. 2 (a), our
+injector uniquely combines a Spatial Feature Transform (SFT) [31]
+and a KV-Q Exchange Strategy. Let 𝑍𝐿𝑄 ∈R 𝐻×𝑊×𝐶 denote LQ
+features and 𝑍𝑡𝑥𝑡 denote the projected textual-prior embeddings
+encoded by the Flan-T5 model [5]. First, we employ SFT to seman-
+tically modulate the visual features based on the textual guidance.
+Specifically, the SFT branch predicts a scaling factor𝑠 and a shifting
+factor𝛽from𝑍 𝑡𝑥𝑡 , producing the prior-aligned features:
+𝑍align =(1+𝑠) ⊙𝑍 𝐿𝑄 +𝛽.(2)
+This operation modulates LQ features by enhancing text-consistent
+responses and suppressing irrelevant ones, aligning feature distri-
+butions with textual priors while preserving the original spatial
+structure. Next, we introduce a KV-Q Exchange Strategy to fuse
+global semantic context with the locally-precise visual features.
+Unlike conventional designs that use the original LQ features as
+the query, we observe that unreliable queries may hinder high-
+fidelity restoration [39]. Therefore, we use𝑍align as the query, while
+treating the original LQ features as the key and value:
+𝑍𝑒𝑛ℎ =CrossAttn(𝑄=𝑍 align, 𝐾=𝑍 𝐿𝑄, 𝑉=𝑍 𝐿𝑄 ).(3)
+By using the semantically rich and structurally sound 𝑍align as the
+query, our injector can selectively retrieve the most relevant, high-
+fidelity information from the original LQ feature space. This guided
+attention process produces the final enhanced 𝑍𝑒𝑛ℎ, which are then
+passed to the MAR transformer.
+3.3 Masked Autoregressive Token Prediction
+To overcome the fragility of one-step prediction and improve global
+structural consistency, we reformulate the latent code mapping as a
+multi-step, progressive refinement process, where the geometrically
+aligned features 𝑍𝑒𝑛ℎ are provided as a conditional prefix to the
+Masked AR transformer in Fig. 2 (b). Specifically, let a binary mask
+sequence 𝑴=[𝑚 0, . . . , 𝑚𝐿−1 ] ∈ { 0, 1}𝐿 be applied to the target
+HQ code sequence 𝒀 to produce the masked sequence 𝒀 𝑀. Here,
+𝐿 denotes the total length of the token sequence. Elements where
+𝑚𝑖 = 0retain their original discrete code values (acting as visible
+context), while positions where 𝑚𝑖 = 1are replaced with a special
+[MASK] token. We perform iterative refinement over𝑇 steps with a
+dynamic masking schedule 𝛾(𝑟)=cos  𝜋
+2 ·𝑟 (𝑟∈ ( 0, 1]) following
+MaskGIT [2], which gradually reduces the ratio of masked tokens.
+At each step 𝑡∈ [ 1, 𝑇], the transformer takes the current masked
+sequence 𝒀 (𝑡)
+𝑀 and 𝑍𝑒𝑛ℎ as input and predicts token probabilities
+𝒑 (𝑡) . The confidence of previously unmasked tokens is fixed to 1.0
+to preserve reliable structural context. The number of tokens to be
+masked in the next step is determined by 𝑛 (𝑡) = ⌈𝛾(𝑡/𝑇) ·𝐿 ⌉. All
+tokens are then sorted by confidence in descending order, and the
+𝑛 (𝑡) least confident tokens are retained as masked. The updated
+mask 𝑀 (𝑡+1) defines the next masked sequence 𝒀 (𝑡+1)
+𝑀 , which is
+progressively refined by the transformer. After𝑇 steps, the complete
+predicted sequence ˆ𝒀is obtained, formalized as:
+𝑃( ˆ𝒀|𝑌 (1)
+𝑀 , 𝑍𝑒𝑛ℎ)=
+𝑇Ö
+𝑡=1
+𝑃(𝑌 (𝑡+1)
+𝑀 |𝑌 (𝑡)
+𝑀 , 𝑍𝑒𝑛ℎ).(4)
+3.4 Training and Inference
+Training.During training, we sample a masking ratio 𝑟 uni-
+formly from (0, 1] and randomly mask ⌈𝛾(𝑟) ·𝐿 ⌉ tokens in the HQ
+sequence 𝒀 , producing the masked sequence 𝒀 𝑀. The enhanced
+geometrically aligned features 𝑍𝑒𝑛ℎ are then concatenated with 𝒀 𝑀
+as a prefix, and the combined sequence is fed into the bidirectional
+transformer [6] for masked-code prediction. The overall training
+objective is defined as:
+L=L 𝑐𝑜𝑛𝑡𝑟𝑎 +𝜆 𝑓 𝑒𝑎𝑡 · L𝑓 𝑒𝑎𝑡 + L𝑚𝑎𝑠𝑘 ,(5)
+where𝜆 𝑓 𝑒𝑎𝑡 is empirically set to 10.
+First, we employ a contrastive objective to align the LQ visual
+features 𝑍𝐿𝑄 with the projected textual-prior embeddings 𝑍𝑡𝑥𝑡 . Let
+z(𝑖)
+𝐿𝑄 andz (𝑖)
+𝑡𝑥𝑡 denote their pooled and normalized representations for
+the 𝑖-th sample. For a mini-batch of size𝑁 , the matched visual–text
+pair is treated as positive, while the remaining text representations
+serve as negatives. The InfoNCE-style loss [22] is defined as:
+L𝑐𝑜𝑛𝑡𝑟𝑎 =− 1
+𝑁
+𝑁∑︁
+𝑖=1
+log
+exp
+
+sim(z (𝑖)
+𝐿𝑄,z (𝑖)
+𝑡𝑥𝑡 )/𝜏
+
+Í𝑁
+𝑗=1 exp
+
+sim(z (𝑖)
+𝐿𝑄,z (𝑗)
+𝑡𝑥𝑡 )/𝜏
+ ,(6)
+where sim(·,·) denotes cosine similarity and 𝜏 is a learnable tem-
+perature initialized to 0.07. Second, an L2 loss aligns 𝑍𝑒𝑛ℎ with the
+quantized latent codebook feature𝑍𝑐. This provides explicit supervi-
+sion for fusing the textual priors and visual features while reducing
+their domain discrepancy before autoregressive prediction:
+L𝑓 𝑒𝑎𝑡 =||𝒁 𝑒𝑛ℎ −𝑠𝑔(𝒁 𝑐 )|| 2
+2,(7)
+where 𝑠𝑔(·) denotes the stop-gradient. Finally, L𝑚𝑎𝑠𝑘 minimizes
+the negative log-likelihood only at masked positions, conditioned
+on𝒀 𝑀 and𝑍 𝑒𝑛ℎ:
+L𝑚𝑎𝑠𝑘 =−E 𝒀∈ D
+
+∑︁
+∀𝑖∈ [1,𝐿],𝑚 𝑖 =1
+log𝑝(𝑦 𝑖 |𝒀 𝑀,𝒁 𝑒𝑛ℎ)
+
+.(8)
+Inference.The inference process differs from the training phase
+in two key aspects. First, without access to HQ images, we feed
+both the LQ image and its parsing map into the VLM to extract
+component-based geometric priors. This dual-input design yields
+priors that remain relatively robust to severe input degradation, as
+demonstrated in Sec. 4.4. Second, at the initial step 𝑡= 1, the entire
+token sequence 𝑌 (1)
+𝑀 is initialized with [MASK] tokens, allowing the
+model to perform blind restoration without ground truth.
+4 Experiment
+4.1 Experimental Settings
+Datasets.We use the FFHQ dataset [ 14] containing 70,000 HQ
+images for training. All images are resized to512 × 512. We fol-
+low [26, 46] to synthesize corresponding LQ images. Moreover, we
+adopt Qwen3-VL-8B-Instruct [1] to generate component-based face
+description prompts based on a dual-input (i.e., an RGB image and
+
+=== PAGE 5 ===
+GeoMAR: Unleashing Geometrically Aligned Features for Masked Autoregressive Blind Face Restoration MM ’26, November 10–14, 2026, Rio de Janeiro, Brazil
+LFW-TestWebPhoto-TestWIDER-Test
+FID=144FID=267
+natural-toned lips
+with no expression
+slightly open, thin,
+pale lips with no
+visible teeth
+Prompt
+descriptions
+moderately full-
+lipped, upper teeth;
+slightly open
+moderately full-
+lipped, upper teeth;
+slightly open
+Input GFPGAN DifFace VSPBFR DiffusionReward CodeFormer DAEFR GeoMAR(Ours)
+Ground TruthInput GFPGAN DifFace VSPBFR DiffusionReward CodeFormer DAEFR GeoMAR(Ours)
+Figure 3: Qualitative comparison on three real-world datasets: LFW-Test, WebPhoto-Test and WIDER-Test.
+Table 1: Quantitative comparison on three real-world datasets. Red, blue and cyan indicate the best, second and third-best,
+respectively. For GeoMAR, † denotes the online restoration-core latency; the complete end-to-end latency is described in the
+implementation details.
+Prior type Methods Time (s) LFW-Test WebPhoto-Test WIDER-Test
+FID↓NIQE↓MANIQA↑FID↓NIQE↓MANIQA↑FID↓NIQE↓MANIQA↑
+GAN-based GFPGAN [CVPR’21] 0.13 53.86 4.742 0.456 100.20 4.970 0.438 49.45 4.693 0.439
+GPEN [CVPR’21] 0.06 55.18 4.538 0.479 85.63 5.306 0.438 58.52 5.264 0.450
+Diffusion-based
+DR2 [CVPR’23] 2.05 50.79 4.538 0.525 113.37 6.035 0.412 54.70 5.904 0.407
+DifFace [TPAMI’24] 7.05 46.35 3.813 0.461 80.69 4.372 0.425 37.43 4.255 0.431
+VSPBFR [PR’25] 0.11 46.37 3.746 0.533 77.24 4.218 0.502 38.20 3.579 0.493
+DiffusionReward [arXiv’25] 4.23 48.92 4.386 0.517 79.49 5.202 0.483 36.49 4.724 0.492
+Codebook-based
+VQFR [ECCV’22] 5.71 50.09 3.836 0.534 85.28 4.608 0.491 37.87 4.036 0.504
+CodeFormer [NeurIPS’22] 0.07 52.84 4.438 0.527 83.94 5.529 0.503 38.78 4.119 0.496
+DAEFR [ICLR’24] 0.12 47.53 3.552 0.542 75.79 3.933 0.493 36.72 3.655 0.520
+GeoMAR (Ours) 0.24 † 46.87 3.547 0.540 75.73 3.930 0.499 37.37 3.762 0.510
+its parsing map). The parsing map is obtained using BiSeNet [43].
+We evaluate our method on four widely used benchmarks for
+BFR, including one synthetic dataset and three real-world datasets.
+The synthetic dataset CelebA-Test comprises 3,000 images selected
+from CelebA-HQ [13]. To quantitatively evaluate restoration per-
+formance under different degradation, we adopt two settings: the
+standard GFPGAN [ 30] degradation pipeline (FID=144) and the
+degradation pipeline used during training (FID=267). The three
+real-world datasets, respectively, are LFW-Test [11] (1,711 images,
+mild degradation), WebPhoto-Test [30] (407 images, medium degra-
+dation), and WIDER-Test [40] (970 images, heavy degradation).
+Evaluation metrics.We adopt both no-reference and reference-
+based metrics for the comprehensive evaluation. Specifically, we
+use no-reference metrics FID [9], NIQE [21], and MANIQA [41] to
+evaluate the perceptual quality of all datasets. For the synthesized
+dataset with ground truth, we also adopt PSNR, SSIM [32] and inter-
+ocular normalized landmark distance (LMD) for evaluation. LMD
+is reported in percentage in Table 2.
+Implementation details.In our implementation, the size of the
+input face image is512×512×3, and the size of the quantized feature
+is16 × 16 × 256. The pre-trained codebook [26] contains 𝐾= 1, 024
+code items, with each code represented by a 256-dimensional vector.
+During training, we employ the Adam optimizer [15] with a batch
+size 16 and set the learning rate to7 .2 × 10−5. In autoregressive
+token prediction, the refinement step is empirically set to 8. The
+model is trained with four NVIDIA GeForce RTX 4090 GPUs for
+28 epochs. During inference, the complete pipeline takes around
+3.91seconds per image for a newly observed input, comprising
+face parsing with BiSeNet (0.03s), prompt generation with Qwen3-
+VL-8B-Instruct (3.63s), text encoding with Flan-T5 (0 .01s), and
+MAR prediction plus decoding with the GeoMAR core (0.24s † as
+reported in Table 1).
+4.2 Main Results
+We compare GeoMAR with nine representative BFR approaches,
+including: (1) GAN-based methods: GFPGAN [30], GPEN [42]; (2)
+
+=== PAGE 6 ===
+MM ’26, November 10–14, 2026, Rio de Janeiro, Brazil Lu Gan, Hanyu Yan, Chaofeng Chen, Junqi Hu, and Dan Zeng
+LFW-TestWebPhoto-TestWIDER-Test
+FID=144FID=267
+natural-toned lips
+with no expression
+slightly open, thin,
+pale lips with no
+visible teeth
+Prompt
+descriptions
+FID=144 FID=267
+w/ Geo
+from HQ im
+moderately full-
+lipped, upper teeth;
+moderately full-
+lipped, upper teeth;
+slightly open
+Input GFPGAN DifFace VSPBFR DiffusionReward CodeFormer DAEFR GeoMAR(Ours)
+Ground TruthInput GFPGAN DifFace VSPBFR DiffusionReward CodeFormer DAEFR GeoMAR(Ours)
+Figure 4: Qualitative comparison on the synthetic CelebA-Test dataset under two degradation levels (FID=144 and FID=267).
+Table 2: Quantitative comparison on the synthetic CelebA-Test dataset under two degradation levels (FID=144 and FID=267).
+Red, blue and cyan indicate the best, second and third-best, respectively.
+Prior type Methods FID = 144 FID = 267
+FID↓NIQE↓MANIQA↑PSNR↑SSIM↑LMD↓FID↓NIQE↓MANIQA↑PSNR↑SSIM↑LMD↓
+GAN-based GFPGAN [CVPR’21] 52.29 4.565 0.466 25.80 0.708 2.52 79.30 5.451 0.453 21.97 0.611 8.89
+GPEN [CVPR’21] 51.46 4.817 0.459 25.77 0.703 2.50 72.99 5.723 0.447 22.05 0.619 9.19
+Diffusion-based
+DR2 [CVPR’23] 58.59 5.370 0.487 24.45 0.679 2.66 72.41 5.579 0.477 21.28 0.606 4.40
+DifFace [TPAMI’24] 37.88 4.157 0.468 24.80 0.673 2.47 47.89 4.513 0.461 22.81 0.604 3.16
+VSPBFR [PR’25] 38.52 3.839 0.546 24.73 0.657 2.37 43.28 3.512 0.500 21.02 0.503 4.76
+DiffusionReward [arXiv’25] 42.59 4.545 0.537 26.33 0.701 2.15 49.70 5.021 0.534 23.25 0.640 3.04
+Codebook-based
+VQFR [ECCV’22] 46.77 4.204 0.540 23.76 0.659 2.45 53.73 4.743 0.553 21.84 0.621 3.28
+CodeFormer [NeurIPS’22] 52.42 4.594 0.538 25.15 0.670 2.32 58.31 4.566 0.556 22.19 0.594 3.18
+DAEFR [ICLR’24] 40.76 3.744 0.545 22.59 0.609 2.44 47.50 4.500 0.570 20.29 0.588 3.29
+GeoMAR (Ours) 39.61 3.819 0.541 21.95 0.597 2.66 42.13 4.223 0.554 20.23 0.562 3.62
+Diffusion-based methods: DR2 [34], DifFace [45], VSPBFR [18], Dif-
+fusionReward [36]; (3) Codebook-based methods: VQFR [8], Code-
+Former [46], DAEFR [26].
+Evaluation on three real-world datasets.As shown in Table 1, our
+method consistently improves perceptual quality while maintain-
+ing practical inference time. While some methods may achieve
+marginally better scores on certain metrics by producing over-
+smoothed outputs, our method prioritizes global structural con-
+sistency and perceptual realism. Consequently, GeoMAR achieves
+the lowest FID on WebPhoto-Test (75.73) and the best NIQE on
+both LFW-Test (3.547) and WebPhoto-Test (3.930), while consis-
+tently ranking among the top three in MANIQA across all datasets,
+demonstrating its strong perceptual quality, as MANIQA is well
+aligned with human perception.
+This quantitative advantage aligns with the visual comparisons
+in Fig. 3. Under real-world degradation, many GAN-based and
+diffusion-based methods fail to recover complex facial details (e.g.,
+pupils in the first and third rows) and produce over-smoothed
+results with artifacts, while codebook-based methods such as Code-
+Former and DAEFR often yield distorted and unnatural structures
+due to the fragility of one-step mapping. In contrast, by combining
+explicit geometry-aware priors with a progressive MAR refine-
+ment process, GeoMAR reliably restores coherent facial structures
+and fine-grained textures (e.g., hair in the second row), produc-
+ing restorations that are structurally accurate and faithful to the
+original attributes.
+Evaluation on the synthetic CelebA-Test dataset.As shown in Ta-
+ble 2, GeoMAR maintains highly competitive performance under
+different synthetic degradation levels, ranking among the top three
+across all perceptual metrics under varying degradation levels. Al-
+though GeoMAR is not consistently superior across all quantitative
+metrics, it better preserves perceptual quality and structural realism
+under severe degradation. In such cases, slight shifts in facial com-
+ponents (e.g., eyes and mouth) may increase LMD despite visually
+coherent restorations.
+The qualitative comparisons in Fig. 4 further illustrate this dis-
+tinction. Guided by reliable geometric anchors and refined through
+context-aware MAR generation, GeoMAR reconstructs complex,
+attribute-consistent details around the eyes in the first two rows.
+In the third row, GeoMAR better preserves the subject’s overall
+facial appearance, whereas competing methods produce noticeable
+artifacts or appear less faithful to the original subject.
+
+=== PAGE 7 ===
+GeoMAR: Unleashing Geometrically Aligned Features for Masked Autoregressive Blind Face Restoration MM ’26, November 10–14, 2026, Rio de Janeiro, Brazil
+Table 3: Ablation study of GeoMAR design on CelebA-Test
+dataset (FID=144).
+Models Geometric Priors MAR FID↓NIQE↓
+(a)✗ ✗42.38 3.975
+(b)✓✗42.23 3.891
+(c)✗✓42.36 3.829
+(d)✓ ✓39.61 3.819
+Table 4: Ablation study on geometric priors design.
+Metrics
+LFW-Test WebPhoto-Test
+Geometric priors Geometric priors
+w/o concat-style Ours w/o concat-style Ours
+FID↓50.98 48.43 46.87 75.85 77.74 75.73
+NIQE↓3.496 3.518 3.547 4.069 4.047 3.930
++
+<FACE_DETAIL>: Sourced from RGB Image. (e.g. Gender, Age, Expression, Lighting, Color, Texture)
+<FACE_GEOMETRY>: Sourced from Parsing Map. (e.g. Shape, State, Relative Size)
+Predefined Facial Attributes
+RGB Image Parsing Map
+Synergistic GenerationInput
+<Generation Task>:
+    Generate a coherent paragraph by integrating:
+    - <FACE_DETAIL> from <img_rgb>
+    - <FACE_GEOMETRY> from <img_parse>
+    ... following the rules in the System Prompt.
+Qwen
+The individual appears to be a middle-aged male, with a facial structure
+characterized by a moderately wide nasal bridge that tapers to a defined, slightly
+rounded nasal tip with visible nostrils. His eyes are light-colored, medium-sized, with
+well-defined upper and lower eyelids and sparse, dark eyelashes; gaze is directed
+slightly upward and to the right. Lips are full and slightly parted, revealing the upper
+incisors in a gentle smile. Eyebrows are......The face is oval with a moderately wide
+nasal bridge and a rounded nasal tip. The eyes are medium-sized with moderate
+spacing, appearing slightly open. The mouth is horizontally oriented with a moderate
+width and slight openness. The eyebrows are arched and moderately spaced.
+Input Concat-Stylew/o Geo-Priors
+ Ours
+Input
+w/o MAR w/ MAR
+GeoMAR
+LFW-TestWebPhoto-TestWIDER-Test
+FID=144FID=267
+natural-toned lips
+with no expression
+slightly open, thin,
+pale lips with no
+visible teeth
+Eyes: … medium-sized,
+open eyes are light
+brown with sparse lashes
+light brown with visible
+eyelashes
+ … light-colored, with
+sparse lashes;
+Eyes: medium-sized
+dark with visible
+eyelashes
+round, open eyes
+are dark brown
+Prompt
+descriptions
+Prompt
+descriptions
+Used Prompts:
+FID=144 FID=267
+w/o Geo-Priorsw/ Geo-Priorsupper-bound
+w/o MAR w/ MAR
+DAEFR GeoMAR
+moderately full-
+lipped, upper teeth;
+slightly open
+moderately full-
+lipped, upper teeth;
+slightly open
+dark brown;
+oval and open
+dark brown;
+oval and open
+Figure 5: Qualitative comparison of different textual priors
+and their corresponding visual restoration results.
+4.3 Ablation Studies
+Effectiveness of GeoMAR design.As shown in Table 3, the base-
+line model (a), which adopts one-step code mapping with generic
+caption-style text priors, achieves the poorest performance. Intro-
+ducing explicit geometric priors (model b) improves the results,
+demonstrating that explicit, fine-grained structural guidance helps
+reduce the ambiguity in degraded LQ features and better preserves
+facial fidelity. Replacing one-step mapping with the masked autore-
+gressive (MAR) mechanism (model c) consistently further boosts
+metrics, underscoring the value of multi-step, context-aware re-
+finement. Crucially, our full GeoMAR model (d) integrates both
+innovations, exhibiting strong synergy that substantially reduces
+FID from 42.38 to 39.61 and NIQE from 3.975 to 3.819. These results
+verify their complementarity: the geometrically aligned features
+indeed provide a more accurate and structurally sound foundation,
+which the iterative, multi-step mapping of the MAR mechanism
+establishes global structural consistency and perceptual realism.
+Advantage of leveraging geometric priors.We compare component-
+based geometric prior with two alternatives under the same injector
+architecture: (1) generic caption-style textual descriptions solely
+Table 5: Ablation of query types in geometric prior injector.
+Metrics LFW-Test WebPhoto-Test
+LQ fea asQEnhanced fea asQLQ fea asQEnhanced fea asQ
+FID↓48.05 46.87 76.68 75.73
+NIQE↓3.671 3.547 4.175 3.930
+InputCodeFormerCodeFormer + MAR
+Input LQ as Query Enhanced LQ as Query
+Input LQ as Query Enhanced LQ as Query
+Figure 6: Qualitative comparison of different query designs.
+from RGB inputs (w/o Geo-Priors), and (2) a concat-style variant
+that generates texture and geometry descriptions separately from
+the image and parsing map before concatenation. As shown in
+Table 4, our design achieves the best FID. Although the ‘w/o Geo-
+Priors’ variant obtains slightly better NIQE on LFW-Test, this is
+likely due to NIQE favoring smoother outputs. By jointly leverag-
+ing RGB image and parsing map and generating descriptions based
+on components, the VLM forms a coherent representation with a
+robust cross-validation mechanism. The parsing map provides high-
+frequency structural guidance, while the LQ image compensates
+for potential parsing inaccuracies, improving robustness under se-
+vere degradation. As illustrated in Fig. 5, relying solely on RGB
+inputs (w/o Geo-Priors) produces generic or structurally ambigu-
+ous results (e.g., misaligned lip contours). The concat-style variant,
+lacking overall context, often introduces disjointed artifacts. In
+contrast, our design achieves more accurate and stable restorations.
+Insights of KV-Q exchange in geometric prior injector.To deter-
+mine the most effective way to inject our geometric priors, we
+analyze the design of our Aligned Geometric Priors Injector about
+the role of the query in its cross-attention mechanism. We compare
+two feature types as queries: LQ and Enhanced LQ features. As
+shown in Table 5, using the Enhanced LQ features as the query
+outperforms using LQ features. When the degraded LQ features
+serve as the query, their limited semantic information makes them
+vulnerable to being dominated by textual priors, causing the generic
+structure of the prior to override input-specific evidence. In con-
+trast, Enhanced LQ features enable the prior-aligned representation
+to selectively retrieve relevant information from the original LQ
+space, allowing the geometric prior to correct global facial struc-
+ture while retaining facial attributes. Fig. 6 provides consistent
+qualitative evidence: the KV-Q exchange design reduces visual am-
+biguity, successfully retaining realistic facial attributes (e.g., natural
+teeth structure and facial contour) while preventing the text from
+dominating the actual visual input.
+
+=== PAGE 8 ===
+MM ’26, November 10–14, 2026, Rio de Janeiro, Brazil Lu Gan, Hanyu Yan, Chaofeng Chen, Junqi Hu, and Dan Zeng
+Table 6: Generalization of MAR across BFR methods (FID). △
+indicates performance improvement.
+Models Methods LFW-Test WebPhoto-Test
+DAEFR w/o MAR 47.69 75.79
+w/ MAR 45.77 (△1.92) 73.13 (△2.66)
+GeoMAR (Ours) w/o MAR 53.42 76.81
+w/ MAR 46.87 (△6.55) 75.73 (△1.08)
++
+<FACE_DETAIL>: Sourced from RGB Image. (e.g. Gender, Age, Expression, Lighting, Color, Texture)
+<FACE_GEOMETRY>: Sourced from Parsing Map. (e.g. Shape, State, Relative Size)
+Predefined Facial Attributes
+RGB Image Parsing Map
+Synergistic GenerationInput
+<Generation Task>:
+    Generate a coherent paragraph by integrating:
+    - <FACE_DETAIL> from <img_rgb>
+    - <FACE_GEOMETRY> from <img_parse>
+    ... following the rules in the System Prompt.
+Qwen
+The individual appears to be a middle-aged male, with a facial structure
+characterized by a moderately wide nasal bridge that tapers to a defined, slightly
+rounded nasal tip with visible nostrils. His eyes are light-colored, medium-sized, with
+well-defined upper and lower eyelids and sparse, dark eyelashes; gaze is directed
+slightly upward and to the right. Lips are full and slightly parted, revealing the upper
+incisors in a gentle smile. Eyebrows are......The face is oval with a moderately wide
+nasal bridge and a rounded nasal tip. The eyes are medium-sized with moderate
+spacing, appearing slightly open. The mouth is horizontally oriented with a moderate
+width and slight openness. The eyebrows are arched and moderately spaced.
+Input Concat-Stylew/o Geo-Priors
+ Ours
+Input
+w/o MAR w/ MAR
+GeoMAR
+LFW-TestWebPhoto-TestWIDER-Test
+FID=144FID=267
+natural-toned lips with
+no expression
+Mouth: … slightly open,
+revealing thin, pale lips
+with no visible teeth
+… moderately full-lipped,
+revealing the upper teeth;
+Mouth：slightly open
+Eyes: … medium-sized,
+open eyes are light
+brown with sparse lashes
+light brown with visible
+eyelashes
+ … light-colored, with
+sparse lashes;
+Eyes: medium-sized
+… dark brown;  Eyes:
+oval and open
+dark with visible eyelashes  Eyes:  … round, open
+eyes are dark brown
+Used Prompts:
+Used Prompts: Used Prompts:
+FID=144 FID=267
+w/o  oursupper-bound
+w/o MAR w/ MAR
+DAEFR GeoMAR
+Figure 7: Generalization of MAR. MAR improves restoration
+quality on both GeoMAR and DAEFR.
+Table 7: Quantitative results with different prediction steps
+𝑇in masked autoregressive.
+Steps𝑇Time (s) LFW-Test WebPhoto-Test
+FID↓NIQE↓FID↓NIQE↓
+1 0.12 48.24 3.569 77.23 3.966
+4 0.18 46.99 3.554 76.03 3.955
+8 0.24 46.87 3.547 75.73 3.930
+12 0.32 46.97 3.557 75.95 3.936
+Generalization of masked autoregressive.To evaluate the gener-
+alization of MAR mechanism, we integrate it as a plug-and-play
+module into the competitive codebook-based method DAEFR. As
+shown in Table 6, MAR consistently improves performance across
+different architectures, demonstrating its strong generalization and
+its ability to alleviate the inherent fragility of one-step mapping.
+Qualitative results in Fig. 7 further highlight this advantage. With-
+out MAR, DAEFR and GeoMAR predict the complete code sequence
+in one pass and struggle to capture complex global structural depen-
+dencies, often generating structurally inconsistent artifacts around
+challenging regions like eyeglasses and facial contours. In contrast,
+MAR reformulates the prediction into a multi-step, context-aware
+refinement. By establishing a reliable global structure first, MAR
+progressively synthesizes clean, coherent boundaries, thereby guar-
+anteeing better structural consistency and perceptual realism.
+Effect of prediction steps 𝑇 in masked autoregressive.Table 7 re-
+ports the impact of prediction steps 𝑇 in MAR. Increasing 𝑇 consis-
+tently improves restoration quality during the early stages, as the
+model is able to progressively refine uncertain or complex facial
+regions. When 𝑇 increases from 1 to 8, both FID and NIQE decrease
+steadily on LFW-Test and WebPhoto-Test, indicating that multi-step
+refinement effectively reduces structural ambiguity far better than
+one-step mapping. However, further increasing𝑇 brings diminish-
+ing returns while increasing inference cost. Therefore, we set𝑇= 8
+as the default configuration, achieving a favorable balance between
+restoration quality and efficiency.
+4.4 Discussion
++
+<FACE_DETAIL>: Sourced from RGB Image. (e.g. Gender, Age, Expression, Lighting, Color, Texture)
+<FACE_GEOMETRY>: Sourced from Parsing Map. (e.g. Shape, State, Relative Size)
+Predefined Facial Attributes
+RGB Image Parsing Map
+Synergistic GenerationInput
+<Generation Task>:
+    Generate a coherent paragraph by integrating:
+    - <FACE_DETAIL> from <img_rgb>
+    - <FACE_GEOMETRY> from <img_parse>
+    ... following the rules in the System Prompt.
+Qwen
+The individual appears to be a middle-aged male, with a facial structure
+characterized by a moderately wide nasal bridge that tapers to a defined, slightly
+rounded nasal tip with visible nostrils. His eyes are light-colored, medium-sized, with
+well-defined upper and lower eyelids and sparse, dark eyelashes; gaze is directed
+slightly upward and to the right. Lips are full and slightly parted, revealing the upper
+incisors in a gentle smile. Eyebrows are......The face is oval with a moderately wide
+nasal bridge and a rounded nasal tip. The eyes are medium-sized with moderate
+spacing, appearing slightly open. The mouth is horizontally oriented with a moderate
+width and slight openness. The eyebrows are arched and moderately spaced.
+Input Concat-Stylew/o Geo-Priors
+ Ours
+Input
+w/o MAR w/ MAR
+GeoMAR
+LFW-TestWebPhoto-TestWIDER-Test
+FID=144FID=267
+natural-toned lips with
+no expression
+Mouth: … slightly open,
+revealing thin, pale lips
+with no visible teeth
+… moderately full-lipped,
+revealing the upper teeth;
+Mouth：slightly open
+Eyes: … medium-sized,
+open eyes are light
+brown with sparse lashes
+light brown with visible
+eyelashes
+ … light-colored, with
+sparse lashes;
+Eyes: medium-sized
+… dark brown;  Eyes:
+oval and open
+dark with visible eyelashes  Eyes:  … round, open
+eyes are dark brown
+Used Prompts:
+Used Prompts: Used Prompts:
+FID=144 FID=267
+w/o Geo-Priorsw/ Geo-Priorsupper-bound
+w/o MAR w/ MAR
+DAEFR GeoMAR
+Input FID=144 Input FID=267
+Degradation Level
+36
+38
+40
+42
+44
+46
+48
+50FID ↓
+39.61
+42.1342.36
+47.87
+39.07
+41.97
+w/o geometric priors
+w/ geometric priors (Ours)
+w/ geometric priors from HQ images
+Figure 8: Comparison with and without geometric priors
+under different degradation levels on CelebA-Test dataset.
+Robustness of GeoMAR using inaccurate parsing maps.The fragility
+of geometric priors lies in the fact that severe input degradation
+may lead to inaccurate face parsing maps. To quantify its impact,
+we evaluate GeoMAR on CelebA-Test dataset under two degrada-
+tion levels. As shown in Fig. 8 (Right), GeoMAR remains markedly
+more stable than the baseline without geometric priors as degrada-
+tion increases. Moreover, GeoMAR stays substantially closer to the
+oracle setting that uses GT parsing maps (denoted by ★), indicat-
+ing that our geometrically aligned features provide rather robust
+and reliable guidance even when the predicted parsing maps are
+inaccurate. Qualitative results in Fig. 8 (Left) further confirm that
+even when the degradation is severe, GeoMAR preserves plausible
+structures around challenging regions like eyes and mouths.
+5 Limitations
+GeoMAR assumes that degraded RGB inputs and predicted pars-
+ing maps preserve sufficient evidence for component-level facial
+geometry. This assumption may fail under extreme real-world oc-
+clusions (e.g., sunglasses, hands, or foreground objects), where both
+RGB evidence and parsing results become unreliable, weakening
+the dual-input validation mechanism and causing inaccurate VLM
+descriptions. Consequently, GeoMAR may generate plausible but
+input-inconsistent details in heavily occluded regions, with failure
+cases presented in the supplementary material. Future work will ex-
+plore occlusion-aware parsing, confidence-guided geometric prior
+selection, and targeted occlusion augmentation.
+6 Conclusion
+In this paper, we present GeoMAR, a novel framework that ad-
+dresses the limitations of ambiguous conditioning features and a
+fragile prediction mechanism in one-step codebook-based blind
+face restoration. Through a dual-input extraction pipeline and KV-
+Q Exchange Strategy, GeoMAR produces geometrically aligned
+features with reliable visual guidance. Furthermore, MAR-based
+latent code refinement enables coarse-to-fine, context-aware gener-
+ation with improved structural consistency and perceptual realism.
+Extensive experiments demonstrate that GeoMAR achieves com-
+petitive performance against existing methods in both quantitative
+and qualitative evaluations.
+
+=== PAGE 9 ===
+GeoMAR: Unleashing Geometrically Aligned Features for Masked Autoregressive Blind Face Restoration MM ’26, November 10–14, 2026, Rio de Janeiro, Brazil
+Acknowledgments
+This work was supported by the National Natural Science Foun-
+dation of China (Grant No. 62206123) and the Key Science and
+Technology Program of Lhasa Municipality (Grant No. LSKJ202612).
+References
+[1] Shuai Bai, Yuxuan Cai, Ruizhe Chen, Keqin Chen, Xionghui Chen, Zesen Cheng,
+Lianghao Deng, Wei Ding, Chang Gao, Chunjiang Ge, and et al. 2025. Qwen3-VL
+Technical Report.arXiv preprint arXiv:2511.21631(2025).
+[2] Huiwen Chang, Han Zhang, Lu Jiang, Ce Liu, and William T Freeman. 2022.
+Maskgit: Masked generative image transformer. InProceedings of the IEEE/CVF
+Conference on Computer Vision and Pattern Recognition. 11315–11325.
+[3] Chaofeng Chen, Xiaoming Li, Lingbo Yang, Xianhui Lin, Lei Zhang, and Kwan-
+Yee K Wong. 2021. Progressive semantic-aware style transformation for blind
+face restoration. InProceedings of the IEEE/CVF Conference on Computer Vision
+and Pattern Recognition. 11896–11905.
+[4] Mark Chen, Alec Radford, Rewon Child, Jeffrey Wu, Heewoo Jun, David Luan,
+and Ilya Sutskever. 2020. Generative Pretraining From Pixels. InProceedings of
+the 37th International Conference on Machine Learning. 1691–1703.
+[5] Hyung Won Chung, Le Hou, Shayne Longpre, Barret Zoph, Yi Tay, William Fedus,
+Yunxuan Li, Xuezhi Wang, Mostafa Dehghani, Siddhartha Brahma, et al. 2024.
+Scaling instruction-finetuned language models.Journal of Machine Learning
+Research25, 70 (2024), 1–53.
+[6] Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova. 2019. Bert:
+Pre-training of deep bidirectional transformers for language understanding. In
+Proceedings of the 2019 conference of the North American chapter of the association
+for computational linguistics: human language technologies, volume 1 (long and
+short papers). 4171–4186.
+[7] Patrick Esser, Robin Rombach, and Bjorn Ommer. 2021. Taming transformers for
+high-resolution image synthesis. InProceedings of the IEEE/CVF Conference on
+Computer Vision and Pattern Recognition. 12873–12883.
+[8] Yuchao Gu, Xintao Wang, Liangbin Xie, Chao Dong, Gen Li, Ying Shan, and
+Ming-Ming Cheng. 2022. Vqfr: Blind face restoration with vector-quantized
+dictionary and parallel decoder. InEuropean Conference on Computer Vision.
+Springer, 126–143.
+[9] Martin Heusel, Hubert Ramsauer, Thomas Unterthiner, Bernhard Nessler, and
+Sepp Hochreiter. 2017. Gans trained by a two time-scale update rule converge to
+a local nash equilibrium. InAdvances in Neural Information Processing Systems,
+Vol. 30.
+[10] Yujie Hu, Yinhuai Wang, and Jian Zhang. 2023. Dear-gan: Degradation-aware
+face restoration with gan prior.IEEE Transactions on Circuits and Systems for
+Video Technology33, 9 (2023), 4603–4615.
+[11] Gary B Huang, Marwan Mattar, Tamara Berg, and Eric Learned-Miller. 2008. La-
+beled faces in the wild: A database for studying face recognition in unconstrained
+environments. InWorkshop on Faces in’Real-Life’Images: Detection, Alignment,
+and Recognition.
+[12] Aiwen Jiang, Zhi Wei, Long Peng, Feiqiang Liu, and Mingwen Wang. 2026.
+Dalpsr: Leverage degradation-aligned language prompt for real-world image
+super-resolution.Image and Vision Computing170 (2026), 105978.
+[13] Tero Karras, Timo Aila, Samuli Laine, and Jaakko Lehtinen. 2018. Progressive
+growing of gans for improved quality, stability, and variation. InProceedings of
+International Conference on Learning Representations.
+[14] Tero Karras, Samuli Laine, and Timo Aila. 2019. A style-based generator ar-
+chitecture for generative adversarial networks. InProceedings of the IEEE/CVF
+conference on computer vision and pattern recognition. 4401–4410.
+[15] Diederik P. Kingma and Jimmy Ba. 2015. Adam: A Method for Stochastic Opti-
+mization. InInternational Conference on Learning Representations.
+[16] Wenjie Li, Yulun Zhang, Guangwei Gao, Heng Guo, and Zhanyu Ma. 2025.
+Measurement-constrained sampling for text-prompted blind face restoration.
+arXiv preprint arXiv:2511.14213(2025).
+[17] Guoqiang Liang, Qingnan Fan, Bingtao Fu, Jinwei Chen, Hong Gu, and Lin Wang.
+2025. Authface: Towards authentic blind face restoration with face-oriented
+generative diffusion prior. InProceedings of the 33rd ACM International Conference
+on Multimedia. 9842–9851.
+[18] Wanglong Lu, Jikai Wang, Tao Wang, Kaihao Zhang, Xianta Jiang, and Hanli
+Zhao. 2025. Visual style prompt learning using diffusion models for blind face
+restoration.Pattern Recognition161 (2025), 111312.
+[19] Xiaobin Lu, Xiaobin Hu, Jun Luo, Ben Zhu, Yaping Ruan, and Wenqi Ren. 2024.
+3d priors-guided diffusion for blind face restoration. InProceedings of the 32nd
+ACM International Conference on Multimedia. 1829–1838.
+[20] Sachit Menon, Alexandru Damian, Shijia Hu, Nikhil Ravi, and Cynthia Rudin.
+2020. Pulse: Self-supervised photo upsampling via latent space exploration of
+generative models. InProceedings of the IEEE/CVF Conference on Computer Vision
+and Pattern Recognition. 2437–2445.
+[21] Anish Mittal, Rajiv Soundararajan, and Alan C. Bovik. 2013. Making a “completely
+blind” image quality analyzer.IEEE Signal Processing Letters20, 3 (2013), 209–212.
+[22] Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya Ramesh, Gabriel Goh,
+Sandhini Agarwal, Girish Sastry, Amanda Askell, Pamela Mishkin, Jack Clark,
+Gretchen Krueger, and Ilya Sutskever. 2021. Learning transferable visual mod-
+els from natural language supervision. InInternational conference on machine
+learning. PMLR, 8748–8763.
+[23] Sucheng Ren, Qihang Yu, Ju He, Xiaohui Shen, Alan Yuille, and Liang-Chieh
+Chen. 2025. Beyond next-token: Next-x prediction for autoregressive visual
+generation. InProceedings of the IEEE/CVF International Conference on Computer
+Vision. 15781–15791.
+[24] Robin Rombach, Andreas Blattmann, Dominik Lorenz, Patrick Esser, and Björn
+Ommer. 2022. High-resolution image synthesis with latent diffusion models. In
+Proceedings of the IEEE/CVF conference on computer vision and pattern recognition.
+10684–10695.
+[25] Keyu Tian, Yi Jiang, Zehuan Yuan, Bingyue Peng, and Liwei Wang. 2024. Visual
+autoregressive modeling: Scalable image generation via next-scale prediction. In
+Proceedings of the 38th International Conference on Neural Information Processing
+Systems. 84839–84865.
+[26] Yu-Ju Tsai, Yu-Lun Liu, Lu Qi, Kelvin C.K. Chan, and Ming-Hsuan Yang. 2024. Dual
+associated encoder for face restoration. InThe Twelfth International Conference
+on Learning Representations.
+[27] Aäron Van Den Oord, Nal Kalchbrenner, and Koray Kavukcuoglu. 2016. Pixel
+recurrent neural networks. InProceedings of International Conference on Machine
+Learning. PMLR, 1747–1756.
+[28] Aaron van den Oord, Oriol Vinyals, and Koray Kavukcuoglu. 2017. Neural discrete
+representation learning. InProceedings of the 31st International Conference on
+Neural Information Processing Systems. 6309–6318.
+[29] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones,
+Aidan N Gomez, Łukasz Kaiser, and Illia Polosukhin. 2017. Attention is all
+you need.Advances in neural information processing systems30 (2017).
+[30] Xintao Wang, Yu Li, Honglun Zhang, and Ying Shan. 2021. Towards real-world
+blind face restoration with generative facial prior. InProceedings of the IEEE/CVF
+Conference on Computer Vision and Pattern Recognition. 9168–9178.
+[31] Xintao Wang, Ke Yu, Chao Dong, and Chen Change Loy. 2018. Recovering
+realistic texture in image super-resolution by deep spatial feature transform. In
+Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition.
+606–615.
+[32] Zhou Wang, Alan C Bovik, Hamid R Sheikh, and Eero P Simoncelli. 2004. Image
+quality assessment: From error visibility to structural similarity.IEEE Transactions
+on Image Processing13, 4 (2004), 600–612.
+[33] Zhouxia Wang, Jiawei Zhang, Runjian Chen, Wenping Wang, and Ping Luo. 2022.
+Restoreformer: High-quality blind face restoration from undegraded key-value
+pairs. InProceedings of the IEEE/CVF Conference on Computer Vision and Pattern
+Recognition. 17512–17521.
+[34] Zhixin Wang, Ziying Zhang, Xiaoyun Zhang, Huangjie Zheng, Mingyuan Zhou,
+Ya Zhang, and Yanfeng Wang. 2023. Dr2: Diffusion-based robust degradation
+remover for blind face restoration. InProceedings of the IEEE/CVF Conference on
+Computer Vision and Pattern Recognition. 1704–1713.
+[35] Hongyang Wei, Shuaizheng Liu, Chun Yuan, and Lei Zhang. 2025. Perceive,
+understand and restore: Real-world image super-resolution with autoregres-
+sive multimodal generative models. InProceedings of the IEEE/CVF International
+Conference on Computer Vision. 18640–18650.
+[36] Bin Wu, Wei Wang, Yahui Liu, Zixiang Li, and Yao Zhao. 2025. Diffusionre-
+ward: Enhancing blind face restoration through reward feedback learning.arXiv
+preprint arXiv:2505.17910(2025).
+[37] Rongyuan Wu, Tao Yang, Lingchen Sun, Zhengqiang Zhang, Shuai Li, and Lei
+Zhang. 2024. Seesr: Towards semantics-aware real-world image super-resolution.
+InProceedings of the IEEE/CVF conference on computer vision and pattern recogni-
+tion. 25456–25467.
+[38] Chengxing Xie, Qian Ning, Weisheng Dong, and Guangming Shi. 2023. Tfrgan:
+Leveraging text information for blind face restoration with extreme degrada-
+tion. In2023 IEEE/CVF Conference on Computer Vision and Pattern Recognition
+Workshops. 2535–2545.
+[39] Lianxin Xie, Csbingbing Zheng, Wen Xue, Le Jiang, Cheng Liu, Si Wu, and
+Hau San Wong. 2024. Learning degradation-unaware representation with prior-
+based latent transformations for blind face restoration. InProceedings of the
+IEEE/CVF Conference on Computer Vision and Pattern Recognition. 9120–9129.
+[40] Shuo Yang, Ping Luo, Chen-Change Loy, and Xiaoou Tang. 2016. Wider face:
+A face detection benchmark. InProceedings of the IEEE conference on computer
+vision and pattern recognition. 5525–5533.
+[41] Sidi Yang, Tianhe Wu, Shuwei Shi, Shanshan Lao, Yuan Gong, Mingdeng Cao, Jia-
+hao Wang, and Yujiu Yang. 2022. Maniqa: Multi-dimension attention network for
+no-reference image quality assessment. InProceedings of the IEEE/CVF Conference
+on Computer Vision and Pattern Recognition Workshops. 1191–1200.
+[42] Tao Yang, Peiran Ren, Xuansong Xie, and Lei Zhang. 2021. Gan prior embedded
+network for blind face restoration in the wild. InProceedings of the IEEE/CVF
+Conference on Computer Vision and Pattern Recognition. 672–681.
+[43] Changqian Yu, Jingbo Wang, Chao Peng, Changxin Gao, Gang Yu, and Nong
+Sang. 2018. Bisenet: Bilateral segmentation network for real-time semantic
+
+=== PAGE 10 ===
+MM ’26, November 10–14, 2026, Rio de Janeiro, Brazil Lu Gan, Hanyu Yan, Chaofeng Chen, Junqi Hu, and Dan Zeng
+segmentation. InProceedings of the European conference on computer vision. 325–
+341.
+[44] Fanghua Yu, Jinjin Gu, Zheyuan Li, Jinfan Hu, Xiangtao Kong, Xintao Wang,
+Jingwen He, Yu Qiao, and Chao Dong. 2024. Scaling up to excellence: Practicing
+model scaling for photo-realistic image restoration in the wild. InProceedings
+of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. 25669–
+25680.
+[45] Zongsheng Yue and Chen Change Loy. 2024. Difface: Blind face restoration with
+diffused error contraction.IEEE Transactions on Pattern Analysis and Machine
+Intelligence46, 12 (2024), 9991–10004.
+[46] Shangchen Zhou, Kelvin Chan, Chongyi Li, and Chen Change Loy. 2022. Towards
+robust blind face restoration with codebook lookup transformer.Advances in
+Neural Information Processing Systems35 (2022), 30599–30611.
+
+=== PAGE 11 ===
+GeoMAR: Unleashing Geometrically Aligned Features for Masked Autoregressive Blind Face Restoration MM ’26, November 10–14, 2026, Rio de Janeiro, Brazil
+A Overview
+This supplementary material provides additional details and results
+to support the findings presented in the main paper. It consists of
+four parts:
+• More Details on GeoMAR (Section 1): We elaborate on the
+implementation specifics of our method, including the degra-
+dation synthesis pipeline, the design of VLM prompts for
+geometric priors extraction, and detailed network architec-
+tures. In addition, we present a thorough analysis of model
+complexity and inference efficiency.
+• More Discussions on GeoMAR (Section 2): We further study
+robustness to imperfect geometric priors, generalization un-
+der extreme real-world degradations, fine-grained compo-
+nent contributions, sensitivity to the choice of VLM, the
+perception–distortion trade-off, and the refinement mecha-
+nism of MAR.
+• More Results on GeoMAR (Section 3): We present more qual-
+itative comparisons to validate the effectiveness of our core
+components, along with additional visual results compared
+to state-of-the-art methods.
+• Limitations (Section 4): The limitations of GeoMAR are given
+in this section.
+B More Details on GeoMAR
+B.1 Details of Degradation Pipeline
+We train our model on the FFHQ dataset, which contains 70,000
+high-quality face images. All images are resized to512 × 512for
+training. The paired degraded images are synthesized following
+the same procedure as in the compared methods, CodeFormer and
+DAEFR, which can be formulated as follows:
+𝐼L =
+
+[(𝐼H ⊗𝑘 𝜎 ) ↓ 𝑟 +𝑛𝛿 ] JPEG𝑞
+
+↑𝑟 .(9)
+First, the HQ image 𝐼H is blurred by convolution operator ⊗ with
+a Gaussian kernel 𝑘𝜎. Second, a downsampling operation ↓ with
+a scaling factor 𝑟 is performed to reduce the resolution of image.
+Next, additive Gaussian noise 𝑛𝛿 is added to the downsampled
+image. JPEG compression with a quality factor𝑞 is applied to further
+degrade image quality. The resulting image is then upsampled ↑
+with a scaling factor 𝑟 to512 × 512to obtain the degraded 𝐼L image.
+In our experiment setting, we randomly sample𝜎, 𝑟, 𝛿,and𝑞from
+[0.1,15],[0.8,30],[0,20],and[30,100], respectively.
+B.2 Details of Geometric Priors Extraction
+Pipeline
+To obtain geometric priors, we first predefine a structured set of
+facial attributes that explicitly cover both appearance-level details
+and geometry-related properties. We instantiate the VLM with
+Qwen3-VL-8B-Instruct, i.e., a 8B-parameter multimodal chat model.
+Instead of concatenating independent captions, we feed the VLM
+with a two-image input tuple in a fixed order: Image 1 is the LQ RGB
+face image and Image 2 is the corresponding facial parsing map. In
+implementation, the two inputs are packed into the same chat turn
+as two image entries rather than concatenated along the channel
+dimension. As shown in Table 8, the prompt enforces a component-
+wise reasoning process, where geometric attributes (e.g., shape
+and open/closed states) are inferred only from the parsing map,
+while appearance-related attributes (e.g., color, texture, lighting,
+and accessories) are inferred from the RGB image. This design
+improves robustness under severe degradations: when the parsing
+map is locally unreliable, the RGB image provides complementary
+contextual cues for correction. The VLM outputs a single coherent
+subsection that is semantically consistent and plausible, thereby
+reducing hallucinated descriptions that contradict facial structure.
+We then encode this subsection with a frozen T5-Large encoder into
+a sequence of 128 tokens, each represented by a 1024-dimensional
+embedding, and use it as the textual prior for GeoMAR. Importantly,
+both the VLM and T5 are used only in an offline pre-processing
+stage to extract and save text features; during GeoMAR training
+and inference, we only load the pre-computed T5 features and
+no gradient is propagated to either model. As shown in Fig 9, the
+prompts explicitly emphasize critical facial components and provide
+more accurate structural cues than conventional semantic captions.
+B.3 Details of GeoMAR’s Architecture
+The architecture of GeoMAR consists of a hierarchical encoder-
+decoder design and a masked auto-regressive transformer for re-
+construction. Both HQ and LQ encoders share the same structural
+design, ensuring consistency across feature spaces. During train-
+ing, the HQ codebook, decoder, post-quantization convolution, HQ
+encoder, and HQ quantization convolution are frozen, while only
+the LQ encoder is updated to map degraded inputs into the frozen
+HQ token space.
+For masked auto-regressive prediction, we employ a transformer
+with nine stacked self-attention blocks, embedding dimension 512,
+8 attention heads, and an MLP width of 1024 per block. The aligned
+LQ feature sequence 𝐿𝐸 ∈R 256×256 is linearly projected from 256
+to 512 channels and concatenated with the masked HQ token em-
+beddings, forming the transformer input of 512 tokens (256 LQ
+prefix tokens + 256 HQ target tokens). Long-range skip connec-
+tions are fused by concatenating feature maps from the main and
+skip branches (h𝑚 andh 𝑠) along the channel dimension and apply-
+ing a linear projection:ℎ𝑓 𝑢𝑠𝑒𝑑=𝐿𝑖𝑛𝑒𝑎𝑟(𝐶𝑜𝑛𝑐𝑎𝑡(ℎ 𝑚, ℎ𝑠 )), enabling
+reconstruction guidance from 𝐿𝐸 while preserving the flexibility of
+iterative masked token prediction.
+The Injector aligns textual and visual features through a four-
+stage module. First, frozen T5-Large features of shape128×1024are
+projected to128 ×256via a learnable linear projector with GELU and
+LayerNorm. Second, a 3-layer text MLP (256 → 512 → 512 → 256)
+refines the sequence with GELU activations and 0.1 dropout. Third,
+an SFT branch applies scale-and-shift modulation via two parallel
+1D convolution stacks (256 → 256 → 256, kernel size 1), using the
+mean-pooled text condition for modulation. Fourth, an 8-head cross-
+attention layer treats the SFT-modulated image tokens as queries
+and the original image tokens as keys/values (all projections with
+256 channels). During training, a contrastive alignment branch
+further maps pooled image and text features into a shared 256-
+dimensional space.
+Overall, GeoMAR contains 124.51M parameters, of which 51.83M
+are trainable under this freezing strategy, as summarized in Table 9.
+
+=== PAGE 12 ===
+MM ’26, November 10–14, 2026, Rio de Janeiro, Brazil Lu Gan, Hanyu Yan, Chaofeng Chen, Junqi Hu, and Dan Zeng
+Table 8: System prompt template and a component-based example used in the VLM pipeline.
+Item Content
+Role “You are an expert visual analyst for high-fidelity face restoration, specialized in generating dense natural-language descriptions for T5 text
+encoders. ”
+Input definition “Image 1 (RGB): source for color, texture, lighting, and fine details. Image 2 (Parsing Map): source for geometry, including shapes, open/closed
+states, and relative sizes. ”
+Core rules “Generate a single coherent and objective subsection. Do not use subjective metaphors. Start from global appearance and lighting, then describe
+Face → Eyes/Brows → Nose → Mouth. Ignore the colors in the parsing map itself. Use the parsing map only for geometry and use the RGB
+image for actual appearance. ”
+Component templates “Overall appearance & accessories:” age, gender, race, skin tone, hair, pose, expression, accessories, and lighting from RGB. “Face & skin details:”
+face shape from parsing map, but freckles/makeup/wrinkles from RGB. “Eyes & eyebrows:” eye shape/state from parsing map, iris color and
+lashes from RGB. “Nose & mouth:” shape/size/state from parsing map, lip texture/color and teeth visibility from RGB.
+Output format“Return only the raw subsection text. Do not output tags, section headers, or bullet points. ”
+Example output “A young Asian female with pale skin and long black hair with bangs is smiling under soft natural lighting. She is wearing circular gold earrings
+and a silver necklace. She features an oval face shape with a heavy makeup finish and no visible freckles. Her narrow, open eyes are dark brown
+with thick eyelashes, complemented by arched, neatly groomed black eyebrows. She has a small nose with smooth skin texture. Her mouth is
+slightly open, displaying thick, glossy red lips with upper teeth visible. ”
+Age：young
+Race：white
+Gender：female
+Hair：long and dark
+Expression：smiling
+Light：soft, even lighting
+Face：round, no visible wrinkles, moles, or freckles, a
+natural makeup finish
+Eye：wide, open,  dark brown,  visible eyelashes
+Eyebrows：thick, arched
+Nose：small, smooth skin texture
+Mouth：slightly open, thin, pale lips, no visible teeth
+Age：young
+Race：white
+Gender：female
+Hair：long and dark
+Expression：smiling
+Light：soft, even lighting
+Face：oval,  smooth skin texture, no visible freckles or
+moles
+Eye：narrow, open,  dark brown,  thick eyelashes
+Eyebrows：arched, dark
+Nose：small, smooth skin texture
+Mouth：slightly open, thick, glossy pink lips, upper
+teeth visible
+Age：young
+Race：white
+Gender：male
+Hair：short and brown
+Expression：smiling
+Light：bright artificial lighting
+Face：round,  smooth skin texture,  no visible
+freckles or moles
+Eye：narrow, open,  light blue,  thick eyelashes
+Eyebrows：thin, arched
+Nose：sharp, smooth skin texture
+Mouth：open, thin, glossy lips, upper teeth visible
+Age：young
+Race：white
+Gender：male
+Hair：short and brown
+Expression：smiling
+Light：bright artificial lighting
+Face：round, no visible wrinkles, moles, or freckles,
+a natural makeup finish
+Eye：wide, open,  light blue,  long eyelashes
+Eyebrows：thin, arched
+Nose：small, smooth skin texture
+Mouth：open, thin, pale lips, upper teeth
+√
+√
+√
+√
+×
+×
+√
+×
+×
+Figure 9: Comparison of the tag description accuracy between
+original images and parsing maps.
+Table 9: GeoMAR parameter breakdown.
+Module Structure Params Trainable
+Frozen VQ backbone VQGAN (HQ/LQ) + codebook 102.16M 29.48M
+MAR transformer 9×SA blocks, dim 512 20.37M 20.37M
+Injector projector + SFT + cross-attn 1.97M 1.97M
+Total – 124.51M 51.83M
+Table 10: Comparison of model complexity and reported in-
+ference time. For GeoMAR, † denotes the online restoration-
+core latency.
+Prior type Methods Params (M) FLOPs (G) Time (s)
+GAN-based GFPGAN 60.76 170.00 0.13
+GPEN 71.01 137.06 0.06
+Diffusion-based DR2 85.79 725.08 2.05
+DifFace 175.40 185.95 7.05
+VSPBFR 420.88 570.21 0.11
+DiffusionReward 2045.69 44949.94 4.23
+Codebook-based VQFR 79.30 1012.94 5.71
+CodeFormer 84.22 802.54 0.07
+DAEFR 141.68 1110.97 0.12
+GeoMAR (Ours) 124.51 702.49 0.24 †
+B.4 Model Complexity and Inference Efficiency
+To provide a comprehensive assessment of efficiency, we evalu-
+ate both the computational complexity and the inference runtime
+of our framework. As shown in Table 10, we report the number
+of parameters (Params), computational cost (FLOPs), and online
+restoration time. The GeoMAR core achieves a favorable balance
+between restoration performance and efficiency, requiring fewer
+parameters and lower FLOPs than the competitive baseline DAEFR.
+We further provide a stage-by-stage latency profile in Table 12. For
+a newly observed input, BiSeNet face parsing takes0 .03seconds,
+Qwen3-VL-8B prompt generation takes3.63seconds, Flan-T5 text
+encoding takes0 .01seconds, and MAR prediction plus final decod-
+ing takes0 .24seconds, giving a complete end-to-end latency of3 .91
+seconds per image. The first three stages generate static condition-
+ing information and can be pre-computed or cached. Nevertheless,
+they are included in the end-to-end total for transparency. Accord-
+ingly, the0 .24-second entry in Table 10 refers specifically to the
+online GeoMAR restoration core after the geometric prior has been
+obtained. Under this inclusive definition, GeoMAR remains faster
+than the reported7 .05-second runtime of DifFace while benefiting
+from component-level multimodal guidance.
+C More Discussions on GeoMAR
+C.1 CodeFormer with Masked Auto-regressive
+Token Prediction
+While the main paper evaluates the effectiveness of the masked
+auto-regressive token prediction (MAR) module within DAEFR,
+we further validate its plug-and-play capability by integrating it
+into another baseline method, CodeFormer. Quantitative results
+depicted in Table 11 show improvements on LFW-Test datasets
+by applying MAR, while achieving comparable performance on
+the WebPhoto-Test dataset. The visual comparisons showed in
+Fig. 15 reveal that MAR enables better restoration through iterative
+refinement over the original single-step approach. Notably, even
+in cases where the quantitative metrics are comparable, the results
+with MAR exhibit visibly improved fine-grained details, particularly
+in challenging regions such as hair structures.
+
+=== PAGE 13 ===
+GeoMAR: Unleashing Geometrically Aligned Features for Masked Autoregressive Blind Face Restoration MM ’26, November 10–14, 2026, Rio de Janeiro, Brazil
+Input CodeFormer DAEFRDifFaceDR2 GeoMAR(Ours)
+Figure 10: Extreme cases on SCface Distance-3.
+Table 14: Quantitative comparison on SCface Distance-3.
+Metric DR2 DifFace CodeFormer DAEFRGeoMAR
+FID↓79.69 91.11 81.87 82.0078.80
+NIQE↓4.400 4.490 4.3013.5293.744
+MANIQA↑0.415 0.263 0.431 0.4510.471
+Table 11: Quantitative results of CodeFormer with and with-
+out MAR on two real-world datasets (best FID in red).
+Model Methods LFW-Test WebPhoto-Test
+CodeFormer w/o MAR 52.840 83.936
+w/ MAR 51.635 84.416
+Table 12: Per-image end-to-end runtime breakdown of Geo-
+MAR.
+Stage Module Time (s) Cacheable?
+Face parsing BiSeNet 0.03 Yes
+Prompt generation Qwen3-VL-8B 3.63 Yes
+Text embedding Flan-T5-Large 0.01 Yes
+MAR prediction + decoding GeoMAR core (𝑇=8) 0.24 No
+Uncached end-to-end Full pipeline 3.91–
+Table 13: Ablation study on the effect of the contrastive align-
+ment loss (L 𝑐𝑜𝑛𝑡𝑟𝑎 ).
+Variant LFW-Test WebPhoto-Test
+FID↓NIQE↓FID↓NIQE↓
+GeoMAR w/oL 𝑐𝑜𝑛𝑡𝑟 𝑎 47.68 3.543 77.05 3.971
+GeoMAR (Full) 46.87 3.547 75.73 3.930
+C.2 Ablation Study of the Contrastive
+Alignment Loss
+To evaluate the contribution of the contrastive alignment loss
+(L𝑐𝑜𝑛𝑡𝑟𝑎 ) independently of the Aligned Geometric Priors Injector,
+we train a variant with L𝑐𝑜𝑛𝑡𝑟𝑎 removed while keeping all archi-
+tectures and hyperparameters unchanged. As shown in Table 13,
+removing L𝑐𝑜𝑛𝑡𝑟𝑎 consistently degrades FID across both datasets
+and results in worse or comparable NIQE. In the injector, the pro-
+jected textual-prior embeddings 𝑍𝑡𝑥𝑡 modulate the original LQ
+features 𝑍𝐿𝑄 through SFT. Under severe degradation, the raw LQ
+features can exhibit a substantial semantic disparity from high-level
+textual priors. The contrastive objective reduces this cross-modal
+gap before SFT modulation, enabling the injector to produce more
+accurate and geometrically faithful aligned features𝑍 align.
+C.3 Generalization under Extreme Real-World
+Degradations
+The main paper evaluates GeoMAR on three commonly used real-
+world BFR benchmarks. To further assess generalization under
+more extreme conditions, we evaluate it on SCface Distance-3, a
+surveillance setting characterized by severe low resolution, blur,
+compression artifacts, and illumination variation. As reported in
+Table 14, GeoMAR achieves the best FID and MANIQA among the
+compared methods, while DAEFR obtains the best NIQE. The results
+indicate improved perceptual realism and human-aligned quality
+under challenging surveillance degradation, although GeoMAR is
+not uniformly superior on every no-reference metric.
+C.4 Robustness to Imperfect Geometric Priors
+GeoMAR does not assume perfect parsing maps or VLM descrip-
+tions. The extracted geometric priors act as soft, high-level cues
+for disambiguating degraded visual features rather than hard re-
+construction constraints. In particular, the KV–Q exchange uses
+prior-aligned features as queries while retaining the original LQ
+features as keys and values. The injector therefore retrieves evi-
+dence from the observed LQ image instead of blindly following a
+potentially inaccurate prior.
+We quantify this robustness through a controlled study with
+four settings: GT parsing, predicted parsing used by GeoMAR,
+component-dropout parsing, and no geometric prior. Component
+dropout removes key facial components, including the eyes, mouth,
+and facial contour, from the parsing map before prompt generation,
+thereby simulating parsing failures and inaccurate component de-
+scriptions. As shown in Table 15, predicted parsing remains close to
+the GT-parsing upper bound on CelebA-Test. Although component
+dropout degrades performance, it retains better FID and competi-
+tive no-reference quality relative to removing the prior entirely on
+CelebA-Test, and outperforms the no-prior variant across all three
+metrics on the more challenging WIDER-Test. These results show
+that inaccurate priors reduce the benefit of geometric guidance but
+do not cause cascading restoration failure.
+C.5 Fine-Grained Ablation of Core Components
+The main paper evaluates the component-level prompt, KV–Q ex-
+changed injector, and MAR refinement separately. To further isolate
+their contributions, we construct the additive ablation ladder in
+Table 16. SFT and the projected T5 features are retained as the com-
+mon prior-encoding backbone. Starting from M0, we progressively
+add dual-input prior extraction, component-based descriptions, KV–
+Q exchange, and MAR refinement. FID improves from 43.44 in M0
+to 39.61 in M4, while NIQE and MANIQA remain competitive, val-
+idating the complementary effects of geometric-prior extraction,
+feature alignment, and iterative code refinement.
+C.6 Sensitivity to the Choice of VLM
+We replace Qwen3-VL with InternVL while keeping the remaining
+pipeline unchanged. Table 17 shows only marginal variations across
+all three real-world benchmarks. This limited sensitivity indicates
+that the performance gains primarily arise from the component-
+based geometric-prior extraction and alignment mechanism rather
+than a particular VLM backbone.
+
+=== PAGE 14 ===
+MM ’26, November 10–14, 2026, Rio de Janeiro, Brazil Lu Gan, Hanyu Yan, Chaofeng Chen, Junqi Hu, and Dan Zeng
+Figure 11: Failure cases under severe occlusions.
+Table 15: Robustness to imperfect geometric priors. “Dropout”
+removes key facial components from the parsing map before
+prompt generation.
+Dataset Metric GT parsing Predicted parsing Dropout No prior
+CelebA-Test
+FID↓39.07 39.61 40.86 42.36
+NIQE↓3.779 3.819 3.842 3.829
+MANIQA↑0.541 0.540 0.540 0.539
+WIDER-Test
+FID↓– 37.37 39.25 40.58
+NIQE↓– 3.762 3.813 3.858
+MANIQA↑– 0.510 0.509 0.500
+Table 16: Fine-grained additive ablation on CelebA-Test.
+Dual, Comp., and KV–Q denote dual-input prior extraction,
+component-based descriptions, and KV–Q exchange, respec-
+tively.
+Setting Dual Comp. KV–Q MAR FID↓NIQE↓MANIQA↑
+M0✗ ✗ ✗ ✗43.44 3.962 0.534
+M1✓ ✗ ✗ ✗42.64 3.927 0.539
+M2✓ ✓ ✗ ✗42.59 3.870 0.542
+M3✓ ✓ ✓ ✗42.23 3.891 0.540
+M4 (GeoMAR)✓ ✓ ✓ ✓39.613.819 0.540
+Table 17: Sensitivity to the VLM used for geometric-prior
+extraction.
+Dataset Metric Qwen3-VL InternVL
+LFW-Test
+FID↓46.87 46.44
+NIQE↓3.547 3.583
+MANIQA↑0.540 0.539
+WebPhoto-Test
+FID↓75.73 75.72
+NIQE↓3.930 3.940
+MANIQA↑0.499 0.499
+WIDER-Test
+FID↓37.37 37.63
+NIQE↓3.762 3.766
+MANIQA↑0.510 0.511
+D More Visual Results
+In this section, we provide more qualitative results to further demon-
+strate the superiority of our proposed GeoMAR and validate the
+effectiveness of its core components.
+D.1 Comparisons on different textual priors
+In Fig. 12, we further compare textual prior extraction strategies,
+including w/o Geo-Priors, concat-style priors, and our component-
+based geometric priors (Ours). The results indicate that our dual-
+input explicit priors significantly reduce semantic hallucinations
+and provide more faithful structural guidance.
+D.2 Effectiveness of KV-Q Exchange Injector
+In Fig. 13, we compare different query designs in the cross-attention
+module, including raw and enhanced LQ features as queries. Com-
+pared with raw LQ queries, our KV-Q exchange design selectively
+extracts high-fidelity information, enabling better recovery of fine
+facial details while preserving input-consistent attributes.
+D.3 Comparisons on different prediction steps 𝑇
+in MAR
+In Fig. 14, we provide qualitative results generated using different
+auto-regressive prediction steps (𝑇= 1, 4, 8, 12) during inference.
+The results at 𝑇 = 8 exhibit richer texture details and higher fidelity.
+Although the inference time of 𝑇 = 8 is slightly higher than that of
+𝑇 = 1, it achieves the best overall restoration quality, making it a
+favorable trade-off between performance and efficiency.
+D.4 Effectiveness of the MAR module
+To demonstrate the plug-and-play capability of MAR token predic-
+tion, we provide visual comparisons with and without MAR. Fig. 15
+and Fig. 16 show the improvements when MAR is integrated into
+CodeFormer and DAEFR, while Fig. 17 compares our GeoMAR with
+and without MAR. The results demonstrate that multi-step MAR
+refinement effectively reduces structural distortions and artifacts
+from fragile one-step mapping.
+D.5 Comparisons with representative methods
+We further provide visual comparisons between GeoMAR and rep-
+resentative blind face restoration methods on multiple datasets.
+Fig. 18, Fig. 19, Fig. 20, and Fig. 21 present results on LFW-Test,
+WebPhoto-Test, WIDER-Test, and CelebA-Test, respectively. Under
+diverse real-world and synthetic degradations, GeoMAR consis-
+tently restores more realistic details and coherent structures than
+competing methods.
+E Limitations
+Failure cases.Figure 11 shows failures caused by sunglasses,
+hands, and foreground objects. These occlusions corrupt both RGB
+evidence and parsing maps, leading to inaccurate descriptions and
+input-inconsistent restorations. When identity-related evidence
+is fully hidden, the restored face may alter occluded attributes or
+remove parts of the occluder.
+Although GeoMAR demonstrates strong performance, our model
+is built upon a pre-trained codebook, and its reconstruction quality
+is inherently limited by the capacity of codebook and the diversity
+of HQ features it encodes. As a result, it struggles to accurately
+reconstruct fine-grained accessories such as earrings and hair or-
+naments and complex background.
+
+=== PAGE 15 ===
+GeoMAR: Unleashing Geometrically Aligned Features for Masked Autoregressive Blind Face Restoration MM ’26, November 10–14, 2026, Rio de Janeiro, Brazil
+InputT=1T=4T=8T=12
+Input OursConcat-Stylew/o Geo-Priors Input OursConcat-Stylew/o Geo-Priors
+Figure 12: Qualitative comparison of different textual priors on two real-world datasets.
+InputCodeFormerCodeFormer + MAR
+Input LQ as Query Enhanced LQ as Query
+Input LQ as Query Enhanced LQ as QueryInput LQ as Query Enhanced LQ as Query
+Figure 13: Qualitative comparisons of different types of query on two real-world datasets.
+
+=== PAGE 16 ===
+MM ’26, November 10–14, 2026, Rio de Janeiro, Brazil Lu Gan, Hanyu Yan, Chaofeng Chen, Junqi Hu, and Dan Zeng
+InputT=1T=4T=8T=12
+Input OursConcat-Stylew/o Geo-Priors Input OursConcat-Stylew/o Geo-Priors
+InputGeoMAR(Ours) w/o MAR
+Figure 14: Qualitative comparisons of different steps𝑇in masked auto-regressive on two real-world datasets.
+
+=== PAGE 17 ===
+GeoMAR: Unleashing Geometrically Aligned Features for Masked Autoregressive Blind Face Restoration MM ’26, November 10–14, 2026, Rio de Janeiro, Brazil
+CodeFormer + AR odeFormer
+Input
+Figure 15: Qualitative comparisons of CodeFormer with and without MAR on two real-world datasets.
+InputCodeFormerCodeFormer + MAR
+Input LQ as Query Enhanced LQ as Query
+Input LQ as Query Enhanced LQ as QueryInput LQ as Query Enhanced LQ as Query
+InputDAEFRDAEFR+MAR
+Figure 16: Qualitative comparisons of DAEFR with and without MAR on two real-world datasets.
+
+=== PAGE 18 ===
+MM ’26, November 10–14, 2026, Rio de Janeiro, Brazil Lu Gan, Hanyu Yan, Chaofeng Chen, Junqi Hu, and Dan Zeng
+InputT=1T=4T=8T=12
+Input OursConcat-Stylew/o Geo-Priors Input OursConcat-Stylew/o Geo-Priors
+InputGeoMAR(Ours) w/o MAR
+Figure 17: Qualitative comparisons of GeoMAR with and without MAR on two real-world datasets.
+Figure 18: Visual comparisons of different methods on LFW-Test dataset.
+
+=== PAGE 19 ===
+GeoMAR: Unleashing Geometrically Aligned Features for Masked Autoregressive Blind Face Restoration MM ’26, November 10–14, 2026, Rio de Janeiro, Brazil
+Figure 19: Visual comparisons of different methods on WebPhoto-Test dataset.
+Figure 20: Visual comparisons of different methods on WIDER-Test dataset.
+
+=== PAGE 20 ===
+MM ’26, November 10–14, 2026, Rio de Janeiro, Brazil Lu Gan, Hanyu Yan, Chaofeng Chen, Junqi Hu, and Dan Zeng
+Figure 21: Visual comparisons of different methods on synthetic CelebA-Test dataset.

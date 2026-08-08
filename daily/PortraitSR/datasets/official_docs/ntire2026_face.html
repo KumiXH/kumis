@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NTIRE 2026 — Real-World Face Restoration Challenge</title>
+  <meta name="description" content="NTIRE 2026 Workshop & Challenges @ CVPR 2026: Real-World Face Restoration Challenge." />
+  <meta property="og:title" content="NTIRE 2026 — Real-World Face Restoration Challenge" />
+  <meta property="og:description" content="A challenge track at NTIRE 2026 (CVPR 2026, Denver) for real-world face restoration." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="assets/cover.jpg" />
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%B7%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="Home">
+      <span class="brand__mark">NTIRE 2026</span>
+      <span class="brand__sep">•</span>
+      <span class="brand__sub">Face Restoration Challenge</span>
+    </a>
+
+    <nav class="nav">
+      <a href="#overview">Overview</a>
+      <a href="#dataset">Data & Phases</a>
+      <a href="#evaluation">Evaluation</a>
+      <a href="#timeline">Timeline</a>
+      <a href="#organizers">Organizers</a>
+      <a class="nav__cta" href="#join">Join</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-label="Hero">
+      <div class="hero__bg" role="img" aria-label="CVPR 2026 Denver cover image"></div>
+      <div class="hero__overlay"></div>
+
+      <div class="hero__content">
+        <p class="badge">NTIRE Workshop & Challenges @ CVPR 2026 • Denver, Colorado</p>
+        <h1>Real-World Face Restoration Challenge</h1>
+        <p class="lead">
+          Restore high-quality (HQ) face images from real-world degraded low-quality (LQ) inputs. LQ images are often affected by blur, noise, compression, and other distortions, making this task highly ill-posed. Achieving high perceptual quality and stable generalization remains challenging.
+        </p>
+
+        <div class="hero__actions">
+          <a class="button primary" href="#join">Join the Challenge</a>
+          <a class="button" href="#timeline">Key Dates</a>
+          <a class="button ghost" href="#wechat">WeChat Group</a>
+        </div>
+
+        <div class="hero__stats" role="list" aria-label="Quick facts">
+          <div class="stat" role="listitem">
+            <div class="stat__k">Task</div>
+            <div class="stat__v">Real-World Face Restoration</div>
+          </div>
+          <div class="stat" role="listitem">
+            <div class="stat__k">Evaluation</div>
+            <div class="stat__v">Multiple No-Reference Metrics</div>
+          </div>
+          <div class="stat" role="listitem">
+            <div class="stat__k">Applications</div>
+            <div class="stat__v">Face Recognition, Keypoint Detection</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="overview" class="section">
+      <div class="container">
+        <h2>Challenge Overview</h2>
+
+        <p>
+          This challenge is part of the <strong>NTIRE 2026 Workshop & Challenges</strong> co-located with
+          <strong>CVPR 2026</strong> in Denver, Colorado. NTIRE (New Trends in Image Restoration and Enhancement) is one of the most influential international competitions and workshops in the field of image restoration and enhancement, aiming to bring together the latest advances from academia and industry, and promote open, fair, and reproducible algorithm comparison and exchange.
+        </p>
+
+        <div class="grid2">
+          <div class="card">
+            <h3>Why face restoration is challenging</h3>
+            <p>
+              Face Restoration aims to restore high-quality (HQ) face images from real-world degraded low-quality (LQ) inputs. LQ images are often affected by blur, noise, compression, and other distortions, making this task highly ill-posed. In recent years, CNNs, Transformers, and generative models (such as diffusion models) have significantly improved restoration results, but achieving high perceptual quality and stable generalization under complex real-world degradations remains challenging.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Application value</h3>
+            <p>
+              The importance of face restoration is not only reflected in perceptual improvement, but also directly affects downstream tasks, including: face recognition, keypoint detection, 3D face reconstruction, etc. It is widely used in security and forensics, video surveillance, mobile/wearable devices, social media content enhancement, and other application scenarios, thus requiring higher demands for "high-quality, real-time, and efficient" methods.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="dataset" class="section section--alt">
+      <div class="container">
+        <h2>Data & Competition Phases</h2>
+
+        <div class="card">
+          <h3>Where to get the data</h3>
+          <p>
+            All datasets are hosted on the competition platform under the <em>Files</em> section.
+          </p>
+        </div>
+
+        <div class="grid3">
+          <div class="card">
+            <h3>Development: Training</h3>
+            <p>
+              Only high-quality (HQ) images are provided. Participants are encouraged to design their own degradation model to synthesize LQ inputs for training.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>Development: Validation</h3>
+            <p>
+              Validation data provides only LQ inputs (for debugging and comparison).
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>Test Phase</h3>
+            <p>
+              Final test data provides only inputs for final evaluation. Participants submit restoration results and provide reproducible code or an executable.
+            </p>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 14px;">
+          <p class="muted">
+            <strong>Fairness requirement:</strong> Please do not use validation and test sets for training.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="evaluation" class="section">
+      <div class="container">
+        <h2>Evaluation</h2>
+
+        <div class="grid2">
+          <div class="card">
+            <h3>Metrics</h3>
+            <p>
+              Quality scores will be obtained by weighted averaging of all restoration results on the validation/test sets. The official description uses multiple no-reference (No-Reference) quality metrics for comprehensive evaluation (examples include: NIQE, CLIP-IQA, ManIQA, MUSIQ, FID, Q-Align, etc.; specific metric list and weights are subject to the competition page).
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>Submission requirements</h3>
+            <ul class="nice">
+              <li>Submit restoration results for the test set by the result deadline.</li>
+              <li>Submit a Fact Sheet and reproducible code/executable by the code deadline.</li>
+              <li>Top-ranked teams will be invited to present at the NTIRE workshop.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="timeline" class="section section--alt">
+      <div class="container">
+        <h2>Important Dates</h2>
+
+        <div class="card">
+          <div class="timeline">
+            <div class="trow">
+              <div class="tdate">2026-02-02</div>
+              <div class="titem">Training data (HQ only) + Validation inputs (LQ only) released</div>
+            </div>
+            <div class="trow">
+              <div class="tdate">2026-03-10</div>
+              <div class="titem">Final test inputs released</div>
+            </div>
+            <div class="trow">
+              <div class="tdate">2026-03-17</div>
+              <div class="titem">Test output submission deadline</div>
+            </div>
+            <div class="trow">
+              <div class="tdate">2026-03-17</div>
+              <div class="titem">Fact Sheet + code/executable submission deadline</div>
+            </div>
+            <div class="trow">
+              <div class="tdate">2026-03-19</div>
+              <div class="titem">Preliminary test results released to participants</div>
+            </div>
+            <div class="trow">
+              <div class="tdate">2026-03-24</div>
+              <div class="titem">Challenge paper submission deadline</div>
+            </div>
+            <div class="trow">
+              <div class="tdate">2026-06</div>
+              <div class="titem">NTIRE Workshop & Challenges & Awards (CVPR 2026, Denver, CO)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="awards" class="section">
+      <div class="container">
+        <h2>Awards & Publication</h2>
+
+        <div class="grid2">
+          <div class="card">
+            <h3>Awards</h3>
+            <p>
+              Top-ranked participants will receive awards and be invited to write method descriptions according to CVPR Workshop paper submission requirements, to be submitted to the NTIRE Workshop proceedings co-located with CVPR 2026.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Proceedings</h3>
+            <p>
+              The overall results will be published in the <strong>NTIRE 2026 Workshop Proceedings</strong>
+              (CVPR Workshops).
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="join" class="section section--alt">
+      <div class="container">
+        <h2>Join the Challenge</h2>
+
+        <div class="grid2">
+          <div class="card">
+            <h3>Competition portal</h3>
+            <p>
+              Register, download data, and submit results on the CodaBench competition page.
+            </p>
+            <a class="button primary" href="https://www.codabench.org/competitions/13507/" target="_blank" rel="noreferrer">
+              Open CodaBench
+            </a>
+          </div>
+
+          <div class="card">
+            <h3>NTIRE 2026</h3>
+            <p>
+              Learn more about the NTIRE 2026 workshop and other challenges on the official NTIRE website.
+            </p>
+            <a class="button" href="https://cvlai.net/ntire/2026/" target="_blank" rel="noreferrer">
+              Open NTIRE 2026
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="organizers" class="section">
+      <div class="container">
+        <h2>Organizers</h2>
+
+        <div class="card">
+          <div class="org-grid" role="list" aria-label="Organizers list">
+            <div class="org" role="listitem">
+              <div class="org__name">Jingkai Wang</div>
+              <div class="org__affil">Shanghai Jiao Tong University</div>
+              <a class="org__email" href="mailto:jingkaiwang100@gmail.com">jingkaiwang100@gmail.com</a>
+            </div>
+            <div class="org" role="listitem">
+              <div class="org__name">Jue Gong</div>
+              <div class="org__affil">Shanghai Jiao Tong University</div>
+              <a class="org__email" href="mailto:g1017325431@gmail.com">g1017325431@gmail.com</a>
+            </div>
+            <div class="org" role="listitem">
+              <div class="org__name">Zheng Chen</div>
+              <div class="org__affil">Shanghai Jiao Tong University</div>
+              <a class="org__email" href="mailto:zhengchen.cse@gmail.com">zhengchen.cse@gmail.com</a>
+            </div>
+            <div class="org" role="listitem">
+              <div class="org__name">Kai Liu</div>
+              <div class="org__affil">Shanghai Jiao Tong University</div>
+              <a class="org__email" href="mailto:normal.kliu@gmail.com">normal.kliu@gmail.com</a>
+            </div>
+            <div class="org" role="listitem">
+              <div class="org__name">Jiatong Li</div>
+              <div class="org__affil">Shanghai Jiao Tong University</div>
+              <a class="org__email" href="mailto:jiatong.li2024@gmail.com">jiatong.li2024@gmail.com</a>
+            </div>
+            <div class="org" role="listitem">
+              <div class="org__name">Radu Timofte</div>
+              <div class="org__affil">University of Würzburg</div>
+              <a class="org__email" href="mailto:Radu.Timofte@uni-wuerzburg.de">Radu.Timofte@uni-wuerzburg.de</a>
+            </div>
+            <div class="org" role="listitem">
+              <div class="org__name">Yulun Zhang</div>
+              <div class="org__affil">Shanghai Jiao Tong University</div>
+              <a class="org__email" href="mailto:yulun100@gmail.com">yulun100@gmail.com</a>
+            </div>
+          </div>
+
+          <p class="muted" style="margin-top: 14px;">
+            Organizer list may be updated.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="wechat" class="section section--alt">
+      <div class="container">
+        <h2>WeChat Group</h2>
+
+        <div class="grid2">
+          <div class="card">
+            <p>
+              Scan the QR code below to join the official WeChat group for announcements and discussion.
+            </p>
+            <p class="muted">
+              Note: If the QR code expires, please scan the QR code at the bottom of the competition homepage to join the group.
+            </p>
+          </div>
+
+          <div class="card qr">
+            <img src="assets/wechat-qr.jpg" alt="WeChat group QR code" loading="lazy" />
+            <div class="qr__caption">WeChat Group QR</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="container footer__inner">
+        <div class="footer__left">
+          <div class="footer__title">NTIRE 2026 — Real-World Face Restoration Challenge</div>
+          <div class="footer__meta">
+            <span>© <span id="year"></span></span>
+            <span class="dot">•</span>
+            <span>Built for GitHub Pages</span>
+          </div>
+        </div>
+
+        <div class="footer__right">
+          <a href="#top">Back to top ↑</a>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

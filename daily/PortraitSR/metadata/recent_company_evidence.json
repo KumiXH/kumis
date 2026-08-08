@@ -1,0 +1,57 @@
+[
+  {
+    "key": "meintime",
+    "company": "Xiaomi",
+    "institution": "Xiaomi Corporation",
+    "evidence_type": "ar5iv HTML rendering of arXiv source",
+    "evidence_excerpt": "4 Xiaomi Corporation; author Yasen Zhang uses the xiaomi.com email domain.",
+    "snapshot_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\sources\\arxiv\\html_2603.18645.html",
+    "snapshot_lines": "67-73",
+    "source_url": "https://arxiv.org/abs/2603.18645",
+    "verified_at": "2026-08-06"
+  },
+  {
+    "key": "lrpo",
+    "company": "Kuaishou",
+    "institution": "Kuaishou Technology",
+    "evidence_type": "ar5iv HTML rendering of arXiv source",
+    "evidence_excerpt": "3 Kuaishou Technology.",
+    "snapshot_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\sources\\arxiv\\html_2509.23339.html",
+    "snapshot_lines": "60-64",
+    "source_url": "https://arxiv.org/abs/2509.23339",
+    "verified_at": "2026-08-06"
+  },
+  {
+    "key": "dicface",
+    "company": "Alibaba",
+    "institution": "Alibaba Group",
+    "evidence_type": "ar5iv HTML rendering of arXiv source",
+    "evidence_excerpt": "1 Fudan University; 2 Alibaba Group; 3 Nanjing University.",
+    "snapshot_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\sources\\arxiv\\html_2506.13355.html",
+    "snapshot_lines": "65-69",
+    "source_url": "https://arxiv.org/abs/2506.13355",
+    "verified_at": "2026-08-06"
+  },
+  {
+    "key": "iqpfr",
+    "company": "Huawei",
+    "institution": "Media Technology Lab, Huawei",
+    "evidence_type": "ar5iv HTML rendering of arXiv source",
+    "evidence_excerpt": "4 Media Technology Lab, Huawei.",
+    "snapshot_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\sources\\arxiv\\html_2503.09294.html",
+    "snapshot_lines": "66-71",
+    "source_url": "https://arxiv.org/abs/2503.09294",
+    "verified_at": "2026-08-06"
+  },
+  {
+    "key": "infobfr",
+    "company": "Lenovo",
+    "institution": "PCIE, Lenovo Research",
+    "evidence_type": "ar5iv HTML rendering of arXiv source",
+    "evidence_excerpt": "Jia Li and Ke Shang are with PCIE, Lenovo Research.",
+    "snapshot_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\sources\\arxiv\\html_2501.15443.html",
+    "snapshot_lines": "66-70",
+    "source_url": "https://arxiv.org/abs/2501.15443",
+    "verified_at": "2026-08-06"
+  }
+]

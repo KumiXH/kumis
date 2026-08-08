@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="TIGER: Taming Identity, Geometry, and Generative Priors for High-Quality Face Video Restoration.">
+  <title>TIGER | High-Quality Face Video Restoration</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Jost:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <header class="navbar">
+    <a class="brand" href="#top" aria-label="TIGER home">TIGER</a>
+    <nav class="nav-links" aria-label="Page navigation">
+      <a href="#abstract">Abstract</a>
+      <a href="#method">Method</a>
+      <a href="#demos">Demos</a>
+      <a href="#citation">BibTeX</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <p class="hero-eyebrow">ECCV 2026</p>
+      <h1 class="hero-title">TIGER</h1>
+      <p class="hero-subtitle">Taming Identity, Geometry, and Generative Priors for High-Quality Face Video Restoration</p>
+      <p class="hero-authors">Yang Zhou<sup>1,*</sup> · Wenxue Li<sup>1,2,*</sup> · Peng Zhang<sup>1,†</sup> · Yifei Chen<sup>1</sup> · Fei Wang<sup>1</sup> · Daiguo Zhou<sup>1</sup></p>
+      <p class="hero-affiliation"><sup>1</sup> MiLM Plus, Xiaomi Inc. &nbsp; <sup>2</sup> The Hong Kong University of Science and Technology (Guangzhou)</p>
+      <p class="hero-notes"><sup>*</sup> Equal contribution &nbsp; <sup>†</sup> Corresponding author</p>
+      <div class="hero-actions">
+        <a class="btn" href="https://arxiv.org/abs/2606.24336">Paper</a>
+        <a class="btn" href="https://github.com/PixCtrol/Tiger">Code</a>
+        <a class="btn" href="#citation">BibTeX</a>
+      </div>
+    </section>
+
+    <section class="teaser-section" aria-label="TIGER teaser figure">
+      <div class="container wide">
+        <img class="paper-figure" src="assets/figures/teaser.png" alt="TIGER teaser qualitative comparison">
+      </div>
+    </section>
+
+    <section class="section" id="abstract">
+      <div class="container narrow">
+        <h2 class="section-title">Abstract</h2>
+        <div class="abstract-body">
+          <p>Face Video Restoration (FVR) aims to recover high-fidelity facial videos from degraded input while preserving identity and semantic consistency across frames. Existing methods often struggle to simultaneously address identity shift, viewpoint-entangled guidance, and perceptual realism.</p>
+          <p>We propose <strong>TIGER</strong>, a structured tri-prior fusion framework that tames <strong>I</strong>dentity, <strong>G</strong>eometry, and g<strong>E</strong>nerative p<strong>R</strong>iors for high-quality FVR. TIGER anchors identity with subject-discriminative embeddings, lifts reference cues into a disentangled 3D geometry prior, and harnesses a video generative prior through one-step rectified flow.</p>
+          <p>A progressive three-stage training strategy refines structural fidelity, textural reconstruction, and distribution-level realism. Extensive experiments demonstrate state-of-the-art identity fidelity and temporal stability with efficient, identity-consistent face video restoration.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-alt" id="method">
+      <div class="container">
+        <h2 class="section-title">Method</h2>
+        <p class="section-lead">A tri-prior framework for identity-consistent, geometry-aware, and realistic restoration.</p>
+        <div class="method-grid">
+          <article class="method-card">
+            <span class="step-num">01</span>
+            <h3>Identity Prior</h3>
+            <p>Reference identity embeddings are injected into the latent backbone to anchor subject-discriminative facial traits under severe degradation.</p>
+          </article>
+          <article class="method-card">
+            <span class="step-num">02</span>
+            <h3>Geometry Prior</h3>
+            <p>2D reference cues are lifted into a 3D parameter space and fused with frame motion to provide temporally consistent structure.</p>
+          </article>
+          <article class="method-card">
+            <span class="step-num">03</span>
+            <h3>Generative Prior</h3>
+            <p>A one-step rectified-flow formulation transports degraded latents to the high-fidelity manifold while preserving photorealistic detail.</p>
+          </article>
+        </div>
+        <figure class="figure-block">
+          <img class="paper-figure" src="assets/figures/pipeline.png" alt="TIGER framework pipeline">
+          <figcaption>TIGER integrates identity, geometry, and generative priors with progressive optimization.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section" id="demos">
+      <div class="container wide">
+        <h2 class="section-title">Restoration Demos</h2>
+        <p class="section-lead">Paired degraded inputs, restored outputs, and identity references from VFHQ and VOX2.</p>
+        <div class="dataset-tabs" role="tablist" aria-label="Dataset tabs">
+          <button class="tab-btn active" data-dataset="VFHQ" type="button">VFHQ</button>
+          <button class="tab-btn" data-dataset="VOX2" type="button">VOX2</button>
+        </div>
+
+        <div class="dataset-panel active" data-panel="VFHQ">
+          <article class="demo-card">
+            <header><span>VFHQ Sample 01</span><small>Clip+1qf8dZpLED0</small></header>
+            <div class="comparison-grid">
+              <div class="media-tile"><img src="assets/media/mp4/VFHQ/ref/Clip+1qf8dZpLED0+P2+C1+F5731-5855.png" alt="VFHQ sample 01 reference"><p>Reference</p></div>
+              <div class="media-tile"><video src="assets/media/mp4/VFHQ/blur/Clip+1qf8dZpLED0+P2+C1+F5731-5855.mp4" controls muted loop playsinline preload="metadata"></video><p>Degraded Input</p></div>
+              <div class="media-tile"><video src="assets/media/mp4/VFHQ/clear/Clip+1qf8dZpLED0+P2+C1+F5731-5855.mp4" controls muted loop playsinline preload="metadata"></video><p>TIGER Restoration</p></div>
+            </div>
+          </article>
+          <article class="demo-card">
+            <header><span>VFHQ Sample 02</span><small>Clip+1L2d-mQA-Gc</small></header>
+            <div class="comparison-grid">
+              <div class="media-tile"><img src="assets/media/mp4/VFHQ/ref/Clip+1L2d-mQA-Gc+P0+C0+F5084-5295.png" alt="VFHQ sample 02 reference"><p>Reference</p></div>
+              <div class="media-tile"><video src="assets/media/mp4/VFHQ/blur/Clip+1L2d-mQA-Gc+P0+C0+F5084-5295.mp4" controls muted loop playsinline preload="metadata"></video><p>Degraded Input</p></div>
+              <div class="media-tile"><video src="assets/media/mp4/VFHQ/clear/Clip+1L2d-mQA-Gc+P0+C0+F5084-5295.mp4" controls muted loop playsinline preload="metadata"></video><p>TIGER Restoration</p></div>
+            </div>
+          </article>
+        </div>
+
+        <div class="dataset-panel" data-panel="VOX2">
+          <article class="demo-card">
+            <header><span>VOX2 Sample 01</span><small>id00088</small></header>
+            <div class="comparison-grid">
+              <div class="media-tile"><img src="assets/media/mp4/VOX2/ref/id00088_7W6ysZIGtm4_00008.png" alt="VOX2 sample 01 reference"><p>Reference</p></div>
+              <div class="media-tile"><video src="assets/media/mp4/VOX2/blur/id00088_7W6ysZIGtm4_00008.mp4" controls muted loop playsinline preload="metadata"></video><p>Degraded Input</p></div>
+              <div class="media-tile"><video src="assets/media/mp4/VOX2/clear/id00088_7W6ysZIGtm4_00008.mp4" controls muted loop playsinline preload="metadata"></video><p>TIGER Restoration</p></div>
+            </div>
+          </article>
+          <article class="demo-card">
+            <header><span>VOX2 Sample 02</span><small>id00109</small></header>
+            <div class="comparison-grid">
+              <div class="media-tile"><img src="assets/media/mp4/VOX2/ref/id00109_IfR_OiOg8pE_00005.png" alt="VOX2 sample 02 reference"><p>Reference</p></div>
+              <div class="media-tile"><video src="assets/media/mp4/VOX2/blur/id00109_IfR_OiOg8pE_00005.mp4" controls muted loop playsinline preload="metadata"></video><p>Degraded Input</p></div>
+              <div class="media-tile"><video src="assets/media/mp4/VOX2/clear/id00109_IfR_OiOg8pE_00005.mp4" controls muted loop playsinline preload="metadata"></video><p>TIGER Restoration</p></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-alt" id="results">
+      <div class="container wide">
+        <h2 class="section-title">Qualitative Results</h2>
+        <p class="section-lead">Additional comparisons from the paper.</p>
+        <img class="paper-figure" src="assets/figures/qualitative.png" alt="TIGER qualitative restoration results">
+      </div>
+    </section>
+
+    <section class="section" id="citation">
+      <div class="container narrow">
+        <h2 class="section-title">BibTeX</h2>
+        <div class="citation-box">
+<pre><code>@inproceedings{zhou2026tiger,
+  title={TIGER: Taming Identity, Geometry, and Generative Priors for High-Quality Face Video Restoration},
+  author={Yang Zhou and Wenxue Li and Peng Zhang and Yifei Chen and Fei Wang and Daiguo Zhou},
+  booktitle={European Conference on Computer Vision},
+  year={2026}
+}</code></pre>
+          <button class="btn copy-btn" type="button" data-copy-target=".citation-box code">Copy</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Project page for TIGER. Replace placeholder links when paper/code are released.</p>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

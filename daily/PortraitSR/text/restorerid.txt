@@ -1,0 +1,1043 @@
+=== PAGE 1 ===
+RestorerID: Towards Tuning-Free Face Restoration with ID Preservation
+Jiacheng Ying1,† Mushui Liu1,† Zhe Wu1 Runming Zhang1
+Zhu Yu1 Siming Fu1 Si-Yuan Cao1 Chao Wu1 Yunlong Yu1 Hui-Liang Shen1,∗
+1 Zhejiang University
+{yingjiacheng, lms, jeffw, runmin zhang}@zju.edu.cn
+{yu zhu, fusiming, cao siyuan, chao.wu, yuyunlong, shenhl }@zju.edu.cn
+Increasing Degradation
+Ground-Truth
+Reference
+InputBase ModelFaceRestorer
+Tuning-free Insertion
+ID Preservation
+ID Preservation
+Increasing Degradation
+Ground-Truth
+Reference
+InputBase ModelFaceRestorer
+Tuning-free Insertion
+ID Preservation
+ID Preservation
+Increasing Degradation
+ID Preservation
+ID Preservation
+RestorerID Input
+Base Model
+Ground-Truth
+Reference
+Tuning-free Insertion
+Increasing Degradation
+ID Preservation
+ID Preservation
+RestorerID InputBase Model
+Ground-Truth
+Reference
+Tuning-free Insertion
+CodeFormer
+CodeFormer
+Figure 1. As image degradation increases, the blind face restoration approach CodeFormer [45] can restore images but fails to preserve ID
+consistency (see the second row). In contrast, OurRestorerID, incorporating reference ID priors, generates restored images with consistent
+ID information (see the third row).
+Abstract
+Blind face restoration has made great progress in producing
+high-quality and lifelike images. Yet it remains challenging
+to preserve the ID information especially when the degra-
+dation is heavy. Current reference-guided face restoration
+approaches either require face alignment or personalized
+test-tuning, which are unfaithful or time-consuming. In this
+paper, we propose a tuning-free method named RestorerID
+that incorporates ID preservation during face restoration.
+RestorerID is a diffusion model-based method that restores
+low-quality images with varying levels of degradation by
+using a single reference image. To achieve this, we pro-
+pose a unified framework to combine the ID injection with
+the base blind face restoration model. In addition, we de-
+sign a novel Face ID Rebalancing Adapter (FIR-Adapter)
+to tackle the problems of content unconsistency and con-
+tours misalignment that are caused by information conflicts
+between the low-quality input and reference image. Fur-
+thermore, by employing an Adaptive ID-Scale Adjusting
+† Equal contribution. ∗ Corresponding author.
+strategy, RestorerID can produce superior restored images
+across various levels of degradation. Experimental results
+on the Celeb-Ref dataset and real-world scenarios demon-
+strate that RestorerID effectively delivers high-quality face
+restoration with ID preservation, achieving a superior per-
+formance compared to the test-tuning approaches and other
+reference-guided ones. The code of RestorerID is avail-
+able at https : / / github . com / YingJiacheng /
+RestorerID.
+1. Introduction
+Face restoration [14, 15, 17, 28] aims to recover clear and
+high-quality (HQ) facial images from degraded inputs af-
+fected by blurring, pixelation, artifacts, JPEG compression,
+and other noise distortions. This task has important applica-
+tions across various fields, e.g., computational photography
+[40], old photo recovery [29].
+To eliminate complex and unknown degradations in low-
+quality (LQ) images, blind face restoration approaches use
+GANs [33, 38], codebooks [45], and diffusion models [35]
+1
+arXiv:2411.14125v1  [cs.CV]  21 Nov 2024
+
+=== PAGE 2 ===
+to explore general face priors for degradation removal.
+While these models are capable of generating high-detailed
+images from LQ inputs, they often struggle to accurately
+preserve the intricate identity features of human faces. This
+limitation is particularly evident when dealing with severely
+degraded images where the ID information are quite un-
+clear, as illustrated in the first and second row in Fig. 1.
+To restore more faithful face images, recent approaches
+incorporate reference images of the same identity during
+the restoration process. These approaches can be broadly
+classified into two categories: the alignment-based one
+and alignment-free one. Alignment-based approaches, e.g.,
+ASFFNet [15] and DMDNet [17], use reference align-
+ment and fusion modules to inject identity features into the
+restoration process. However, these approaches often strug-
+gle with inaccurate alignment between the reference and LQ
+input images, leading to suboptimal restoration results. On
+the other hand, PFStorer [28] introduces an alignment-free
+approach to learn a neural representation of the identity us-
+ing personalized models, thereby bypassing the need for di-
+rect alignment. While effective in preserving identity with-
+out relying on alignment, PFStorer requires model finetun-
+ing, taking more than 10 minutes and several (3∼5) images
+for each identity during testing. This increases computa-
+tional complexity and limits its practical use. Moreover,
+this type of test-time fine-tuning often necessitates cloud
+deployment, which may raise privacy concerns.
+In this work, we explore alignment-free and tuning-free
+face restoration with ID preservation. This task presents
+two main challenges: 1) How to combine the LQ structural
+information and reference ID information into a unified
+framework? Here, the LQ image provides structural infor-
+mation, while the reference image provides ID information.
+These two types of features should be precisely extracted
+and uniquely injected into a unified framework. 2) How
+to reduce the information conflicts between the LQ and
+reference images? Although the reference and LQ images
+belong to the same identity, they often have significantly
+differences in illumination, pose, and expression. Direct ID
+prior injection will disrupt the structure of restored image,
+and result in a decline of image quality. It is crucial to bal-
+ance the structural and ID information in the framework.
+To address above two challenges, we propose a novel
+diffusion model-based method, named RestorerID, for ID-
+preserved face restoration. For the first challenge, we adopt
+the independent LQ spatial model and ID model to ex-
+tract the LQ structural features and ID features, respec-
+tively. These two types of features are distinctly injected
+through ResBlock and Attention modules of a unified diffu-
+sion UNet without any parameter conflict. This enables the
+latent feature to incorporate both the structural and ID infor-
+mation simultaneously during the denoising process. For
+the second challenge, we propose a Face ID Rebalancing
+Method Diffusion-based Ref Tuning-free Alignment-free
+DR2 [35] ✓ ✗ ✓ -
+CodeFormer [45] ✗ ✗ ✓ -
+ASFFNet [15] ✗ ✓ ✓ ✗
+DMDNet [17] ✗ ✓ ✓ ✗
+PFStorer [28] ✓ ✓ (3∼5) ✗ ✓
+RestorerID ✓ ✓ ✓ ✓
+Table 1. An overview of previous works on face restoration, in
+comparison with our RestorerID method.
+Adapter (FIR-Adapter) that enables an interaction between
+the LQ structural features and reference ID embeddings,
+to further enhance the latent features. This adapter effec-
+tively avoids facial contours misalignment and content in-
+consistency during ID injection, significantly improving the
+image quality while ensuring ID similarity. Additionally,
+we further design an Adaptive ID-Scale Adjusting strategy
+based on the level of degradation. This strategy can dynam-
+ically adjust the ID injection degree for the model to pro-
+duce optimal restored images. As a result, RestorerID can
+restore face images with ID preserved across varying levels
+of degradation, as shown in the third row of Fig. 1.
+We distinguish our RestorerID from previous works
+through its high-fidelity restoration, alignment-free, and
+tuning-free, along with its superior performance compared
+to other methods. Tab. 1 concludes the previous face
+restoration works and provides an overall comparison. Our
+contributions can be summarized as follows:
+• We propose a unified framework, RestorerID, a tuning-
+free method for face restoration that is capable of han-
+dling various degradation scenarios while maintaining
+high-fidelity reconstruction and ID preservation.
+• We devise the FIR-Adapter to balance the LQ structural
+information and the reference ID information, improving
+the restored image quality while maintaining ID preserva-
+tion. Additionally, we design an Adaptive ID-Scale Ad-
+justing strategy to adaptively generate optimal results ac-
+cording to the level of degradation.
+• Experimental results validate that RestorerID achieves su-
+perior performance compared to the state-of-the-art ap-
+proaches across different degradation levels.
+2. Related Works
+Blind Image Restoration. Blind face image restoration ap-
+proaches recover HQ face images from LQ inputs by ex-
+ploiting face priors, such as geometry, facial textures and
+colors. Early works use GAN inversion. For example,
+GPEN [38] embeds a GAN within a U-shaped network,
+followed by fine-tuning for effective blind face restoration.
+GFP-GAN [33] employs a GAN framework with carefully
+designed architectures and losses to leverage generative fa-
+cial priors, producing high-quality face images. Recent ap-
+proaches employ diffusion models [9] to address severe and
+unknown degradations in face restoration. DifFace [41] cre-
+2
+
+=== PAGE 3 ===
+Reference Image
+LQ Image
+(Latent)
+ID
+Model
+❄
+LQ Structure
+Condition
+Ref ID
+Embedding
+K V
+Q
+Layer
+Norm
+Conv2d
+Conv2dConv2d
+(b) FIR-Adapter
+  ID CrossAttention
+Degradation
+Assessment
+(c) Adaptive ID-Scale Adjusting
+Adjusting
+Function
+(a) Framework
+❄
+LQ Image
+ID-Scale
+...
+Adaptive ID-Scale
+Adjusting
+FIR-BlockRestored
+Image
+...
+AdaID Adaption
+ResBlock
+FIR-Adapter
+❄ 🔥
+FIR-Block
+CrossAttention
+SelfAttention
+❄FIR-Block
+(First Stage)
+LQ Spatial
+Model
+🔥
+(Second Stage)
+❄
+Training
+ Frozen
+🔥
+❄
+Figure 2. (a) Our RestorerID framework integrates LQ structural information and reference ID information into a unified diffusion UNet.
+RestorerID adopts the FIR-Adapter and Adaptive ID-Scale Adjusting module to balance the above two types of information. (b) The
+FIR-Adapter effectively fuses the LQ structure conditions with reference ID embeddings through an adaptive training mechanism. (c) The
+Adaptive ID-Scale Adjusting module adjusts the ID injection degree based on degradation assessment.
+ates a transition distribution from LQ images to an interme-
+diate state of a pre-trained diffusion model, gradually re-
+covering HQ images through iterative denoising. DR2 [35]
+adds Gaussian noise to LQ images, reconstructing HQ tar-
+gets from the noisy state via a pre-trained diffusion model.
+PGDiff [37] uses partial guidance to control the denoising
+process, while BFRffusion [4] leverages the generative pri-
+ors in Stable Diffusion, rich in facial and object details, for
+face restoration. However, under heavy degradation, these
+approaches struggle to preserve ID information, as critical
+identity features are often lost during degradation.
+ID Preserving Image Generation. Despite significant ad-
+vancements in image generation [1, 22], the field still falls
+short of meeting the requirements for personalized genera-
+tion, particularly for human face synthesis. The main chal-
+lenge lies in the difficulty of enumerating all desired at-
+tributes for facial identity generation. This gap has drawn
+considerable attention to ID-preserving image generation
+[18, 31], a specialized form of subject-driven generation
+[3, 6, 13, 24, 39, 43]. A subset of methods, such as Dream-
+Booth [24], Textual Inversion [6], LoRA [10], and ELITE
+[36], focus on fine-tuning diffusion models during infer-
+ence using ID-specific datasets. Meanwhile, recent research
+has shifted towards training-free ID customization. For in-
+stance, IP-Adapter-FaceID [39] leverages face ID embed-
+dings from a face recognition model rather than CLIP im-
+age embeddings to retain identity consistency. PhotoMaker
+[18] and Face0 [26] combine text and image embeddings
+in CLIP space to guide the stable diffusion model, while
+InstanceID [32] explores a plug-and-play module that inte-
+grates facial and landmark images with textual prompts to
+assist in face generation. In this paper, we leverage exist-
+ing ID-preservation models to aid in face restoration while
+preserving identity characteristics.
+Reference-Guided Face Restoration. Reference-guided
+face restoration aims to improve identity preservation dur-
+ing the restoration process by taking one or several high-
+quality images of the same identity as guidance. GFRNet
+[14] explicitly warps the guided face to align with LQ face
+and further restores corresponding HQ image. ASFFNet
+[15] extracts the landmark features as a bridge to fuse the
+selected guided face image and the LQ image for restora-
+tion. DMDNet [17] first memorizes the generic and spe-
+cific features of facial regions through dual dictionaries, and
+then adaptively aligns and fuses the relevant features to pro-
+duce the final result. PFStorer [28] encodes the identity as
+a neural representation via the test-tuning for personalized
+face generation, which is quite time-consuming in inference
+mode. In this paper, we explore tuning-free ID preservation
+to restore face images even with heavy degradation.
+3. Method
+We propose a tuning-free, ID-preserved face restoration
+framework, RestorerID, which leverages same-identity ref-
+erence priors. As shown in Fig. 2 (a), RestorerID consists
+of key components: the Stable-Diffusion (SD) UNet, LQ
+Spatial Model, ID Model, FIR-Adapter, and Adaptive ID-
+Scale Adjusting module. The LQ Spatial Model extracts
+multi-scale structural features Flq to support base restora-
+tion, while the ID Model captures reference ID features
+Fref, integrated into the UNet through decoupled cross-
+3
+
+=== PAGE 4 ===
+Expression Inconsistency
+Contours Misalignment
+LQ input Base Model Base Model +
+ID injection
+Ours Ground-Truth Ref
+Content Inconsistency
+Contours Misalignment
+LQ input Base Model Base Model +
+ID injection
+Ours GT Ref
+Expression Inconsistency
+Contours Misalignment
+Contours Misalignment
+Pose Inconsistency
+Expression Inconsistency
+Pose Inconsistency
+Contours Misalignment
+Content Mistakes
+LQ input Base Model + ID Injection Ours GT Ref
+Light Degradation Heavy Degradation
+Figure 3. The outputs produced by the base model, base model + ID injection, and Our method. Blue, red, and green boxes highlight the
+contours misalignment, pose inconsistency and content mistakes, respectively.
+attention. Positioned between ResBlock and Attention lay-
+ers, the FIR-Adapter rebalances structural and identity in-
+formation, with the Adaptive ID-Scale Adjusting module
+modulating the ID injection degree for optimal results.
+3.1. Preliminaries
+Stable Diffusion (SD) Model. SD [21] models mainly
+consist of several components: CLIP [20] text encoder
+for extracting text embeddings, a variational autoencoder
+(V AE) [27] with an encoderE to encode images into a low-
+dimensional latent space, and a decoder D to reconstruct
+images from the latent vectors, and a UNet [23] for predict-
+ing noise during the diffusion process. The encoder E maps
+the input image to the latent space zt, which is efficient and
+low-dimensional. The optimization is as follows:
+L = Eε(x),ϵ∼N (0,1),t ∥ ϵ − ϵθ(zt, t) ∥2
+2, (1)
+where ϵθ is the diffusion model, zt the latent code at time t,
+and ϵ the sampled noise.
+Image Prompt Adapter . Recent ID preservation model,
+e.g., IP-Adapter [39], adopts the decoupled cross attention
+to inject the ID embeddings from CLIP image encoder or
+ID encoder to the SD UNet’s Attention module, which can
+be formulated as:
+Znew = Attention(Q, Kt, Vt) + λ · Attention(Q, Ki, Vi),
+(2)
+where Q is mapped from the latent feature, Kt and Vt are
+from the text embeddings, Ki and Vi are from the image
+embeddings, λ is the scale weight of the image embeddings.
+3.2. Face Restoration Base Model
+A strong base model that capable of blind restoration is fun-
+damental to ID-preserved face restoration. Following the
+setup of PFStorer [28], we combine the SD with the LQ
+Spatial Model from StableSR [30] as the base model. We
+retrain the base model using the following optimization:
+L = Eε(x),Ilq,ϵ∼N (0,1),t ∥ ϵ − ϵθ(zt, Ilq, t) ∥2
+2, (3)
+where Ilq denotes the input LQ image.
+Synthetic Degradation. To obtain HQ-LQ face image
+pairs, we generate synthetic LQ images by adopting a
+second-ordered degradation model [34] that contains blur-
+ring, resizing, noising, and JPEG compression. Further-
+more, we improve the noise addition process by converting
+the image from the sRGB to the raw domain using an ISP
+model [7]. This operation more closely resembles the real-
+world noise generation process in camera imaging.
+3.3. ID Preservation
+Blind face restoration is an ill-posed problem. When im-
+ages undergo severe degradation, the ID information, such
+as facial features, landmarks, and details, are easily com-
+promised. Blind face restoration only relies on general fa-
+cial priors to restore faces with a similar outline, which is
+not faithful. In this paper, we incorporate the reference pri-
+ors from the same identity into the base model to generate
+more faithful and reliable outputs.
+Impact of ID Injection. Following IP-Adapter [39], we
+utilize its pre-trained model (FaceID-Plus) to extract ID
+embeddings and integrate them through decoupled cross-
+attention modules, as defined in Eq. (2). Further details
+can be found in the Supplementary Materials . However,
+we observe that direct ID embedding injection can nega-
+tively affect restoration results. As shown in Fig. 3, the
+first row demonstrates that while the image produced by
+the base model with ID injection contains more ID informa-
+tion, it struggles to preserve facial contours and pose consis-
+tency. In the second row, the image generated by the base
+model with ID injection exhibits content errors, perform-
+ing even worse than the base model alone. This is because
+4
+
+=== PAGE 5 ===
+LQ Input ID-Scale=0.0 ID-Scale=0.5 ID-Scale=1.0 Adaptive Adjusting GT Ref
+Heavy Degradation Light Degradation
+Increasing ID-Scale
+Figure 4. The restored images under light and heavy degradation using increasing ID-Scale values and our adaptive adjusting strategy. Red
+boxes highlight the facial details. Please zoom in for the best view.
+that the reference and LQ faces have different poses, ex-
+pressions, and decorations, which means that, the injected
+embeddings, while incorporating ID priors, also disturb the
+structural information of the produced images.
+FIR-Adapter . To tackle the aforementioned problem, we
+design the FIR-Adapter, which is integrated into the UNet
+to enhance the facial features. As illustrated in Fig. 2 (b),
+the FIR-Adapter consists of ID CrossAttention and AdaIn
+Adaption modules. It first enables an interaction between
+the LQ structural features Fi
+lq and reference ID embeddings
+Fref through the cross attention. Then, the FIR-Adapter
+adopts a LayerNorm and three Convolution layers to ob-
+tain the Gi and Bi maps, which are used to enhance the
+facial details and contour structure of the latent code xi in
+a linear manner. The operation of the FIR-Adapter can be
+formulated as:
+Fi
+en = Fi
+lq + Attention(Qi
+lq, Kref, Vref), (4)
+Gi = Conv(Conv(LayerNorm(Fi
+en))), (5)
+Bi = Conv(Conv(LayerNorm(Fi
+en))), (6)
+xi
+out = Gi · xi + Bi, (7)
+where Qi
+lq is obtained from Fi
+lq, Kref and Vref are from Fref.
+Second-stage Training. We train the FIR-Adapter in the
+second stage with the other components locked. During the
+training process, we input LQ and reference images as con-
+ditions, and set the ID-Scale λ in Eq. (2) to 0.75. Addition-
+ally, we apply random dropout of LQ or reference images
+to enable classifier-free guidance in the inference stage. We
+use the modified diffusion loss as follows:
+L = Eε(x),Ilq,Iref,ϵ∼N (0,1),t ∥ ϵ − ϵθ(zt, Ilq, Iref, t) ∥2
+2, (8)
+where Ilq and Iref have probabilities to be zero tensors.
+3.4. Adaptive ID-Scale Adjusting
+In Eq. (2), ID-Scale λ is the hyperparameter that adjusts the
+ID injection degree, balancing the generation freedom and
+0.0 0.5 1.0 1.5 2.0
+0.4
+0.5
+0.6
+0.7
+0.8
+0.9
+B
+IP-Scale
+ 10≤MUSIQ<13
+ 13≤MUSIQ<16
+ 16≤MUSIQ<19
+ 19≤MUSIQ<22
+ 22≤MUSIQ<25
+ 25≤MUSIQ<28
+ 28≤MUSIQ<31
+ 31≤MUSIQ<34
+ 34≤MUSIQ<37
+ 37≤MUSIQ<40
+ 40≤MUSIQ<43
+ 43≤MUSIQ<46
+0.0 0.5 1.0 1.5 2.0
+0.4
+0.5
+0.6
+0.7
+0.8
+0.9
+B
+IP-Scale
+ 10≤MUSIQ<13
+ 13≤MUSIQ<16
+ 16≤MUSIQ<19
+ 19≤MUSIQ<22
+ 22≤MUSIQ<25
+ 25≤MUSIQ<28
+ 28≤MUSIQ<31
+ 31≤MUSIQ<34
+ 34≤MUSIQ<37
+ 37≤MUSIQ<40
+ 40≤MUSIQ<43
+ 43≤MUSIQ<46
+ID-Scale
+ID similarity
+Ideal ID-Scale Adjusting Curve
+0.0                       0.5                        1.0                          1.5                        2.0
+0.4
+0.5
+0.6
+0.7
+0.8
+0.9
+10≤MUSIQ<13
+13≤MUSIQ<16
+16≤MUSIQ<19
+19≤MUSIQ<22
+22≤MUSIQ<25
+25≤MUSIQ<28
+28≤MUSIQ<31
+31≤MUSIQ<34
+34≤MUSIQ<37
+37≤MUSIQ<40
+40≤MUSIQ<43
+43≤MUSIQ<46
+0.0 0.5 1.0 1.5 2.0
+0.4
+0.5
+0.6
+0.7
+0.8
+0.9
+B
+IP-Scale
+ 10≤MUSIQ<13
+ 13≤MUSIQ<16
+ 16≤MUSIQ<19
+ 19≤MUSIQ<22
+ 22≤MUSIQ<25
+ 25≤MUSIQ<28
+ 28≤MUSIQ<31
+ 31≤MUSIQ<34
+ 34≤MUSIQ<37
+ 37≤MUSIQ<40
+ 40≤MUSIQ<43
+ 43≤MUSIQ<46
+0.0 0.5 1.0 1.5 2.0
+0.4
+0.5
+0.6
+0.7
+0.8
+0.9
+B
+IP-Scale
+ 10≤MUSIQ<13
+ 13≤MUSIQ<16
+ 16≤MUSIQ<19
+ 19≤MUSIQ<22
+ 22≤MUSIQ<25
+ 25≤MUSIQ<28
+ 28≤MUSIQ<31
+ 31≤MUSIQ<34
+ 34≤MUSIQ<37
+ 37≤MUSIQ<40
+ 40≤MUSIQ<43
+ 43≤MUSIQ<46
+ID-Scale
+ID similarity
+Ideal ID-Scale Adjusting Curve
+0.0                       0.5                        1.0                          1.5                        2.0
+0.4
+0.5
+0.6
+0.7
+0.8
+0.9
+10≤MUSIQ<13
+13≤MUSIQ<16
+16≤MUSIQ<19
+19≤MUSIQ<22
+22≤MUSIQ<25
+25≤MUSIQ<28
+28≤MUSIQ<31
+31≤MUSIQ<34
+34≤MUSIQ<37
+37≤MUSIQ<40
+40≤MUSIQ<43
+43≤MUSIQ<46
+0.0 0.5 1.0 1.5 2.0
+0.4
+0.5
+0.6
+0.7
+0.8
+0.9
+B
+IP-Scale
+ 10≤MUSIQ<13
+ 13≤MUSIQ<16
+ 16≤MUSIQ<19
+ 19≤MUSIQ<22
+ 22≤MUSIQ<25
+ 25≤MUSIQ<28
+ 28≤MUSIQ<31
+ 31≤MUSIQ<34
+ 34≤MUSIQ<37
+ 37≤MUSIQ<40
+ 40≤MUSIQ<43
+ 43≤MUSIQ<46
+Figure 5. The curves of the average ID similarity values with re-
+spect to IP-Scale across different MUSIQ intervals.
+ID preservation. Although we fix λ = 0 .75 in the train-
+ing stage, we still find that varying degrees of ID prior in-
+jection influence the accuracy of the restored images during
+the inference stage. As shown in Fig. 4, under light degrada-
+tion conditions, a high ID-Scale easily causes the recovered
+faces to be inaccurate. For example, as highlighted in red
+boxes, the generated images with ID-Scale=0.5 and 1.0 ex-
+hibit deep winkles that are not present in the ground-truth.
+Conversely, under heavy degradation conditions, a low ID-
+Scale is insufficient for ID preservation. Therefore, we de-
+sign an Adaptive ID-Scale Adjusting strategy based on the
+degradation levels of the LQ images. The strategy should
+adhere to the following rule: ID-Scale should increase as
+the level of degradation rises.
+We restore 150 LQ images with varying levels of degra-
+dation using our method, with ID-Scale ranging from 0 to 2
+with interval of 0.04. We adopt the MUSIQ metric [12] to
+quantify the degradation level of images. A higher MUSIQ
+value indicates a smaller level of degradation. Fig. 5 illus-
+trates the curves of the average ID similarity (using Arc-
+Face [5]) values with respect to ID-Scale across different
+MUSIQ intervals. It can be observed that when MUSIQ is
+5
+
+=== PAGE 6 ===
+Input DR2+SPAR [35] CodeFormer [45] ASFFNet [15] DMDNet [17] PFStorer [28] Ours GT
+Figure 6. Qualitative comparison with state-of-the-art restoration models on Celeb-Ref dataset with heavy synthetic degradation.
+Methods Ref Light Degradation Heavy Degradation
+PSNR↑ SSIM↑ LPIPS↓ MUSIQ↑ LMSE↓ ID↑ PSNR↑ SSIM↑ LPIPS↓ MUSIQ↑ LMSE↓ ID↑
+DR2 + SPAR [35]✗ 25.21 0.750 0.193 44.85 2.831 0.711 21.52 0.703 0.289 20.53 6.479 0.385
+CodeFormer [45]✗ 25.03 0.714 0.136 75.38 2.498 0.774 21.16 0.641 0.196 73.55 4.793 0.379
+ASFFNet [15] ✓ 25.07 0.742 0.127 72.09 2.483 0.843 21.25 0.641 0.199 71.55 11.661 0.399
+DMDNet [17] ✓ 23.97 0.715 0.158 70.31 2.637 0.867 21.39 0.652 0.211 67.85 6.966 0.450
+PFStorer [28] ✓ 25.16 0.685 0.136 76.12 2.230 0.853 22.31 0.638 0.182 75.44 3.918 0.473
+Ours ✓ 26.03 0.744 0.132 71.62 2.210 0.867 21.87 0.621 0.204 74.79 4.348 0.548
+Table 2. Quantitative comparison on light and heavy degradation levels. Red indicates the best and blue indicates the second best.
+high, a smaller ID-Scale is beneficial for restoration; When
+MUSIQ is low, ID similarity initially rises and then de-
+creases with increasing ID-Scale. We identify the optimal
+ID-Scale values for different MUSIQ levels and empirically
+use the following formula to adjust ID-Scale λ,
+λ = exp
+ α − MUSIQ(Ilq)
+β
+
+, (9)
+where we set α = 9.5 and β = 10.
+4. Experiments
+4.1. Experimental Settings
+Datasets. For the base model training, we use FFHQ [11]
+and VGGFace2 [2] datasets. For the FIR-Adapter training,
+we select 9,384 identities from the VGGFace2 and Celeb-
+Ref [16] datasets, with each identity comprising 5-40 im-
+ages. Additionally, we clean the training dataset by remov-
+ing low-quality facial images using ArcFace backbone [5].
+For synthetic data evaluation, we select 50 identities from
+the remaining Celeb-Ref datasets, randomly choosing 2 im-
+ages for each identity as the ground truth and reference im-
+ages. We introduce two levels of degradation, i.e., light and
+heavy, to obtain LQ input images for comprehensive eval-
+uation. For real-world data evaluation, we collect LQ and
+HQ images of 20 identities from the Internet.
+Implement Details. Our RestorerID is built based on
+the Stable Diffusion v1.5-base. We train the base model
+for 60,000 iterations and FIR-Adapter for 30,000 iterations
+with a batch size of 16. We use AdamW [19] optimizer
+and the learning rate is set to 5 × 10−5. The training pro-
+cess is conducted on 512 × 512 resolution with 2 NVIDIA
+48G-A6000 GPUs. For inference, we adopt DDIM [25]
+sampling with 50 timesteps and use classifier-free guidance
+(CFG) [8] to guide the denoising process with λcfg = 7.5.
+Evaluation Metrics. We use PSNR, SSIM, LPIPS [42],
+MUSIQ [12], LMSE (Landmark MSE) [44], and ID (cosine
+similarity with ArcFace[5]) as evaluation metrics.
+Comparing Methods. We compare our method with both
+reference-guided and blind face restoration approaches.
+The reference-guided approaches include ASFFNet [15],
+DMDNet [17], and PFStorer [28], while the blind face
+restoration approaches include CodeFormer [45] and DR2
++ SPAR [35]. Note that PFStorer is a test-tuning approach
+and it employs 5 reference images for each identity tuning.
+4.2. Performance Comparison
+Quantitative. Tab. 2 lists the quantitative results of Re-
+storerID and other competitors on light and heavy degra-
+dation levels. From the results, it can be observed that
+RestorerID achieves competitive performance on PSNR,
+SSIM, and LPIPS metrics in the light degradation scenario,
+obtaining a PSNR of 26.03, which ranks among the top
+results. For the heavy degradation scenario, blind face
+restoration approaches demonstrate superior performance
+on SSIM. We hypothesize that this is because the SSIM
+metric emphasizes image sharpness and structural clarity.
+However, it overlooks the fidelity of facial details and nat-
+uralness, which are critical for a realistic face restoration.
+Despite this, our method still produces visually pleasing
+results in terms of facial identity preservation and overall
+6
+
+=== PAGE 7 ===
+Input DR2 + SPAR [35] CodeFormer [45] ASFFNet [15] DMDNet [17] PFStorer [28] Ours Pseudo-GT
+Figure 7. Qualitative comparison with state-of-the-art restoration models on real-world images. Images are sourced from the Internet.
+77.70% 22.30% 80.00 % 20.00%
+RestorerID
+71.30% 28.70% 77.00% 23.00%
+75.30% 24.97% 73.03% 26.97%
+76.70% 23.30% 67.70% 32.30%
+52.03% 47.97% 53.03% 46.97%
+CodeFormer ASFFNet DMDNet PFStorer
+Quality Identity
+Figure 8. User study results. V oting rates of our RestorerID com-
+pared with other approaches on Quality and Identity metrics.
+landmark consistency. Notably, RestorerID achieves the
+best performance in ID metric for both light and heavy dis-
+tortions, which underscores the ability of our model to re-
+tain personalized facial characteristics. In particular, un-
+der heavy degradation, our model surpasses the second-best
+competitor by 0.075. These results highlight the strength
+of RestorerID in accurately extracting personalized fea-
+tures from the reference image and leveraging these features
+for effective face restoration, even in challenging scenarios
+where input quality is severely degraded.
+Qualitative. Fig. 6 presents the visual results of face
+restoration at the heavy degradation level across different
+approaches. It is observed that our RestorerID outperforms
+other approaches, particularly in ID preservation. Specifi-
+cally, when the noisy input images are difficult to recognize
+due to blurred facial features such as the eyes and nose, our
+method can restore the face and preserve the ID more ef-
+fectively than blind face restoration approaches. Compared
+to PFStorer, our method also demonstrates superior identity
+preservation on features like the eyes and nose, as shown in
+the first row of Fig. 6.
+We also evaluate our RestorerID on real-world scenarios,
+as shown in Fig. 7. Our method continues to demonstrate
+superior performance in both ID preservation and image
+quality. In comparison, blind face restoration approaches
+such as DR2+SPAR and CodeFormer struggle to restore
+images faithfully, while reference-guided approaches face
+Degradation light heavy
+LPIPS↓ LMSE↓ ID↑ LPIPS↓ LMSE↓ ID↑
+Base Model 0.141 2.214 0.859 0.206 4.392 0.401
++ ID Injection 0.158 2.571 0.831 0.221 5.635 0.557
++ FIR Adapter 0.141 2.315 0.859 0.207 4.427 0.552
++ AIDSA (Ours)0.132 2.210 0.867 0.204 4.348 0.548
+Table 3. Ablation study on the proposed components, includ-
+ing ID injection, FIR-Adapter, and Adaptive ID-Scale Adjusting
+(AIDSA). The best ones are highlighted in bold.
+challenges in accurately recovering fine facial details. Addi-
+tionally, PFStorer often produces artifacts and distortions in
+facial regions, highlighting the robustness of our approach.
+From the results, we can conclude that our RestorerID is
+also effective in real-world scenarios.
+User Study. We conduct a user study to assess human pref-
+erences for perceptual quality, complementing the quanti-
+tative metrics. Totally 30 participants evaluate 100 images
+on two aspects: quality and identity fidelity relative to a
+reference image. The collected data includes images with
+varying levels of degradation, comprising 25% with light
+degradation and 75% with heavy degradation. The results
+are shown in Fig. 8. It can be observed that our method
+received the highest number of votes for both image qual-
+ity and identity fidelity. Specifically, RestorerID outper-
+forms blind face restoration methods in both metrics and
+surpasses reference-guided methods such as ASFFNet and
+DMDNet in large margin, while achieving competitive re-
+sults compared to the test-tuning method PFStorer. These
+findings demonstrate that RestorerID effectively delivers
+high-quality face restoration.
+4.3. Ablation Studies
+The Effective of Proposed Components. To assess the
+impact of each component on model performance, we in-
+crementally add the ID Injection, FIR-Adapter, and Adap-
+tive ID-Scale Adjusting strategy (AIDSA) components to
+the baseline model and conduct experiments under varying
+levels of degradation. Tab. 3 presents the LPIPS, LMSE,
+7
+
+=== PAGE 8 ===
+GT RefLQ Input Single-Stage Training Ours
+Heavy Degradation Light Degradation
+LQ Input Base Model + ID Injection + ID Injection
++ FIR-Adapter
++ ID Injection
++ FIR-Adapter
++ AIDSA (Ours)
+GT Ref
+Heavy Degradation Light Degradation
+Figure 9. The qualitative results of ablation studies on the proposed components under light and heavy degradations. We incrementally
+add the ID injection, FIR-Adapter, and Adaptive ID-Scale Adjusting strategy (AIDSA) to the base model. Red and blue boxes highlight
+the haircut and eyebrow inconsistency.
+LQ Input Base Model + ID Injection + ID Injection
++ FIR Adapter
++ ID Injection
++ FIR Adapter
++ IPAAS (Ours)
+GT Ref
+Heavy Degradation Light Degradation
+LQ Input Single-Stage Training Ours GT Ref
+Heavy Degradation Light Degradation
+Figure 10. The qualitative results of ablation study on the two-
+stage training strategy under light and heavy degradations.
+and ID metrics for each model setting. The results show
+that incorporating the ID Injection component significantly
+improves the ID metric from 0.401 to 0.557 under heavy
+degradation, indicating a substantial enhancement in ID
+preservation. However, this also results in a decline in
+image quality. Furthermore, the introduction of the FIR-
+Adapter aids in balancing ID preservation with image qual-
+ity. This results in an ID metric increase from 0.831 to
+0.859 under light degradation. It also leads to an LMSE
+metric reduction from 5.635 to 4.427 under heavy degrada-
+tion. These improvements signify enhanced ID preservation
+while maintaining image quality. Additionally, incorporat-
+ing the AIDSA strategy yields the best results in both image
+quality and identity preservation for face image restoration.
+Fig. 9 illustrates the qualitative results of the ablation
+study on the proposed components. It is observed that the
+adoption of ID injection component successfully incorpo-
+rates the reference prior into the output, especially under
+heavy degradation, while it diminishes the structure consis-
+tency under light degradation. The adoption of FIR-Adapter
+effectively improves the image quality while maintaining
+ID similarity. But there still exists some content inconsis-
+tency, as highlighted in red and blue boxes. The addition of
+AIDSA further addresses the remaining issues, providing a
+Degradation light heavy
+LPIPS↓ LMSE↓ ID↑ LPIPS↓ LMSE↓ ID↑
+Single-Stage0.137 2.225 0.852 0.195 4.626 0.470
+Ours 0.132 2.210 0.867 0.204 4.348 0.548
+Table 4. Ablation study for our two-stage training strategy.
+more faithful restoration outcome.
+The Necessity of Two-Stage Training.To verify the neces-
+sity of the two-stage training, we conducted a single-stage
+training by combining the base model and FIR-Adapter
+training together under the same settings. As shown in
+Tab. 4, the performance of the single-stage training model
+is generally inferior to that of the two-stage training model.
+For example, under heavy degradation, the ID metric for
+single-stage training is 0.470, compared to 0.548 for two-
+stage training, and the LMSE is 4.626, higher than 4.348
+for two-stage training. This is because the two-stage train-
+ing for the base model and FIR-Adapter more effectively
+explores their capabilities of blind face restoration and in-
+formation rebalancing, respectively, which is crucial for im-
+proving model performance.
+Fig. 10 illustrates the qualitative results of the ablation
+study on two-stage training strategy. It is observed that the
+images produced by the single-stage training model show
+deficiencies in facial details, such as the beard and eyes.
+In contrast, our two-stage training model achieves superior
+performance in both image quality and ID preservation.
+5. Conclusions
+In this work, we have introduced RestorerID, a tuning-
+free face restoration method with ID preservation, capable
+of recovering high-quality face images across varying lev-
+els of degradation. RestorerID combines the face restora-
+tion and ID preservation into a unified stable diffusion-
+based framework by adopting the independent LQ spatial
+8
+
+=== PAGE 9 ===
+model and ID model. To balance the LQ structural and
+reference ID information, we propose the FIR-Adapter and
+Adaptive ID-Scale Adjusting strategy, which seamlessly en-
+hance the restoration quality with ID-preserving capabil-
+ities. Experimental results on Celeb-Ref and real-world
+scenario datasets proves that RestorerID achieves excellent
+face restoration with ID preservation, even in challenging
+heavy-degradation scenarios. We hope this work can con-
+tribute to advancements in high-fidelity photography.
+References
+[1] James Betker, Gabriel Goh, Li Jing, Tim Brooks, Jianfeng
+Wang, Linjie Li, Long Ouyang, Juntang Zhuang, Joyce
+Lee, Yufei Guo, et al. Improving image generation with
+better captions. Computer Science. https://cdn. openai.
+com/papers/dall-e-3. pdf, 2:3, 2023. 3
+[2] Qiong Cao, Li Shen, Weidi Xie, Omkar M Parkhi, and An-
+drew Zisserman. Vggface2: A dataset for recognising faces
+across pose and age. In 2018 13th IEEE international con-
+ference on automatic face & gesture recognition (FG 2018),
+pages 67–74. IEEE, 2018. 6
+[3] Xi Chen, Lianghua Huang, Yu Liu, Yujun Shen, Deli Zhao,
+and Hengshuang Zhao. Anydoor: Zero-shot object-level im-
+age customization. CoRR, abs/2307.09481, 2023. 3
+[4] Xiaoxu Chen, Jingfan Tan, Tao Wang, Kaihao Zhang, Wen-
+han Luo, and Xiaochun Cao. Towards real-world blind face
+restoration with generative diffusion prior. IEEE Transac-
+tions on Circuits and Systems for Video Technology , 2024.
+3
+[5] Jiankang Deng, Jia Guo, Niannan Xue, and Stefanos
+Zafeiriou. Arcface: Additive angular margin loss for deep
+face recognition. In CVPR, pages 4690–4699, 2019. 5, 6
+[6] Rinon Gal, Yuval Alaluf, Yuval Atzmon, Or Patashnik,
+Amit Haim Bermano, Gal Chechik, and Daniel Cohen-Or.
+An image is worth one word: Personalizing text-to-image
+generation using textual inversion. In ICLR, 2023. 3
+[7] Shi Guo, Zifei Yan, Kai Zhang, Wangmeng Zuo, and Lei
+Zhang. Toward convolutional blind denoising of real pho-
+tographs. In CVPR, pages 1712–1722, 2019. 4
+[8] Jonathan Ho and Tim Salimans. Classifier-free diffusion
+guidance. arXiv preprint arXiv:2207.12598, 2022. 6
+[9] Jonathan Ho, Ajay Jain, and Pieter Abbeel. Denoising dif-
+fusion probabilistic models. In NeurIPS, pages 6840–6851,
+2020. 2
+[10] Edward J Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-
+Zhu, Yuanzhi Li, Shean Wang, Lu Wang, and Weizhu Chen.
+Lora: Low-rank adaptation of large language models. arXiv
+preprint arXiv:2106.09685, 2021. 3
+[11] Tero Karras, Samuli Laine, and Timo Aila. A style-based
+generator architecture for generative adversarial networks. In
+CVPR, pages 4401–4410, 2019. 6
+[12] Junjie Ke, Qifei Wang, Yilin Wang, Peyman Milanfar, and
+Feng Yang. Musiq: Multi-scale image quality transformer.
+In ICCV, pages 5148–5157, 2021. 5, 6
+[13] Nupur Kumari, Bingliang Zhang, Richard Zhang, Eli
+Shechtman, and Jun-Yan Zhu. Multi-concept customiza-
+tion of text-to-image diffusion. In CVPR, pages 1931–1941.
+IEEE, 2023. 3
+[14] Xiaoming Li, Ming Liu, Yuting Ye, Wangmeng Zuo, Liang
+Lin, and Ruigang Yang. Learning warped guidance for blind
+face restoration. In ECCV, pages 272–289, 2018. 1, 3
+[15] Xiaoming Li, Wenyu Li, Dongwei Ren, Hongzhi Zhang,
+Meng Wang, and Wangmeng Zuo. Enhanced blind face
+restoration with multi-exemplar images and adaptive spatial
+feature fusion. In CVPR, pages 2706–2715, 2020. 1, 2, 3, 6,
+7
+[16] Xiaoming Li, Shiguang Zhang, Shangchen Zhou, Lei Zhang,
+and Wangmeng Zuo. Learning dual memory dictionaries for
+blind face restoration. IEEE Transactions on Pattern Analy-
+sis and Machine Intelligence, 45(5):5904–5917, 2022. 6
+[17] Xiaoming Li, Shiguang Zhang, Shangchen Zhou, Lei Zhang,
+and Wangmeng Zuo. Learning dual memory dictionaries for
+blind face restoration. T-PAMI, 45(5):5904–5917, 2022. 1,
+2, 3, 6, 7
+[18] Zhen Li, Mingdeng Cao, Xintao Wang, Zhongang Qi, Ming-
+Ming Cheng, and Ying Shan. Photomaker: Customizing re-
+alistic human photos via stacked id embedding. In CVPR,
+pages 8640–8650, 2024. 3
+[19] I Loshchilov. Decoupled weight decay regularization. arXiv
+preprint arXiv:1711.05101, 2017. 6
+[20] Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya
+Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sastry,
+Amanda Askell, Pamela Mishkin, Jack Clark, et al. Learn-
+ing transferable visual models from natural language super-
+vision. In ICML, pages 8748–8763, 2021. 4
+[21] Robin Rombach, Andreas Blattmann, Dominik Lorenz,
+Patrick Esser, and Bj¨orn Ommer. High-resolution image syn-
+thesis with latent diffusion models. In CVPR, pages 10684–
+10695, 2022. 4
+[22] Robin Rombach, Andreas Blattmann, Dominik Lorenz,
+Patrick Esser, and Bj¨orn Ommer. High-resolution image syn-
+thesis with latent diffusion models. In CVPR, pages 10674–
+10685, 2022. 3
+[23] Olaf Ronneberger, Philipp Fischer, and Thomas Brox. U-net:
+Convolutional networks for biomedical image segmentation.
+In MICCAI, pages 234–241, 2015. 4
+[24] Nataniel Ruiz, Yuanzhen Li, Varun Jampani, Yael Pritch,
+Michael Rubinstein, and Kfir Aberman. Dreambooth: Fine
+tuning text-to-image diffusion models for subject-driven
+generation. In CVPR, pages 22500–22510, 2023. 3
+[25] Jiaming Song, Chenlin Meng, and Stefano Ermon.
+Denoising diffusion implicit models. arXiv preprint
+arXiv:2010.02502, 2020. 6
+[26] Dani Valevski, Danny Wasserman, Yossi Matias, and Yaniv
+Leviathan. Face0: Instantaneously conditioning a text-to-
+image model on a face, 2023. 3
+[27] Aaron Van Den Oord, Oriol Vinyals, et al. Neural discrete
+representation learning. In NeurIPS, 2017. 4
+[28] Tuomas Varanka, Tapani Toivonen, Soumya Tripathy, Guoy-
+ing Zhao, and Erman Acar. Pfstorer: Personalized face
+restoration and super-resolution. In CVPR, pages 2372–
+2381, 2024. 1, 2, 3, 4, 6, 7
+9
+
+=== PAGE 10 ===
+[29] Ziyu Wan, Bo Zhang, Dongdong Chen, Pan Zhang, Dong
+Chen, Jing Liao, and Fang Wen. Bringing old photos back to
+life. In CVPR, pages 2747–2757, 2020. 1
+[30] Jianyi Wang, Zongsheng Yue, Shangchen Zhou, Kelvin CK
+Chan, and Chen Change Loy. Exploiting diffusion prior for
+real-world image super-resolution. IJCV, pages 1–21, 2024.
+4
+[31] Qixun Wang, Xu Bai, Haofan Wang, Zekui Qin, and An-
+thony Chen. Instantid: Zero-shot identity-preserving gener-
+ation in seconds. In ECCV, 2024. 3
+[32] Qixun Wang, Xu Bai, Haofan Wang, Zekui Qin, and An-
+thony Chen. Instantid: Zero-shot identity-preserving gener-
+ation in seconds. arXiv preprint arXiv:2401.07519 , 2024.
+3
+[33] Xintao Wang, Yu Li, Honglun Zhang, and Ying Shan. To-
+wards real-world blind face restoration with generative facial
+prior. In CVPR, pages 9168–9178, 2021. 1, 2
+[34] Xintao Wang, Liangbin Xie, Chao Dong, and Ying Shan.
+Real-esrgan: Training real-world blind super-resolution with
+pure synthetic data. In ICCV, pages 1905–1914, 2021. 4
+[35] Zhixin Wang, Ziying Zhang, Xiaoyun Zhang, Huangjie
+Zheng, Mingyuan Zhou, Ya Zhang, and Yanfeng Wang. Dr2:
+Diffusion-based robust degradation remover for blind face
+restoration. In CVPR, pages 1704–1713, 2023. 1, 2, 3, 6, 7
+[36] Yuxiang Wei, Yabo Zhang, Zhilong Ji, Jinfeng Bai, Lei
+Zhang, and Wangmeng Zuo. ELITE: encoding visual con-
+cepts into textual embeddings for customized text-to-image
+generation. In ICCV, pages 15897–15907. IEEE, 2023. 3
+[37] Peiqing Yang, Shangchen Zhou, Qingyi Tao, and
+Chen Change Loy. PGDiff: Guiding diffusion models
+for versatile face restoration via partial guidance. 36, 2023.
+3
+[38] Tao Yang, Peiran Ren, Xuansong Xie, and Lei Zhang. Gan
+prior embedded network for blind face restoration in the
+wild. In CVPR, pages 672–681, 2021. 1, 2
+[39] Hu Ye, Jun Zhang, Sibo Liu, Xiao Han, and Wei Yang. Ip-
+adapter: Text compatible image prompt adapter for text-to-
+image diffusion models. CoRR, abs/2308.06721, 2023. 3,
+4
+[40] Fanghua Yu, Jinjin Gu, Zheyuan Li, Jinfan Hu, Xiangtao
+Kong, Xintao Wang, Jingwen He, Yu Qiao, and Chao Dong.
+Scaling up to excellence: Practicing model scaling for photo-
+realistic image restoration in the wild. In CVPR, pages
+25669–25680, 2024. 1
+[41] Zongsheng Yue and Chen Change Loy. DifFace: Blind face
+restoration with diffused error contraction. IEEE Transac-
+tions on Pattern Analysis and Machine Intelligence , pages
+1–15, 2024. 2
+[42] Richard Zhang, Phillip Isola, Alexei A Efros, Eli Shechtman,
+and Oliver Wang. The unreasonable effectiveness of deep
+features as a perceptual metric. In CVPR, pages 586–595,
+2018. 6
+[43] Yuxuan Zhang, Jiaming Liu, Yiren Song, Rui Wang, Hao
+Tang, Jinpeng Yu, Huaxia Li, Xu Tang, Yao Hu, Han Pan,
+and Zhongliang Jing. Ssr-encoder: Encoding selective sub-
+ject representation for subject-driven generation. In CVPR,
+pages 8069–8078, 2024. 3
+[44] Yinglin Zheng, Hao Yang, Ting Zhang, Jianmin Bao, Dong-
+dong Chen, Yangyu Huang, Lu Yuan, Dong Chen, Ming
+Zeng, and Fang Wen. General facial representation learning
+in a visual-linguistic manner. In CVPR, pages 18697–18709,
+2022. 6
+[45] Shangchen Zhou, Kelvin Chan, Chongyi Li, and
+Chen Change Loy. Towards robust blind face restora-
+tion with codebook lookup transformer. In NeurIPS, pages
+30599–30611, 2022. 1, 2, 6, 7
+10

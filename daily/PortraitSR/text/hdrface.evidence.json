@@ -1,0 +1,161 @@
+{
+  "key": "hdrface",
+  "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\01_single_face\\hdrface_2605.14821.pdf",
+  "page_count": 19,
+  "first_page_excerpt": "HDRFace: Rethinking Face Restoration with\nHigh-Dimensional Representation\nZirui Wang1, Xianhui Lin 2† , Yi Dong2, Bo Wei2, Gangjian Zhang 2,\nSiteng Ma2, Zebiao Zheng 2, Xing Liu 2, Hong Gu 2, Minjing Dong 1∗\n1 City University of Hong Kong\n2 vivo BlueImage Lab, vivo Mobile Communication Co., Ltd\nzrwang23-c@my.cityu.edu.hk xhlin129@gmail.com minjdong@cityu.edu.hk\nProject Page\nAbstract\nFace restoration under complex degradations still remains an ill-posed inverse\nproblem due to severe information loss. Although diffusion models benefit from\nstrong generative priors, most methods still condition only on low-quality inputs,\nmaking it difficult to recover identity-critical details under heavy degradations. In\nthis work, we proposeHDRF ace, aHigh-DimensionalRepresentation conditioned\nF acerestoration framework that injects semantically rich priors into the conditional\nflow without modifying the generative backbone. Our pipeline first obtains a\nstructurally reliable intermediate restoration with an off-the-shelf restorer, then\nuses a pretrained high-dimensional feature encoder to extract fine-grained facial\nrepresentations from both the low-quality input and the intermediate result, and\ninjects them as additional conditions for generation. We further introduce SDFM,\na Structure-Detail aware adaptive Fusion Mechanism that emphasizes global con-\nstraints during structure modeling and strengthens representation guidance during\ndetail synthesis, balancing structural consistency and detail fidelity. To validate the\ngeneralization ability of our method, we implement the proposed framework on\ntwo generative models, SD V2.1-base and Qwen-Image, and consistently observe\nstable and coherent performance gains across different architectures.\n1 Introduction\nFace restoration aims to reconstruct high-quality face images from low-quality inputs that have\nundergone complex degradations. Degradations such as blur, noise, downsampling, and JPEG\ncompression can severely damage facial structures and fine-grained texture details, making the task\ninherently an ill-posed inverse problem. In recent years, diffusion models [ 1, 2], empowered by\nstrong generative priors and superior detail completion capabilities, have achieved notable progress in\nimproving perceptual realism and have gradually become a dominant paradigm in face restoration [3,\n4, 5, 6, 7, 8], particularly demonstrating enhanced robustness and advantages under severe degradation\nconditions.\nHowever, most existing diffusion-based face restoration methods [6, 4, 7, 8] still exhibit suboptimal\nperformance in fine-grained detail reconstruction and image fidelity. The fundamental reason lies\nin the fact that these approaches typically rely solely on low-quality images as the only input and\nattempt to learn a direct mapping from LQ to HQ images. Due to the severe information loss and\ncomplex degradations commonly present in low-quality observations, many identity-related facial\ndetails are irreversibly damaged or heavily blurred, making it difficult for the model to accurately\n† Project leader. ∗ Corresponding author.\nPreprint.\narXiv:2605.14821v1  [cs.CV]  14 May 2026",
+  "figure_candidates": [
+    {
+      "page": 2,
+      "caption": "Figure 1: Motivation and improvements of HDRFace. (Left) Existing diffusion-based methods"
+    },
+    {
+      "page": 4,
+      "caption": "Figure 2: Overview of our proposed HDRFace framework."
+    },
+    {
+      "page": 8,
+      "caption": "Figure 3: Qualitative comparison on the CelebA-Test dataset."
+    },
+    {
+      "page": 9,
+      "caption": "Figure 4: Heatmap visualizations of representation"
+    },
+    {
+      "page": 9,
+      "caption": "Figure 5: Ablation evaluation of different"
+    },
+    {
+      "page": 16,
+      "caption": "Figure 6: More Qualitative comparison on CelebA-Test dataset. From left to right: HQ, results of"
+    },
+    {
+      "page": 17,
+      "caption": "Figure 7: More Qualitative comparison on LFW-Test dataset. From left to right: LQ, results of other"
+    },
+    {
+      "page": 17,
+      "caption": "Figure 8: More Qualitative comparison on CeleChild-Test dataset. From left to right: LQ, results of"
+    },
+    {
+      "page": 18,
+      "caption": "Figure 9: Representative failure cases of HDRFace under severe degradations. Our method still"
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 6,
+      "caption": "Table 1: Quantitative comparison on the synthetic CelebA-Test dataset among non-diffusion, multi-"
+    },
+    {
+      "page": 7,
+      "caption": "Table 2: Comparison of metrics with our"
+    },
+    {
+      "page": 7,
+      "caption": "Table 3: Quantitative comparison on real-world datasets."
+    },
+    {
+      "page": 9,
+      "caption": "Table 4: Ablation studies of our method. The left table compares the proposed method with three"
+    },
+    {
+      "page": 15,
+      "caption": "Table 5: Full training and inference details."
+    },
+    {
+      "page": 16,
+      "caption": "Table 6: Complexity comparison during inference. All models are tested with an input image size of"
+    },
+    {
+      "page": 18,
+      "caption": "Table 7: Comparison of metrics with different guidance models, where C-IQA stands for CLIP-IQA."
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      11,
+      13,
+      14,
+      15,
+      18,
+      19
+    ],
+    "identity": [
+      1,
+      2,
+      5,
+      6,
+      7,
+      8,
+      9,
+      14,
+      18,
+      19
+    ],
+    "portrait_detail": [
+      1,
+      2,
+      3,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      15,
+      16,
+      18,
+      19
+    ],
+    "efficiency": [
+      1,
+      2,
+      3,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ],
+    "datasets": [
+      6,
+      7,
+      8,
+      15,
+      16,
+      17,
+      18
+    ],
+    "limitations": [
+      2,
+      3,
+      9,
+      18,
+      19
+    ]
+  },
+  "source_urls": [],
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\hdrface.txt"
+}

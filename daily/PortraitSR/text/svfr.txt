@@ -1,0 +1,978 @@
+=== PAGE 1 ===
+SVFR: A Unified Framework for Generalized Video Face Restoration
+Zhiyao Wang1,2, Xu Chen2,*, Chengming Xu2, Junwei Zhu2†, Xiaobin Hu2,
+Jiangning Zhang2, Chengjie Wang2, Yuqi Liu1, Yiyi Zhou1†, Rongrong Ji1
+1Key Laboratory of Multimedia Trusted Perception and Efficient Computing,
+Ministry of Education of China, Xiamen University, China 2Tencent Youtu Lab
+Abstract
+Face Restoration (FR) is a crucial area within image and
+video processing, focusing on reconstructing high-quality
+portraits from degraded inputs. Despite advancements in
+image FR, video FR remains relatively under-explored, pri-
+marily due to challenges related to temporal consistency,
+motion artifacts, and the limited availability of high-quality
+video data. Moreover, traditional face restoration typi-
+cally prioritizes enhancing resolution and may not give as
+much consideration to related tasks such as facial coloriza-
+tion and inpainting. In this paper, we propose a novel ap-
+proach for the Generalized Video Face Restoration (GVFR)
+task, which integrates video BFR, inpainting, and coloriza-
+tion tasks that we empirically show to benefit each other.
+We present a unified framework, termed as stable video
+face restoration (SVFR), which leverages the generative
+and motion priors of Stable Video Diffusion (SVD) and
+incorporates task-specific information through a unified
+face restoration framework. A learnable task embedding
+is introduced to enhance task identification. Meanwhile,
+a novel Unified Latent Regularization (ULR) is employed
+to encourage the shared feature representation learning
+among different subtasks. To further enhance the restora-
+tion quality and temporal stability, we introduce the fa-
+cial prior learning and the self-referred refinement as aux-
+iliary strategies used for both training and inference. The
+proposed framework effectively combines the complemen-
+tary strengths of these tasks, enhancing temporal coherence
+and achieving superior restoration quality. This work ad-
+vances the state-of-the-art in video FR and establishes a
+new paradigm for generalized video face restoration. Code
+and video demo are available at https://github.
+com/wangzhiyaoo/SVFR.git.
+1. Introduction
+Face Restoration (FR) is a critical area of research within
+the broader field of image and video processing, aiming to
+recover high-quality facial images from degraded inputs.
+SVFR
+Colorization
+GPEN
+BFR
+PGTFormer
+Inpainting
+CodeFormer
+Figure 1. Face restoration results of SOTA single task methods
+and SVFR. Our unified SVFR model outperforms SOTA single
+task methods by avoiding facial structure abnormalities, temporal
+color inconsistencies, and texture distortions.
+This task has significant applications for both images and
+videos. For example, effective image FR methods can help
+on personal photo enhancement, historical photo restora-
+tion, and forensic analysis, while video FR can well serve
+the goal of film restoration and surveillance.
+While abundant works have been proposed to solve im-
+age FR with acceptable results, the video FR, which tar-
+gets high-quality and realistic face recovery with appropri-
+ate identity consistency together with temporal stability, has
+hardly been explored. Few efforts dedicated to this area
+such as BasicVSR++ [7] and KEEP [43] still significantly
+lack behind their image-based counterparts, suffering from
+problems such as low generation quality, temporal jitter
+and discontinuity, due to the multifaceted challenges. The
+main problem lies in the fact that video FR is intrinsically
+more complex than image FR in that the temporal dimen-
+sion introduces additional complexity, requiring the model
+to maintain consistency across frames while dealing with
+motion artifacts, occlusions, and varying lighting condi-
+tions. However, the high-quality training data for video FR
+is hard to collect. In this way, the scarcity of high-quality
+annotated video datasets further complicates the training
+process, making it difficult to achieve robust performance.
+Moreover, the limited capacity of architecture adopted by
+*Equal Contribution. †Corresponding Author.
+1
+arXiv:2501.01235v2  [cs.CV]  3 Jan 2025
+
+=== PAGE 2 ===
+previous works also contributes to the low fidelity problem.
+To this end, in this paper, we explore an alternative solu-
+tion to the above-mentioned problems, that is, leveraging a
+unified face restoration framework that simultaneously en-
+gages more general restoration supervision other than BFR.
+Such an idea has been successfully applied to a wide range
+of deep learning tasks. For example, multi-task learning
+frameworks have shown significant improvements in nat-
+ural language processing [38], where tasks like translation,
+summarization, and question answering benefit from shared
+representations. Meanwhile, one can find that BFR intrinsi-
+cally shares similar goals with other tasks, e.g., the color of
+low-quality videos is often destroyed due to compression ar-
+tifacts, whose restoration also involves performing coloriza-
+tion. Intuitively, a well-learned colorization model should
+enhance the BFR process by providing more accurate color
+information. Similarly, inpainting techniques, which aim
+to fill in missing or corrupted regions in images, can pro-
+vide valuable priors for restoring occluded or degraded fa-
+cial features in videos.
+To validate this idea, we first conduct several pilot exper-
+iments to show that with simple transfer learning, the prior
+knowledge from BFR, inpainting, and colorization can be
+beneficial for each other. These experiments demonstrate
+that leveraging shared representations across these tasks can
+lead to improved performance in video BFR. For instance,
+we observed that models pretrained on colorization tasks
+were better at restoring natural skin tones in low-quality
+videos, while inpainting models helped in reconstructing
+occluded facial regions with higher fidelity.
+Based on this clue, we in this paper propose a novel
+framework dubbed as Stable Video Face Restoration
+(SVFR) as a generalized solver for a composited video FR
+task named Generalized Video Face Restoration (GVFR),
+including video BFR [24, 33, 52], inpainting [30, 41, 50],
+and colorization [40], to enhance the supervision from lim-
+ited training data. Our proposed SVFR leverages strong
+motion-level and spatial-level priors embedded in pre-
+trained Stable Video Diffusion (SVD) [3] with task-specific
+information, to ensure the backbone model enjoys enough
+capacity for producing high-fidelity results. Concretely,
+the pretrained SVD is assisted with conditions from two
+sources, i.e., the contaminated task-specific context and the
+reference identity image, to indicate the target task and
+provide the spatial details. This basic pipeline is modi-
+fied with several novelties to benefit GVFR. First, in or-
+der to ensure task-specific information can be embedded
+in the proper latent space, i.e., videos with same content
+and different forms of degradation should be more simi-
+lar than videos with different contents, a novel unified face
+restoration framework featuring the task embedding and
+the unified latent regularization is employed to constrain
+the intermediate feature from diffusion UNet. Addition-
+ally, to further enhance the human face quality generated
+by our model, we propose a facial prior learning objective,
+which guides the model with structure priors represented by
+face landmarks to smoothly embed the human face struc-
+ture prior into the pretrained SVD. During inference, we
+leverage a self-referred refinement strategy, in which the
+generated results are refined by referring to the previously
+generated frames, in order to improve temporal stability.
+This whole framework can successfully leverage the com-
+plementary strength of BFR, inpainting, and colorization,
+thus enhancing the temporal coherence of the restored video
+and achieving superior restoration quality.
+In order to validate the effectiveness of our method, we
+conduct experiments on all three subtasks on VFHQ-test
+dataset, following the previous works. Extensive results
+show that by addressing the challenges of these video-based
+low-level tasks through a unified framework, our method
+paves the way for more robust and efficient video restora-
+tion techniques, with potential applications in fields such as
+video conferencing, film restoration, and surveillance.
+In summary, our contributions can be listed as follows:
+• We propose a novel framework called Stable Video Face
+Restoration (SVFR) that unifies video BFR, inpainting,
+and colorization tasks, leveraging shared representations
+to enhance supervision from limited training data and im-
+prove overall restoration quality.
+• We introduce key innovations including a novel unified
+latent regularization to ensure proper embedding of task-
+specific information, and a facial prior learning objective
+that incorporates human face priors using face landmarks,
+thereby enhancing the fidelity of the restored videos.
+• We develop a self-referred refinement strategy during in-
+ference, which refines generated frames by referring to
+previously generated ones, significantly improving tem-
+poral stability and coherence in the restored videos.
+2. Related Works
+Diffusion models in video processing. The advent of
+diffusion models in image generation [17] has catalyzed
+their application in video processing. Early research pri-
+marily extended these models [18, 51] to video genera-
+tion by incorporating temporal dynamics. For instance,
+Video LDM [5] begins with image pretraining and subse-
+quently integrates temporal layers fine-tuned on video data.
+VideoCrafter [9] enhances video generation by combining
+textual and visual features from CLIP [29] within cross-
+attention layers. VideoComposer [34] uses images as con-
+ditional prompts during training to guide video generation.
+Building on these foundations, researchers have explored
+additional video processing tasks. VIDIM [20], for exam-
+ple, employs cascaded diffusion models for video interpola-
+tion, while DiffIR2VR [46] adapts pretrained image-based
+diffusion models for zero-shot video restoration through la-
+2
+
+=== PAGE 3 ===
+tent warping. DiffAct [26] generates action sequences for
+temporal action segmentation via iterative denoising.
+Blind face restoration. The field of blind face restora-
+tion aims to recover high-quality face images from severely
+degraded inputs, often captured in uncontrolled settings.
+Given the structured nature of faces, researchers have suc-
+cessfully incorporated prior information into restoration
+models. As an important method to address this task,
+generative priors from pre-trained GANs, such as Style-
+GAN [21, 22], are leveraged through iterative latent opti-
+mization of GAN inversion [14, 27, 28]. Other works such
+as GLEAN [6], GPEN [45], and GFPGAN [33] were pro-
+posed to introduce generative prior to enhance restoration
+quality. Moreover, recent works [15, 19, 23, 36, 53, 54]
+also tried to enhancing robustness to severe degradation by
+compressing the high quality images into a finite codebook,
+or introduce structure prior such as 3D Morphable Model
+(3DMM) [2]. Most face restoration methods are image-
+based ones [25, 37, 48], without focusing on video-level
+tasks. Few video face restoration methods [32, 42] such
+as BasicVSR++ [8] and KEEP [12] propose to extend the
+image-based models to video tasks. However, these meth-
+ods still suffer from severe temporal instability and low
+quality. In comparison, our proposed method can perform
+much better due to the design of introducing multiple learn-
+ing tasks, which has hardly been explored before for BFR.
+3. Pilot Study: Can training on multiple video
+FR tasks help?
+Table 1. Pilot study results. For all subtasks, training models based
+on specific prior knowledge leads to better FID.
+GVFR subtask FID w/o prior↓ FID w prior↓
+BFR 30.023 28.014
+Color 12.677 11.941
+Inpaint 9.907 9.089
+In order to validate the efficacy of leveraging supervision
+from multiple subtasks to enhance the performance of video
+FR, we setup a straightforward pilot experiment in this sec-
+tion. Concretely, we train GPEN [45] for three tasks includ-
+ing BFR, colorization and inpainting both with and without
+using pretrained model with specific prior knowledge. The
+prior knowledge is set as the pretraining on inpainting for
+BFR and BFR for the other two tasks. The results are pre-
+sented in Tab. 1, from which we can find that the transfer
+learning setting consistently outperforms the training-from-
+scratch setting in all tasks, thus indicating that these three
+subtasks in the GVFR indeed share similar prior knowledge
+that can benefit each other.
+4. Methodology
+Preliminary: Stable Video Diffusion. Diffusion mod-
+els [42] are generative models that use a forward process to
+turn data x0 ∼ pdata(x) into Gaussian noise xT ∼ N (0, I)
+and learn a reverse process to remove this noise step-by-
+step. In the forward processq(xt|x0, t), noise is added grad-
+ually over T time steps, producing increasingly noisy sam-
+ples xt. The reverse process, pθ(xt−1|xt, t), uses a neural
+network εθ(xt, t) to predict and remove the noise, progres-
+sively recovering the original data.
+For video generation tasks, several methods are based on
+diffusion models. In this work, we choose Stable Video
+Diffusion (SVD) [4] as a base model to utilize its time-
+stable modeling capabilities. To model the temporal data,
+SVD introduces two types of temporal layers: 3D convolu-
+tion layers and temporal attention layers. Temporal layers
+are also integrated into the V AE decoder. Given a video
+x ∈ RN ×3×H×W , we first encode each frame into the la-
+tent space, represented as z = E(x). In this latent space,
+we perform forward and reverse processes. The final gener-
+ated video, x, is then obtained by decoding from this latent
+representation.
+Lnoise = EE(x),ϵ∼N (0,1),t
+hϵ − ϵθ
+
+zt, t
+2
+2
+i
+, (1)
+where t is sampled from {0, ..., T}, ϵθ denotes a diffusion
+U-Net parameterized by θ. During inference, zT is directly
+sampled from Gaussian distribution, which is denoised into
+z0 and then mapped back to video space using decoder D
+of VQ-V AE.
+Overview. To leverage multiple tasks to mutually en-
+hance the performance, we present a unified framework Sta-
+ble Video Face Restoration (SVFR) as depicted in Fig. 2.
+Formally, for each task, the model is provided with a con-
+taminated source video Vd (i.e., low-quality video for BFR,
+masked video for inpainting, and gray-scale video for col-
+orization), and required to generate a repaired version of it,
+denoted as Vr. In our proposed framework, the task-level
+conditions are initially processed by a novel unified face
+restoration framework (Sec. 4.1), where the Task Embed-
+ding enhances the model’s ability to recognize the specific
+task, and the Unified Latent Regularization integrates in-
+termediate feature from diverse task domains into a shared
+latent space. To smoothly embed the human facial prior
+into the pretrained SVD, we further propose a facial prior
+learning objective (Sec. 4.2), which guides the model with
+structure priors represented by face landmarks. After that,
+we leverage a self-referred refinement strategy (Sec. 4.3),
+in which the generated results are refined by referring to the
+previously generated frames to improve the temporal stabil-
+ity.
+3
+
+=== PAGE 4 ===
+×T
+...
+???
+????
+(a) Training pipeline of SVFR
+...
+??
+(b) Inference pipeline of SVFR
+Mapping Network
+??
+? ??
+1 0 0 0 1 1
+Task Embedding
+??ask
+Dropout
+by 50%
+Landmark Predictor
+??????
+???
+Spatial Layer Temporal Layer
+Task Prompt
+????? :
+?????,   ?≤?≤? :
+Facial Prior Learning
+???
+Latent Transformer
+??
+Unified Latent Regularization
+??
++ ??
+−??
+????????????
+??????
+TimeStep
+??
+???
+ ? ??
+1 0 0
+????
+×T
+??
+???
+ ? ??
+1 0 0
+ ×T
+????
+????
+??
+??
+??
+Figure 2. Pipeline of our proposed SVFR. (a) Training pipeline of SVFR: We incorporate task information into the training process using
+a task embedding approach to enhance unified face restoration. To enhance performance across different tasks, we propose unified latent
+regularization to effectively aggregate task-specific features, thereby improving the model’s performance on various tasks. Additionally,
+we introduce facial landmark information as an auxiliary guidance to help the model learn structural priors related to human face. Finally,
+we propose a Self-referred Refinement method that ensures temporal stability. During training, a reference frame is randomly provided, the
+model will produce consistent results when a reference frame is available. (b) Inference pipeline of SVFR: During inference, we initially
+generate the first video clip without a reference frame, then select a result frame as the reference image Iref for subsequent video clips.
+4.1. Unified Face Restoration Framework
+In order to guide the denoising process with source video
+Vd, a simple approach is to encodeVd into latent space and
+directly concatenate E(Vd) with the noise zt. However, the
+source videos from different tasks can convey different prior
+information. For instance, Vd provided by BFR shares the
+same structural information with Vr while lacking detailed
+texture information. On the other hand, information from
+Vr is fully retained in Vd for unmasked regions while be-
+ing unavailable inside the masked areas. Therefore, simply
+adopting pretrained V AE cannot encode all source videos
+into a proper and consistent latent space which can then be
+used to guide the diffusion U-Net.
+To this end, we propose a unified face restoration frame-
+work comprising two key modules: Task Embedding and
+the Unified Latent Regularization. The Task Embedding
+module is designed to capture the unique characteristics
+of each task, allowing the model to adjust when switching
+between tasks adaptively. Meanwhile, the Unified Latent
+Regularization integrates information across tasks within a
+shared latent space, ensuring that task-specific features are
+effectively leveraged for enhanced performance across di-
+verse tasks.
+Task embedding. While the source videoVd can indicate
+the required task to some extent, directly relying on Vd for
+task information can lead to confusion. For example, both
+colorization and BFR may involve video with destroyed
+color information. Moreover, when handling multiple types
+of contamination, Vd itself cannot provide sufficient infor-
+mation for the target task, thus potentially leading to unde-
+sired outcomes. since Vd from different tasks are input into
+the model, it is challenging for the model to distinguish the
+target task without additional guidance, potentially leading
+to undesired outcomes. To this end, we leverage the Task
+Embedding module as an essential component within the
+multi-task framework, designed to capture and represent the
+unique characteristics of each task, thereby enhancing the
+model’s ability to recognize and adapt to specific tasks.
+Given a task set T = {T1, T2, T3}, where T1, T2 and
+T3 represent BFR, colorization, and inpainting tasks respec-
+tively. To enhance the model’s ability to recognize tasks,
+each task is represented by a binary indicator ti(i ∈ [1, 3])
+(0 for absence and 1 for presence). The task prompt is rep-
+resented as a binary vector γ = [ t1, t2, t3]. For example,
+[0, 1, 1] indicates that colorization and inpainting tasks are
+active while BFR is inactive. For a given task prompt γ, a
+Task Embedding layerEtask is employed to map γ to a task
+embedding Etask(γ), which is then integrated into the dif-
+fusion U-Net to guide task-specific adaptations throughout
+the model by adding it to the time embedding.
+Unified Latent Regularization. To further align features
+across different tasks and enable the model to leverage
+4
+
+=== PAGE 5 ===
+shared knowledge within a unified learning framework, we
+propose Unified Latent Regularization (ULR). ULR con-
+strains the feature distributions of various degraded tasks
+for the same video within the U-Net feature space, allowing
+the model to learn common features across multi-tasks.
+Specifically, we implement cross-task alignment using
+features from the middle block of the UNet. We first extract
+the output from the intermediate layers of the UNet, as these
+layers capture essential structural and semantic information
+crucial for modeling nuanced video details. These interme-
+diate outputs xd are then processed through a Latent Trans-
+former Tl, composed with two resblock and a layernorm,
+producing feature representations of the video frames ˆxd.
+Subsequently, we compute the contrastive loss on these
+features to improve visual consistency across tasks and
+reinforce restoration quality. This ensures that output
+frames across tasks share unified intermediate features dur-
+ing restoration, thereby enhancing structural consistency,
+reducing artifacts, and elevating overall generation quality.
+Formally, the proposed regularization term for each batch
+can be represented as:
+LU LR = − log
+
+exp
+
+(ˆxi · ˆx+
+i )/τ
+
+PN
+j=1 exp
+
+(ˆxi · ˆx−
+j )/τ
+
+!
+, (2)
+where ˆxi denotes the intermediate features obtained from
+the Latent Transformer, representing the primary degraded
+video. ˆx+
+i indicates features derived from different degra-
+dations of the same source video, while ˆx−
+j corresponds to
+features from different source videos, also extracted through
+the UNet and transformer module. By applying this regu-
+larization constraint, ULR effectively maintains spatial and
+detail feature consistency across tasks, thereby enhancing
+fidelity.
+4.2. Facial Prior Learning
+While the pretrained SVD can be directly adapted to our
+task by optimizing the noise prediction loss as in Eq. 1, such
+an objective cannot help inject the structure priors of human
+faces into the model. As a result, the model may struggle to
+generate facial details with consistent structure.
+To address this problem and further guide the model in
+preserving the facial structure, we introduce an auxiliary
+objective function that can encourage the model to concen-
+trate on the human face structure-related information from
+noisy latent. Concretely, we leverage the features xd output
+from the U-Net middle block and pass them through a land-
+mark predictor Plm composed of an average pooling layer
+followed by five layers of MLP. This predictor is trained
+to estimate a 68-points facial landmark set, obtained from
+ground truth frames using a pretrained landmark detection
+model [16].
+To achieve precise alignment between predicted and
+ground-truth landmarks, inspired by [13], we utilize a fa-
+cial prior loss for fine-grained facial landmark regression.
+Formally, for each predicted landmark ˆyi = Plm(xd) and
+its corresponding ground truth yi from Vlm, this loss func-
+tion is defined as:
+Lprior =
+
+wln(1 + |x| /ϵ) if |x| < w
+|x| − C otherwise , (3)
+where x denotes the difference ˆyi − yi, with w and ϵ as
+hyperparameters controlling the balance between linear and
+logarithmic scaling, and C ensuring continuity. This loss
+is incorporated as an auxiliary component in the total loss
+function, weighted to balance with other objectives, thereby
+guiding the model to prioritize facial structure consistency
+across different tasks. This approach selectively emphasizes
+smaller deviations while maintaining robustness to outliers,
+making it highly effective for accurate facial feature align-
+ment.
+In all, the diffusion U-Net ϵθ is optimized together with
+the unified latent regularization Tl, the task embedding
+Etask and the landmark predictor Plm, using the following
+composited objective function:
+L = Lnoise + λ1LU LR + λ2Lprior, (4)
+where λ1, λ2 is a hyper-parameter. The detailed model ar-
+chitecture is provided in the supplementary materials.
+4.3. Self-referred Refinement
+To achieve temporal stability and consistency across entire
+segments in long video facial restoration tasks, we propose
+a mechanism called Self-referred Refinement. This method
+enhances generation quality by injecting reference frame
+features during the generation process, ensuring structural
+and stylistic consistency between frames and improving
+overall generation results.
+In the training phase, we extract features from the ref-
+erence frame Iref using a V AE encoder zref = E(Iref ).
+These features are then injected into the initial noise of
+the U-Net model. Additionally, identity features fid are
+extracted by Eid and passed through a mapping network
+Mid before being injected into the cross-attention layers of
+the U-Net. To improve model generalization and allow the
+model to generate content without a reference frame, we
+apply a 50% dropout to the reference frame during training.
+This strategy encourages the model to develop independent
+content restoration capabilities, enabling it to produce con-
+sistent facial structures even without explicit conditioning.
+In inference, for sequential generation across video seg-
+ments, the model first generates the initial video segment
+without a reference frame. From this generated segment,
+we select one frame as a reference for subsequent segments.
+This approach ensures stylistic and structural continuity
+across frames, facilitating long-range consistency through-
+out the entire video sequence.
+5
+
+=== PAGE 6 ===
+Table 2. Quantitative comparisons with state-of-the-art methods on the VFHQ-test dataset.The results show that our method achieves
+the best performance across both image and video metrics, outperforming all methods on the GVFR tasks. Notably, our approach is tested
+on a unified model, while other methods use specially trained model for each task. PGTFormer [42] and KEEP [12] did not provide trained
+models for colorization and inpainting, so the metrics for these two tasks are empty.
+Methods BFR / Colorization / Inpainting
+PSNR↑ SSIM↑ LPIPS↓ IDS↑ VIDD↓ FVD↓
+GPEN [45] 26.237 / 22.012/ 23.596 0.795 / 0.887/ 0.886 0.320 / 0.294/ 0.228 0.786 / 0.959/ 0.757 0.575/ 0.499/ 0.671 412.81 / 366.2481/ 286.763
+CodeFormerr [53] 26.528 / 17.927 / 28.6720.762/ 0.663 / 0.8960.361 / 0.508 / 0.1560.784 / 0.624 / 0.8460.700 / 0.895 / 0.727 379.53 / 551.448 / 170.631
+PGDiff [44] 23.638 / 21.550 / 20.551 0.765 / 0.825 / 0.794 0.399 / 0.481 / 0.360 0.489 / 0.794 / 0.615 0.649 / 0.558 / 0.595445.36 / 370.150 / 354.615
+PGTFormer [42] 28.996 / - / - 0.843 / - / - 0.248 / - / - 0.845 / - / - 0.577 / - / - 154.857 / - / -
+KEEP [12] 27.335 / - / - 0.813 / - / - 0.259 / - / - 0.790 / - / - 0.787 / - / - 399.239 / - / -
+Ours 29.563/23.079/29.119 0.862/0.896/0.904 0.223/0.272/0.153 0.902/0.980/0.888 0.479/0.497/0.504 89.316/204.260/88.354
+5. Experiments
+5.1. Implementation detail
+Dataset. We construct the training datasets by following
+previous works focusing on three subtasks. Specifically, We
+selected V oxCeleb2 [11], CelebV-Text [47], and VFHQ [39]
+as our training datasets. To enhance the quality of our train-
+ing data, we utilize ARNIQA [1] score to filtere a high-
+quality video dataset comprising 20,000 clips. The VFHQ-
+test dataset [39] is selected as test dataset, which contains
+50 videos. For the BFR task, we applied various degrada-
+tions, including random blurring, noise addition, resizing,
+and video compression (CRF). For the colorization task,
+we converted the videos to grayscale, and for the inpaint-
+ing task, we applied brush stroke masks [45] to the video
+frames. Since some comparison methods operate only on
+aligned images or videos, we performed alignment on the
+test data.
+Metrics. To evaluate our model’s performance in face
+restoration, we use a range of targeted metrics. PSNR
+and SSIM [35] assess frame-level reconstruction accuracy,
+while LPIPS [49] captures perceptual quality. IDS evalu-
+ates identity consistency in face restoration. At the video
+level, VIDD [10] measures temporal consistency by calcu-
+lating identity feature differences between adjacent frames
+using ArcFace, and FVD [31] assesses overall video quality,
+reflecting spatial and temporal coherence.
+Baseline. For the BFR task, we benchmarked our ap-
+proach against state-of-the-art methods, including image-
+based methods such as GPEN [45], CodeFormer [53],
+and PGDiff [44], which generate frames independently,
+processing them one by one. We also compared with
+video-based restoration methods like PGTFormer [42] and
+KEEP [12]. All testing degradations were applied consis-
+tently across methods, and each baseline followed the set-
+tings reported in their respective original papers. For the
+inpainting and colorization tasks, we selected GPEN [45],
+CodeFormer [53], and PGDiff [44] for comparison.
+5.2. Comparison with State-of-the-Art Methods
+Qualitative analysis. In Table 2, we present a comprehen-
+sive comparison of our method against state-of-the-art tech-
+niques for the BFR, colorization, and inpainting tasks on
+the VFHQ-test dataset. Our approach outperforms existing
+methods across a range of image quality metrics, including
+PSNR, SSIM and LPIPS, showcasing its superior ability to
+restore high-quality video frames. Notably, the higher IDS
+score demonstrates our method’s enhanced capacity to pre-
+serve facial identity consistency throughout the restoration
+process. Furthermore, the improved VIDD and FVD scores
+reflect significant gains in both the realism and temporal sta-
+bility of the restored video, underscoring the robustness of
+our method in handling dynamic video restoration tasks.
+Quantitative analysis. To further validate the effectiveness
+of our approach, we performed a visual comparison with
+existing methods, as shown in Fig. 3. The results demon-
+strate that other methods often struggle with issues such as
+frame-level blurring, facial feature distortions, and produc-
+ing artifacts, especially when there are large pose or motion
+changes between consecutive frames. Additionally, these
+methods tend to fail in challenging scenarios, including fa-
+cial occlusion, the presence of accessories such as glasses
+or earrings, and side-profile views, where our approach con-
+sistently delivers more accurate and stable restorations. For
+instance, in the first case, when the face is obstructed by a
+microphone, other methods tend to distort the mouth region
+during generation, thereby compromising the overall facial
+structure in the restored video. Meanwhile, they also suffer
+from temporal inconsistencies, including abrupt changes in
+facial features, flickering, and poor frame-to-frame conti-
+nuity, which degrade the overall stability and realism of the
+restored video.
+Additionally, we conducted a visual comparison for the
+colorization and inpainting tasks. Fig.4(left) presents the re-
+sults for the colorization task, where our method produces
+clear, faithful video frames that are consistent with the input
+grayscale video. Unlike CodeFormer and PGDiff, our ap-
+proach avoids issues such as distorted facial attributes (e.g.,
+unrealistic eyes, etc.). Furthermore, leveraging the Self-
+referred Refinement strategy, our method does not intro-
+duce color shifts across frames, maintaining temporal con-
+sistency. Fig.4(right) presents the comparison results for
+the inpainting task. The results show that other methods
+tend to generate distorted or collapsed facial structures in
+the masked regions, especially when head pose transforma-
+tions occur. In contrast, our method effectively reconstructs
+6
+
+=== PAGE 7 ===
+GPENCodeformer BFR inputKEEP PGDiffOurs
+ PGTformer
+Figure 3. Comparisons of SVFR with Advanced BFR Methods. Compared to other methods, SVFR avoids distortions in facial structure
+and shifts in facial attributes, resulting in highly realistic faces. It also demonstrates high spatial and temporal stability in complex scenarios
+such as occlusion, side-profile views, and large motion.
+GPENCodeformer InputPGDiffOurs
+Figure 4. Comparisons of SVFR with Advanced Colorization (left) and Inpainting (right) Methods. Compared to other methods,
+our model preserves realistic facial structure and attributes, while keeping detail preservation, and cross-frame stability across extended
+sequences.
+facial features with high accuracy, preserving both struc-
+tural integrity and consistency across frames.
+To assess temporal stability, we utilize a temporal stack-
+ing visualization, where a vertical line of pixels from the
+same spatial location is extracted across consecutive frames.
+As shown in Fig.5, image-based methods often suffer from
+jitter and misalignment along the temporal axis, while
+video-based methods exhibit limited texture continuity. In
+contrast, our approach ensures a smooth and consistent tran-
+sition across frames, as evidenced by the seamless and co-
+herent texture in the stacked visualization. This underscores
+the robustness of our method in preserving both facial fea-
+ture integrity and temporal stability throughout the video
+sequence.
+7
+
+=== PAGE 8 ===
+Table 3. Ablation study for multi-task training.
+Methods BFR / Colorization / Inpainting
+PSNR↑ SSIM↑ LPIPS↓ IDS↑ VIDD↓ FVD↓
+single 28.323 / 22.233 / 27.765 0.845 / 0.831 / 0.896 0.260 / 0.279 / 0.162 0.854 / 0.978 / 0.861 0.495 / 0.503 / 0.517 167.313 / 233.389 / 106.522
+multi 28.936 / 22.921 / 28.303 0.854 / 0.870 / 0.898 0.242 / 0.274 / 0.156 0.881 / 0.979/ 0.875 0.489 / 0.501 / 0.511 98.781 / 223.168 / 101.146
+multi+ULR 29.296/ 22.987/ 28.337 0.859/ 0.886/ 0.900 0.225/0.270/ 0.155 0.884/ 0.978 / 0.8790.486/ 0.498/ 0.508 90.353/ 214.846/ 93.615
+multi+ULR+FPL29.563/23.079/29.119 0.862/0.896/0.904 0.223/ 0.272/0.153 0.902/0.980/0.888 0.479/0.497/0.504 89.316/204.260/88.354
+GPEN CodeFormer PGDiff
+PGTFormer KEEP Ours
+Frames
+GT
+Figure 5. Temporal Stability Comparison. Through temporal
+stacking visualizations, we observe that our method exhibits sig-
+nificantly less jitter compared to other approaches, demonstrated
+the superior temporal stability of our approach, ensuring that the
+restored video frames maintain both spatial coherence and tempo-
+ral continuity, even across long sequences.
+5.3. Ablation Study
+To further verify the efficacy of our contributions, we con-
+duct several ablation studies with evaluation on VFHQ test
+dataset. Due to space limitations, additional ablation studies
+are provided in the supplementary materials.
+Multi-Task training. As demonstrated in Sec. 3, three sub-
+tasks in our proposed GVFR share common prior knowl-
+edge. To further validate that training on GVFR improves
+performance compared to training each task individually,
+Tab. 3 compares the performance metrics of each task when
+trained separately versus within the GVFR framework. The
+results clearly show that multi-task training enhances over-
+all model performance by facilitating the transfer of shared
+features across tasks. This leads to better detail preserva-
+tion and temporal stability, confirming that joint training is
+beneficial for comprehensive facial video restoration.
+Effectiveness of Unified Latent Regularization. We
+conduct ablation studies on Unified Latent Regularization
+(ULR) with λ1 = 0 .01, In Tab. 3, the results show that
+ULR improves consistency across multiple restoration tasks
+by facilitating the sharing of common features and ensuring
+coherence within frames from the same source. By optimiz-
+ing the shared feature representation in multi-task learning,
+ULR not only preserves facial characteristics but also en-
+hances cross-task knowledge transfer, enabling better adap-
+tation to diverse restoration challenges.This unified frame-
+work significantly improves video clarity, refines facial de-
+tails, and strengthens temporal stability, ensuring smooth
+frame transitions and reduced artifacts. Ultimately, ULR
+enables tasks to mutually reinforce each other, leading to
+robust and comprehensive facial video restoration.
+Effectiveness of facial prior learning. As shown in Tab. 3
+with λ2 = 0 .1, Lprior enhances temporal consistency and
+w/o SRRw SRR
+Figure 6. Ablation study on self-referred refinement (SRR).
+Comparison of model inference with and without the SRR strat-
+egy shows that incorporating SRR results in more stable temporal
+consistency, including consistent facial attributes and video color.
+ensures spatial coherence, particularly in BFR and inpaint-
+ing, even under challenging conditions such as occlusions
+and side-profile views. By aligning facial features struc-
+turally, the prior loss significantly improves model stability
+and robustness in video restoration.
+Effectiveness of self-referred refinement. To validate the
+efficacy of the proposed self-referred refinement(SRR), we
+provide visual comparisons of inference results with and
+without the Self-referred Refinement strategy. As observed
+in Fig.6, without SRR, inconsistencies emerge over long
+video sequences, such as color shifts in colorization tasks
+and facial misalignment in inpainting tasks, especially in re-
+drawn regions. By contrast, incorporating SRR allows the
+model to maintain consistent identity, color, and facial at-
+tributes across extended sequences. This refinement mech-
+anism reinforces temporal stability, ensuring that features
+remain cohesive throughout the video, thereby greatly en-
+hancing the reliability and continuity of restored facial at-
+tributes in long-sequence video restoration.
+6. Conclusion
+In this paper, we have introduced the Generalized Video
+Face Restoration (GVFR), which is an extended task com-
+posed of video BFR, inpainting and colorization. A novel
+unified face restoration framework is designed to simulta-
+neously address all three challenges in videos. By engaging
+supervision from all three tasks rather than training models
+for each task respectively, our method enhances the overall
+quality and temporal consistency of restored videos. Our
+approach integrates representative motion priors from pre-
+trained SVD with task-specific information through a uni-
+fied latent regularization and facial prior learning, resulting
+in significant improvements over existing state-of-the-art
+methods. Extensive experimental evaluations demonstrate
+the efficacy of our method in achieving superior restoration
+quality and temporal coherence.
+8
+
+=== PAGE 9 ===
+References
+[1] Lorenzo Agnolucci, Leonardo Galteri, Marco Bertini, and
+Alberto Del Bimbo. Arniqa: Learning distortion mani-
+fold for image quality assessment. In Proceedings of the
+IEEE/CVF Winter Conference on Applications of Computer
+Vision, 2024. 6
+[2] V olker Blanz and Thomas Vetter. A morphable model for
+the synthesis of 3d faces. In Proceedings of the 26th an-
+nual conference on Computer graphics and interactive tech-
+niques, 1999. 3
+[3] Andreas Blattmann, Tim Dockhorn, Sumith Kulal, Daniel
+Mendelevitch, Maciej Kilian, Dominik Lorenz, Yam Levi,
+Zion English, Vikram V oleti, Adam Letts, et al. Stable video
+diffusion: Scaling latent video diffusion models to large
+datasets. arXiv preprint arXiv:2311.15127, 2023. 2
+[4] Andreas Blattmann, Tim Dockhorn, Sumith Kulal, Daniel
+Mendelevitch, Maciej Kilian, Dominik Lorenz, Yam Levi,
+Zion English, Vikram V oleti, Adam Letts, et al. Stable video
+diffusion: Scaling latent video diffusion models to large
+datasets. arXiv preprint arXiv:2311.15127, 2023. 3
+[5] Andreas Blattmann, Robin Rombach, Huan Ling, Tim Dock-
+horn, Seung Wook Kim, Sanja Fidler, and Karsten Kreis.
+Align your latents: High-resolution video synthesis with la-
+tent diffusion models. In Proceedings of the IEEE/CVF Con-
+ference on Computer Vision and Pattern Recognition, 2023.
+2
+[6] Kelvin CK Chan, Xintao Wang, Xiangyu Xu, Jinwei Gu,
+and Chen Change Loy. GLEAN: Generative latent bank for
+large-factor image super-resolution. In CVPR, 2021. 3
+[7] Kelvin CK Chan, Shangchen Zhou, Xiangyu Xu, and
+Chen Change Loy. Basicvsr++: Improving video super-
+resolution with enhanced propagation and alignment. InPro-
+ceedings of the IEEE/CVF conference on computer vision
+and pattern recognition, 2022. 1
+[8] Kelvin C.K. Chan, Shangchen Zhou, Xiangyu Xu, and
+Chen Change Loy. BasicVSR++: Improving video super-
+resolution with enhanced propagation and alignment. In
+IEEE Conference on Computer Vision and Pattern Recog-
+nition, 2022. 3
+[9] Haoxin Chen, Menghan Xia, Yingqing He, Yong Zhang,
+Xiaodong Cun, Shaoshu Yang, Jinbo Xing, Yaofang Liu,
+Qifeng Chen, Xintao Wang, et al. Videocrafter1: Open
+diffusion models for high-quality video generation. arXiv
+preprint arXiv:2310.19512, 2023. 2
+[10] Ziyan Chen, Jingwen He, Xinqi Lin, Yu Qiao, and Chao
+Dong. Towards real-world video face restoration: A new
+benchmark. arXiv preprint arXiv:2404.19500, 2024. 6
+[11] Joon Son Chung, Arsha Nagrani, and Andrew Zisserman.
+V oxceleb2: Deep speaker recognition. arXiv preprint
+arXiv:1806.05622, 2018. 6
+[12] Ruicheng Feng, Chongyi Li, and Chen Change Loy.
+Kalman-inspired feature propagation for video face super-
+resolution. arXiv preprint arXiv:2408.05205, 2024. 3, 6
+[13] Zhen-Hua Feng, Josef Kittler, Muhammad Awais, Patrik Hu-
+ber, and Xiao-Jun Wu. Wing loss for robust facial landmark
+localisation with convolutional neural networks. InProceed-
+ings of the IEEE conference on computer vision and pattern
+recognition, 2018. 5
+[14] Jinjin Gu, Yujun Shen, and Bolei Zhou. Image processing
+using multi-code gan prior. In CVPR, 2020. 3
+[15] Yuchao Gu, Xintao Wang, Liangbin Xie, Chao Dong, Gen
+Li, Ying Shan, and Ming-Ming Cheng. Vqfr: Blind
+face restoration with vector-quantized dictionary and paral-
+lel decoder. In European Conference on Computer Vision .
+Springer, 2022. 3
+[16] Jia Guo, Jiankang Deng, Niannan Xue, and Stefanos
+Zafeiriou. Stacked dense u-nets with dual transformers for
+robust face alignment. arXiv preprint arXiv:1812.01936 ,
+2018. 5
+[17] Jonathan Ho, Ajay Jain, and Pieter Abbeel. Denoising dif-
+fusion probabilistic models. Advances in neural information
+processing systems, 2020. 2
+[18] Jonathan Ho, Tim Salimans, Alexey Gritsenko, William
+Chan, Mohammad Norouzi, and David J Fleet. Video dif-
+fusion models. Advances in Neural Information Processing
+Systems, 2022. 2
+[19] Xiaobin Hu, Wenqi Ren, John LaMaster, Xiaochun Cao, Xi-
+aoming Li, Zechao Li, Bjoern Menze, and Wei Liu. Face
+super-resolution guided by 3d facial priors. In Computer
+Vision–ECCV 2020: 16th European Conference, Glasgow,
+UK, August 23–28, 2020, Proceedings, Part IV 16 , pages
+763–780. Springer, 2020. 3
+[20] Siddhant Jain, Daniel Watson, Eric Tabellion, Ben Poole,
+Janne Kontkanen, et al. Video interpolation with diffusion
+models. In Proceedings of the IEEE/CVF Conference on
+Computer Vision and Pattern Recognition, 2024. 2
+[21] Tero Karras, Samuli Laine, and Timo Aila. A style-based
+generator architecture for generative adversarial networks. In
+CVPR, 2019. 3
+[22] Tero Karras, Samuli Laine, Miika Aittala, Janne Hellsten,
+Jaakko Lehtinen, and Timo Aila. Analyzing and improving
+the image quality of stylegan. In CVPR, 2020. 3
+[23] Aijin Li, Gen Li, Lei Sun, and Xintao Wang. Faceformer:
+Scale-aware blind face restoration with transformers. arXiv
+preprint arXiv:2207.09790, 2022. 3
+[24] Xiaoming Li, Chaofeng Chen, Shangchen Zhou, Xianhui
+Lin, Wangmeng Zuo, and Lei Zhang. Blind face restora-
+tion via deep multi-scale component dictionaries. In ECCV,
+2020. 2
+[25] Xinqi Lin, Jingwen He, Ziyan Chen, Zhaoyang Lyu, Bo Dai,
+Fanghua Yu, Wanli Ouyang, Yu Qiao, and Chao Dong. Diff-
+bir: Towards blind image restoration with generative diffu-
+sion prior. arXiv preprint arXiv:2308.15070, 2023. 3
+[26] Daochang Liu, Qiyue Li, Anh-Dung Dinh, Tingting Jiang,
+Mubarak Shah, and Chang Xu. Diffusion action segmenta-
+tion. In Proceedings of the IEEE/CVF International Confer-
+ence on Computer Vision, 2023. 3
+[27] Sachit Menon, Alexandru Damian, Shijia Hu, Nikhil Ravi,
+and Cynthia Rudin. Pulse: Self-supervised photo upsam-
+pling via latent space exploration of generative models. In
+CVPR, 2020. 3
+[28] Xingang Pan, Xiaohang Zhan, Bo Dai, Dahua Lin,
+Chen Change Loy, and Ping Luo. Exploiting deep genera-
+9
+
+=== PAGE 10 ===
+tive prior for versatile image restoration and manipulation.
+TPAMI, 44(11):7474–7489, 2021. 3
+[29] Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya
+Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sastry,
+Amanda Askell, Pamela Mishkin, Jack Clark, et al. Learn-
+ing transferable visual models from natural language super-
+vision. In International conference on machine learning .
+PMLR, 2021. 2
+[30] Sridhar Sola and Darshan Gera. Unmasking your expression:
+Expression-conditioned gan for masked face inpainting. In
+Proceedings of the IEEE/CVF conference on computer vi-
+sion and pattern recognition, pages 5908–5916, 2023. 2
+[31] Thomas Unterthiner, Sjoerd van Steenkiste, Karol Kurach,
+Rapha¨el Marinier, Marcin Michalski, and Sylvain Gelly.
+Fvd: A new metric for video generation. 2019. 6
+[32] Xintao Wang, Kelvin CK Chan, Ke Yu, Chao Dong, and
+Chen Change Loy. EDVR: Video restoration with enhanced
+deformable convolutional networks. In CVPRW, 2019. 3
+[33] Xintao Wang, Yu Li, Honglun Zhang, and Ying Shan. To-
+wards real-world blind face restoration with generative facial
+prior. In CVPR, 2021. 2, 3
+[34] Xiang Wang, Hangjie Yuan, Shiwei Zhang, Dayou Chen, Ji-
+uniu Wang, Yingya Zhang, Yujun Shen, Deli Zhao, and Jin-
+gren Zhou. Videocomposer: Compositional video synthesis
+with motion controllability. Advances in Neural Information
+Processing Systems, 2024. 2
+[35] Zhou Wang, Alan C Bovik, Hamid R Sheikh, and Eero P Si-
+moncelli. Image quality assessment: from error visibility to
+structural similarity. IEEE transactions on image processing,
+2004. 6
+[36] Zhouxia Wang, Jiawei Zhang, Runjian Chen, Wenping
+Wang, and Ping Luo. Restoreformer: High-quality blind
+face restoration from undegraded key-value pairs. In CVPR,
+2022. 3
+[37] Zhixin Wang, Ziying Zhang, Xiaoyun Zhang, Huangjie
+Zheng, Mingyuan Zhou, Ya Zhang, and Yanfeng Wang. Dr2:
+Diffusion-based robust degradation remover for blind face
+restoration. In Proceedings of the IEEE/CVF Conference
+on Computer Vision and Pattern Recognition , pages 1704–
+1713, 2023. 3
+[38] Joseph Worsham and Jugal Kalita. Multi-task learning for
+natural language processing in the 2020s: Where are we go-
+ing? Pattern Recognition Letters, 136:120–126, 2020. 2
+[39] Liangbin Xie, Xintao Wang, Honglun Zhang, Chao Dong,
+and Ying Shan. Vfhq: A high-quality dataset and bench-
+mark for video face super-resolution. In Proceedings of
+the IEEE/CVF Conference on Computer Vision and Pattern
+Recognition, 2022. 6
+[40] Jiangtao Xu, Kaige Lu, Xingping Shi, Shuzhen Qin, Han
+Wang, and Jianguo Ma. A denseunet generative adversarial
+network for near-infrared face image colorization. Signal
+Processing, 183:108007, 2021. 2
+[41] Jianjin Xu, Saman Motamed, Praneetha Vaddamanu,
+Chen Henry Wu, Christian Haene, Jean-Charles Bazin, and
+Fernando De la Torre. Personalized face inpainting with dif-
+fusion models by parallel visual attention. In Proceedings of
+the IEEE/CVF Winter Conference on Applications of Com-
+puter Vision, pages 5432–5442, 2024. 2
+[42] Kepeng Xu, Li Xu, Gang He, Wenxin Yu, and Yun-
+song Li. Beyond alignment: Blind video face restoration
+via parsing-guided temporal-coherent transformer. arXiv
+preprint arXiv:2404.13640, 2024. 3, 6
+[43] Haiwei Xue, Xiangyang Luo, Zhanghao Hu, Xin Zhang,
+Xunzhi Xiang, Yuqin Dai, Jianzhuang Liu, Zhensong Zhang,
+Minglei Li, Jian Yang, et al. Human motion video genera-
+tion: A survey. Authorea Preprints, 2024. 1
+[44] Peiqing Yang, Shangchen Zhou, Qingyi Tao, and
+Chen Change Loy. Pgdiff: Guiding diffusion models
+for versatile face restoration via partial guidance. Advances
+in Neural Information Processing Systems, 2024. 6
+[45] Tao Yang, Peiran Ren, Xuansong Xie, and Lei Zhang. Gan
+prior embedded network for blind face restoration in the
+wild. In CVPR, 2021. 3, 6
+[46] Chang-Han Yeh, Chin-Yang Lin, Zhixiang Wang, Chi-Wei
+Hsiao, Ting-Hsuan Chen, and Yu-Lun Liu. Diffir2vr-
+zero: Zero-shot video restoration with diffusion-based image
+restoration models. arXiv preprint arXiv:2407.01519, 2024.
+2
+[47] Jianhui Yu, Hao Zhu, Liming Jiang, Chen Change Loy, Wei-
+dong Cai, and Wayne Wu. Celebv-text: A large-scale facial
+text-video dataset. In Proceedings of the IEEE/CVF Con-
+ference on Computer Vision and Pattern Recognition, 2023.
+6
+[48] Zongsheng Yue and Chen Change Loy. Difface: Blind face
+restoration with diffused error contraction. IEEE Transac-
+tions on Pattern Analysis and Machine Intelligence, 2024. 3
+[49] Richard Zhang, Phillip Isola, Alexei A Efros, Eli Shecht-
+man, and Oliver Wang. The unreasonable effectiveness of
+deep features as a perceptual metric. In Proceedings of the
+IEEE conference on computer vision and pattern recogni-
+tion, 2018. 6
+[50] Shu Zhang, Ran He, Zhenan Sun, and Tieniu Tan. Demesh-
+net: Blind face inpainting for deep meshface verification.
+IEEE Transactions on Information Forensics and Security ,
+13(3):637–647, 2017. 2
+[51] Shiwei Zhang, Jiayu Wang, Yingya Zhang, Kang Zhao,
+Hangjie Yuan, Zhiwu Qin, Xiang Wang, Deli Zhao, and
+Jingren Zhou. I2vgen-xl: High-quality image-to-video
+synthesis via cascaded diffusion models. arXiv preprint
+arXiv:2311.04145, 2023. 2
+[52] Shangchen Zhou, Kelvin Chan, Chongyi Li, and
+Chen Change Loy. Towards robust blind face restora-
+tion with codebook lookup transformer. Advances in Neural
+Information Processing Systems, 35:30599–30611, 2022. 2
+[53] Shangchen Zhou, Kelvin C.K. Chan, Chongyi Li, and
+Chen Change Loy. Towards robust blind face restoration
+with codebook lookup transformer. In NeurIPS, 2022. 3,
+6
+[54] Feida Zhu, Junwei Zhu, Wenqing Chu, Xinyi Zhang, Xi-
+aozhong Ji, Chengjie Wang, and Ying Tai. Blind face restora-
+tion via integrating face shape and generative priors. In Pro-
+ceedings of the IEEE/CVF conference on computer vision
+and pattern recognition, 2022. 3
+10

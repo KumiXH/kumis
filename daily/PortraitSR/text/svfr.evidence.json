@@ -1,0 +1,98 @@
+{
+  "key": "svfr",
+  "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\04_video_face\\svfr_2501.01235.pdf",
+  "page_count": 10,
+  "first_page_excerpt": "SVFR: A Unified Framework for Generalized Video Face Restoration\nZhiyao Wang1,2, Xu Chen2,*, Chengming Xu2, Junwei Zhu2†, Xiaobin Hu2,\nJiangning Zhang2, Chengjie Wang2, Yuqi Liu1, Yiyi Zhou1†, Rongrong Ji1\n1Key Laboratory of Multimedia Trusted Perception and Efficient Computing,\nMinistry of Education of China, Xiamen University, China 2Tencent Youtu Lab\nAbstract\nFace Restoration (FR) is a crucial area within image and\nvideo processing, focusing on reconstructing high-quality\nportraits from degraded inputs. Despite advancements in\nimage FR, video FR remains relatively under-explored, pri-\nmarily due to challenges related to temporal consistency,\nmotion artifacts, and the limited availability of high-quality\nvideo data. Moreover, traditional face restoration typi-\ncally prioritizes enhancing resolution and may not give as\nmuch consideration to related tasks such as facial coloriza-\ntion and inpainting. In this paper, we propose a novel ap-\nproach for the Generalized Video Face Restoration (GVFR)\ntask, which integrates video BFR, inpainting, and coloriza-\ntion tasks that we empirically show to benefit each other.\nWe present a unified framework, termed as stable video\nface restoration (SVFR), which leverages the generative\nand motion priors of Stable Video Diffusion (SVD) and\nincorporates task-specific information through a unified\nface restoration framework. A learnable task embedding\nis introduced to enhance task identification. Meanwhile,\na novel Unified Latent Regularization (ULR) is employed\nto encourage the shared feature representation learning\namong different subtasks. To further enhance the restora-\ntion quality and temporal stability, we introduce the fa-\ncial prior learning and the self-referred refinement as aux-\niliary strategies used for both training and inference. The\nproposed framework effectively combines the complemen-\ntary strengths of these tasks, enhancing temporal coherence\nand achieving superior restoration quality. This work ad-\nvances the state-of-the-art in video FR and establishes a\nnew paradigm for generalized video face restoration. Code\nand video demo are available at https://github.\ncom/wangzhiyaoo/SVFR.git.\n1. Introduction\nFace Restoration (FR) is a critical area of research within\nthe broader field of image and video processing, aiming to\nrecover high-quality facial images from degraded inputs.\nSVFR\nColorization\nGPEN\nBFR\nPGTFormer\nInpainting\nCodeFormer\nFigure 1. Face restoration results of SOTA single task methods\nand SVFR. Our unified SVFR model outperforms SOTA single\ntask methods by avoiding facial structure abnormalities, temporal\ncolor inconsistencies, and texture distortions.\nThis task has significant applications for both images and\nvideos. For example, effective image FR methods can help\non personal photo enhancement, historical photo restora-\ntion, and forensic analysis, while video FR can well serve\nthe goal of film restoration and surveillance.\nWhile abundant works have been proposed to solve im-\nage FR with acceptable results, the video FR, which tar-\ngets high-quality and realistic face recovery with appropri-\nate identity consistency together with temporal stability, has\nhardly been explored. Few efforts dedicated to this area\nsuch as BasicVSR++ [7] and KEEP [43] still significantly\nlack behind their image-based counterparts, suffering from\nproblems such as low generation quality, temporal jitter\nand discontinuity, due to the multifaceted challenges. The\nmain problem lies in the fact that video FR is intrinsically\nmore complex than image FR in that the temporal dimen-\nsion introduces additional complexity, requiring the model\nto maintain consistency across frames while dealing with\nmotion artifacts, occlusions, and varying lighting condi-\ntions. However, the high-quality training data for video FR\nis hard to collect. In this way, the scarcity of high-quality\nannotated video datasets further complicates the training\nprocess, making it difficult to achieve robust performance.\nMoreover, the limited capacity of architecture adopted by\n*Equal Contribution. †Corresponding Author.\n1\narXiv:2501.01235v2  [cs.CV]  3 Jan 2025",
+  "figure_candidates": [
+    {
+      "page": 1,
+      "caption": "Figure 1. Face restoration results of SOTA single task methods"
+    },
+    {
+      "page": 4,
+      "caption": "Figure 2. Pipeline of our proposed SVFR. (a) Training pipeline of SVFR: We incorporate task information into the training process using"
+    },
+    {
+      "page": 7,
+      "caption": "Figure 3. Comparisons of SVFR with Advanced BFR Methods. Compared to other methods, SVFR avoids distortions in facial structure"
+    },
+    {
+      "page": 7,
+      "caption": "Figure 4. Comparisons of SVFR with Advanced Colorization (left) and Inpainting (right) Methods. Compared to other methods,"
+    },
+    {
+      "page": 8,
+      "caption": "Figure 5. Temporal Stability Comparison. Through temporal"
+    },
+    {
+      "page": 8,
+      "caption": "Figure 6. Ablation study on self-referred refinement (SRR)."
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 3,
+      "caption": "Table 1. Pilot study results. For all subtasks, training models based"
+    },
+    {
+      "page": 6,
+      "caption": "Table 2. Quantitative comparisons with state-of-the-art methods on the VFHQ-test dataset.The results show that our method achieves"
+    },
+    {
+      "page": 8,
+      "caption": "Table 3. Ablation study for multi-task training."
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      8,
+      9
+    ],
+    "identity": [
+      1,
+      2,
+      5,
+      6,
+      8
+    ],
+    "portrait_detail": [
+      1,
+      2,
+      3,
+      4,
+      6,
+      8,
+      9,
+      10
+    ],
+    "efficiency": [
+      1,
+      3,
+      4,
+      6,
+      7
+    ],
+    "datasets": [
+      2,
+      6,
+      8,
+      9,
+      10
+    ],
+    "limitations": [
+      8
+    ]
+  },
+  "source_urls": [
+    {
+      "page": 1,
+      "url": "https://github"
+    }
+  ],
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\svfr.txt"
+}

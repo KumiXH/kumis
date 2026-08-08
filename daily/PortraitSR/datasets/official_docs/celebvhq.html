@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="CelebV-HQ: A Large-scale Video Facial Attributes Dataset ">
+  <meta name="keywords" content="CelebV-HQ Dataset">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CelebV-HQ: A Large-scale Video Facial Attributes Dataset </title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+  <script src="https://scripts.sirv.com/sirvjs/v3/sirv.js"></script>
+  <style>
+    #pic_list {
+      display: block;
+      white-space: nowrap;
+      overflow: auto;
+    }
+
+    #pic_list li {
+      display: inline-block;
+    }
+  </style>
+</head>
+
+<body>
+
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+            <h1 class="title is-1 publication-title">CelebV-HQ: A Large-scale Video Facial Attributes Dataset</h1>
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">
+                <h3 style="color:#5a6268;">ECCV 2022</h3><br />
+                <span class="author-block">
+                  <a href="https://www.zhuhaozh.xyz">Hao Zhu</a><sup>1*</sup>, </span>
+                <span class="author-block">
+                  <a href="https://wywu.github.io/">Wayne Wu</a><sup>1*&#8224 </sup>, 
+                </span>
+                <span class="author-block">
+                  <a href="https://wentao.live/">Wentao Zhu</a><sup>2</sup>, </span>
+                <span class="author-block">
+                  <a href="https://liming-jiang.com/">Liming Jiang</a><sup>3</sup>, 
+                </span>
+                <br>
+                <span class="author-block">
+                  <a href="mailto:tangsiwei@sensetime.com">Siwei Tang</a><sup>1</sup>, 
+                </span>
+                <span class="author-block">
+                  <a href="mailto:lizhang2@sensetime.com">Li Zhang</a><sup>1</sup>, 
+                </span>
+                <span class="author-block">
+                  <a href="https://liuziwei7.github.io/">Ziwei Liu</a><sup>3</sup>, 
+                </span>
+                <span class="author-block">
+                  <a href="https://scholar.google.com/citations?user=559LF80AAAAJ&hl=en">Chen Change
+                    Loy</a><sup>3</sup> 
+                </span>
+                <br>
+                <small>(*Equal contribution)</small>
+
+            </div>
+
+            <div class="is-size-5 publication-authors">
+              <span class="author-block"><sup>1</sup>SenseTime Research, </span>
+              <span class="author-block"><sup>2</sup>Peking University, </span>
+              <span class="author-block"><sup>3</sup>S-Lab, Nanyang Technological University </span>
+            </div>
+
+            <div class="column has-text-centered">
+              <div class="publication-links">
+                <!-- PDF Link. -->
+                <span class="link-block">
+                  <a href="https://arxiv.org/abs/2207.12393" target="_blank" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                    </span>
+                    <span>Paper </span>
+                  </a>
+                </span>
+                <!-- <span class="link-block">
+                  <a href="https://drive.google.com/file/d/1WsopipyFG5Kuilwo0pbOmzhZfxs0dx-C/view?usp=sharing"
+                    target="_blank" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                    </span>
+                    <span>Supplement</span>
+                  </a>
+                </span> -->
+                <!-- Code Link. -->
+                <span class="link-block">
+                  <a href="https://github.com/CelebV-HQ/CelebV-HQ" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fab fa-github"></i>
+                    </span>
+                    <span>GitHub</span>
+                  </a>
+                </span>
+                <!-- Video Link. -->
+                <span class="link-block">
+                  <a href="https://www.youtube.com/watch?v=Y0uxlUW4sW0" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fab fa-youtube"></i>
+                    </span>
+                    <span>Demo Video</span>
+                  </a>
+                </span>
+                <!-- Dataset Link. -->
+                <span class="link-block">
+                  <a href="explore/index.html" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="far fa-images"></i>
+                    </span>
+                    <span>Data Explore</span>
+                  </a>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <br>
+  <!-- Teaser Picture -->
+  <section class="hero teaser">
+    <div class="container is-max-desktop">
+      <div class="hero-body">
+        <div class="figure">
+          <video id="replay-video" controls muted preload autoplay loop width="100%">
+            <source src="./static/video/teaser0.mp4" type="video/mp4">
+          </video>
+          <!-- <img class="Sirv image-main" src="static/img/teaser.png" data-src="static/img/teaser.png"> -->
+          <img class="Sirv image-hover" data-src="static/img/teaser_hover3.png">
+        </div>
+
+        </a>
+      </div>
+    </div>
+
+  </section>
+
+
+  <!-- Abstract. -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Abstract</h2>
+          <div class="content has-text-justified">
+            <p> Large-scale datasets played an indispensable role in the recent success of face
+              generation/editing and significantly facilitate the advances of emerging research fields.
+              However, the academic community still lacks a video dataset with diverse facial attribute
+              annotations, which is crucial for face-related video research.
+              We propose a large-scale, high-quality, and diverse video dataset, <b>named the
+                High-Quality Celebrity Video Dataset (CelebV-HQ)</b>, with rich facial attribute
+              annotations.
+            </p>
+            <p>
+              CelebV-HQ contains 35,666 video clips involving 15,653 identities and 83 manually labeled facial
+              attributes covering appearance, action, and emotion.
+              We conduct a comprehensive analysis in terms of ethnicity, age, brightness, motion smoothness,
+              head pose diversity, and data quality to demonstrate the diversity and temporal coherence of
+              CelebV-HQ. Besides, its versatility and potential are validated on unconditional video
+              generation and video facial attribute editing tasks.
+              <!-- Furthermore, we envision the future potential of CelebV-HQ, as well as the new opportunities and
+                challenges it would bring to related research directions. -->
+            </p>
+            <p>For more details of the dataset, please refer to the paper "<a href="https://arxiv.org/abs/2207.12393">CelebV-HQ: A Large-scale
+                Video Facial Attributes Dataset</a>".
+            </p>
+          </div>
+        </div>
+      </div>
+  </section>
+  <!--/ Abstract. -->
+
+
+  <!-- Paper video. -->
+  <section>
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-three-fifths">
+        <h2 class="title is-3">Overview Video</h2>
+        <div class="publication-video">
+          <iframe src="https://www.youtube.com/embed/Y0uxlUW4sW0?autoplay=0&start=11" frameborder="10"
+            allow="autoplay; encrypted-media" width="50%" allowfullscreen></iframe>
+        </div>
+
+      </div>
+    </div>
+  </section>
+  <!-- / Paper video.   -->
+
+<!-- 
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3 "> Overview</h2>
+          <div class="publication-video">
+            <video id="replay-video" controls muted preload autoplay loop width="100%">
+              <source src="./static/video/demo.mp4" type="video/mp4">
+            </video>
+          </div>
+  </section> -->
+  <hr/>
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3 "> Statistics</h2>
+          <div class="content has-text-justified">
+            <p>
+              The distributions of each attribute. CelebV-HQ has a diverse distribution on each attribute category.
+              Overall, CelebV-HQ contains diverse facial attributes and natural distributions, bringing new opportu
+              -unities and challenges to the community.
+            </p>
+            <image src="static/img/statistic.png" class="img-responsive" alt="scales">
+
+  </section>
+
+  <hr/>
+
+  <!-- #1  -->
+  <!-- / Paper video.   -->
+  <br /><br />
+  <h3 class="title is-4 has-text-centered">Demo of Appearances</h3>
+  <div class="content has-text-justified">
+    <div class="slideshow-container">
+
+
+      <div class="mySlides fade">
+        <div class="publication-video">
+          <video id="replay-video" controls muted preload autoplay loop width="100%">
+            <source src="./static/video/appearance_eyegalsses.mp4" type="video/mp4">
+          </video>
+          <!-- <iframe src="https://www.youtube.com/embed/g3nmM6MdxwY?autoplay=1"
+            frameborder="0" allow="autoplay; encrypted-media" width="100%" height="80%"></iframe> -->
+        </div>
+        <!-- <video id="replay-video" controls muted preload autoplay loop width="155%">
+            <source src="./static/videos/10x1-style-mixing_5_9_clothingtype.mp4" type="video/mp4"></video>  -->
+        <br>
+        <div class="text">[1 / 3] Appearance: Eyeglasses </div>
+        <!-- <div class="numbertext">1 / 3</div> -->
+      </div>
+
+      <div class="mySlides fade">
+        <div class="publication-video">
+          <video id="replay-video" controls muted preload autoplay loop width="100%">
+            <source src="./static/video/appearance_bald.mp4" type="video/mp4">
+          </video>
+
+          <!-- <image src="static/img/demo.gif" width="100%" class="img-responsive" alt="overview"> -->
+          <!-- <iframe src="https://www.youtube.com/embed/p2uwqh_SFL8?autoplay=1"
+            frameborder="0" allow="autoplay; encrypted-media" width="100%" height="80%"></iframe> -->
+        </div>
+        <!-- <video id="replay-video" controls muted preload autoplay loop width="155%">
+            <source src="./static/videos/10x1-style-mixing_10_17_clothingcolor.mp4" type="video/mp4"></video> -->
+        <!-- <div class="numbertext">3 / 3</div> -->
+        <br>
+        <div class="text">[2 / 3] Appearance: Bald </div>
+      </div>
+
+      <div class="mySlides fade">
+        <div class="publication-video">
+          <video id="replay-video" controls muted preload autoplay loop width="100%">
+            <source src="./static/video/appearance_wearingmask.mp4" type="video/mp4">
+          </video>
+        </div>
+        <!-- <video id="replay-video" controls muted preload autoplay loop width="155%">
+            <source src="./static/videos/10x1-style-mixing_0_3_pose.mp4" type="video/mp4"></video> -->
+        <!-- <div class="numbertext">1 / 3</div> -->
+        <br>
+        <div class="text">[3 / 3]  Appearance: Wearing Masks </div>
+      </div>
+      <a class="prev" onclick="plusSlides(-1)">❮</a>
+      <a class="next" onclick="plusSlides(1)">❯</a>
+    </div>
+    <div style="text-align:center">
+      <span class="dot " onclick="currentSlide(1)"></span>
+      <span class="dot " onclick="currentSlide(2)"></span>
+      <span class="dot " onclick="currentSlide(3)"></span>
+    </div>
+  </div>
+  <script>
+    let slideIndex = 1;
+    showSlides(slideIndex);
+function plusSlides(n) {
+    showSlides(slideIndex += n);
+  }
+
+  function currentSlide(n) {
+    showSlides(slideIndex = n);
+  }
+
+  function showSlides(n) {
+    let i;
+    let slides = document.getElementsByClassName("mySlides");
+    let dots = document.getElementsByClassName("dot");
+    if (n > slides.length) {slideIndex = 1}    
+    if (n < 1) {slideIndex = slides.length}
+    for (i = 0; i < slides.length; i++) {
+      slides[i].style.display = "none";  
+    }
+    for (i = 0; i < dots.length; i++) {
+      dots[i].className = dots[i].className.replace(" active", "");
+    }
+    slides[slideIndex-1].style.display = "block";  
+    dots[slideIndex-1].className += " active";
+  }
+      // https://stackoverflow.com/questions/47368940/css-slideshow-not-showing-image-until-clicked
+
+  </script>
+
+
+
+  <!-- #2  -->
+  <br /><br />
+  <h3 class="title is-4 has-text-centered">Demo of Actions</h3>
+  <div class="content has-text-justified">
+    <div class="slideshow-container">
+
+
+      <div class="mySlides2 fade">
+        <div class="publication-video">
+          <video id="replay-video" controls muted preload autoplay loop width="100%">
+            <source src="./static/video/action_laugh.mp4" type="video/mp4">
+          </video>
+          <!-- <iframe src="https://www.youtube.com/embed/g3nmM6MdxwY?autoplay=1"
+            frameborder="0" allow="autoplay; encrypted-media" width="100%" height="80%"></iframe> -->
+        </div>
+        <!-- <video id="replay-video" controls muted preload autoplay loop width="155%">
+            <source src="./static/videos/10x1-style-mixing_5_9_clothingtype.mp4" type="video/mp4"></video>  -->
+        <br>
+        <div class="text">[1 / 3] Action: Laugh </div>
+        <!-- <div class="numbertext">1 / 3</div> -->
+      </div>
+
+      <div class="mySlides2 fade">
+        <div class="publication-video">
+          <video id="replay-video" controls muted preload autoplay loop width="100%">
+            <source src="./static/video/action_close_eyes.mp4" type="video/mp4">
+          </video>
+
+          <!-- <image src="static/img/demo.gif" width="100%" class="img-responsive" alt="overview"> -->
+          <!-- <iframe src="https://www.youtube.com/embed/p2uwqh_SFL8?autoplay=1"
+            frameborder="0" allow="autoplay; encrypted-media" width="100%" height="80%"></iframe> -->
+        </div>
+        <!-- <video id="replay-video" controls muted preload autoplay loop width="155%">
+            <source src="./static/videos/10x1-style-mixing_10_17_clothingcolor.mp4" type="video/mp4"></video> -->
+        <!-- <div class="numbertext">3 / 3</div> -->
+        <br>
+        <div class="text">[2 / 3] Action: Close Eyes </div>
+      </div>
+
+      <div class="mySlides2 fade">
+        <div class="publication-video">
+          <video id="replay-video" controls muted preload autoplay loop width="100%">
+            <source src="./static/video/action_talk.mp4" type="video/mp4">
+          </video>
+        </div>
+        <!-- <video id="replay-video" controls muted preload autoplay loop width="155%">
+            <source src="./static/videos/10x1-style-mixing_0_3_pose.mp4" type="video/mp4"></video> -->
+        <!-- <div class="numbertext">1 / 3</div> -->
+        <br>
+        <div class="text">[3 / 3] Action: Talking </div>
+      </div>
+      <a class="prev" onclick="plusSlides2(-1)">❮</a>
+      <a class="next" onclick="plusSlides2(1)">❯</a>
+    </div>
+    <div style="text-align:center">
+      <span class="dot2 dot" onclick="currentSlide2(1)"></span>
+      <span class="dot2 dot" onclick="currentSlide2(2)"></span>
+      <span class="dot2 dot" onclick="currentSlide2(3)"></span>
+    </div>
+  </div>
+  <script>
+    let slideIndex2 = 1;
+    showSlides2(slideIndex2);
+  function plusSlides2(n) {
+    showSlides2(slideIndex2 += n);
+  }
+
+  function currentSlide2(n) {
+    showSlides2(slideIndex2 = n);
+  }
+
+  function showSlides2(n) {
+    let i;
+    let slides = document.getElementsByClassName("mySlides2");
+    let dots = document.getElementsByClassName("dot2");
+    if (n > slides.length) {slideIndex2 = 1}    
+    if (n < 1) {slideIndex2 = slides.length}
+    for (i = 0; i < slides.length; i++) {
+      slides[i].style.display = "none";  
+    }
+    for (i = 0; i < dots.length; i++) {
+      dots[i].className = dots[i].className.replace(" active", "");
+    }
+    slides[slideIndex2-1].style.display = "block";  
+    dots[slideIndex2-1].className += " active";
+  }    // https://stackoverflow.com/questions/47368940/css-slideshow-not-showing-image-until-clicked
+
+  </script>
+
+
+  <!-- #3  -->
+  <!-- #3  -->
+  <!-- #3  -->
+  <!-- #3  -->
+  <!-- #3  -->
+  <!-- #3  -->
+  <br /><br />
+  <h3 class="title is-4 has-text-centered">Demo of Emotions</h3>
+  <div class="content has-text-justified">
+    <div class="slideshow-container">
+
+
+      <div class="mySlides3 fade">
+        <div class="publication-video">
+          <video id="replay-video" controls muted preload autoplay loop width="100%">
+            <source src="./static/video/emotion_sad.mp4" type="video/mp4">
+          </video>
+          <!-- <iframe src="https://www.youtube.com/embed/g3nmM6MdxwY?autoplay=1"
+            frameborder="0" allow="autoplay; encrypted-media" width="100%" height="80%"></iframe> -->
+        </div>
+        <!-- <video id="replay-video" controls muted preload autoplay loop width="155%">
+            <source src="./static/videos/10x1-style-mixing_5_9_clothingtype.mp4" type="video/mp4"></video>  -->
+        <br>
+        <div class="text">[1 / 3] Emotion: Sad </div>
+        <!-- <div class="numbertext">1 / 3</div> -->
+      </div>
+
+      <div class="mySlides3 fade">
+        <div class="publication-video">
+          <video id="replay-video" controls muted preload autoplay loop width="100%">
+            <source src="./static/video/emotion_angey.mp4" type="video/mp4">
+          </video>
+        </div>
+        <br>
+        <div class="text">[2 / 3] Emotion: Anger </div>
+      </div>
+
+      <div class="mySlides3 fade">
+        <div class="publication-video">
+          <video id="replay-video" controls muted preload autoplay loop width="100%">
+            <source src="./static/video/emotion_happy.mp4" type="video/mp4">
+          </video>
+        </div>
+        <br>
+        <div class="text">[3 / 3] Emotion: Happy </div>
+      </div>
+      
+      <a class="prev" onclick="plusSlides3(-1)">❮</a>
+      <a class="next" onclick="plusSlides3(1)">❯</a>
+    </div>
+    <div style="text-align:center">
+      <span class="dot3 dot" onclick="currentSlide3(1)"></span>
+      <span class="dot3 dot" onclick="currentSlide3(2)"></span>
+      <span class="dot3 dot" onclick="currentSlide3(3)"></span>
+    </div>
+  </div>
+  <script>
+    let slideIndex3 = 1;
+    showSlides3(slideIndex3);
+  function plusSlides3(n) {
+    showSlides3(slideIndex3 += n);
+  }
+
+  function currentSlide3(n) {
+    showSlides3(slideIndex3 = n);
+  }
+
+  function showSlides3(n) {
+    let i;
+    let slides = document.getElementsByClassName("mySlides3");
+    let dots = document.getElementsByClassName("dot3");
+    if (n > slides.length) {slideIndex3 = 1}    
+    if (n < 1) {slideIndex3 = slides.length}
+    for (i = 0; i < slides.length; i++) {
+      slides[i].style.display = "none";  
+    }
+    for (i = 0; i < dots.length; i++) {
+      dots[i].className = dots[i].className.replace(" active", "");
+    }
+    slides[slideIndex3-1].style.display = "block";  
+    dots[slideIndex3-1].className += " active";
+  }    // https://stackoverflow.com/questions/47368940/css-slideshow-not-showing-image-until-clicked
+
+  </script>
+  <hr/>
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3 "> Face Datasets Comparison</h2>
+          <div class="content has-text-justified">
+            <p>CelebV-HQ consists of <b>35,666 video clips</b> of 3 to 20 seconds each, involving <b>15,653
+                identities</b>, with a total video duration of about <b>65 hours</b>.
+              CelebV-HQ also contains <b>83 annotations</b>, including 40 appearance attributes, 35 action
+              attributes, and 8 emotion attributes.</p>
+            <image src="static/img/data_comp.png" class="img-responsive" alt="overview">
+
+  </section>
+
+
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3 "> Benchmark</h2>
+          <h3 class="is-4 title"> Unconditional Video Generation</h3>
+          
+          <div class="content has-text-justified">
+            <p>We construct a benchmark of unconditional video generation task, for four currently prevalent models (VideoGPT, MoCoGAN-HD, DIGAN, and StyleGAN-V) on 4 face video datasets (FaceForensics, Vox, MEAD and CelebV-HQ). 
+            <br/>
+            <i>CelebV-HQ as a challenging real-world dataset, still has room for community to make improvement. </i>
+              </p>
+            </div>
+              <figure>
+
+                <figcaption>Table: FVD/FID Metrics Comparsion</figcaption>
+            <image src="static/img/benchmark.png" class="img-responsive" alt="overview">
+            </figure>
+            
+                <video id="replay-video" controls muted preload autoplay loop width="100%">
+                  <source src="./static/video/demo_videogpt.mp4" type="video/mp4">
+               </video>
+               <h3 class="is-4 title"> VideoGPT</h3>
+               <br/>
+              
+                <video id="replay-video" controls muted preload autoplay loop width="100%">
+                  <source src="./static/video/demo_mocoganhd.mp4" type="video/mp4">
+                </video>
+                <h3 class="is-4 title is-centered "> MoCoGAN-HD</h3>
+                <br/>
+
+                  <video id="replay-video" controls muted preload autoplay loop width="100%">
+                    <source src="./static/video/demo_digan.mp4" type="video/mp4">
+                  </video>
+                  <h3 class="is-4 title"> DIGAN</h3>
+                  <br/>
+                    <video id="replay-video" controls muted preload autoplay loop width="100%">
+                      <source src="./static/video/demo_styleganv.mp4" type="video/mp4">
+                    </video>
+                    <h3 class="is-4 title"> StyleGAN-V</h3>
+
+                </section>
+
+
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3 "> Agreement</h2>
+        <div class="content has-text-justified">
+
+          <ul>
+            <li>The CelebV-HQ dataset is available for non-commercial research purposes only. </li>
+            <li>All videos of the CelebV-HQ dataset are obtained from the Internet which are not property of
+              our institutions. Our institution are not responsible for the content nor the meaning
+              of these videos. </li>
+            <li>You agree not to reproduce, duplicate, copy, sell, trade, resell or exploit for any
+              commercial purposes, any portion of the videos and any portion of derived data.</li>
+            <li>You agree not to further copy, publish or distribute any portion of the CelebV-HQ
+              dataset. Except, for internal use at a single site within the same organization it is allowed to
+              make copies of the dataset.</li>
+          </ul>
+
+</section>
+
+
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <!-- <div class="column is-four-fifths"> -->
+        <div class="column is-four-fifths">
+          <h2 class="title is-3 "> Dataset</h2>
+          <div class="content has-text-justified">
+            <p class="text-justify">We provide a download tool that automatically fetches and processes videos from <a href="https://www.youtube.com">YouTube</a>. 
+              We highly recommend using this tool to acquire the dataset. 
+              In addition, as some links may no longer be available, we host the full version of CelebV-HQ. Please contact us if needed.</p>
+
+            <ul id="pic_list">
+              <li>
+                <figure>
+                  <a href="https://www.github.com/CelebV-HQ/CelebV-HQ/">
+                    <img src="static/img/download_icon.jpeg" height="80px" width="100px" alt="download">
+                    <figcaption> Download & Process Tools </figcaption>
+                  </a>
+                </figure>
+              </li>
+              
+              <li>
+                <figure>
+                  <a href="https://github.com/CelebV-HQ/CelebV-HQ/blob/main/celebvhq_info.json">
+                    <img src="static/img/download_icon.jpeg" height="80px" width="100px" alt="download">
+                    <figcaption> Annotations </figcaption>
+                  </a>
+                </figure>
+              </li>
+            </ul>
+  </section>
+
+  <hr/>
+
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3 "> Acknowledgements</h2>
+          <div class="content has-text-justified">
+            <p class="text-justify">
+              We sincerely thank Zongcai Sun for his help with source data preparation and the download tool development. This work is partly supported by Shanghai AI Laboratory and SenseTime Research. It is also supported by NTU NAP, MOE AcRF Tier 1 (2021-T1-001-088), and under the RIE2020 Industry Alignment Fund – Industry Collaboration Projects (IAF-ICP) Funding Initiative, as well as cash and in-kind contribution from the industry partner(s).</p>
+  </section>
+  <hr/>
+
+  <section class="section" id="Citaton">
+    <div class="container is-max-desktop content">
+      <h2 class="title">BibTeX</h2>
+      <p>If you find this helpful, please cite our work: </p>
+      <pre><code>@inproceedings{zhu2022celebvhq,
+  title={{CelebV-HQ}: A Large-Scale Video Facial Attributes Dataset},
+  author={Zhu, Hao and Wu, Wayne and Zhu, Wentao and Jiang, Liming and Tang, Siwei and Zhang, Li and Liu, Ziwei and Loy, Chen Change},
+  booktitle={ECCV},
+  year={2022}
+}</code></pre>
+    </div>
+  </section>
+
+
+  <footer class="footer">
+    <div class="columns is-centered">
+      <div class="content">
+        <p> This template is borrowed from <a href="https://github.com/nerfies/nerfies.github.io"> nerfies's
+            webpage</a>. </p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    $(window).on('load', function () {
+      $('#loading').hide();
+    }) 
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="VFHQ.">
+  <meta name="keywords" content="Video Face Dataset, High-Quality, Face Video Super Resolution">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VFHQ</title>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-PYVRSFMDRL');
+  </script>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <!-- <link rel="icon" href="./static/images/favicon.svg"> -->
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+  <script src="https://scripts.sirv.com/sirvjs/v3/sirv.js"></script>
+  <style>
+    #pic_list {
+      display: block;
+      white-space: nowrap;
+      overflow: auto;
+    }
+
+    #pic_list li {
+      display: inline-block;
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav class="navbar" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+      <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </a>
+    </div>
+    <div class="navbar-menu">
+      <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+        <a class="navbar-item" href="https://liangbinxie.github.io/">
+          <span class="icon">
+            <i class="fas fa-home"></i>
+          </span>
+        </a>
+
+        <!-- <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link">
+            More Research
+          </a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://hypernerf.github.io">
+              HyperNeRF
+            </a>
+            <a class="navbar-item" href="https://nerfies.github.io">
+              Nerfies
+            </a>
+            <a class="navbar-item" href="https://latentfusion.github.io">
+              LatentFusion
+            </a>
+            <a class="navbar-item" href="https://photoshape.github.io">
+              PhotoShape
+            </a>
+          </div>
+        </div> -->
+      </div>
+
+    </div>
+  </nav>
+
+
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+            <h1 class="title is-1 publication-title">
+              <font color="Tomato">VFHQ</font>: A <font color="Tomato">H</font>igh-<font color="Tomato">Q</font>uality
+              Dataset and Benchmark for <font color="Tomato">V</font>ideo <font color="Tomato">F</font>ace Super
+              Resolution
+            </h1>
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">
+                <a href="https://LiangbinXie.github.io/">Liangbin Xie</a>
+                <sup>1,2,3</sup>,</span>
+              <span class="author-block">
+                <a href="https://xinntao.github.io/">Xintao Wang</a><sup>3</sup>,</span>
+              <span class="author-block">
+                <a href="https://scholar.google.com/citations?hl=en&user=KjQLROoAAAAJ">Honglun Zhang</a><sup>3</sup>,
+              </span>
+              <span class="author-block">
+                <a href="https://scholar.google.com.hk/citations?user=OSDCB0UAAAAJ&hl=zh-CN">Chao Dong</a><sup>1*</sup>,
+              </span>
+              <span class="author-block">
+                <a href="https://scholar.google.com/citations?user=4oXBp9UAAAAJ&hl=en">Ying Shan</a><sup>3</sup>
+              </span>
+            </div>
+
+            <div class="is-size-5 publication-authors">
+              <span class="author-block"><sup>1</sup>Shenzhen Key Lab of Computer Vision and Pattern Recognition, <br>
+                Shenzhen Institute of Advanced Technology, Chinese Academy of Sciences.<br></span>
+              <span class="author-block"><sup>2</sup>University of Chinese Academy of Sciences.</span>
+              &nbsp;&nbsp;
+              <span class="author-block"><sup>3</sup>ARC Lab, Tencent PCG.</span>
+            </div>
+
+            <div class="column has-text-centered">
+              <div class="publication-links">
+                <!-- PDF Link. -->
+                <span class="link-block">
+                  <a href="https://openaccess.thecvf.com/content/CVPR2022W/NTIRE/papers/Xie_VFHQ_A_High-Quality_Dataset_and_Benchmark_for_Video_Face_Super-Resolution_CVPRW_2022_paper.pdf"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                    </span>
+                    <span>Paper</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="https://arxiv.org/abs/2205.03409" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                    </span>
+                    <span>arXiv</span>
+                  </a>
+                </span>
+                <!-- Video Link. -->
+                <!-- <span class="link-block">
+                  <a href="https://www.youtube.com/watch?v=MrKrnHhk8IA"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fab fa-youtube"></i>
+                    </span>
+                    <span>Video</span>
+                  </a>
+                </span> -->
+                <!-- Code Link. -->
+                <!-- <span class="link-block">
+                  <a href="https://github.com/google/nerfies" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fab fa-github"></i>
+                    </span>
+                    <span>Code</span>
+                  </a>
+                </span> -->
+                <!-- Dataset Link. -->
+                <!-- <span class="link-block">
+                  <a href="https://github.com/google/nerfies/releases/tag/0.1"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="far fa-images"></i>
+                    </span>
+                    <span>Data</span>
+                  </a> -->
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="hero teaser">
+    <div class="container is-max-desktop">
+      <div class="hero-body">
+        <div class="figure">
+          <video id="replay-video" controls muted preload autoplay loop width="100%">
+            <source src="./static/images/teaser.mp4" type="video/mp4">
+          </video>
+          <!-- <img class="Sirv image-main" src="static/img/teaser.png" data-src="static/img/teaser.png"> -->
+          <img class="Sirv image-hover" data-src="./static/images/mask.png">
+        </div>
+        <div class="content has-text-centered">
+          <p>
+            (This is a <b>video</b>, you may need to wait some time before totally loading it.)
+          </p>
+        </div>
+        </a>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- <section class="hero teaser">
+    <div class="container is-max-desktop">
+      <div class="hero-body">
+        <video id="teaser" autoplay muted loop playsinline height="80%">
+          <source src="./static/images/teasor.mp4" type="video/mp4" onmouseover="this.src='./static/images/teasor.mp4'"
+            onmouseout="this.src='./static/images/teasor_mask.mp4'">
+        </video>
+        <div class="content has-text-centered">
+          <p>
+            (This is a <b>video</b>, you may need to wait some time before totally loading it.)
+          </p>
+        </div>
+      </div>
+    </div>
+  </section> -->
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <!-- Abstract. -->
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Abstract</h2>
+          <div class="content has-text-justified">
+            <p>
+              Most of the existing video face super-resolution (VFSR) methods are trained and evaluated on VoxCeleb1,
+              which is designed specifically for speaker identification and the frames in this dataset are of low
+              quality. As a consequence, the VFSR models trained on this dataset can not output visual-pleasing results.
+              In this paper, we develop an automatic and scalable pipeline to collect a high-quality video face dataset
+              (VFHQ), which contains over <b>16,000 high-fidelity clips</b> of <b>diverse interview scenarios</b>. To
+              verify
+              the necessity of VFHQ, we further conduct experiments and demonstrate that VFSR models trained on our VFHQ
+              dataset can generate results with sharper edges and finer textures than those trained on VoxCeleb1. In
+              addition, we show that the temporal information plays a pivotal role in eliminating video consistency
+              issues as well as further improving visual performance. Based on VFHQ, by analyzing the benchmarking study
+              of several state-of-the-art algorithms under bicubic and blind settings.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr />
+  <section class="section">
+    <div class="container is-max-desktop">
+      <!-- High Quality. -->
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Characteristics — High Quality and Diverse</h2>
+          <div class="content has-text-justified">
+            <video id="high_qulity" controls muted preload autoplay loop height="100%">
+              <source src="./static/images/quality1.mp4" type="video/mp4">
+            </video>
+            <div class="content has-text-centered">
+              <p>
+                The clips in VFHQ are high-quality. <br>(This is a <b>video</b>, you may need to wait some time before
+                totally
+                loading it.)
+              </p>
+            </div>
+            <div class="content has-text-justified">
+              <video id="high_qulity" controls muted preload autoplay loop height="100%">
+                <source src="./static/images/quality2.mp4" type="video/mp4">
+              </video>
+              <div class="content has-text-centered">
+                <p>
+                  The scenarios in VFHQ are diverse.<br>(This is a <b>video</b>, you may need to wait some time before
+                  totally
+                  loading it.)
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  </section>
+
+  <hr />
+  <section class="section">
+    <div class="container is-max-desktop">
+
+      <!-- Statistics. -->
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-full-width">
+          <h2 class="title is-3">Statistics</h2>
+          <div class="content has-text-justified">
+            <img src="static/images/statistic1.jpg" class="interpolation-image"
+              alt="Interpolation end reference image." />
+            <p class="is-bold">As shown in (a), VFHQ
+              includes
+              persons that come from more than 20 distinct countries. In (b), we notice that the proportion of men and
+              women is
+              roughly the same.</p>
+          </div>
+          <div class="content has-text-justified">
+            <img src="static/images/statistic2.jpg" class="interpolation-image"
+              alt="Interpolation end reference image." />
+            <p class="is-bold">The figure (c)
+              demonstrates that the distribution of clip resolution of our VFHQ is
+              different from
+              VoxCeleb1 and the resolution of VFHQ is much higher than VoxCeleb1. Above the bar is the number of clips.
+              Note that we
+              use the length of the shortest side as the clip resolution. The figure (d) shows that the quality of VFHQ
+              is higher than
+              VoxCeleb1 quantitatively.</p>
+          </div>
+          <br />
+          <!--/ Interpolating. -->
+
+          <!-- Re-rendering. -->
+          <!-- <h3 class="title is-3">Benefits of VFHQ</h3>
+          <div class="content has-text-justified">
+            <p>
+              Using <span class="dnerf">Nerfies</span>, you can re-render a video from a novel
+              viewpoint such as a stabilized camera by playing back the training deformations.
+            </p>
+          </div>
+          <div class="content has-text-centered">
+            <video id="replay-video" controls muted preload playsinline width="75%">
+              <source src="https://homes.cs.washington.edu/~kpar/nerfies/videos/replay.mp4" type="video/mp4">
+            </video>
+          </div> -->
+          <!--/ Re-rendering. -->
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <hr />
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <!-- <div class="column is-four-fifths"> -->
+        <div class="column is-four-fifths">
+          <h2 class="title is-3 "> Dataset</h2>
+          <div class="content has-text-justified">
+            <p class="text-justify">We provide a processing script that extracts
+              high-resolution faces from meta info. We also provide the processed VFHQ dataset and
+              the resized 512x512 version. Note that the usage of VFHQ must comply with the agreement that mentioned in
+              the
+              next
+              section.
+            </p>
+            <div>
+              <table>
+                <tr>
+                  <td>
+                    <figure>
+                      <!-- <a href="https://github.com/CelebV-HQ/CelebV-HQ/blob/main/celebvhq_info.json">
+                    <img src="static/img/download_icon.jpeg" height="80px" width="100px" alt="download">
+                    <figcaption> Annotations </figcaption>
+                  </a> -->
+                      <img src="static/images/python_icon.png" , width="30%"><br><br>
+                      <ul>
+                        <li>
+                          Processing script: <a href="https://1drv.ms/u/s!Ag1HH_EDGMqqh2e_C7_9L0tV-N7u?e=nYGlKg"
+                            target="_blank">
+                            <strong>OneDrive</strong></a>
+                        </li>
+                        <li>
+                          Processing script: <a href="https://share.weiyun.com/qr3k40jV" target="_blank">
+                            <strong>腾讯微云</strong></a>
+                        </li>
+                      </ul>
+                      <!-- <span class="block-text">
+                        <a href="https://1drv.ms/u/s!Ag1HH_EDGMqqh2e_C7_9L0tV-N7u?e=nYGlKg" target="_blank">
+                          <strong>&nbsp;Processing Script (OneDrive)&nbsp;</strong></a></span><br><br>
+                      <span class=" block-text">
+                        <a href="https://share.weiyun.com/qr3k40jV" target="_blank"> <strong>&nbsp;Processing Script
+                            (腾讯微云)&nbsp;</strong></a> -->
+                      </span>
+                    </figure>
+                  </td>
+
+                  <td>
+                    <figure>
+                      <img src="static/images/folders.png" , width="30%"><br><br>
+                      <ul>
+                        <li>
+                          VFHQ meta info: <a href="https://1drv.ms/u/s!Ag1HH_EDGMqqh2i5sgNyHpcVldos?e=8wKFtV"
+                            target="_blank">
+                            <strong>OneDrive</strong></a>
+                        </li>
+                        <!-- <li>
+                          VFHQ1(Part1 of VFHQ): <a
+                            href="https://pan.baidu.com/share/init?surl=MUJoULtT5Ku9aMj_JJXVmg&pwd=VFHQ"
+                            target="_blank">
+                            <strong>百度网盘</strong></a>
+                        </li>
+                        <li>
+                          VFHQ2(Part2 of VFHQ): <a
+                            href="https://pan.baidu.com/share/init?surl=tU4a3IajeZrgazLar8XcEw&pwd=VFHQ"
+                            target="_blank">
+                            <strong>百度网盘&nbsp;</strong></a>
+                        </li> -->
+                        <li>
+                          VFHQ_zips (w/o resize): <a href="https://pan.baidu.com/s/1DQq0HxDHEIYf77ZOZ1om1g?pwd=VFHQ"
+                            target="_blank">
+                            <strong>百度网盘&nbsp;</strong></a>
+                        </li>
+                        <li>
+                          VFHQ-512: <a href="https://pan.baidu.com/s/18uyNtoCpkWw9ldLtHdRp2g?pwd=VFHQ" target="_blank">
+                            <strong>&nbsp;百度网盘&nbsp;</strong></a>
+                        </li>
+                      </ul>
+                    </figure>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+          <h2 class="title is-4 "> Dataset Structure</h2>
+          <div class="content has-text-justified">
+            <table border="1">
+              <thead>
+                <tr>
+                  <th align="left">Name</th>
+                  <th align="center">Size</th>
+                  <th align="center">Clips</th>
+                  <th align="center">Links</th>
+                  <th align="left">Description</th>
+                  <!-- <th align="left">Link</th> -->
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td align="left">vfhq-dataset</td>
+                  <td align="center">4.2 TB</td>
+                  <td align="right"></td>
+                  <td align="center"></td>
+                  <td align="left">Main folder</td>
+                </tr>
+                <tr>
+                  <td align="left">├ <a href="https://pan.baidu.com/s/1ipIPJkhBTnX8yTfKJOwsoA?pwd=VFHQ"
+                      rel="nofollow">meta_info</a></td>
+                  <td align="center">170 MB</td>
+                  <td align="center">15,381</td>
+                  <td align="center"><a href="https://pan.baidu.com/s/1ipIPJkhBTnX8yTfKJOwsoA?pwd=VFHQ"
+                      rel="nofollow">百度网盘</a></td>
+                  <td align="left">Metadata including video id, face landmarks, etc.</td>
+                </tr>
+                <tr>
+                  <td align="left">├ <a href="https://pan.baidu.com/s/1DQq0HxDHEIYf77ZOZ1om1g?pwd=VFHQ"
+                      rel="nofollow">VFHQ_zips</a>
+                  </td>
+                  <td align="center">2.8 TB</td>
+                  <td align="center">15,204</td>
+                  <td align="center"><a href="https://pan.baidu.com/s/1DQq0HxDHEIYf77ZOZ1om1g?pwd=VFHQ"
+                      rel="nofollow">百度网盘</a></td>
+                  <td align="left">Zips of VFHQ (w/o resize operation).</td>
+                </tr>
+                <!-- <tr>
+                  <td align="left">├ <a href="https://pan.baidu.com/s/1MUJoULtT5Ku9aMj_JJXVmg?pwd=VFHQ"
+                      rel="nofollow">VFHQ1</a></td>
+                  <td align="center">1.4 TB</td>
+                  <td align="center">7,543</td>
+                  <td align="center"><a href="https://pan.baidu.com/s/1MUJoULtT5Ku9aMj_JJXVmg?pwd=VFHQ"
+                      rel="nofollow">百度网盘</a></td>
+                  <td align="left"> Part1 of VFHQ cropped from the YouTube videos.
+                  </td>
+                </tr>
+                <tr>
+                  <td align="left">├ <a href="https://pan.baidu.com/s/1tU4a3IajeZrgazLar8XcEw?pwd=VFHQ"
+                      rel="nofollow">VFHQ2</a></td>
+                  <td align="center">1.6 TB</td>
+                  <td align="center">8,228</td>
+                  <td align="center"><a href="https://pan.baidu.com/s/1tU4a3IajeZrgazLar8XcEw?pwd=VFHQ"
+                      rel="nofollow">百度网盘</a></td>
+                  <td align="left"> Part2 of VFHQ cropped from the YouTube videos.
+                  </td>
+                </tr> -->
+                <tr>
+                  <td align="left">├ <a href="https://pan.baidu.com/s/18uyNtoCpkWw9ldLtHdRp2g?pwd=VFHQ"
+                      rel="nofollow">VFHQ-512</a></td>
+                  <td align="center">1.2 TB</td>
+                  <td align="center">15,381</td>
+                  <td align="center"><a href="https://pan.baidu.com/s/18uyNtoCpkWw9ldLtHdRp2g?pwd=VFHQ"
+                      rel="nofollow">百度网盘</a></td>
+                  <td align="left">Resized 512x512 version of VFHQ.</td>
+                </tr>
+                <tr>
+                  <td align="left">├ <a href="https://pan.baidu.com/s/14jdQw6RZkWS-ARBo4YHK9Q?pwd=VFHQ"
+                      rel="nofollow">VFHQ-Test</a></td>
+                  <td align="center">2.37 GB</td>
+                  <td align="center">100</td>
+                  <td align="center"><a href="https://pan.baidu.com/s/14jdQw6RZkWS-ARBo4YHK9Q?pwd=VFHQ"
+                      rel="nofollow">百度网盘</a></td>
+                  <td align="left">Test dataset adopted in the paper.</td>
+                </tr>
+                <tr>
+                  <td align="left">└ <a href="https://pan.baidu.com/s/1yaEXTrzY7E-WiYKsin5HaQ?pwd=DGLF"
+                      rel="nofollow">resize.py</a>
+                  </td>
+                  <td align="center"> </td>
+                  <td align="center"> </td>
+                  <td align="center"><a href="https://pan.baidu.com/s/1yaEXTrzY7E-WiYKsin5HaQ?pwd=DGLF"
+                      rel="nofollow">百度网盘</a></td>
+                  <td align="left">Resize script.</td>
+                </tr>
+              </tbody>
+              <p>
+                Note: Due to the transfer instability of large files, there may exists few empty folders. All these
+                four download links are valid. <br> <br>
+
+                <b>Considering the large size of the data, it is recommended to download the compressed VFHQ_zips file
+                  directly, which
+                  contains videos in their original dimensions. You can resize these clips to a 512x512 resolution using
+                  the resize script
+                  provided by us. We don't have additional storage to support uploading 512x512 compressed zip
+                  files.</b>
+              </p>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr />
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <!-- <div class="column is-four-fifths"> -->
+        <div class="column is-four-fifths">
+          <h2 class="title is-3 "> Model Zoo</h2>
+          <div class="content has-text-justified">
+            <p class="text-justify">We release the trained models used in our benchmarking experiments. <br>
+              For the <strong>bicubic setting (for scaling factor X4 and X8)</strong>, we release the pre-trained
+              weights
+              of RRDB,
+              ESRGAN,
+              EDVR(frame=5),
+              EDVR+GAN(frame=5), BasicVSR(frame=7), BasicVSR-GAN(frame=7). <br>
+              For the <strong>blind setting (for scaling factor X4)</strong>,
+              we release the pre-trained weights of EDVR(frame=5), EDVR+GAN(frame=5), BasicVSR(frame=7),
+              BasicVSR-GAN(frame=7). <br> <br>
+              All of the models are trained based on the <strong>BasicSR</strong> framework, and the specific training
+              settings are also
+              referenced from <strong>BasicSR</strong>. <br>
+            </p>
+          </div>
+          <h2 class="title is-4 "> Model Zoo Structure</h2>
+          <div class="content has-text-justified">
+            <table border="1">
+              <thead>
+                <tr>
+                  <th align="left">Name</th>
+                  <th align="center">Links</th>
+                  <th align="left">Description</th>
+                  <!-- <th align="left">Link</th> -->
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td align="left">pretrained_models</td>
+                  <td align="center"></td>
+                  <td align="left">Main folder</td>
+                </tr>
+                <tr>
+                  <td align="left">├ <a href="https://pan.baidu.com/s/16IHDa_oZBAXaTCy7hZI7sA?pwd=VFHQ"
+                      rel="nofollow">Cubic-Setting-X4</a></td>
+                  <td align="center"><a href="https://pan.baidu.com/s/16IHDa_oZBAXaTCy7hZI7sA?pwd=VFHQ"
+                      rel="nofollow">百度网盘</a>
+                  </td>
+                  <td align="left">Pre-trained weights of models for <strong>bicubic setting</strong> with scale
+                    <strong>X4</strong>.
+                  </td>
+                </tr>
+                <tr>
+                  <td align="left">├ <a href="https://pan.baidu.com/s/1VkcC7MNJXg7eQnT9CY473g?pwd=VFHQ"
+                      rel="nofollow">Cubic-Setting-X8</a>
+                  </td>
+                  <td align="center"><a href="https://pan.baidu.com/s/1VkcC7MNJXg7eQnT9CY473g?pwd=VFHQ"
+                      rel="nofollow">百度网盘</a>
+                  </td>
+                  <td align="left">Pre-trained weights of models for <strong>bicubic setting</strong> with scale
+                    <strong>X8</strong>.
+                  </td>
+                </tr>
+                <tr>
+                  <td align="left">└ <a href="https://pan.baidu.com/s/1Z3eULdkkv94nNflbW3xefQ?pwd=VFHQ"
+                      rel="nofollow">Blind-Setting-X4</a></td>
+                  <td align="center"><a href="https://pan.baidu.com/s/1Z3eULdkkv94nNflbW3xefQ?pwd=VFHQ"
+                      rel="nofollow">百度网盘</a>
+                  </td>
+                  <td align="left">Pre-trained weights of models for <strong>blind setting</strong> with scale
+                    <strong>X4</strong>.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr />
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <!-- <div class="column is-four-fifths"> -->
+        <div class="column is-four-fifths">
+          <h2 class="title is-3 "> Training setting</h2>
+          <div class="content has-text-justified">
+            <p class="text-justify">For blind setting, we provide the dataset pipeline in training phase. Besides, we
+              also provide a yaml file which contains the detailed range of different degradation types.
+            </p>
+          </div>
+          <h2 class="title is-4 "> </h2>
+          <div class="content has-text-justified">
+            <table border="1">
+              <thead>
+                <tr>
+                  <th align="left">Name</th>
+                  <th align="center">Links</th>
+                  <th align="left">Description</th>
+                  <!-- <th align="left">Link</th> -->
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td align="left">code</td>
+                  <td align="center"></td>
+                  <td align="left">Main folder</td>
+                </tr>
+                <tr>
+                  <td align="left">├ <a href="https://pan.baidu.com/s/1NxjOz1Mr7yaEE4x_qHo2yA?pwd=VFHQ"
+                      rel="nofollow">data</a></td>
+                  <td align="center"><a href="https://pan.baidu.com/s/1NxjOz1Mr7yaEE4x_qHo2yA?pwd=VFHQ"
+                      rel="nofollow">百度网盘</a>
+                  </td>
+                  <td align="left">The pipeline of synthesizing paired data in training phase.</td>
+                </tr>
+                <tr>
+                  <td align="left">└ <a href="https://pan.baidu.com/s/1fPmQoa7ja7ZybRiRlvAFqg?pwd=VFHQ"
+                      rel="nofollow">yaml</a>
+                  </td>
+                  <td align="center"><a href="https://pan.baidu.com/s/1fPmQoa7ja7ZybRiRlvAFqg?pwd=VFHQ"
+                      rel="nofollow">百度网盘</a>
+                  </td>
+                  <td align="left">An example of training configuration.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <hr />
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3 ">Agreement</h2>
+          <div class="content has-text-justified">
+
+            <ul>
+              <li> The VFHQ dataset is only available to download for non-commercial research purposes. The
+                copyright
+                remains with the original owners of the video. A complete
+                version of the license can be found <a href="./license.txt">here</a> and we refer to the
+                license of <a href="https://www.robots.ox.ac.uk/~vgg/data/voxceleb/">VoxCeleb</a>. </li>
+              <li>All videos of the VFHQ dataset are obtained from the Internet which are not property of
+                our institutions. Our institution are not responsible for the content nor the meaning
+                of these videos. </li>
+              <li>You agree not to reproduce, duplicate, copy, sell, trade, resell or exploit for any
+                commercial purposes, any portion of the videos and any portion of derived data. You agree not
+                to further
+                copy, publish or distribute any portion of the VFHQ
+                dataset.</li>
+              <li>The distribution of identities in the VFHQ datasets may not be representative of the global
+                human
+                population. Please be careful of unintended societal, gender, racial and other biases when
+                training or
+                deploying models trained on this data.</li>
+            </ul>
+
+  </section>
+
+  <hr />
+  <section class="section" id="Citaton">
+    <div class="container is-max-desktop content">
+      <h2 class="title">BibTeX</h2>
+      <p>If you find this helpful, please cite our work: </p>
+      <pre><code>@InProceedings{xie2022vfhq,
+      author = {Liangbin Xie and Xintao Wang and Honglun Zhang and Chao Dong and Ying Shan},
+      title = {VFHQ: A High-Quality Dataset and Benchmark for Video Face Super-Resolution},
+      booktitle={The IEEE Conference on Computer Vision and Pattern Recognition Workshops (CVPRW)},
+      year = {2022}
+  }</code></pre>
+    </div>
+  </section>
+
+
+
+  <footer class="footer">
+    <div class="columns is-centered">
+      <div class="content">
+        <p> This template is borrowed from <a href="https://github.com/nerfies/nerfies.github.io"> nerfies's
+            webpage</a>.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    $(window).on('load', function () {
+      $('#loading').hide();
+    })
+  </script>
+
+</body>
+
+</html>

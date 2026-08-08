@@ -1,0 +1,890 @@
+=== PAGE 1 ===
+3D Priors-Guided Diffusion for Blind Face Restoration
+Xiaobin Lu∗
+Shenzhen Campus of Sun Yat-sen
+University
+Shenzhen, China
+Yunnan Key Laboratory of Smart
+Education
+Kunming, China
+luxb@mail2.sysu.edu.cn
+Xiaobin Hu∗
+Tencent Youtu Lab
+Shanghai, China
+xiaobinhu@tencent.com
+Jun Luo
+University of Chinese Academy of
+Sciences
+Beijing, China
+luojun@iie.ac.cn
+Ben Zhu
+Tencent Cloud Architecture Platform
+Shenzhen, China
+benjaminzhu@tencent.com
+Yaping Ruan
+Tencent Cloud Architecture Platform
+Shenzhen, China
+paulruan@tencent.com
+Wenqi Ren†
+Shenzhen Campus of Sun Yat-sen
+University
+Shenzhen, China
+renwq3@mail.sysu.edu.cn
+LQGFPGANDiffBIRPSFRGAN
+VQFR Ours
+Gan-based DPM-basedCNN-based
+DR2 + SPAR
+Figure 1: Comparison of our method with other blind face restoration methods. The left segment illustrates low-quality images (LQ), while the
+center showcases the outcomes of Generative Adversarial Networks (GANs) in the green rectangle [ 3, 45], results from a CNN-based model in
+the blue region [ 16], and outcomes from the Diffusion Probability Model (DPM) in the red rectangle [ 31, 48]. Our approach excels in enhancing
+restoration details significantly.
+∗Both authors contributed equally to this research.
+†Corresponding author.
+Permission to make digital or hard copies of all or part of this work for personal or
+classroom use is granted without fee provided that copies are not made or distributed
+for profit or commercial advantage and that copies bear this notice and the full citation
+on the first page. Copyrights for components of this work owned by others than the
+author(s) must be honored. Abstracting with credit is permitted. To copy otherwise, or
+republish, to post on servers or to redistribute to lists, requires prior specific permission
+and/or a fee. Request permissions from permissions@acm.org.
+MM ’24, October 28-November 1, 2024, Melbourne, VIC, Australia
+© 2024 Copyright held by the owner/author(s). Publication rights licensed to ACM.
+ACM ISBN 979-8-4007-0686-8/24/10. . . $15.00
+https://doi.org/10.1145/3664647.3681611
+ABSTRACT
+Blind face restoration endeavors to restore a clear face image from
+a degraded counterpart. Recent approaches employing Generative
+Adversarial Networks (GANs) as priors have demonstrated remark-
+able success in this field. However, these methods encounter chal-
+lenges in achieving a balance between realism and fidelity, particu-
+larly in complex degradation scenarios. To inherit the exceptional re-
+alism generative ability of the diffusion model and also constrained
+by the identity-aware fidelity, we propose a novel diffusion-based
+arXiv:2409.00991v2  [cs.CV]  12 Sep 2024
+
+=== PAGE 2 ===
+MM ’24, October 28-November 1, 2024, Melbourne, VIC, Australia Xiaobin Lu et al.
+framework by embedding the 3D facial priors as structure and iden-
+tity constraints into a denoising diffusion process. Specifically, in
+order to obtain more accurate 3D prior representations, the 3D facial
+image is reconstructed by a 3D Morphable Model (3DMM) using an
+initial restored face image that has been processed by a pretrained
+restoration network. A customized multi-level feature extraction
+method is employed to exploit both structural and identity infor-
+mation of 3D facial images, which are then mapped into the noise
+estimation process. In order to enhance the fusion of identity infor-
+mation into the noise estimation, we propose a Time-Aware Fusion
+Block (TAFB). This module offers a more efficient and adaptive
+fusion of weights for denoising, considering the dynamic nature
+of the denoising process in the diffusion model, which involves
+initial structure refinement followed by texture detail enhancement.
+Extensive experiments demonstrate that our network performs
+favorably against state-of-the-art algorithms on synthetic and real-
+world datasets for blind face restoration. The Code is released on
+our project page at https://github.com/838143396/3Diffusion.
+CCS CONCEPTS
+•Computing methodologies → Computer vision.
+KEYWORDS
+Blind face restoration, diffusion probabilistic models, facial genera-
+tive prior, image restoration
+ACM Reference Format:
+Xiaobin Lu, Xiaobin Hu, Jun Luo, Ben Zhu, Yaping Ruan, and Wenqi Ren.
+2024. 3D Priors-Guided Diffusion for Blind Face Restoration. In Proceedings
+of the 32nd ACM International Conference on Multimedia (MM ’24), October
+28-November 1, 2024, Melbourne, VIC, Australia. ACM, New York, NY, USA,
+10 pages. https://doi.org/10.1145/3664647.3681611
+1 INTRODUCTION
+Blind face restoration is a long-standing vision task that involves
+recovering a high-quality face image from a low-quality observation.
+It plays an important role in old photo recovery and face recognition.
+As an ill-posed problem, this task is highly challenging since low-
+quality face images can suffer from multiple degradations, such as
+downsampling, blurring, noise, and compression.
+Multifarious traditional end-to-end methods have been proposed
+based on convolutional neural networks (CNNs) to learn mapping
+relationships between low-quality and high-quality image pairs [6–
+10, 36], but they fail to restore fine details on the face [5, 32]. Re-
+cently, due to the powerful ability of Generative Adversarial Net-
+works (GANs) [13] to generate realistic face images, some methods
+[14, 50, 55] have utilized GANs as a prior for generating high-quality
+faces. These methods extract low-quality face features using CNNs
+and encode them into the latent space of the GAN. However, meth-
+ods employing GANs as priors may encounter training collapse
+[53], a consequence of challenges in optimizing the objective func-
+tion during training. To improve the identity consistency of the
+restored images, some methods incorporate prior information dur-
+ing the face restoration process, such as facial geometric priors
+[4, 21] and reference priors [28, 29]. For example, Gu et al. use vec-
+tor quantization face Restoration (VQFR) [16] to guide the model
+for generating more realistic facial details by storing the features
+PSFRGAN/0.12
+VQFR/0.09GFPGAN/0.05DiffBIR/0.08
+Ours/0.32
+GT/IDS
+Input/0.09
+DR2/0.09
+Figure 2: Results on the Arcface identity score (IDS). The
+results in the first line show that our method is better consis-
+tent with the ground truth (GT) in restoring facial features.
+extracted from high-resolution images in a dictionary. Some meth-
+ods [47, 54] leverage the powerful feature extraction capability of
+Vision Transformer (ViT) [43] to achieve better restoration results.
+However, as shown in Fig. 2, the restoration results of these models
+cannot achieve a balance between fidelity and authenticity when
+dealing with complex scenes or under specific conditions. These
+approaches continue to face challenges in accurately restoring intri-
+cate facial features while simultaneously capturing realistic textural
+qualities, as exemplified in Fig. 1.
+More recently, denoising diffusion models have been introduced
+into image restoration. For example, [39] feeds the combination of
+low-quality and noisy images into the denoising diffusion model
+for noise prediction. [37] encodes the low-quality image once and
+passes it through a cross-attention mechanism, feeding the features
+into a diffusion model. [31] utilizes a parallel encoding module to
+encode the condition information and inputs it into the decoder
+of the denoising diffusion model at each step of the denoising
+process. Latent diffusion [ 37] learns the data distribution in the
+latent space by gradually diffusing the noise signal and completes
+the guidance by applying cross attention to the conditions in the
+denoising network. However, throughout the denoising diffusion
+process, the low-frequency components exhibit gradual changes as
+the time step progresses, whereas the high-frequency components
+undergo more pronounced alterations [41]. Besides, in the initial
+phase of the denoising process, the primary emphasis is on refining
+the structure of the restored image, while in the later stages, the
+main focus shifts to refining the intricate textures of the restored
+image [42]. To improve restoration quality, it is not sufficient to
+extract features on the guide image only once, nor is it adequate to
+rely solely on simple addition or cross-attention to fuse the features.
+Different from aforementioned methods, to ensure the fidelity,
+authenticity, and identity consistency of restored images in com-
+plex degradation scenarios, we propose a 3D prior-guided diffusion
+model by incorporating 3D facial prior information as constraints.
+Besides, we propose a multi-level feature extraction module to
+extract structural and identity information from 3D prior informa-
+tion at each time step and then weight-adaptively fuse this condi-
+tional guidance information with noisy image feature information
+through a Time-Aware Fusion Block.
+
+=== PAGE 3 ===
+3D Priors-Guided Diffusion for Blind Face Restoration MM ’24, October 28-November 1, 2024, Melbourne, VIC, Australia
+Overall, the main contributions of this paper can be summarized
+as follows:
+• A novel diffusion-based face restoration network is proposed,
+which integrates 3D facial structure into the noise estima-
+tion process. In our approach, a multi-level feature extraction
+method is tailored to extract structural and identity informa-
+tion, which is then projected into the latent noise space.
+• To adapt to the denoising process of the diffusion model
+that begins with structure refinement and progresses to tex-
+ture detail enhancement, a Time-Aware Fusion Block (TAFB)
+is proposed to effectively and adaptively fuse facial prior
+features and noisy image features at different time steps.
+• Comprehensive experiments demonstrate that the proposed
+method performs favorably against state-of-the-art algo-
+rithms on synthetic and real-world datasets in terms of image
+quality restoration and identity consistency.
+2 RELATED WORK
+2.1 Blind face restoration
+As a fundamental task in computer vision, blind face restoration
+(BFR) aims to recover a high-quality face image from its degraded
+counterpart in the presence of unknown degraded types and pa-
+rameters. CNN-based approaches can learn mapping relationships
+between low-/high-quality image pairs from large-scale collected
+datasets, but they often fail to restore high-frequency texture details
+on the face. In recent years, significant progress has been made for
+BFR by using facial geometry priors and generative priors. Harness-
+ing the specific structure and details of faces, techniques grounded
+in facial geometry priors utilize prior information such as parsing
+maps, landmarks, and reference images to enhance the restoration
+of facial images [ 3, 4, 12]. On the other hand, generative priors-
+based methods employ powerful generative models like StyleGAN
+[26] and incorporate adversarial training to enhance the visual qual-
+ity of the restored images. Despite the fact that generative prior
+methods have the ability to restore facial details more effectively
+when compared to CNN-based restoration approaches, they may
+encounter significant challenges pertaining to training difficulties
+and model collapse problems [53].
+2.2 Diffusion model
+Recently, a majority of generative tasks in computer vision have
+been dominated by GAN-based methods [23, 40], which generate de-
+cent images through adversarial training. However, these methods
+may encounter challenges in training difficulties and model col-
+lapse [53]. With the application of diffusion models [17, 20, 34, 44]
+in the generative task domain, these models have demonstrated
+unprecedented generative capabilities in terms of image quality and
+diversity. Diffusion models have also been widely applied to various
+computer vision tasks, including image super-resolution [27, 37, 39],
+image inpainting [33], image segmentation [1, 2], image-to-image
+translation [38], text-to-image translation [15], and more. In the
+context of BFR, DiffBIR [31] Utilizes the pre-trained text-to-image
+diffusion model and adopts a multi-stage pipeline approach for
+image restoration. However, it is characterized by many param-
+eters and relies solely on addition for feature fusion. To address
+the challenge of incorporating diverse degradations for real-world
+LQ HQ3DMMOurs
+Figure 3: Comparison of reconstructing 3D faces from the
+3D Morphable Model (3DMM) and ours.
+scenarios in training data, the Diffusion-based Robust Degradation
+Remover (DR2)[48] introduces a method that transforms degraded
+images into degradation-agnostic predictions before utilizing an
+enhancement module for high-fidelity image restoration.
+Denoising diffusion probabilistic models (DDPM) consist of for-
+ward and backward Markov processes. The forward process gradu-
+ally adds random noise to the image, and we denote these latent
+variables as 𝑥1, ..., 𝑥𝑇 , where 𝑥𝑇 becomes a completely noisy image.
+The backward process of DDPM is a denoising process, where it
+learns a Markov chain that gradually transforms a simple noise
+distribution (such as isotropic Gaussian distribution) into the target
+data distribution. Throughout the entire forward and backward
+processes of DDPM, the dimensions of the image remain consis-
+tent. Each step of the forward process can be represented by the
+following equation:
+𝑞 (𝑥𝑡 | 𝑥𝑡 −1) := 𝑁
+
+𝑥𝑡 ;
+√︁
+1 − 𝛽𝑡 𝑥𝑡 −1, 𝛽𝑡 I
+
+, (1)
+where 𝛽1, ..., 𝛽𝑇 are fixed variance values. At each step, Gaussian
+noise with variance 𝛽𝑡 is added, resulting in the final 𝑥𝑇 being
+mapped to pure Gaussian noise. Let 𝑥0 be the original image, and it
+is possible to obtain the noisy image at any step 𝑡 based on 𝑥0:
+𝑞 (𝑥𝑡 | 𝑥0) := 𝑁
+
+𝑥𝑡 ; √ ¯𝛼𝑡 𝑥0, (1 − ¯𝛼𝑡 ) I
+
+, (2)
+where 𝛼𝑡 := 1 − 𝛽𝑡 and ¯𝛼𝑡 := Î𝑡
+𝑛=1 𝛼𝑛. These parameters are pre-
+defined prior to training. DDPM achieves the denoising process by
+predicting the mean of the noise added from step 𝑥𝑡 to 𝑥𝑡 −1:
+𝑝𝜃 (𝑥𝑡 −1 | 𝑥𝑡 ) = 𝑁
+
+𝑥𝑡 −1; 𝜇𝜃 (𝑥𝑡 , 𝑡) , 𝜎2
+𝑡 I
+
+, (3)
+where 𝑝𝜃 (𝑥𝑡 −1 | 𝑥𝑡 ) represents the backward process from 𝑥𝑡 to
+𝑥𝑡 −1, while 𝜇𝜃 (𝑥𝑡 , 𝑡) denotes the diffusion model with parameter
+𝜃. At step 𝑡, 𝑥𝑡 −1 can be expressed by the predicted mean and 𝑥𝑡 :
+𝑥𝑡 −1 = 1√𝛼𝑡
+
+𝑥𝑡 − 1 − 𝛼𝑡√1 − ¯𝛼𝑡
+𝜇𝜃 (𝑥𝑡 , 𝑡)
+
++ 𝜎𝑡 z, (4)
+where z ∼ 𝑁 (0, I) is a standard Gaussian noise and has the same
+dimensionality as noisy image 𝑥1, ..., 𝑥𝑇 . By performing denoising
+
+=== PAGE 4 ===
+MM ’24, October 28-November 1, 2024, Melbourne, VIC, Australia Xiaobin Lu et al.
+TAFB
+ConvTAFB
+ConvTAFB
+ConvResBlock
+ConvResBlock
+ConvResBlock
+ResBlock
+ConvResBlock
+AddNoise
+𝒙𝒍𝒒
+𝒙𝒉𝒒𝒙𝒕
+𝒙3d
+ConvResBlock
+ResBlock
+ResBlock
+ResBlock
+LNSFT
+𝒕MLPLN
+CS
+1X1 ConvScale Add
+FFNGate𝑭𝒐𝒖𝒕
+Time Aware Fusion Block(TAFB)
+C
+CS𝑭𝒊𝒏𝒊
+𝑭𝟑𝒅𝒊
+𝒙𝒕-1
+Coefficients𝜶-identity𝜷-expression𝜹-texture𝜸-lightingP-pose
+3DReconstructionBlock
+ZAverageFaceX
+Yaw
+Y
+PitchRoll
+3D Branch
+SFT
+CSChannel SqueezeCConcatMultiplication
+LNLayerNormalization
+Denoise Branch
+Spatial Feature Transformations
+Figure 4: The architecture of 3D priors embedded diffusion model. Top: Our framework consists of two parts: the 3D recon-
+struction block and the denoising diffusion branch. Bottom: The TAFB module fuses 3D features with features extracted by the
+denoising network.
+for T steps, the pure noisy image can be transformed into the target
+data distribution.
+3 PROPOSED METHOD
+The overall framework for face restoration by incorporating 3D
+priors into a diffusion model is illustrated in Fig. 4. Our overall
+framework mainly consists of two branches, including the 3D recon-
+struction branch and the diffusion branch. The 3D reconstruction
+branch includes the SwinIR model and the 3DMM model, while the
+denoising diffusion branch mainly includes a U-net, a multi-level
+feature extraction module, and a Time-Aware Fusion Block (TAFB).
+The low-quality image is initially restored using the pre-trained
+restoration module, SwinIR, resulting in an initial face restoration
+result denoted as x𝑖𝑛𝑖𝑡 . The 3D facial image is reconstructed using
+the D3DFR method [11]. The multi-level feature extraction module
+extracts identity and structural information features across differ-
+ent scales of the 3D facial image. These features are then input into
+the TAFB, in conjunction with features extracted from the noisy
+image and the current timestep 𝑡. Subsequently, the time-aware
+block fuses the features across various time steps and passes them
+to the subsequent feature extraction block. We will introduce the
+3D reconstruction branch and the diffusion branch in detail.
+3.1 Motivation and novelty
+Although current diffusion-based blind face restoration methods
+have shown promising results in terms of image quality restoration,
+they often fail to ensure the identity consistency of the restored
+faces, as illustrated in Fig. 2. It is mainly due to the conflict and
+balance of realism and fidelity, particularly in complex degradation
+scenarios. To mitigate this problem, 3D facial priors as structure
+and identity constraints are embedded into a denoising diffusion
+process to keep the high fidelity while generating high-realism
+images. However, considering the dynamic nature of the denoising
+process in the diffusion model, which involves initial structure
+refinement followed by texture detail enhancement, we design
+ingenious modules to incorporate the 3D priors into the diffusion
+model. 1.) A customized multi-level feature extraction method is
+designed to fully exploit both structural and identity information of
+3D facial images, which are then mapped into the noise estimation
+process. 2.) A Time-Aware Fusion Block (TAFB) is proposed to
+enhance the fusion of identity information into the noise estimation
+and offer a more efficient and adaptive fusion of weights for the
+denoising process. 3.) The features of 3D facial priors are multi-
+iteratively embedded into the denoising process at each step and
+avoid inadequate excavation of 3D facial priors.
+3.2 3D reconstruction block
+3D face priors encompass a wealth of hierarchical features, includ-
+ing low-level details such as sharp edges and lighting, as well as
+perceptual-level information related to identity. However, Low-
+quality images for blind face restoration often suffer from multiple
+complex types of degradation (e.g., blur, noise, JPEG compression
+artifacts, low resolution, etc.). So the input low-quality image𝑥𝐿𝑞 is
+first processed by the pre-trained restoration module, SwinIR [30],
+to obtain the initial face restoration result 𝑥𝐼𝑛𝑖𝑡 .
+𝑥𝑖𝑛𝑖𝑡 = FSwinIR
+
+𝑥𝐿𝑞
+
+, (5)
+The outcomes obtained will be utilized as inputs for the diffusion
+model and the 3D Morphable Model (3DMM) [ 11] module. The
+
+=== PAGE 5 ===
+3D Priors-Guided Diffusion for Blind Face Restoration MM ’24, October 28-November 1, 2024, Melbourne, VIC, Australia
+low-quality image is processed using ResNet-50 [18] to obtain the
+3DMM coefficients 𝑧3𝑑.
+𝑧3𝑑 = GRes50 (𝑥𝑖𝑛𝑖𝑡 ) , (6)
+where 𝑧3𝑑 is a 257-dimensional vector, denoted as𝑧3𝑑 = (𝜶 , 𝜷, 𝜹, 𝜸, p),
+where 𝜶 , 𝜷, 𝜹, 𝜸 and p respectively represent the identity informa-
+tion, facial expression, texture, illumination [35], and facial pose.We
+define the 3D shape S and texture T of a face as follows:
+S(𝜶 , 𝜷) = S + B𝑖𝑑 𝜶 + B𝑒𝑥𝑝 𝜷 (7)
+and
+T(𝜹) = T + B𝑡 𝜹, (8)
+S and T respectively represent the average facial shape and facial
+texture. The variables B𝑖𝑑 , B𝑒𝑥𝑝 and B𝑡 represent the principal com-
+ponent analysis (PCA) bases for identity, expression, and texture,
+respectively. The color information of 3D face, denoted as C, can
+be represented as:
+C(𝑖) = c𝑖 (n𝑖, t𝑖, 𝛾) = t𝑖 ·
+27∑︁
+𝑏=1
+𝛾𝑏 Φ𝑏 (n𝑖 ) , (9)
+The 3D image is reconstructed using the D3DFR method, with
+coefficients S, T, and C. The preliminary restoration module and the
+3D reconstruction module are not involved in the training process.
+As illustrated in Fig. 3, 3D faces reconstructed directly from low-
+quality images exhibit significant deviations in facial expressions,
+structure, facial features, mouth shape, and illumination. In contrast,
+the 3D faces we reconstructed appear more realistic and faithful to
+the original subject.
+3.3 Denoising diffusion branch
+In the denoising diffusion branch, we initially subject 𝑥ℎ𝑞 to the
+forward process to derive the noise image as per Eq. 2, (where t∈ [1,
+T], and T represents the total number of denoising diffusion steps).
+Subsequently, the reconstructed facial 3D image is fed into the
+multi-level feature extraction module to extract features ranging
+from coarse to fine, thereby capturing both structural and identity
+information within the facial 3D image.
+𝐹 1
+3𝑑 = ResBlock (𝑥3𝑑 ) , (10)
+ResBlock uses the same structure as SR3 [39], and the obtained
+features will be sent to the next level for feature extraction.
+𝐹 𝑖
+3𝑑 = ResBlock
+
+𝐶𝑜𝑛𝑣 3×3
+
+𝐹 𝑖 −1
+3𝑑
+
+, (11)
+Downsampling is performed through a convolution layer, where
+𝐹 𝑖
+3𝑑 represents the facial 3D image features extracted from the 𝑖-th
+layer. We also use ResBlock for feature extraction on the noisy
+image 𝑥𝑡 . 𝐹 𝑖
+𝑖𝑛, 𝐹 𝑖
+3𝑑, and timestep 𝑡 is input into the Time Aware
+Fusion Block, as depicted in Fig. 4. Since the guidance information
+required by the denoising diffusion model is different at different
+time steps, we first input t into the Multilayer Perceptron (MLP) to
+learn the weight parameters.
+𝛼1, 𝛽1, 𝛾1, 𝛾2, 𝛾3 = 𝑀𝐿𝑃 (𝑡), (12)
+We apply Spatial Feature Transform (SFT) to modulate the facial
+3D image features processed by the LayerNorm layer.
+𝐹1 = 𝑆𝐹𝑇
+
+LayerNorm
+
+𝐹 𝑖
+3𝑑
+
+, 𝛼1, 𝛽1
+
+= 𝛼1 ⊙
+
+1 + LayerNorm
+
+𝐹 𝑖
+3𝑑
+
++ 𝛽1,
+(13)
+where ⊙ represents Element-wise Multiplication, passing 𝐹1
+through different Channel Squeezes (CS) can obtain different weights
+in the channel dimension. For the sake of simplicity, we only draw
+four channels in Fig. 4, two sets of different weights. Multiply
+with 𝐹1 and 𝐹 𝑖
+𝑖𝑛 passing through the LayerNorm layer, respectively.
+Through channel attention, the model can focus more on important
+structural information in facial images.
+𝐹3 = 𝑪𝑺 1 (𝐹1) ⊙ 𝐹1,
+𝐹4 = 𝑪𝑺 2 (𝐹1) ⊙ LayerNorm
+
+𝐹 𝑖
+𝑖𝑛
+
+, (14)
+After splicing 𝐹3 and 𝐹4 through concat, we use 1X1 convolution
+to transform the number of channels, and then pass through the
+scale add module. This module uses the weights learned at time
+step 𝑡 to combine the output features, denoising image features,
+and 3D Features.
+𝐹5 = Conv 1 × 1(Concat(𝐹3, 𝐹4)) + 𝛾 ∗
+1 𝐹 𝑖
+𝑖𝑛 + 𝛾 ∗
+2 𝐹 𝑖
+3𝑑, (15)
+Then 𝐹5 is input to the Feedforward Neural Network (FFN) and
+then passes through the Gate layer. The gate layer is mainly used as
+a gating mechanism in the feedforward network, and the weights
+are learned by 𝑡.
+𝐹𝑜𝑢𝑡 = 𝐹 𝐹 𝑁 (𝐹5) + 𝛾 ∗
+3 𝐹5, (16)
+We optimize the conditional denoising diffusion model through
+the following equation:
+𝐿𝐷𝑀 = 𝐸𝑥,𝜖 ∼N (0,1),𝑡
+
+∥𝜖 − 𝜇𝜃 (𝑥𝑡 , 𝑥3𝑑, 𝑡) ∥2
+2
+
+. (17)
+In the inference stage, we use the same truncated sampling
+method as [51] for inference. We set the denoising steps to 100, and
+the specific network architecture layers will be presented in the
+supplementary materials.
+4 EXPERIMENTS
+4.1 Experimental settings
+Datasets. Following the methods [28, 45, 50], we also selected the
+FFHQ [25] dataset as our training dataset, which consists of 70,000
+high-resolution face images with a resolution of1024×1024. Initially,
+we used simple downsampling to resize the images in the dataset
+from 1024 × 1024 to 512 × 512, which served as the high-quality
+(HQ) images in our training dataset. Following the methods [28, 45,
+50], we also employed the same random degradation approach to
+synthesize the LQ images:
+𝑥 = [(𝑦 ⊗ 𝑘𝜎 ) ↓𝑟 +𝑛𝛿 ]JPEG𝑞 , (18)
+The corresponding LQ images were synthesized via Eq. (18),
+where 𝑦 represents the HQ image, 𝑘𝜎 denotes the Gaussian blur
+kernel, 𝑟 signifies the downsampling factor, and 𝑞 represents JPEG
+compressed images with a quality factor of𝑞. We randomly sampled
+the parameters 𝜎, 𝑟, 𝛿, 𝑞 from {0.1 : 10}, {4 : 20}, {1 : 20}, {30 : 70}.
+
+=== PAGE 6 ===
+MM ’24, October 28-November 1, 2024, Melbourne, VIC, Australia Xiaobin Lu et al.
+Input PSFRGAN VQFR CodeFormer DiffBIR Ours GTGFPGAN
+Figure 5: Qualitative comparisons of blind face restoration methods on the CelebA-Test dataset[ 24]. Our method performs better in both
+identity consistency and structure consistency.
+Metrics PSFRGAN [3] GFPGAN [45] Codeformer [54] VQFR [16] DiffBIR [31] DR2 [48] Ours
+PSNR ↑ 21.0868 21.7811 22.0322 21.1516 22.0539 21.2123 22.3247
+SSIM ↑ 0.5535 0.6236 0.5880 0.6073 0.5963 0.6160 0.6327
+LPIPS ↓ 0.4021 0.4156 0.3197 0.3196 0.3495 0.4013 0.3304
+FID-F ↓ 57.96 95.36 58.48 53.45 47.08 75.00 46.26
+FID-G ↓ 53.34 68.36 22.81 21.10 23.20 48.52 19.45
+Table 1: Quantitative evaluation of blind face restoration on CelebA-Test dataset [24] using 3000 randomly selected images.
+We utilized four datasets for evaluation: CelebA-Test [24], LFW-
+Test [22], WIDER-Test [49], and WebPhoto [45]. The CelebA-Test
+dataset consists of 3000 synthetic images randomly sampled from
+CelebA-HQ [24], a high-resolution image dataset. The LQ images
+represent degraded images with an unknown degradation model
+and parameters via Eq. (18). The LFW-Test dataset comprises 1711
+face images collected from the internet, representing real-world
+data with a certain level of complexity and diversity. The WebPhoto-
+Test dataset consists of 407 face images gathered from various online
+sources. The WIDER-Test dataset comprises 970 severely degraded
+facial images sourced from the WIDER Face dataset [49].
+Metrics. We evaluate our method using the distinct perceptual
+metrics: LPIPS [52], and FID (Fréchet Inception Distance) [19]. For
+completeness, we also include two distortion-based metrics: PSNR
+and SSIM [46]. In particular, when calculating the FID metric, both
+ground truth images and the FFHQ [25] dataset are used as reference
+images. We label them as FID-G and FID-F, respectively.
+Implementation details. In the experiment, we first validated the
+effectiveness of the proposed method on the blind restoration task.
+Then, we further demonstrated its superiority by testing on syn-
+thetic and real datasets. Our method employed the Adam optimizer.
+The default initial learning rate is set to 0.0001, and the learning
+rate does not decay during training. The experiment is conducted
+on the A100 GPUs with a batch size of 16. In the tables, the best and
+second-best results are highlighted in red and blue, respectively.
+Quantitative comparisons of CelebA-test dataset. The results
+obtained from our experiments, as presented in Tab. 1, demonstrate
+that our approach outperforms other methods in terms of quanti-
+tative measures when evaluated on the CelebA-Test dataset. Our
+approach achieves the highest scores in FID-F, and FID-G, indicating
+that our restoration results closely resemble both the distribution
+of real face images and natural images, while also maintaining the
+structural consistency and identity consistency of the restored face.
+Besides, the pixel-level metrics SSIM and PSNR are metrics used
+to evaluate structural similarity and image quality. In these two
+indicators, the performance of our method also reaches the top
+scores among all methods, indicating that the restored face image
+is the best in terms of structural similarity and image quality.
+
+=== PAGE 7 ===
+3D Priors-Guided Diffusion for Blind Face Restoration MM ’24, October 28-November 1, 2024, Melbourne, VIC, Australia
+InputGFPGAN DR2 + SPARPSFRGAN DiffBIR
+Ours
+VQFR
+Codeformer
+Figure 6: Comparisons of blind face restoration methods on the real-world datasets. The results in the first row are from the
+LFW-Test dataset [22], the results in the second row are from the WebPhoto dataset [ 45], and the results in the third and fourth
+rows are from the WIDER-Test dataset [49].
+Datasets Metric LQ PSFRGAN [3] GFPGAN [45] Codeformer [54] VQFR [16] DiffBIR [31] DR2 [48] Ours
+LFW-Test [22]
+FID-F↓
+128.1278 51.1954 54.9781 54.0855 51.1867 40.6470 53.7616 45.6724
+WebPhoto [45] 172.1109 88.3238 120.7289 85.9605 88.0733 94.2337 124.1867 83.8059
+WIDER-Test [49] 201.4464 51.5343 51.7469 39.9693 38.7984 33.1132 54.1510 36.7574
+Table 2: For the performance of blind face restoration, we conducted tests on the real datasets LFW-Test [ 22], WebPhoto [45],
+and WIDER-Test [49] using the Fréchet Inception Distance (FID) [19] as the evaluation metric.
+0102030405060708090100-3
+-2.5
+-2
+-1.5
+-1
+-0.5
+0
+0.5
+1
+TimeSteps
+Value
+Weight of Weighted Scale Add Block
+Weight of noise image feature
+Weight of 3D image feature
+Figure 7: Analysis of the weight in Scale Add Block.
+Quantitative comparisons of the real-world dataset. Further-
+more, our study encompasses a comprehensive quantitative analysis
+of the real-world datasets LFW-Test, WebPhoto, and WIDER-Test
+as delineated in Tab. 2. Notably, our method emerged as the top
+performer on the WebPhoto dataset, showcasing its exceptional
+efficacy in facial restoration. Conversely, our method secured the
+second-highest performance on the LFW-Test dataset, as evidenced
+by the FID evaluation metric. However, real-world images typically
+exhibit lesser degradation compared to synthetically altered images.
+Consequently, the full extent of our method’s optimal facial repair
+capabilities may not be fully realized in such scenarios.
+Qualitative comparisons of CelebA-test dataset. We conduct a
+qualitative analysis of six blind face restoration methods. As shown
+in Fig. 5, the highlighted regions in red boxes indicate significant
+differences among the methods in terms of facial detail restoration.
+Our method, by incorporating 3D facial prior information into the
+diffusion model, better ensures the preservation of facial identity.
+Our approach demonstrates excellent fidelity in facial contours,
+nose, eyes, and mouth, approaching the ground truth.
+Qualitative comparisons of real-world dataset. The qualitative
+outcomes of the real-world dataset are depicted in Fig. 6. Existing
+methodologies struggle to compensate adequately for information
+when the input image experiences extensive degradation. In con-
+trast, our methodology introduces 3D facial prior information, re-
+sulting in visually more appealing outputs, particularly in cases of
+severe degradation in the input image.
+Analysis of the weight in Scale Add Block. As shown in Fig.
+7, the weight of 3D image features in Scale Add Block begins to
+increase as denoising proceeds. The first stage is mainly the re-
+covery of structural information, and the subsequent stages are
+the recovery of detailed texture information [42]. The process will
+destroy certain structural information, and the weight of 3D prior
+
+=== PAGE 8 ===
+MM ’24, October 28-November 1, 2024, Melbourne, VIC, Australia Xiaobin Lu et al.
+LQ
+(a)(b)(c)(d)(e)GT
+Figure 8: Ablation study on the CelebA-Test dataset [ 24]. (a) without a facial 3D image as the guidance condition, (b) without
+TAFB as a fusion block, (c) using TAFB without time Embedding, (d) replacing 3D facial reconstruction images with initial
+recovery results, and (e) our model. Our approach exhibits superior performance in recovering facial details.
+Method Parameters MACs Time(s/image)
+DR2 [48] 179.31M 918.843G 0.694
+DiffBIR [31] 1244.63M 1070.71G 6.786
+Ours 180.51M 308.415G 6.687
+Table 3: The computational complexity comparison between
+our method and other diffusion-based methods.
+information will be reduced. The second stage mainly relies on
+denoising image features, and the weight continues to increase.
+Analysis of computational complexity and inference time.
+The comparative computational complexity analysis between our
+method and existing diffusion-based techniques is outlined in Tab.
+3. Parameter count and Multiply-Accumulate Operations (MACs)
+are calculated using the profile function sourced. Inference time
+measurements are performed using a single NVIDIA A100 GPU.
+4.2 Ablation study
+Ablation settings. To demonstrate the benefits of incorporating
+3D embeddings into the diffusion model for capturing more facial
+feature information while ensuring identity consistency in the re-
+stored images, we conduct ablation experiments on our proposed
+method, considering five experimental groups: (a) removing facial
+3D images as guiding conditions and eliminating the multi-level
+feature extraction module and the TAFB module; (b) excluding
+TAFB as a fusion block and using concatenation to combine facial
+3D images and noisy images, only altering the input channel num-
+bers of the diffusion model; (c) employing a TAFB without time
+embedding; (d) removing the 3DMM reconstruction module and
+directly inputting the output of SwinIR [ 30] into the multi-level
+feature extraction module; and (e) our proposed model.
+Quantitative and qualitative analyses of ablation settings. We
+conduct both quantitative and qualitative analyses on the CelebA-
+Test dataset [24]. As depicted in Fig. 8, Our method shows better
+recovery effects on individual glasses, eyes, mouth, eyebrows, and
+facial structures. Since the 3D prior information can reconstruct the
+area under the glasses, when the 3D prior information is missing,
+the eyes will fail to reconstruct. If the TAFB module fusion function
+or time embedding is not integrated, the generated image is prone
+to over-smoothing because conditional guidance cannot provide
+different guidance information at different time steps.
+Ablation Strategy FID-G↓ LPIPS↓ PSNR↑ SSIM↑
+(a) w/o facial 3D Prior 28.25 0.3536 22.55 0.62
+(b) w/o TAFB 24.40 0.3744 22.55 0.61
+(c) w/o Time Embedding 25.13 0.3585 22.51 0.62
+(d) with initial recovery results 21.50 0.3404 22.20 0.64
+(e) Ours 19.45 0.3304 22.71 0.64
+Table 4: Ablation study on the CelebA-Test dataset.
+We convert the image to grayscale and calculate PSNR and SSIM
+[46]. Based on the findings from the quantitative analysis presented
+in Tab. 4, it is evident that the absence of facial 3D prior information
+as a guide results in the most significant decline across all indicators.
+This is attributed to the crucial role of facial 3D prior information
+in offering a clear facial structure for face restoration and identity
+preservation. Notably, the omission of the temporal embedding
+block in the fusion method leads to a substantial decrease in the
+quality of the restored image. This is due to the inability to provide
+more precise guidance throughout the entire denoising process.
+Directly guide the diffusion model through the initial restored image
+for face restoration. Since there is no 3D facial reconstruction of
+the eye area, the eye area will encounter serious artifacts.
+5 CONCLUSION
+We propose a blind degraded face image restoration model based
+on a 3D facial prior diffusion model, which is inspired by the fact
+that the 3D prior information not only contains facial details but
+also includes identity information. To ensure realism and fidelity,
+3D priors can be regarded as identity and structure constraints
+in the denoising diffusion process to ensure identity consistency
+while generating high-quality images. Specifically, the structural
+features and identity features in the 3D prior information are ex-
+tracted through the multi-level feature extraction module. Given
+that the denoising process of the diffusion model primarily involves
+initial structure refinement followed by texture detail enhancement,
+we propose a Time-Aware Fusion Block (TFAB). TAFB is used to
+effectively and weight-adaptively fuse the features with the fea-
+tures extracted from the noise image to more accurately predict
+the noise and restore the identity and structure consistent with
+face images. Extensive experiments demonstrate that the proposed
+model performs favorably against state-of-the-art algorithms.
+
+=== PAGE 9 ===
+3D Priors-Guided Diffusion for Blind Face Restoration MM ’24, October 28-November 1, 2024, Melbourne, VIC, Australia
+ACKNOWLEDGMENTS
+This work has been supported in part by National Natural Science
+Foundation of China (No. 62322216, 62172409, 62311530686), in
+part by Shenzhen Science and Technology Program (Grant No.
+RCYX20221008092849068, KQTD20221101093559018).
+REFERENCES
+[1] Tomer Amit, Tal Shaharbany, Eliya Nachmani, and Lior Wolf. 2021. Segdiff: Image
+segmentation with diffusion probabilistic models. arXiv preprint arXiv:2112.00390
+(2021).
+[2] Dmitry Baranchuk, Ivan Rubachev, Andrey Voynov, Valentin Khrulkov, and
+Artem Babenko. 2021. Label-efficient semantic segmentation with diffusion
+models. arXiv preprint arXiv:2112.03126 (2021).
+[3] Chaofeng Chen, Xiaoming Li, Lingbo Yang, Xianhui Lin, Lei Zhang, and Kwan-
+Yee K Wong. 2021. Progressive semantic-aware style transformation for blind
+face restoration. In CVPR. 11896–11905.
+[4] Yu Chen, Ying Tai, Xiaoming Liu, Chunhua Shen, and Jian Yang. 2018. Fsrnet:
+End-to-end learning face super-resolution with facial priors. InCVPR. 2492–2501.
+[5] Vishal Chudasama, Kartik Nighania, Kishor Upla, Kiran Raja, Raghavendra Ra-
+machandra, and Christoph Busch. 2021. E-comsupresnet: Enhanced face super-
+resolution through compact network. IEEE Transactions on Biometrics, Behavior,
+and Identity Science 3, 2 (2021), 166–179.
+[6] Yuning Cui, Wenqi Ren, Xiaochun Cao, and Alois Knoll. 2023. Focal network for
+image restoration. In Proceedings of the IEEE international conference on computer
+vision. 13001–13011.
+[7] Yuning Cui, Wenqi Ren, Xiaochun Cao, and Alois Knoll. 2024. Image Restoration
+via Frequency Selection. IEEE Transactions on Pattern Analysis and Machine
+Intelligence 46, 2 (2024), 1093–1108.
+[8] Yuning Cui, Wenqi Ren, Xiaochun Cao, and Alois Knoll. 2024. Revitalizing
+Convolutional Network for Image Restoration. IEEE Transactions on Pattern
+Analysis and Machine Intelligence (2024), 1–16.
+[9] Yuning Cui, Wenqi Ren, Sining Yang, Xiaochun Cao, and Alois Knoll. 2023.
+IRNeXt: Rethinking Convolutional Network Design for Image Restoration. In
+Proceedings of the 40th International Conference on Machine Learning . 6545–6564.
+[10] Yuning Cui, Yi Tao, Zhenshan Bing, Wenqi Ren, Xinwei Gao, Xiaochun Cao, Kai
+Huang, and Alois Knoll. 2023. Selective frequency network for image restoration.
+In The Eleventh International Conference on Learning Representations .
+[11] Yu Deng, Jiaolong Yang, Sicheng Xu, Dong Chen, Yunde Jia, and Xin Tong. 2019.
+Accurate 3d face reconstruction with weakly-supervised learning: From single
+image to image set. In CVPR workshops. 0–0.
+[12] Berk Dogan, Shuhang Gu, and Radu Timofte. 2019. Exemplar guided face image
+super-resolution without facial landmarks. In CVPR workshops. 0–0.
+[13] Ian Goodfellow, Jean Pouget-Abadie, Mehdi Mirza, Bing Xu, David Warde-Farley,
+Sherjil Ozair, Aaron Courville, and Yoshua Bengio. 2014. Generative adversarial
+nets. NIPS 27 (2014).
+[14] Jinjin Gu, Yujun Shen, and Bolei Zhou. 2020. Image processing using multi-code
+gan prior. In CVPR. 3012–3021.
+[15] Shuyang Gu, Dong Chen, Jianmin Bao, Fang Wen, Bo Zhang, Dongdong Chen, Lu
+Yuan, and Baining Guo. 2022. Vector quantized diffusion model for text-to-image
+synthesis. In CVPR. 10696–10706.
+[16] Yuchao Gu, Xintao Wang, Liangbin Xie, Chao Dong, Gen Li, Ying Shan, and
+Ming-Ming Cheng. 2022. VQFR: Blind face restoration with vector-quantized
+dictionary and parallel decoder. In ECCV. Springer, 126–143.
+[17] Qi Guo, Shanmin Pang, Xiaojun Jia, and Qing Guo. 2024. Efficiently Adversar-
+ial Examples Generation for Visual-Language Models under Targeted Transfer
+Scenarios using Diffusion Models. arXiv preprint arXiv:2404.10335 (2024).
+[18] Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. 2016. Deep residual
+learning for image recognition. In CVPR. 770–778.
+[19] Martin Heusel, Hubert Ramsauer, Thomas Unterthiner, Bernhard Nessler, and
+Sepp Hochreiter. 2017. GANs Trained by a Two Time-Scale Update Rule Converge
+to a Local Nash Equilibrium. NIPS (Jan 2017).
+[20] Jonathan Ho, Ajay Jain, and Pieter Abbeel. 2020. Denoising diffusion probabilistic
+models. NIPS 33 (2020), 6840–6851.
+[21] Xiaobin Hu, Wenqi Ren, John LaMaster, Xiaochun Cao, Xiaoming Li, Zechao
+Li, Bjoern Menze, and Wei Liu. 2020. Face super-resolution guided by 3d facial
+priors. In ECCV. Springer, 763–780.
+[22] Gary B Huang, Marwan Mattar, Tamara Berg, and Eric Learned-Miller. 2008. La-
+beled faces in the wild: A database forstudying face recognition in unconstrained
+environments. In Workshop on faces in’Real-Life’Images: detection, alignment, and
+recognition.
+[23] Minguk Kang, Woohyeon Shim, Minsu Cho, and Jaesik Park. 2021. Rebooting
+acgan: Auxiliary classifier gans with stable training.NIPS 34 (2021), 23505–23518.
+[24] Tero Karras, Timo Aila, Samuli Laine, and Jaakko Lehtinen. 2017. Progressive
+growing of gans for improved quality, stability, and variation. arXiv preprint
+arXiv:1710.10196 (2017).
+[25] Tero Karras, Samuli Laine, and Timo Aila. 2019. A style-based generator archi-
+tecture for generative adversarial networks. In CVPR. 4401–4410.
+[26] Tero Karras, Samuli Laine, Miika Aittala, Janne Hellsten, Jaakko Lehtinen, and
+Timo Aila. 2020. Analyzing and improving the image quality of stylegan. In
+CVPR. 8110–8119.
+[27] Bahjat Kawar, Michael Elad, Stefano Ermon, and Jiaming Song. 2022. Denoising
+diffusion restoration models. NIPS 35 (2022), 23593–23606.
+[28] Xiaoming Li, Chaofeng Chen, Shangchen Zhou, Xianhui Lin, Wangmeng Zuo,
+and Lei Zhang. 2020. Blind face restoration via deep multi-scale component
+dictionaries. In ECCV. Springer, 399–415.
+[29] Xiaoming Li, Wenyu Li, Dongwei Ren, Hongzhi Zhang, Meng Wang, and Wang-
+meng Zuo. 2020. Enhanced blind face restoration with multi-exemplar images
+and adaptive spatial feature fusion. In CVPR. 2706–2715.
+[30] Jingyun Liang, Jiezhang Cao, Guolei Sun, Kai Zhang, Luc Van Gool, and Radu
+Timofte. 2021. Swinir: Image restoration using swin transformer. In ICCV. 1833–
+1844.
+[31] Xinqi Lin, Jingwen He, Ziyan Chen, Zhaoyang Lyu, Ben Fei, Bo Dai, Wanli
+Ouyang, Yu Qiao, and Chao Dong. 2023. Diffbir: Towards blind image restoration
+with generative diffusion prior. arXiv preprint arXiv:2308.15070 (2023).
+[32] Tao Lu, Yuanzhi Wang, Yanduo Zhang, Yu Wang, Liu Wei, Zhongyuan Wang,
+and Junjun Jiang. 2021. Face hallucination via split-attention in split-attention
+network. In ACM MM. 5501–5509.
+[33] Andreas Lugmayr, Martin Danelljan, Andres Romero, Fisher Yu, Radu Timofte,
+and Luc Van Gool. 2022. Repaint: Inpainting using denoising diffusion proba-
+bilistic models. In CVPR. 11461–11471.
+[34] Alexander Quinn Nichol and Prafulla Dhariwal. 2021. Improved denoising diffu-
+sion probabilistic models. In International Conference on Machine Learning. PMLR,
+8162–8171.
+[35] Ravi Ramamoorthi and Pat Hanrahan. 2001. An efficient representation for
+irradiance environment maps. In Proceedings of the 28th annual conference on
+Computer graphics and interactive techniques . 497–500.
+[36] Wenqi Ren, Jiaolong Yang, Senyou Deng, David Wipf, Xiaochun Cao, and Xin
+Tong. 2019. Face video deblurring using 3D facial priors. In Proceedings of the
+IEEE/CVF international conference on computer vision . 9388–9397.
+[37] Robin Rombach, Andreas Blattmann, Dominik Lorenz, Patrick Esser, and Björn
+Ommer. 2022. High-resolution image synthesis with latent diffusion models. In
+CVPR. 10684–10695.
+[38] Chitwan Saharia, William Chan, Huiwen Chang, Chris Lee, Jonathan Ho, Tim
+Salimans, David Fleet, and Mohammad Norouzi. 2022. Palette: Image-to-image
+diffusion models. In ACM SIGGRAPH 2022 Conference Proceedings . 1–10.
+[39] Chitwan Saharia, Jonathan Ho, William Chan, Tim Salimans, David J Fleet, and
+Mohammad Norouzi. 2022. Image super-resolution via iterative refinement. IEEE
+Transactions on Pattern Analysis and Machine Intelligence 45, 4 (2022), 4713–4726.
+[40] Axel Sauer, Katja Schwarz, and Andreas Geiger. 2022. Stylegan-xl: Scaling style-
+gan to large diverse datasets. In ACM SIGGRAPH 2022 conference proceedings .
+1–10.
+[41] Chenyang Si, Ziqi Huang, Yuming Jiang, and Ziwei Liu. 2023. Freeu: Free lunch
+in diffusion u-net. arXiv preprint arXiv:2309.11497 (2023).
+[42] Lingchen Sun, Rongyuan Wu, Zhengqiang Zhang, Hongwei Yong, and Lei Zhang.
+2023. Improving the Stability of Diffusion Models for Content Consistent Super-
+Resolution. arXiv preprint arXiv:2401.00877 (2023).
+[43] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones,
+Aidan N Gomez, Łukasz Kaiser, and Illia Polosukhin. 2017. Attention is all
+you need. NIPS 30 (2017).
+[44] Haodi Wang, Xiaojun Jia, and Xiaochun Cao. 2024. EAT-Face: Emotion-
+Controllable Audio-Driven Talking Face Generation via Diffusion Model. In 2024
+IEEE 18th International Conference on Automatic Face and Gesture Recognition
+(FG). IEEE, 1–10.
+[45] Xintao Wang, Yu Li, Honglun Zhang, and Ying Shan. 2021. Towards real-world
+blind face restoration with generative facial prior. In CVPR. 9168–9178.
+[46] Z. Wang, A.C. Bovik, H.R. Sheikh, and E.P. Simoncelli. 2004. Image quality
+assessment: from error visibility to structural similarity. IEEE Transactions on
+Image Processing (Apr 2004), 600–612. https://doi.org/10.1109/tip.2003.819861
+[47] Zhouxia Wang, Jiawei Zhang, Runjian Chen, Wenping Wang, and Ping Luo. 2022.
+Restoreformer: High-quality blind face restoration from undegraded key-value
+pairs. In CVPR. 17512–17521.
+[48] Zhixin Wang, Ziying Zhang, Xiaoyun Zhang, Huangjie Zheng, Mingyuan Zhou,
+Ya Zhang, and Yanfeng Wang. 2023. Dr2: Diffusion-based robust degradation
+remover for blind face restoration. In CVPR. 1704–1713.
+[49] Shuo Yang, Ping Luo, Chen-Change Loy, and Xiaoou Tang. 2016. Wider face: A
+face detection benchmark. In CVPR. 5525–5533.
+[50] Tao Yang, Peiran Ren, Xuansong Xie, and Lei Zhang. 2021. Gan prior embedded
+network for blind face restoration in the wild. In CVPR. 672–681.
+[51] Zongsheng Yue and Chen Change Loy. 2022. DifFace: Blind Face Restoration
+with Diffused Error Contraction. arXiv preprint arXiv:2212.06512 (2022).
+[52] Richard Zhang, Phillip Isola, Alexei A Efros, Eli Shechtman, and Oliver Wang.
+2018. The unreasonable effectiveness of deep features as a perceptual metric. In
+CVPR. 586–595.
+
+=== PAGE 10 ===
+MM ’24, October 28-November 1, 2024, Melbourne, VIC, Australia Xiaobin Lu et al.
+[53] Peng Zhou, Lingxi Xie, Bingbing Ni, Cong Geng, and Qi Tian. 2021. Omni-gan:
+On the secrets of cgans and beyond. In ICCV. 14061–14071.
+[54] Shangchen Zhou, Kelvin Chan, Chongyi Li, and Chen Change Loy. 2022. Towards
+robust blind face restoration with codebook lookup transformer. NIPS 35 (2022),
+30599–30611.
+[55] Feida Zhu, Junwei Zhu, Wenqing Chu, Xinyi Zhang, Xiaozhong Ji, Chengjie
+Wang, and Ying Tai. 2022. Blind face restoration via integrating face shape and
+generative priors. In CVPR. 7662–7671.

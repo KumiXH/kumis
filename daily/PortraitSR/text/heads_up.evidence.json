@@ -1,0 +1,137 @@
+{
+  "key": "heads_up",
+  "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\02_portrait_scene\\heads_up_2510.09924.pdf",
+  "page_count": 20,
+  "first_page_excerpt": "Preprint\nHEADSUP! HIGH-FIDELITYPORTRAITIMAGE\nSUPER-RESOLUTION\nRenjie Li1, Zihao Zhu 1, Xiaoyu Wang2, Zhengzhong Tu1∗\n1Texas A&M University,2Topaz Labs\nFigure 1: Different approaches to solve the portrait image super resolution (ISR) task:(a)General\nISR models like (Wu et al., 2024a) may produce unnatural faces when applied to portrait photos\ndue to the lack of face-specific supervision;(b)While introducing an extra face ISR expert (Zhou\net al., 2022) can generate a more natural face, theblendingprocedure will introduce inconsistent\nboundaries.(c)Our portrait ISR approach, HeadsUp, can generate a natural portrait photo without\nintroducing inconsistent boundaries around faces using an all-in-one face-aware restoration model.\nABSTRACT\nPortrait pictures, which typically feature both human subjects and natural back-\ngrounds, are one of the most prevalent forms of photography on social media.\nExisting image super-resolution (ISR) techniques generally focus either on generic\nreal-world images or strictly aligned facial images (i.e., face super-resolution). In\npractice, separate models are blended to handle portrait photos: the face specialist\nmodel handles the face region, and the general model processes the rest. However,\nthese blending approaches inevitably introduce blending or boundary artifacts\naround the facial regions due to different model training recipes, while human\nperception is particularly sensitive to facial fidelity. To overcome these limitations,\nwe study the portrait image supersolution (PortraitISR) problem, and propose\nHeadsUp, a single-step diffusion model that is capable of seamlessly restoring\nand upscaling portrait images in an end-to-end manner. Specifically, we build\nour model on top of a single-step diffusion model and develop a face supervision\nmechanism to guide the model in focusing on the facial region. We then integrate\na reference-based mechanism to help with identity restoration, reducing face am-\nbiguity in low-quality face restoration. Additionally, we have built a high-quality\n4K portrait image ISR dataset dubbedPortraitSR-4K, to support model training\nand benchmarking for portrait images. Extensive experiments show that HeadsUp\nachieves state-of-the-art performance on the PortraitISR task while maintaining\ncomparable or higher performance on both general image and aligned face datasets.\n∗tzz@tamu.edu\n1\narXiv:2510.09924v1  [cs.CV]  10 Oct 2025",
+  "figure_candidates": [
+    {
+      "page": 1,
+      "caption": "Figure 1: Different approaches to solve the portrait image super resolution (ISR) task:(a)General"
+    },
+    {
+      "page": 3,
+      "caption": "Figure 2:Pipeline of HeadsUp.Starting from a pre-trained latent diffusion model, we add a LoRA"
+    },
+    {
+      "page": 6,
+      "caption": "Figure 3:Qualitative Results.While general ISR approaches can achieve good overall quality, they"
+    },
+    {
+      "page": 8,
+      "caption": "Figure 4:Ablation Studies.Us-"
+    },
+    {
+      "page": 16,
+      "caption": "Figure 5: Visualization of some portrait images sampled from PortraitSR-4K."
+    },
+    {
+      "page": 17,
+      "caption": "Fig. 7, which demonstrate our competitive performance compared to the state-of-the-art models. The"
+    },
+    {
+      "page": 18,
+      "caption": "Figure 6:Visual Comparison on PortraitISR.OSEDiff-Face is a blending-based approach, the"
+    },
+    {
+      "page": 19,
+      "caption": "Figure 7:Visual Comparison on GISR.Our model achieves competitive results."
+    },
+    {
+      "page": 20,
+      "caption": "Figure 8:Visual Comparison on FISR.Our model achieves performance comparable to that of the"
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 6,
+      "caption": "Table 1:Comparison on Face ISR.We compare"
+    },
+    {
+      "page": 7,
+      "caption": "Table 2:Comparison on PortraitISR.We compare HeadsUp with state-of-the-art general ISR"
+    },
+    {
+      "page": 8,
+      "caption": "Table 3:Comparison on General ISR.We compare HeadsUp with state-of-the-art GISR models on"
+    },
+    {
+      "page": 8,
+      "caption": "Table 4:Ablation Studies.We ablate the key component of HeadsUp. Compare the first and fourth"
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      2,
+      3,
+      4,
+      5,
+      9,
+      10,
+      11,
+      16
+    ],
+    "identity": [
+      1,
+      2,
+      4,
+      5,
+      7,
+      8,
+      9
+    ],
+    "portrait_detail": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+    ],
+    "efficiency": [
+      2,
+      3,
+      4,
+      5,
+      9,
+      13,
+      14,
+      16,
+      18,
+      19,
+      20
+    ],
+    "datasets": [
+      1,
+      2,
+      6,
+      8,
+      10,
+      16
+    ],
+    "limitations": [
+      1
+    ]
+  },
+  "source_urls": [
+    {
+      "page": 5,
+      "url": "https://huggingface.co/datasets/bghira/photo-concept-bucket"
+    },
+    {
+      "page": 10,
+      "url": "https://github.com/chaofengc/IQA-PyTorch"
+    }
+  ],
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\heads_up.txt"
+}

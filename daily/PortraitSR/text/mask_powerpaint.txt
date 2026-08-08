@@ -1,0 +1,750 @@
+=== PAGE 1 ===
+A Task is Worth One Word:
+Learning with Task Prompts for High-Quality
+Versatile Image Inpainting
+Junhao Zhuang1* Yanhong Zeng2 Wenran Liu2 Chun Yuan1† Kai Chen2†
+1 Tsinghua Shenzhen International Graduate School, Tsinghua University
+2 Shanghai Artificial Intelligence Laboratory
+{zhuangjh23@mails, yuanc@sz}.tsinghua.edu.cn
+{zengyanhong, liuwenran, chenkai}@pjlab.org.cn
+Input + Mask Bald eagle Electric bulb Glass vase Gundam robot Hot air balloon Ice-cream Penguin
+Input + Mask SD-Inpainting Adobe Firefly PowerPaint Input + Mask 𝛼𝛼= 0.98 Input + Mask 𝛼𝛼= 0.5
+Fig. 1: PowerPaint is the first versatile image inpainting model that simultaneously
+achievesstate-of-the-artresultsinvariousinpaintingtasks,includingtext-guidedobject
+inpainting, object removal, shape-guided object inpainting with controllable shape-
+fitting, outpainting, etc. [Best viewed in color with zoom-in]
+Abstract. Advancing image inpainting is challenging as it requires fill-
+ing user-specified regions for various intents, such as background filling
+and object synthesis. Existing approaches focus on either context-aware
+filling or object synthesis using text descriptions. However, achieving
+both tasks simultaneously is challenging due to differing training strate-
+gies. To overcome this challenge, we introducePowerPaint, the first
+high-quality and versatile inpainting model that excels in multiple in-
+painting tasks. First, we introduce learnable task prompts along with
+tailored fine-tuning strategies to guide the model’s focus on different
+inpainting targets explicitly. This enables PowerPaint to accomplish var-
+ious inpainting tasks by utilizing different task prompts, resulting in
+state-of-the-art performance. Second, we demonstrate the versatility of
+* Work done during an internship in Shanghai Artificial Intelligence Lab.
+† Corresponding authors.
+
+=== PAGE 2 ===
+2 J. Zhuang et al.
+the task prompt in PowerPaint by showcasing its effectiveness as a neg-
+ative prompt for object removal. Moreover, we leverage prompt interpo-
+lation techniques to enable controllable shape-guided object inpainting,
+enhancingthemodel’sapplicabilityinshape-guidedapplications.Finally,
+we conduct extensive experiments and applications to verify the effec-
+tiveness of PowerPaint. We release our codes and models on our project
+page: https://powerpaint.github.io/.
+Keywords: Image inpainting · Object removal · Diffusion model
+1 Introduction
+Image inpainting aims to fill in user-specified regions in an image with plausible
+content [4]. It has been widely applied in various practical domains, including
+photo restoration [3,17,19] and object removal [21,29,36]. Recently, with the
+increasing popularity of text-to-image (T2I) models [23,24,26,40], inpainting
+has become even more essential. It provides a flexible and interactive approach
+to mask unsatisfactory regions in generated images and regenerate them for
+achieving perfect results [32,33].
+Despite the significant practical benefits, achieving high-quality versatile im-
+ageinpaintingremainsachallenge[19,29,36].Earlyworksfocusoncontext-aware
+image inpainting, where models are trained by randomly masking a region in an
+image and reconstructing the original content [19,21,36]. Such a design aims to
+incorporate the image context into the inpainted regions, resulting in coherent
+and visually pleasing completions. However, these models encounter challenges
+when it comes to synthesizing novel objects since they rely solely on the context
+to infer the missing content [29,36]. Recent advancements have seen a shift to-
+wards text-guided image inpainting, where a pre-trained T2I model is fine-tuned
+using masks and text descriptions, resulting in remarkable outcomes in object
+synthesis [24,32–34]. However, these approaches introduce a bias that assumes
+the presence of objects in the masked regions. To remove unwanted objects for
+a clean background, these models often require extensive prompt engineering
+or complex workflow. Moreover, these methods remain vulnerable to generating
+random artifacts that lack coherence with the image context [32,33].
+In this paper, we introducePowerPaint, the first versatile inpainting model
+that excels in both text-guided object inpainting and context-aware image in-
+painting. Our approach capitalizes on the use of distinct learnable task prompts
+and tailored training strategies for each task, enabling PowerPaint to handle
+multiple inpainting tasks within a single model. Specifically, PowerPaint is built
+upon a pre-trained T2I diffusion model [24]. To fine-tune the T2I model for
+different inpainting tasks, we introduce two learnable task prompts,Pobj and
+Pctxt, for text-guided object inpainting and context-aware image inpainting,
+respectively. Pobj is optimized by using object bounding boxes as masks and
+appending Pobj as a suffix to the text description, while Pctxt is optimized
+with random masks and Pctxt itself as the text prompt. Through such train-
+ing, Pobj is able to prompt the PowerPaint to synthesize novel objects based
+
+=== PAGE 3 ===
+PowerPaint for High-Quality Versatile Image Inpainting 3
+on text descriptions, while usingPctxt can fill in coherent results according to
+the image context without any additional text hints. Moreover, the learned task
+prompt in PowerPaint has effectively captured the intrinsic pattern of the task
+and can be extended to facilitate powerful object removal. In particular, existing
+T2I models employ a classifier-free guidance sampling strategy, where a nega-
+tive prompt can effectively suppress undesired effects [8,13]. By leveraging this
+sampling strategy and designatingPctxt as the positive prompt andPobj as the
+negative prompt, PowerPaint effectively prevents the generation of unwanted
+objects and promotes seamless background filling in the target region, leading
+to a significant improvement in object removal [24].
+To demonstrate the versatility of our task prompts, we further explore a
+novel prompt interpolation operation for object inpainting, enabling controllable
+shape-fitting degree to the mask. This task involves balancing text-guided object
+inpaintinginthecentralregionofthemaskwithcontext-awarebackgroundfilling
+near the periphery. During training, we randomly expand object segmentation
+masks to create inpainting masks and interpolate betweenPctxt and a new task
+prompt, Pshape, based on the expanded area ratio. After training, users can
+control the shape-fitting degree to the mask by interpolating betweenPctxt and
+Pshape. Our main contributions are as follows:
+–To the best of our knowledge, PowerPaint is the first versatile inpainting
+model that achieves state-of-the-art results in multiple inpainting tasks.
+–We demonstrate the versatility of the task prompts in PowerPaint, show-
+casing their capability for object removal by negative prompts and object
+inpainting with controllable shape-fitting by prompt interpolation.
+–We conducted extensive experiments including both quantitative and qual-
+itative evaluations, to verify the effectiveness of PowerPaint in addressing a
+wide range of inpainting tasks.
+2 Related Work
+Image Inpainting.With the significant progress of deep learning, some works
+have gained remarkable achievements by leveraging generative adversarial net-
+works [3–5,7,10,36–39]. These approaches often randomly mask any regions in
+an image and are optimized to recover the masked region [20,21,36]. Through
+such optimization, these models are able to fill in the region with content that is
+coherent with the image context. However, these approaches can not infer new
+objects from the image context and fail to synthesize novel contents.
+Recent advancements have been greatly promoted by text-to-image diffusion
+models [8,12,23,26]. Specifically, SD-Inpainting [24] and ControlNet-Inpainting
+[40] are both built upon the large-scale pre-trained text-to-image model,i.e.,
+Stable Diffusion [24]. They fine-tune a pre-trained T2I model for inpainting with
+random masks as the inpainting masks and image captions as the text prompt.
+Despite some good results, these models often suffer from text misalignment and
+fail to synthesize objects that align with the text prompt. Smartbrush and Ima-
+gen Editor propose to address this issue by using paired object-description data
+
+=== PAGE 4 ===
+4 J. Zhuang et al.
+for training [32,33]. However, these models tend to assume that there are always
+objects in the missing regions, losing the ability to perform context-aware image
+inpainting. We highlight that, through learning different task prompts for differ-
+ent tasks, PowerPaint significantly improves the alignment of text and context,
+leading to state-of-the-art results in both context-aware image inpainting and
+text-guided object inpainting.
+Adapting Text-to-Image Models.Text-to-image models have achieved re-
+markable advances recently, showcasing their ability to generate realistic and
+diverse images based on natural language descriptions [23,24,26]. These mod-
+els have opened up a wide range of applications that utilize their generative
+power [9,14,25,28,30,42]. One notable example is DreamBooth, which fine-
+tunes the model to associate specific visual concepts with textual cues, enabling
+users to create personalized images from text [25]. Textual Inversion uses a sin-
+gle word vector to encode a unique and novel visual concept, which can then
+be inverted to generate an image [9]. Furthermore, Kumari et al. [14] propose a
+method to simultaneously learn multiple visual concepts and seamlessly blend
+them with existing ones by optimizing a few parameters. Instead of learning
+concept-specific prompts, we propose the utilization of task-specific prompts
+to guide text-to-image models to achieve various tasks within a single model.
+Through fine-tuning both the textual embeddings and model parameters, we
+establish a robust alignment between the task prompts and the desired targets.
+3 PowerPaint
+To fine-tune a pre-trained text-to-image model for high-quality and versatile
+inpainting, we introduce three learnable task prompts:Pobj, Pctxt, andPshape,
+as shown in Figure 2. By incorporating these task prompts along with tailored
+training strategies, PowerPaint is able to deliver outstanding performance in
+various inpainting tasks, including text-guided object inpainting, context-aware
+image inpainting, object removal, and shape-guided object inpainting.
+3.1 Preliminary
+PowerPaint is built upon the well-trained text-to-image diffusion model,i.e.,
+Stable Diffusion, which comprises forward and reverse processes [24]. In the
+forward process, a noise is added to a clean imagex0 in a closed form,
+xt = √ ¯αtx0 +
+√
+1 − ¯αtϵ, ϵ ∼ N (0, I), (1)
+where xt is the noisy image at timestep t, and ¯αt denotes the corresponding
+noise level. In the reverse process, a neural network parameterized byθ, denoted
+as ϵθ, is optimized to predict the added noiseϵt. This enables the generation
+of images by denoising step by step from Gaussian noise. A classical diffusion
+model is typically optimized by:
+L = Ex0,t,ϵt ∥ϵt − ϵθ(xt, t)∥2
+2. (2)
+
+=== PAGE 5 ===
+PowerPaint for High-Quality Versatile Image Inpainting 5
+Denoising U-Net 𝜀𝜀𝜃𝜃
+Q
+K
+V
+Q
+K
+V
+Q
+K
+V
+Q
+K
+V
+CLIP Text
+EncoderPrompt: 𝐏𝐏𝒄𝒄𝒄𝒄𝒄𝒄𝒄𝒄
+CLIP Text
+Encoder
+Prompt: Parrot 𝐏𝐏𝑜𝑜𝑜𝑜𝑜𝑜
+CLIP Text
+Encoder
+Positive Prompt: 𝐏𝐏𝒄𝒄𝒄𝒄𝒄𝒄𝒄𝒄
+Negative Prompt: 𝐏𝐏𝒐𝒐𝒐𝒐𝒐𝒐
+Parrot 𝐏𝐏𝒔𝒔𝒔𝒔𝒔𝒔𝒔𝒔𝒔𝒔
+Parrot 𝐏𝐏𝒄𝒄𝒄𝒄𝒄𝒄𝒄𝒄
+× 𝛼𝛼
+× 1 − 𝛼𝛼
++Prompt: CLIP Text
+Encoder
+1 2 3 4
+1
+2
+3
+4
+Text-Guided Object Inpainting
+Context-aware Image Inpainting
+Shape-Guided Object Inpainting
+Object Removal
+𝛼𝛼= 0.7
+𝛼𝛼= 0.5 𝛼𝛼= 0.3
+𝛼𝛼= 0.9
+21
+3 43
+2
+4
+1
+Text Condition Generated Images
+Fig. 2: Overview . PowerPaint fine-tunes a text-to-image model with two learnable
+task prompts, i.e.,Pobj and Pctxt, for text-guided object inpainting and context-aware
+image inpainting, respectively. After training,Pobj can be further used as a negative
+prompt with classifier-free guidance sampling for effective object removal. We further
+introduce Pshape for shape-guided object inpainting, which can be extended by prompt
+interpolation with Pctxt to control the degree of shape-fitting for object inpainting.
+To fine-tune Stable Diffusion for inpainting, PowerPaint begins by extending the
+first convolutional layer of the denoising networkϵθ with five additional channels
+specifically designed for the masked imagex0 ⊙(1 − m) and masksm. The input
+to PowerPaint consists of the concatenation of the noisy latent, masked image,
+and masks, denoted asx′
+t. Additionally, the denoising process can be guided by
+additional information such as texty. The model is optimized by:
+L = Ex0,m,t,y,ϵt ∥ϵt − ϵθ(x′
+t, τθ(y), t)∥2
+2, (3)
+where τθ(·) is the CLIP text encoder. Importantly, PowerPaint extends the text
+condition by incorporating learnable task prompts, which serve as guidance for
+the model to accomplish diverse inpainting tasks.
+3.2 Learning with Task Prompts
+Context-aware image inpainting and text-guided object inpainting are promi-
+nent applications in the field of inpainting, each demanding distinct training
+strategies for optimal results [21,24,36]. To seamlessly integrate these two dis-
+tinct objectives into a unified model, we propose the use of two learnable task
+prompts dedicated to each task. These task prompts serve as guidance for the
+model, enabling it to effectively accomplish the desired inpainting targets.
+Context-aware Image Inpainting.Context-aware image inpainting aims to
+fill in the user-specified regions with content that seamlessly integrates with the
+surrounding image context. Previous studies have shown that training models
+with random masks and optimizing them to reconstruct the original image yields
+the best results [19,21,36]. This training strategy effectively encourages the
+
+=== PAGE 6 ===
+6 J. Zhuang et al.
+(a) Original Image (b) Adobe Firefly (c) PowerPaint
+Fig. 3: To remove objects from crowded image context, the commercial product, Adobe
+Firefly [1], tends to copy from the context (as circled in the green bounding box), while
+PowerPaint successfully erases the objects.
+model to attend to the image context and fill in coherent content. To achieve
+this, we introduce a learnable task prompt, denoted asPctxt, which serves as the
+text condition during training. Additionally, we randomly mask the image region
+as part of the training process. During model fine-tuning,Pctxt is optimized by:
+pctxt = arg min
+p
+Ex0,m,t,p,ϵt ∥ϵt − ϵθ(x′
+t, τθ(p), t)∥2
+2, (4)
+where p is randomly initialized as an array of tokens and then used as input to
+the text encoder. This formulation enables users to seamlessly fill in regions with
+coherent content without explicitly specifying the desired content.
+Text-guided Object Inpainting.Synthesizing novel objects that cannot be
+inferred solely from the image context often requires additional guidance pro-
+vided by text prompts. Successful approaches in this area have leveraged paired
+object-caption data during training, allowing the model to generate objects that
+align with the provided text prompts [24,32,33]. To achieve this, we introduce a
+learnable task prompt, denoted asPobj, which serves as the task hint for text-
+guided object inpainting. Specifically,Pobj shares similar optimization functions
+as Equation (4), but with two differences. First, for a given training image, we
+utilize the detected object’s bounding box as the inpainting mask. Second, we
+append Pobj as a suffix to the text description of the masked region, which serves
+as the input to the text encoder. After training, our model effectively learns to
+inpaint images based on either the given context or text descriptions.
+Object Removal.PowerPaint can be used for object removal, where users can
+use a mask to cover the entire object and condition the model on the task prompt
+Pctxt to fill in coherent content. However, it becomes more challenging when
+attempting to remove objects in crowded contexts. As shown in Figure 3, even
+state-of-the-artsolutionslikeAdobeFirefly[1],whilegeneratingvisuallypleasing
+content, tend to synthesize objects within the masked region. We suspect that
+the inherent network structure, which includes attention layers, leads to the
+model paying excessive attention to the context. This makes it easier for the
+model to ‘copy’ information from the crowded context and ‘paste’ it into the
+masked region, resulting in object synthesis instead of removal.
+
+=== PAGE 7 ===
+PowerPaint for High-Quality Versatile Image Inpainting 7
+𝛼𝛼 = 𝑆𝑆𝑤𝑤𝑤𝑤𝑤𝑤𝑤𝑤𝑤
+𝑆𝑆𝑤𝑤𝑤𝑤𝑤𝑤𝑤𝑤𝑤+ 𝑆𝑆𝑔𝑔𝑔𝑔𝑔𝑔𝑔𝑔
+Dilation
+CLIP Text
+Encoder
+A boy 𝐏𝐏𝒔𝒔𝒔𝒔𝒔𝒔𝒔𝒔𝒔𝒔
+A boy 𝐏𝐏𝒄𝒄𝒄𝒄𝒄𝒄𝒄𝒄
+× 𝛼𝛼
+× 1 − 𝛼𝛼
++
+4
+Input Image
+Fig. 4: Illustration of prompt interpolation. To enable object inpainting with a
+controllable shape-fitting degree, we randomly expand the object segmentation mask
+and interpolate Pctxt and Pshape according to the expanded area ratio.
+Fortunately, Pctxt and Pobj can be combined with a powerful classifier-free
+guidance sampling strategy [13] to achieve effective object removal. This strategy
+transforms the denoising process into the following form:
+eϵθ = w · ϵθ(x′
+t, τθ(pctxt), t) + (1 − w) · ϵθ(x′
+t, τθ(pobj), t), (5)
+where Pctxt is considered a positive prompt, whilePobj is considered a negative
+prompt, and w is the guidance scale. The classifier-free guidance strategy works
+by decreasing the likelihood conditioned on the negative prompt and increasing
+the likelihood conditioned on the positive prompt for the sample. With this
+design,thelikelihoodofgeneratingobjectscanbeeffectivelydecreasedtoachieve
+object removal, as demonstrated in Figure 3. This outcome indicates that the
+task prompts in PowerPaint have successfully captured the patterns associated
+with different inpainting tasks.
+Controllable Shape Guided Object Inpainting.In this part, we explore
+shape-guided object inpainting, where the generated object aligns well with the
+given mask shape. To achieve this, we introduce a third task prompt, denoted
+as Pshape, which is trained using precise object segmentation masks and object
+descriptions,followingpreviousworks[33].However,wehavenoticedthatrelying
+solely onPshape can lead the model to overfit the mask shape while disregarding
+the overall shape of the object. For instance, when provided with the prompt “a
+cat" and a square mask, the model may generate cat textures within the square
+mask without considering the realistic shape of a cat.
+Toaddresstheabovelimitationandofferusersamorereasonableandcontrol-
+lable shape-guided object inpainting, we propose task prompt interpolation. We
+start by randomly dilating the object segmentation masks using a convolutional-
+based dilation operationD, which is denoted as,
+m′ = D(m, k, it) (6)
+where k denotes the kernel size, andit denotes the iteration of dilation. This
+generates a set of masks with varying fitting degrees to the object shape. For
+each training mask, we calculate the area ratio,α, representing the fitting degree.
+A larger α indicates a closer fit to the mask shape, while a smallerα indicates
+a looser fit. To perform prompt interpolation, we append Pshape and Pctxt
+as suffixes to the text descriptiony and separately input them into the CLIP
+
+=== PAGE 8 ===
+8 J. Zhuang et al.
+Text Encoder. This yields two text embeddings. By linearly interpolating these
+embeddings based on the value ofα, as shown in Figure 4, we obtain the final
+text embedding, which is denoted as:
+τ ′
+θ = (1 − α) · τθ(y, pctxt) + α · τθ(y, pshape). (7)
+After training, users can adjust the value ofα to control the fitting degree of the
+generated objects to the mask shape.
+3.3 Implementation Details
+We fine-tune the task prompts in the embedding layer of the CLIP text encoder
+and the U-Net based on the SD v1.5 model. PowerPaint was trained for 25K iter-
+ations on 8 A100 GPUs with a batch size of 1024 and a learning rate of 1e-5. We
+use the semantic segmentation subset of OpenImage v6 [15] as the main dataset
+for multi-task prompt tuning. In addition, following Smartbrush [33], we use
+segmentation labels and BLIP captions [16] as local text descriptions. Simulta-
+neously, we treat the text-to-image generation task as a special case of inpainting
+(mask everything), and use the image/text pairs from the LAION-Aesthetics v2
+5+ [27] for training. The main task and the text-to-image generation task have
+probabilities of 80% and 20%, respectively, in the training phase.
+4 Experiments
+Baselines. We select the most recent and competitive inpainting approaches for
+fair comparisons. We list them with brief introductions below:
+– LaMa[29] is built upon a generative adversarial network [10] and achieves
+state-of-the-art in large mask inpainting.
+– LDM-Inpainting[24] is finetuned from a text-to-image latent diffusion
+model for inpainting without text prompt.
+– BlendedDiffusion[2]achievestext-guidedinpaintingbyleveragingalanguage-
+image model (CLIP) [22].
+– Stable Diffusion[24] achieves text-guided inpainting by blending the un-
+masked latent in each denoising step.
+– SD-Inpainting[24] fine-tuned Stable Diffusion with random masks and
+image caption for inpainting.
+– CN-Inpainting[40] controls Stable Diffusion for inpainting by a controlnet
+that encodes masked images.
+– SmartBrush[33] fine-tuned Stable Diffusion with object masks of varying
+granularity and localized text descriptions.
+Evaluation Benchmarks.To make fair comparisons with SOTA approaches,
+we adopt the most commonly-used datasets for inpainting following previous
+works [24,29,33]. First, we evaluate object inpainting onOpenImages [15] and
+
+=== PAGE 9 ===
+PowerPaint for High-Quality Versatile Image Inpainting 9
+T able 1:Quantitative comparisons with state-of-the-art models for text-guided object
+inpainting with bounding box masks.
+OpenImages [15] MSCOCO [18]
+Local-FID↓FID↓CLIP Score↑Local-FID↓FID↓CLIP Score↑
+Blended Diffusion [2] 35.66 8.07 27.05 35.11 8.66 24.91
+Stable Diffusion [24] 16.75 6.59 26.79 20.28 7.15 25.13
+ControlNet-Inpainting [40] 14.74 5.66 26.87 17.10 6.18 25.01
+SD-Inpainting [24] 12.71 4.76 26.66 15.77 5.65 24.81
+Smartbrush [33] 9.57 4.40 27.61 11.77 5.20 25.89
+PowerPaint 9.41 4.38 27.56 11.61 5.12 25.95
+T able 2: Quantitative comparisons with state-of-the-art models for shape-guided ob-
+ject inpainting with object layout masks.
+OpenImages [15] MSCOCO [18]
+Local-FID↓FID↓CLIP Score↑Local-FID↓FID↓CLIP Score↑
+Blended Diffusion [2] 22.69 6.87 26.60 26.22 6.31 24.89
+Stable Diffusion [24] 13.94 4.98 26.47 18.23 5.44 24.60
+ControlNet-Inpainting [40] 11.96 4.54 26.45 17.15 5.25 24.58
+SD-Inpainting [24] 10.73 3.93 26.31 16.15 5.09 24.53
+Smartbrush [33] 8.01 3.65 27.10 11.11 4.67 25.60
+PowerPaint 7.96 3.61 27.14 11.04 4.61 25.62
+MSCOCO [18] datasets, following Smartbrush [33]. Each dataset comprises ap-
+proximately 10K images and corresponding masks. Second, we evaluate context-
+aware image inpainting onPlaces2 [43]. We sample 10k images from the test set
+of Places2 and generate random masks as inpainting masks following Rombach
+et al. [24,29]. In this setting, there is no text prompt provided for evaluation and
+the inpainting model should fill in regions according to image contexts. Finally,
+we evaluate the performance of image outpainting without text prompt on 10K
+images from Flickr-Scenery, which are the most representative and natural
+use-cases of outpainting, following Chenget al . [6,31,35].
+Evaluation Metrics.We use five Fréchet Inception Distance (FID) [11], Local-
+FID [33],CLIP Score [22],LPIPS [41], andaestheticscore [27] asnumericmetrics
+for different inpainting tasks, following common settings [6,24,29,32,33]. Specif-
+ically, we use FID and Local-FID for global and local image visual quality. The
+CLIP Score is used in text-guided object inpainting to evaluate the alignment
+of generated visual content with the text prompt. Since context-aware image
+inpainting aims at recovering the randomly masked regions according to image
+contexts, we use the original image as ground truths and use LPIPS to evalu-
+ate the reconstruction performance. Finally, we introduce an aesthetic score for
+outpainting, which aims to evaluate the extended content for pleasing scenery.
+4.1 Comparisons with State-of-the-Art
+Quantitative Comparisons.We report quantitative evaluation on various in-
+painting benchmarks following previous works [29,33]. For text-guided object
+
+=== PAGE 10 ===
+10 J. Zhuang et al.
+T able 3:Quantitative comparisons for context-aware image inpainting on Places2 [43].
+40-50% masked All samples
+FID↓ LPIPS↓ FID↓LPIPS↓
+LaMa [29] 21.07 0.2133 3.48 0.1193
+LDM-Inpaint [24] 21.42 0.2317 3.42 0.1325
+SD-Inpainting [24] 19.73 0.2322 3.03 0.1312
+SD-Inpainting(‘background’) 19.21 0.2290 2.82 0.1293
+SD-Inpainting(‘scenery’) 18.93 0.2312 2.84 0.1306
+SmartBrush [33](‘scenery’) 87.21 0.2812 15.21 0.1579
+PowerPaint 17.910.2225 2.59 0.1263
+T able 4: Quantitative comparisons for outpainting on Flickr-Scenery [6].
+FID↓ Aesthetic Score↑
+LaMa [29] 16.63 5.01
+LDM-Inpainting [24] 11.00 5.10
+SD-Inpainting [24] 58.38 5.22
+SD-Inpainting(‘background’) 24.67 5.25
+SD-Inpainting(‘scenery’) 13.31 5.30
+SmartBrush [33](‘scenery’) 105.99 4.79
+PowerPaint 10.16 5.33
+inpainting and shape-guided object inpainting, we use bounding box masks and
+object layout masks for testing on OpenImages [15] and MSCOCO [18], respec-
+tively. The results in Table 1 and Table 2 demonstrate that PowerPaint is able
+to generate realistic and diverse images that satisfy both the text and shape
+constraints. In particular, PowerPaint achieves state-of-the-art in terms of both
+visual quality and text alignment for object inpainting.
+For context-aware image inpainting, we include text-free inpainting models,
+i.e., LaMa [29] and LDM-Inpaint [24], and the strongest baselines in Table 1 and
+2, i.e., SD-Inpainting for further comparison. The quantitative results shown in
+Table 3 demonstrate that PowerPaint guided by a task-specific prompt, outper-
+forms the baseline in effectively filling missing regions while better matching the
+image context. To conduct a thorough comparison, we use a default text prompt
+of "background" and "scenery" with SD-Inpainting, and compare it with Pow-
+erPaint usingPobj as a negative prompt. Notably, we observed that usingPobj
+as a negative prompt effectively reduces the generation of random artifacts and
+preserves a coherent background that aligns with the image context. This im-
+provement leads to significantly improved inpainting results.
+We report the quantitative comparison for image outpainting in Tab. 4. Since
+image outpainting is often required to extend the image with content that is both
+aesthetically pleasing and coherent, we employed FID and aesthetic scores for
+its quantitative evaluation. As indicated in Table 4, our model demonstrates
+superior image and aesthetic quality compared to the baseline models.
+Qualitative Comparisons.The qualitative comparison in Figure 5, 6 and 7
+show that our model has achieved state-of-the-art performance in text-guided
+
+=== PAGE 11 ===
+PowerPaint for High-Quality Versatile Image Inpainting 11
+Sparrow
+Mushroom
+Crocodile
+Input + Mask Stable Diffusion CN-Inpainting SD-Inpainting PowerPaint
+Trousers
+SmartBrush
+Fig. 5: Compared with SOTA approaches, PowerPaint shows better text alignment
+and visual quality for text-guided object inpainting.
+Input + Mask LDM-Inpainting SD-Inpainting Adobe Firefly PowerPaint
+LaMa
+Fig. 6: Compared with SOTA approaches, PowerPaint shows better context alignment
+for context-aware image inpainting.
+object inpainting, context-aware image inpainting, and outpainting. For text-
+guided object inpainting, existing models often fail to synthesize objects that
+are faithful to the text prompt. For example, in the fourth case, CN-Inpainting
+and SD-Inpainting are hard to generate trousers in the region and can only fill
+the region with backgrounds. PowerPaint is able to synthesize high-fidelity ob-
+jects according to the text prompt with both bounding box masks and object
+layout masks. For context-aware image inpainting and outpainting, our model
+outperforms both text-free and text-based inpainting models significantly. Tak-
+ing the second case in Figure 6 as an example, LaMa tends to synthesize blurry
+results due to its limited generation capacity, while Adobe Firefly [1] tends to
+generate random objects in the region, which goes against the users’ intention.
+
+=== PAGE 12 ===
+12 J. Zhuang et al.
+SD-Inpainting(‘background’)
+SD-Inpainting(‘scenery’)
+PowerPaint
+Adobe Firefly
+Fig. 7: Compared with SOTA approaches, PowerPaint shows more pleasing results for
+image outpainting with a large expand.
+T able 5: User study . PowerPaint is preferred by users across three groups of user
+study, namely object inpainting, object removal and image outpainting.
+T asks Baselines Preference
+Shape Text AlignmentRealism
+Object Inpainting
+PowerPaint 48.3% 50.8% 40.5%
+SmartBrush 40.4% 37.3% 39.1%
+SD-Inpainting11.3% 11.9% 20.4%
+Object RemovalBaselines PowerPaintSD-Inpainting LaMa
+Preference 73.2% 11.6% 15.2%
+Outpainting Baselines PowerPaintSD-InpaintingLDM-Inpainting
+Preference 62.6% 22.8% 14.6%
+User study. We conducted user studies for a more comprehensive comparison.
+Specifically,wedeliverthreegroupsofuserstudiesfortext-guidedobjectinpaint-
+ing, object removal, and outpainting, respectively. For each group, we randomly
+sample test images and show the inpainting results to volunteers anonymously.
+To ensure stable and convincing results with minimal user effort, we specifically
+selected the two strongest baselines for each user study group according to their
+quantitative and qualitative results, instead of considering all baselines.
+In each trial, we introduce different inpainting tasks to the volunteers and ask
+them to choose the most satisfying results per different targets. Specifically, for
+the object inpainting task, we conducted a more detailed investigation into user
+preferences, examining aspects including shape, text alignment, and realism. We
+have collected 2,995 valid votes and conclude the results in Table 5. The results
+show that our model is preferred in all three tasks.
+4.2 Ablation Study
+Effectiveness of Learnable Task Prompt.To verify the effectiveness of task
+prompt learning, we compare our model with the variant of tuning with un-
+learnable rare identifiers [25]. In this variant, we use different rare identifiers
+to denote different tasks with the same training strategies as PowerPaint. The
+quantitative comparison in Table 6 shows that a learnable task prompt can be
+
+=== PAGE 13 ===
+PowerPaint for High-Quality Versatile Image Inpainting 13
+T able 6:Ablation study on learnable task prompt. Under the same training strategies,
+learning with learnable task prompt outperforms the one with unlearnable identifiers.
+object inpainting context inpainting
+Local-FID↓FID↓CLIP Score↑FID↓ LPIPS↓
+identifier 13.03 5.42 25.72 3.11 0.1312
+PowerPaint 11.61 5.12 25.95 2.59 0.1263
+T able 7: Ablation study on single unified model VS task-specific models. We also
+include the results of fine-tuning SD-Inpainting on the same fine-tuning dataset.
+OpenImages [15] / MSCOCO [18] Local-FID↓ FID↓ CLIP Score↑
+SD-Inpainting-tuned (bbox) 12.83 / 15.75 4.74 / 5.67 26.71 / 24.84
+Task-specific Model (bbox) 9.51 / 11.664.36/ 5.11 27.58/ 25.90
+PowerPaint (bbox) 9.41/ 11.614.38 / 5.12 27.56 /25.95
+SD-Inpainting-tuned (layout) 10.94 / 16.20 3.91 / 5.06 26.47 / 24.55
+Task-specific Model (layout) 8.03 /11.01 3.60/ 4.59 27.18/ 25.57
+PowerPaint (layout) 7.96/ 11.04 3.61 / 4.61 27.14 /25.62
+Inpainting / Outpainting FID↓ LPIPS↓ FID ↓ Aesthetic Score↑
+SD-Inpainting-tuned 2.80 0.1302 12.65 5.31
+Task-specific Model 2.68 0.1264 10.24 5.31
+PowerPaint (ours) 2.59 0.1263 10.16 5.33
+better compatible with the description and conditions (i.e., masked images and
+masks) for different inpainting targets, leading to better results.
+Single unified VS task-specific.We trained separate task-specific models for
+text-guidedobjectinpainting,shape-guidedobjectinpainting,andcontext-aware
+image inpainting. The quantitative results in Tab. 7 show that PowerPaint, as
+a versatile model, achieves comparable performance to the task-specific models,
+sometimes even better results. This indicates the effectiveness of incorporating
+task prompts in a unified model without compromising performance.
+Fine-training dataset.To alleviate concerns regarding inconsistencies in pre-
+training datasets, we conducted additional experiments by fine-tuning the SD-
+Inpainting [25] model on the fine-tuning dataset utilized by PowerPaint, namely,
+OpenImages [15] and LAION Aesthetics v2 5+ [28]. Our results demonstrate
+marginal improvements over the baseline when fine-tuning on the same dataset,
+consistent with the observations made by Smartbrush [33].
+4.3 Applications and Limitations
+Object Removal.We find it challenging to remove objects from crowded image
+contexts for inpainting models based on diffusion model, which often copies con-
+textobjectsintoregionsduetotheintrinsicnetworkstructure( i.e.,self-attention
+layers). We show in Figure 8 that, combined with classifier-free guidance strat-
+egy, our model usesPobj as a negative prompt so that it can prevent generating
+objects in regions for effective object removal.
+
+=== PAGE 14 ===
+14 J. Zhuang et al.
+Input + Mask PowerPaintAdobe Firefly
+Fig. 8: Object removal in comparison with Adobe Firefly [1].
+𝛼𝛼= 0.5𝛼𝛼= 0.7𝛼𝛼= 0.95
+penguinInput + Mask
+Fig. 9: Application of shape-guided object inpainting.
+Shape-Guided Object Inpainting.Given a mask, PowerPaint enables users
+to control the fitting degree to the mask shape by adjusting the interpolation
+of two leaned task prompts, i.e.,Pctxt and Pshape. Results in Figure 9 show
+that PowerPaint can synthesize high-fidelity results that are faithful to both the
+mask shape and text prompt.
+Limitations. First, the visual quality can be constrained by the capabilities
+of the underlying text-to-image diffusion model. Second, in the case of shape-
+guided object inpainting, achieving a fitting degree with extremely small values
+is challenging. This limitation stems from the fact that there are few instances
+in which the object occupies a very small area during training.
+5 Conclusions
+We present PowerPaint as a versatile inpainting model that achieves state-of-
+the-art performance across multiple inpainting tasks. We attribute the success
+of PowerPaint to the utilization of task prompts and tailored optimal train-
+ing strategies. We conduct extensive experiments and applications to verify the
+effectiveness of PowerPaint and the versatility of the task prompt through ap-
+plications of removal and object inpainting with controllable shape-fitting.
+
+=== PAGE 15 ===
+PowerPaint for High-Quality Versatile Image Inpainting 15
+Acknowledgments. This work is supported by the National Key R&D Pro-
+gram of China (No. 2022YFB4701400/4701402, No. 2022ZD0161600), SSTIC
+Grant (KJZD2023092311510 6012, KJZD20230923114916032), and Beijing Key
+Lab of Networked Multimedia.
+References
+1. Adobe firefly (2023), https://firefly.adobe.com/
+2. Avrahami, O., Lischinski, D., Fried, O.: Blended diffusion for text-driven editing of
+natural images. In: Proceedings of the IEEE/CVF Conference on Computer Vision
+and Pattern Recognition. pp. 18208–18218 (2022)
+3. Barnes, C., Shechtman, E., Finkelstein, A., Goldman, D.B.: Patchmatch: A ran-
+domized correspondence algorithm for structural image editing. TOG28(3), 24:1–
+24:11 (2009)
+4. Bertalmio, M., Sapiro, G., Caselles, V., Ballester, C.: Image inpainting. In: SIG-
+GRAPH. pp. 417–424 (2000)
+5. Cao, C., Cai, Y., Dong, Q., Wang, Y., Fu, Y.: Leftrefill: Filling right canvas based
+on left reference through generalized text-to-image diffusion model. In: Proceedings
+of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. pp.
+7705–7715 (2024)
+6. Cheng,Y.C.,Lin,C.H.,Lee,H.Y.,Ren,J.,Tulyakov,S.,Yang,M.H.:Inout:Diverse
+image outpainting via gan inversion. In: Proceedings of the IEEE/CVF Conference
+on Computer Vision and Pattern Recognition. pp. 11431–11440 (2022)
+7. Criminisi,A.,Pérez,P.,Toyama,K.:Regionfillingandobjectremovalbyexemplar-
+based image inpainting. TIP13(9), 1200–1212 (2004)
+8. Dhariwal, P., Nichol, A.: Diffusion models beat gans on image synthesis. Advances
+in neural information processing systems34, 8780–8794 (2021)
+9. Gal, R., Alaluf, Y., Atzmon, Y., Patashnik, O., Bermano, A.H., Chechik, G.,
+Cohen-Or, D.: An image is worth one word: Personalizing text-to-image gener-
+ation using textual inversion. arXiv preprint arXiv:2208.01618 (2022)
+10. Goodfellow, I., Pouget-Abadie, J., Mirza, M., Xu, B., Warde-Farley, D., Ozair, S.,
+Courville, A., Bengio, Y.: Generative adversarial nets. In: NeurIPS. pp. 2672–2680
+(2014)
+11. Heusel,M.,Ramsauer,H.,Unterthiner,T.,Nessler,B.,Hochreiter,S.:Ganstrained
+by a two time-scale update rule converge to a local nash equilibrium. Advances in
+neural information processing systems30 (2017)
+12. Ho, J., Jain, A., Abbeel, P.: Denoising diffusion probabilistic models. Advances in
+neural information processing systems33, 6840–6851 (2020)
+13. Ho, J., Salimans, T.: Classifier-free diffusion guidance. In: NeurIPS 2021 Workshop
+on Deep Generative Models and Downstream Applications (2021)
+14. Kumari, N., Zhang, B., Zhang, R., Shechtman, E., Zhu, J.Y.: Multi-concept cus-
+tomization of text-to-image diffusion. In: Proceedings of the IEEE/CVF Confer-
+ence on Computer Vision and Pattern Recognition (CVPR). pp. 1931–1941 (June
+2023)
+15. Kuznetsova, A., Rom, H., Alldrin, N., Uijlings, J., Krasin, I., Pont-Tuset, J., Ka-
+mali, S., Popov, S., Malloci, M., Kolesnikov, A., Duerig, T., Ferrari, V.: The
+open images dataset v4: Unified image classification, object detection, and vi-
+sual relationship detection at scale. International Journal of Computer Vision
+128(7), 1956–1981 (Mar 2020).https://doi.org/10.1007/s11263-020-01316-z,
+http://dx.doi.org/10.1007/s11263-020-01316-z
+
+=== PAGE 16 ===
+16 J. Zhuang et al.
+16. Li, J., Li, D., Savarese, S., Hoi, S.: Blip-2: Bootstrapping language-image pre-
+training with frozen image encoders and large language models (2023)
+17. Li, Y., Liu, S., Yang, J., Yang, M.H.: Generative face completion. In: CVPR. pp.
+3911–3919 (2017)
+18. Lin, T.Y., Maire, M., Belongie, S., Hays, J., Perona, P., Ramanan, D., Dollár, P.,
+Zitnick, C.L.: Microsoft coco: Common objects in context. In: Computer Vision–
+ECCV 2014: 13th European Conference, Zurich, Switzerland, September 6-12,
+2014, Proceedings, Part V 13. pp. 740–755. Springer (2014)
+19. Lugmayr, A., Danelljan, M., Romero, A., Yu, F., Timofte, R., Van Gool, L.: Re-
+paint: Inpainting using denoising diffusion probabilistic models. In: Proceedings
+of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. pp.
+11461–11471 (2022)
+20. Nazeri, K., Ng, E., Joseph, T., Qureshi, F., Ebrahimi, M.: Edgeconnect: Generative
+image inpainting with adversarial edge learning. In: ICCVW (2019)
+21. Pathak, D., Krahenbuhl, P., Donahue, J., Darrell, T., Efros, A.A.: Context en-
+coders: Feature learning by inpainting. In: CVPR. pp. 2536–2544 (2016)
+22. Radford, A., Kim, J.W., Hallacy, C., Ramesh, A., Goh, G., Agarwal, S., Sastry, G.,
+Askell, A., Mishkin, P., Clark, J., et al.: Learning transferable visual models from
+natural language supervision. In: International conference on machine learning. pp.
+8748–8763. PMLR (2021)
+23. Ramesh, A., Pavlov, M., Goh, G., Gray, S., Voss, C., Radford, A., Chen, M.,
+Sutskever, I.: Zero-shot text-to-image generation. In: International Conference on
+Machine Learning. pp. 8821–8831. PMLR (2021)
+24. Rombach, R., Blattmann, A., Lorenz, D., Esser, P., Ommer, B.: High-resolution
+image synthesis with latent diffusion models. In: Proceedings of the IEEE/CVF
+conference on computer vision and pattern recognition. pp. 10684–10695 (2022)
+25. Ruiz, N., Li, Y., Jampani, V., Pritch, Y., Rubinstein, M., Aberman, K.: Dream-
+booth: Fine tuning text-to-image diffusion models for subject-driven generation.
+In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern
+Recognition. pp. 22500–22510 (2023)
+26. Saharia, C., Chan, W., Saxena, S., Li, L., Whang, J., Denton, E.L., Ghasemipour,
+K., Gontijo Lopes, R., Karagol Ayan, B., Salimans, T., et al.: Photorealistic text-
+to-image diffusion models with deep language understanding. Advances in Neural
+Information Processing Systems35, 36479–36494 (2022)
+27. Schuhmann, C., Beaumont, R., Vencu, R., Gordon, C., Wightman, R., Cherti, M.,
+Coombes, T., Katta, A., Mullis, C., Wortsman, M., et al.: Laion-5b: An open large-
+scale dataset for training next generation image-text models. Advances in Neural
+Information Processing Systems35, 25278–25294 (2022)
+28. Sun, Y., Liu, Y., Tang, Y., Pei, W., Chen, K.: Anycontrol: Create your artwork
+withversatilecontrolontext-to-imagegeneration.arXivpreprintarXiv:2406.18958
+(2024)
+29. Suvorov, R., Logacheva, E., Mashikhin, A., Remizova, A., Ashukha, A., Silvestrov,
+A., Kong, N., Goka, H., Park, K., Lempitsky, V.: Resolution-robust large mask
+inpainting with fourier convolutions. In: Proceedings of the IEEE/CVF winter
+conference on applications of computer vision. pp. 2149–2159 (2022)
+30. Tang, J., Zeng, Y., Fan, K., Wang, X., Dai, B., Chen, K., Ma, L.: Make-it-vivid:
+Dressing your animatable biped cartoon characters from text. In: Proceedings of
+the IEEE/CVF Conference on Computer Vision and Pattern Recognition. pp.
+6243–6253 (2024)
+
+=== PAGE 17 ===
+PowerPaint for High-Quality Versatile Image Inpainting 17
+31. Teterwak, P., Sarna, A., Krishnan, D., Maschinot, A., Belanger, D., Liu, C., Free-
+man, W.T.: Boundless: Generative adversarial networks for image extension. In:
+Proceedings of the IEEE/CVF International Conference on Computer Vision. pp.
+10521–10530 (2019)
+32. Wang, S., Saharia, C., Montgomery, C., Pont-Tuset, J., Noy, S., Pellegrini, S.,
+Onoe, Y., Laszlo, S., Fleet, D.J., Soricut, R., et al.: Imagen editor and editbench:
+Advancing and evaluating text-guided image inpainting. In: Proceedings of the
+IEEE/CVF Conference on Computer Vision and Pattern Recognition. pp. 18359–
+18369 (2023)
+33. Xie, S., Zhang, Z., Lin, Z., Hinz, T., Zhang, K.: Smartbrush: Text and shape
+guided object inpainting with diffusion model. In: Proceedings of the IEEE/CVF
+Conference on Computer Vision and Pattern Recognition. pp. 22428–22437 (2023)
+34. Yang, S., Chen, X., Liao, J.: Uni-paint: A unified framework for multimodal im-
+age inpainting with pretrained diffusion model. In: Proceedings of the 31st ACM
+International Conference on Multimedia. pp. 3190–3199 (2023)
+35. Yang, Z., Dong, J., Liu, P., Yang, Y., Yan, S.: Very long natural scenery image pre-
+diction by outpainting. In: Proceedings of the IEEE/CVF International Conference
+on Computer Vision. pp. 10561–10570 (2019)
+36. Yu,J.,Lin,Z.,Yang,J.,Shen,X.,Lu,X.,Huang,T.S.:Generativeimageinpainting
+with contextual attention. In: CVPR. pp. 5505–5514 (2018)
+37. Yu, J., Lin, Z., Yang, J., Shen, X., Lu, X., Huang, T.S.: Free-form image inpainting
+with gated convolution. In: ICCV. pp. 4471–4480 (2019)
+38. Zeng, Y., Fu, J., Chao, H., Guo, B.: Learning pyramid-context encoder network
+for high-quality image inpainting. In: CVPR. pp. 1486–1494 (2019)
+39. Zeng, Y., Fu, J., Chao, H., Guo, B.: Aggregated contextual transformations for
+high-resolution image inpainting. IEEE Transactions on Visualization and Com-
+puter Graphics 29(7), 3266–3280 (2022)
+40. Zhang, L., Rao, A., Agrawala, M.: Adding conditional control to text-to-image
+diffusion models. In: Proceedings of the IEEE/CVF International Conference on
+Computer Vision. pp. 3836–3847 (2023)
+41. Zhang, R., Isola, P., Efros, A.A., Shechtman, E., Wang, O.: The unreasonable
+effectiveness of deep features as a perceptual metric. In: CVPR. pp. 586–595 (2018)
+42. Zhang, Y., Xing, Z., Zeng, Y., Fang, Y., Chen, K.: Pia: Your personalized image
+animatorviaplug-and-playmodulesintext-to-imagemodels.In:Proceedingsofthe
+IEEE/CVF Conference on Computer Vision and Pattern Recognition. pp. 7747–
+7756 (2024)
+43. Zhou, B., Lapedriza, A., Khosla, A., Oliva, A., Torralba, A.: Places: A 10 million
+image database for scene recognition. IEEE transactions on pattern analysis and
+machine intelligence 40(6), 1452–1464 (2017)

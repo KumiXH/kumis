@@ -1,0 +1,139 @@
+{
+  "key": "ntire2026",
+  "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\06_benchmarks_baselines\\ntire2026_2604.10532.pdf",
+  "page_count": 13,
+  "first_page_excerpt": "The Second Challenge on Real-World Face Restoration at NTIRE 2026:\nMethods and Results\nJingkai Wang* Jue Gong* Zheng Chen* Kai Liu* Jiatong Li* Yulun Zhang*†\nRadu Timofte* Jiachen Tu Yaokun Shi Guoyi Xu Yaoxin Jiang Jiajia Liu\nYingsi Chen Yijiao Liu Hui Li Yu Wang Congchao Zhu\nAlexandru-Gabriel Lefterache Anamaria Radoi Chuanyue Yan Tao Lu\nYanduo Zhang Kanghui Zhao Jiaming Wang Yuqi Li WenBo Xiong\nYifei Chen Xian Hu Wei Deng Daiguo Zhou Sujith Roy V Claudia Jesuraj\nVikas B Spoorthi LC Nikhil Akalwadi Ramesh Ashok Tabib Uma Mudenagudi\nYuxuan Jiang Chengxi Zeng Tianhao Peng Fan Zhang David Bull Wei Zhou\nLinfeng Li Hongyu Huang Hoyoung Lee SangYun Oh ChangYoung Jeong\nAxi Niu Jinyang Zhang Zhenguo Wu Senyan Qing Jinqiu Sun Yanning Zhang\nAbstract\nThis paper provides a review of the NTIRE 2026 challenge\non real-world face restoration, highlighting the proposed\nsolutions and the resulting outcomes. The challenge focuses\non generating natural and realistic outputs while maintain-\ning identity consistency. Its goal is to advance state-of-the-\nart solutions for perceptual quality and realism, without im-\nposing constraints on computational resources or training\ndata. Performance is evaluated using a weighted image\nquality assessment (IQA) score and employs the AdaFace\nmodel as an identity checker. The competition attracted\n96 registrants, with 10 teams submitting valid models; ul-\ntimately, 9 teams achieved valid scores in the final ranking.\nThis collaborative effort advances the performance of real-\nworld face restoration while offering an in-depth overview\nof the latest trends in the field.\n1. Introduction\nFace restoration aims to reconstruct high-quality (HQ) face\nimages from low-quality (LQ) inputs degraded by blur,\nnoise, compression, and other distortions. Since severe\ndegradation often removes a large amount of visual in-\nformation, this task is inherently ill-posed. Meanwhile,\n*Jingkai Wang, Jue Gong, Zheng Chen, Kai Liu, Jiatong Li, Yu-\nlun Zhang, and Radu Timofte are the challenge organizers, while the\nother authors participated in the challenge. Section B in the supplemen-\ntary materials contains the authors’ teams and affiliations. NTIRE 2026\nwebpage:https://cvlai.net/ntire/2026. Code:https:\n/ / github . com / jkwang28 / NTIRE2026 _ RealWorld _ Face _\nRestoration.\n†Corresponding author: Yulun Zhang. yulun100@gmail.com\nwith the continuous progress of portrait imaging technol-\nogy, users increasingly expect restored face images to ex-\nhibit both rich details and high fidelity. This makes it es-\nsential for restoration methods to produce outputs that are\nnot only clear but also natural and realistic. In recent years,\ndeep learning has substantially advanced face restoration.\nMethods based on CNNs, Transformers [66, 77, 82, 98],\nGANs [5, 7, 74, 86], and diffusion models [8, 38, 43, 52, 61,\n65, 71, 78, 80, 84, 91] demonstrated strong performance.\nA key challenge in this field lies in how to effectively\nmodel face priors. Traditional image restoration methods\noften rely on statistical priors, whereas modern neural meth-\nods tend to learn such priors directly from data. Among\nthem, geometric-prior-based approaches [9, 29, 60, 90] are\nparticularly valuable because they provide explicit struc-\ntural cues for facial reconstruction. However, when the\ndegradation is relatively mild, users often expect the re-\nstored results to remain highly realistic, including subtle\nskin textures that are usually captured only by high-end\nimaging devices. Therefore, beyond semantic guidance,\ntexture priors are also vital for recovering fine facial details.\nRecent studies [16, 66, 77, 82, 98] have extensively ex-\nplored Transformer-based designs for incorporating face\npriors. Representative methods such as CodeFormer [98]\nand DAEFR [66] employ codebooks learned from HQ face\nimages as priors. Although these methods are effective at\npreserving facial information, they still show limitations\nwhen handling severely degraded images, especially in tran-\nsition regions between the face and the background.\nFor more severely degraded inputs, generative capabil-\nity becomes increasingly important. GAN-based meth-\nods [5, 7, 74, 86] have shown strong ability in synthesizing\narXiv:2604.10532v2  [cs.CV]  15 Apr 2026",
+  "figure_candidates": [
+    {
+      "page": 5,
+      "caption": "Figure 1. MiPlusCV adopts a two-stage pipeline that combines OSDFace-based coarse restoration with a Z-Image-based one-step detail"
+    },
+    {
+      "page": 5,
+      "caption": "Figure 2. Overview of the CEVI-KLETech pipeline. A semantic-"
+    },
+    {
+      "page": 5,
+      "caption": "Figure 3. Overview of the HONORAICamera pipeline."
+    },
+    {
+      "page": 6,
+      "caption": "Figure 4. YuFans combines a one-step SDFace restoration stage with CLIPIQA-guided pixel optimization at test time."
+    },
+    {
+      "page": 6,
+      "caption": "Figure 5. Overview of DeSC-Face. The degraded image is encoded into degraded latent tokens, which are used both as the main condition"
+    },
+    {
+      "page": 7,
+      "caption": "Figure 6. Architecture diagram of the DiffBIR v2.1 two-stage"
+    },
+    {
+      "page": 8,
+      "caption": "Figure 7. Overall architecture and training objective of MaDENN. The baseline CodeFormer architecture is extended with identity-"
+    },
+    {
+      "page": 8,
+      "caption": "Figure 8. The SN VISION pipeline first enhances the degraded"
+    },
+    {
+      "page": 8,
+      "caption": "Figure 9. The workflow of PRIDE-Face. GFPGAN provides the"
+    },
+    {
+      "page": 9,
+      "caption": "Figure 10. The BVI extends TADSR with a residual noise re-"
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 3,
+      "caption": "Table 1. Results of NTIRE 2026 Real-world Face Restoration Challenge. The testing was conducted on the test dataset, consisting of 450"
+    },
+    {
+      "page": 4,
+      "caption": "Table 1 presents the final rankings and results of the teams."
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      1,
+      4,
+      5,
+      6,
+      7,
+      8,
+      10,
+      11
+    ],
+    "identity": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      7,
+      8,
+      10
+    ],
+    "portrait_detail": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      9,
+      10,
+      11,
+      12,
+      13
+    ],
+    "efficiency": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      12,
+      13
+    ],
+    "datasets": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "limitations": [
+      1
+    ]
+  },
+  "source_urls": [
+    {
+      "page": 1,
+      "url": "https://cvlai.net/ntire/2026"
+    },
+    {
+      "page": 2,
+      "url": "https://www.cvlai.net/ntire/2026/"
+    },
+    {
+      "page": 3,
+      "url": "https://github.com/jkwang28/NTIRE2026_"
+    }
+  ],
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\ntire2026.txt"
+}

@@ -1,0 +1,141 @@
+{
+  "key": "tiger",
+  "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\04_video_face\\tiger_2606.24336.pdf",
+  "page_count": 17,
+  "first_page_excerpt": "TIGER: Taming Identity, Geometry, and Generative\nPriors for High-Quality Face Video Restoration\nYang Zhou1∗, Wenxue Li1,2∗, Peng Zhang1†, Yifei Chen1, Fei Wang1, Daiguo Zhou1\n1 MiLM Plus, Xiaomi Inc.\n2 The Hong Kong University of Science and Technology (Guangzhou)\nAbstract\nFace Video Restoration (FVR) aims to recover high-fidelity facial videos from de-\ngraded input while preserving identity and semantic consistency across frames.\nExisting methods often struggle to simultaneously address three key challenges:\nidentity shift, viewpoint-entangled guidance, and perceptual realism. To tackle\nthese issues, we propose TIGER, a structured tri-prior fusion framework that\nTamesIdentity,Geometry, and gEnerative pRiors for high-quality FVR. Specif-\nically, anIdentity Prioris first established by injecting subject-discriminative\nembeddings into the latent space, effectively anchoring the subject’s identity\nagainst severe degradations. Then, to provide temporally consistent structural\nguidance for dynamic videos, TIGER constructs aGeometry Priorby lifting 2D\nreference cues into a disentangled 3D parameter space, creating a geometric\nanchor through cross-source parameter fusion. Moreover, to achieve maximum\nefficiency without compromising realism, we harness the video generation\nmodel’sGenerative Priorthrough a one-step rectified flow. We further design a\nprogressive three-stage training optimazition strategy that refines structural\nfidelity, textural reconstruction, and distribution-level realism to ensure robust\noptimization. We also construct a large-scale FVR dataset to facilitate robust\ntraining and standardized evaluation. Extensive experiments demonstrate that\nTIGER achieves state-of-the-art performance in both identity fidelity and tem-\nporal stability, delivering a high-quality, efficient and identity-consistent FVR.\nProject page:https://yzhoulv.github.io/Tiger/.\n1 Introduction\nRecent advances in video restoration have demonstrated remarkable progress in reconstruct-\ning high-fidelity content from severely degraded inputs [1–3]. Among these tasks, Face Video\nRestoration (FVR) is particularly challenging due to its structural and semantic constraints. Unlike\ngeneric video restoration, FVR must simultaneously recover fine-grained facial details, preserve\nthe subject’s identity-defining characteristics, and maintain temporal coherence across dynamic\nexpressions and pose variations [4, 5]. The difficulty is further amplified when degradations are\nsevere, as the available observations become insufficient to reliably preserve identity.\n1∗Equal contribution.\n2†Corresponding author.\narXiv:2606.24336v2  [cs.CV]  30 Jun 2026",
+  "figure_candidates": [
+    {
+      "page": 2,
+      "caption": "Figure1Qualitative and quantitative comparisons with state-of-the-art video restoration methods."
+    },
+    {
+      "page": 5,
+      "caption": "Figure 2Overview of the proposedTIGERframework, whichTamesIdentity,Geometry, and"
+    },
+    {
+      "page": 8,
+      "caption": "Figure 3Pipeline of the proposed high-quality face video filtering with three core dimensions:"
+    },
+    {
+      "page": 10,
+      "caption": "Figure4Qualitativecomparisonwithotherstate-of-the-artmodels. Ourapproachbetterpreserves"
+    },
+    {
+      "page": 12,
+      "caption": "Figure 6Qualitative of ablation study on the three-stage training pipeline."
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 9,
+      "caption": "Table 1Quantitative comparison results on the VFHQ-Test dataset.↑ / ↓ denote higher / lower is"
+    },
+    {
+      "page": 11,
+      "caption": "Table 2Quantitative comparison of our"
+    },
+    {
+      "page": 11,
+      "caption": "Table 3Ablation study on the effectiveness of"
+    },
+    {
+      "page": 11,
+      "caption": "Table 4Ablation study on the effectiveness of"
+    },
+    {
+      "page": 12,
+      "caption": "Table 5Effectiveness of cross-source param-"
+    },
+    {
+      "page": 12,
+      "caption": "Table 6Ablation on the identity-fused embed-"
+    },
+    {
+      "page": 12,
+      "caption": "Table 7Impact of loss weight configurations (𝜆1, 𝜆2, 𝜆3, 𝜆4) on latent supervision, perceptual"
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      8,
+      11,
+      12,
+      15
+    ],
+    "identity": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      9,
+      10,
+      11,
+      12,
+      13
+    ],
+    "portrait_detail": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17
+    ],
+    "efficiency": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      17
+    ],
+    "datasets": [
+      3,
+      4,
+      8,
+      9,
+      10,
+      11,
+      13,
+      15,
+      16
+    ],
+    "limitations": [
+      3,
+      8
+    ]
+  },
+  "source_urls": [
+    {
+      "page": 1,
+      "url": "https://yzhoulv.github.io/Tiger/"
+    }
+  ],
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\tiger.txt"
+}

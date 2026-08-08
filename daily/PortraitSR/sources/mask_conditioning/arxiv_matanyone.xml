@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/klYyzcJcwNEeoXyTJ7YI6ozikp4</id>
+  <title>arXiv Query: search_query=ti:"MatAnyone"&amp;id_list=&amp;start=0&amp;max_results=5</title>
+  <updated>2026-08-07T04:04:59Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=ti:%22MatAnyone%22&amp;start=0&amp;max_results=5&amp;id_list=" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>5</opensearch:itemsPerPage>
+  <opensearch:totalResults>2</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/2501.14677v2</id>
+    <title>MatAnyone: Stable Video Matting with Consistent Memory Propagation</title>
+    <updated>2025-03-25T06:56:38Z</updated>
+    <link href="https://arxiv.org/abs/2501.14677v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2501.14677v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Auxiliary-free human video matting methods, which rely solely on input frames, often struggle with complex or ambiguous backgrounds. To address this, we propose MatAnyone, a robust framework tailored for target-assigned video matting. Specifically, building on a memory-based paradigm, we introduce a consistent memory propagation module via region-adaptive memory fusion, which adaptively integrates memory from the previous frame. This ensures semantic stability in core regions while preserving fine-grained details along object boundaries. For robust training, we present a larger, high-quality, and diverse dataset for video matting. Additionally, we incorporate a novel training strategy that efficiently leverages large-scale segmentation data, boosting matting stability. With this new network design, dataset, and training strategy, MatAnyone delivers robust and accurate video matting results in diverse real-world scenarios, outperforming existing methods.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-01-24T17:56:24Z</published>
+    <arxiv:comment>Project page: https://pq-yang.github.io/projects/MatAnyone</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Peiqing Yang</name>
+    </author>
+    <author>
+      <name>Shangchen Zhou</name>
+    </author>
+    <author>
+      <name>Jixin Zhao</name>
+    </author>
+    <author>
+      <name>Qingyi Tao</name>
+    </author>
+    <author>
+      <name>Chen Change Loy</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2512.11782v2</id>
+    <title>MatAnyone 2: Scaling Video Matting via a Learned Quality Evaluator</title>
+    <updated>2026-03-16T17:51:36Z</updated>
+    <link href="https://arxiv.org/abs/2512.11782v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2512.11782v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Video matting remains limited by the scale and realism of existing datasets. While leveraging segmentation data can enhance semantic stability, the lack of effective boundary supervision often leads to segmentation-like mattes lacking fine details. To this end, we introduce a learned Matting Quality Evaluator (MQE) that assesses semantic and boundary quality of alpha mattes without ground truth. It produces a pixel-wise evaluation map that identifies reliable and erroneous regions, enabling fine-grained quality assessment. The MQE scales up video matting in two ways: (1) as an online matting-quality feedback during training to suppress erroneous regions, providing comprehensive supervision, and (2) as an offline selection module for data curation, improving annotation quality by combining the strengths of leading video and image matting models. This process allows us to build a large-scale real-world video matting dataset, VMReal, containing 28K clips and 2.4M frames. To handle large appearance variations in long videos, we introduce a reference-frame training strategy that incorporates long-range frames beyond the local window for effective training. Our MatAnyone 2 achieves state-of-the-art performance on both synthetic and real-world benchmarks, surpassing prior methods across all metrics.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-12-12T18:51:49Z</published>
+    <arxiv:comment>Accepted to CVPR 2026. Project page: https://pq-yang.github.io/projects/MatAnyone2/</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Peiqing Yang</name>
+    </author>
+    <author>
+      <name>Shangchen Zhou</name>
+    </author>
+    <author>
+      <name>Kai Hao</name>
+    </author>
+    <author>
+      <name>Qingyi Tao</name>
+    </author>
+  </entry>
+</feed>

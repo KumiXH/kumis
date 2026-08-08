@@ -1,0 +1,749 @@
+=== PAGE 1 ===
+Personalized Face Super-Resolution with Identity Decoupling and Fitting
+Jiarui Yang1 2, Hang Guo2, Wen Huang2, Tao Dai3, Shutao Xia2
+1 Nankai University 2 Tsinghua University 2 Shenzhen University
+Abstract
+In recent years, face super-resolution (FSR) methods have
+achieved remarkable progress, generally maintaining high
+image fidelity and identity (ID) consistency under standard
+settings. However, in extreme degradation scenarios (e.g.,
+scale > 8×), critical attributes and ID information are of-
+ten severely lost in the input image, making it difficult for
+conventional models to reconstruct realistic and ID-consistent
+faces. Existing methods tend to generate hallucinated faces
+under such conditions, producing restored images lacking
+authentic ID constraints. To address this challenge, we pro-
+pose a novel FSR method with Identity Decoupling and Fit-
+ting (IDFSR), designed to enhance ID restoration under large
+scaling factors while mitigating hallucination effects. Our ap-
+proach involves three key designs: 1) Masking the facial re-
+gion in the low-resolution (LR) image to eliminate unreliable
+ID cues; 2) Warping a reference image to align with the
+LR input, providing style guidance; 3) Leveraging ID em-
+beddings extracted from ground truth (GT) images for fine-
+grained ID modeling and personalized adaptation. We first
+pretrain a diffusion-based model to explicitly decouple style
+and ID by forcing it to reconstruct masked LR face regions
+using both style and identity embeddings. Subsequently, we
+freeze most network parameters and perform lightweight
+fine-tuning of the ID embedding using a small set of target
+ID images. This embedding encodes fine-grained facial at-
+tributes and precise ID information, significantly improving
+both ID consistency and perceptual quality. Extensive quan-
+titative evaluations and visual comparisons demonstrate that
+the proposed IDFSR substantially outperforms existing ap-
+proaches under extreme degradation, particularly achieving
+superior performance on ID consistency.
+Introduction
+Face super-resolution (FSR) has significant application
+value in downstream tasks such as identity (ID) recognition
+and facial analysis (Jiang et al. 2021; Zhang, Wu, and Chen
+2020). In scenarios with strict ID requirements, FSR models
+must not only enhance image quality but also maintain ID
+consistency. Existing FSR methods are capable of produc-
+ing high-fidelity, ID-consistent face images under moderate
+degradation (Chen et al. 2018; Zhou et al. 2022). However,
+under extreme degradation conditions (e.g., scaling factors
+Copyright © 2026, Association for the Advancement of Artificial
+Intelligence (www.aaai.org). All rights reserved.
+Figure 1: Visualization of the pretraining and finetuning
+result. Under severe degradation, it is often impossible to re-
+construct fine-grained features without relying on reference
+images. Generalized training can only ensure local ID simi-
+larity, whereas personalized fine-tuning demonstrates strong
+consistency in ID-related attributes.
+exceeding 8×), critical ID and attribute information in the
+input image is often severely lost, turning the reconstruction
+task into a highly ill-posed problem (Alekseev and Navon
+2001). In the absence of strong prior constraints, the solution
+space becomes underdetermined, with numerous plausible
+local optima, making the model prone to generating “hallu-
+cinated” results that fail to accurately preserve the target ID.
+For example, as shown in Fig. 1, the conventional method
+(CodeFormer (Zhou et al. 2022)) may erroneously recon-
+struct a blurry tattoo region into an unrealistic dark patch.
+Reference-based FSR methods (Zhao et al. 2023; Li et al.
+2020) provide a promising solution to this problem by lever-
+aging high-quality (HQ) semantic information from refer-
+ence images to restore missing details in low-resolution (LR)
+inputs. However, single-reference approaches are highly
+sensitive to pose, lighting, and expression variations, and
+typically only perform well when the reference and LR im-
+ages are closely aligned (Li et al. 2018; Dogan, Gu, and
+Timofte 2019). Although multi-reference methods (Li et al.
+2020; Nitzan et al. 2022) attempt to incorporate richer ID
+features, most existing approaches fail to disentangle ID in-
+formation between the reference and LR images. This dis-
+arXiv:2508.10937v1  [cs.CV]  13 Aug 2025
+
+=== PAGE 2 ===
+entanglement is crucial: FSR is a pixel-wise reconstruction
+task, and the LR image itself contains strong structural pri-
+ors. During training, models tend to over-rely on the residual
+ID clues in the LR input, thereby neglecting or underutiliz-
+ing the complementary information provided by the refer-
+ence images. As a result, the reconstructed faces may re-
+semble the correct ID to some extent, but fail to accurately
+reproduce finer attributes and details.
+To address these challenges, we propose a diffusion-based
+two-stage framework for FSR viaID Decoupling and Fitting
+(IDFSR). IDFSR centers around ID-disentangled pretrain-
+ing and personalized fine-tuning, aiming to achieve high-
+fidelity reconstruction with consistent ID and attribute in-
+formation. Specifically, we introduce three key components
+to obtain an ID-decoupling representation:
+• Corrupted ID Masking . We detect the facial region
+in the LR image and apply masking as a strong condi-
+tional constraint. This design preserves background con-
+sistency and prevents the model from relying on incom-
+plete or erroneous ID cues during training, thereby en-
+hancing its dependency on and utilization of reference
+information.
+• Style-Conditioned Embedding. We spatially align the
+reference face region to the LR face and extract a style
+embedding via a style encoder. This embedding is inte-
+grated into the diffusion model through feature fusion,
+providing coarse-grained appearance and motion guid-
+ance from the reference image.
+• Ground Truth ID Embedding and ID Fitting . Dur-
+ing pretraining, we extract ID embeddings from GT im-
+ages using a well-trained ID encoder and integrate them
+into the model via cross-attention. In the fine-tuning, we
+freeze all model parameters and optimize the ID embed-
+dings using a few samples from the same ID to achieve
+generalized and precise decoupling representation.
+As shown in Fig. 1, the pretraining phase yields recon-
+structions with basic ID similarity, while ID Fitting signif-
+icantly enhances attribute fidelity and fine-grained details.
+Extensive experiments across multiple benchmark datasets
+validate the effectiveness of each proposed component and
+the framework’s ability to suppress hallucination artifacts.
+Furthermore, comprehensive quantitative comparisons with
+various SOTA methods show that our approach achieves a
+significant performance improvement of 20%, demonstrat-
+ing the clear superiority of IDFSR in both reconstruction
+quality and ID consistency.
+Related Works
+Single-Image Face Super-Resolution. Different from nat-
+ural image super-resolution (Zhang et al. 2018b; Dai et al.
+2019; Guo et al. 2024, 2025; Dai et al. 2024), face super-
+resolution (FSR) (Tomar et al. 2023) poses unique chal-
+lenges due to the need for accurate restoration of fine-
+grained facial details, identity consistency, and structural
+priors. Early methods on FSR predominantly relied on di-
+rect regression in pixel space; however, empirical studies
+have shown that such approaches tend to produce overly
+smoothed results (Huang et al. 2017; Chen et al. 2018). To
+improve perceptual quality, generative models have been in-
+troduced, leveraging prior distributions or explicit dictionar-
+ies to enhance the naturalness of reconstructed images (He
+et al. 2022; Yang et al. 2023). Nonetheless, due to the inher-
+ent ambiguity in generative modeling, these methods still
+face challenges in maintaining pixel-level consistency and
+ID fidelity. To balance consistency and diversity, recent stud-
+ies have incorporated conditional generation mechanisms,
+using facial priors such as landmarks, segmentation maps,
+and 3D structures as auxiliary constraints to enforce geo-
+metric consistency (Yang et al. 2025; Bulat and Tzimiropou-
+los 2018). While these approaches have improved geomet-
+ric reconstruction to some extent, ID preservation remains
+limited. To address this, ID recognition losses have been
+employed to enhance ID fidelity (Chen et al. 2020). How-
+ever, under large degradation factors, ID cues in LR inputs
+are severely diminished, making models prone to generating
+”hallucinated” identities.
+Reference-Based Face Super-resolution. To allevi-
+ate the severe information loss under high degradation,
+reference-based FSR methods have been extensively ex-
+plored. GFRNet (Li et al. 2018) proposed a dual-network
+architecture—WarpNet aligns the reference image to the
+LR target via optical flow, while RecNet performs recon-
+struction. Landmark loss and total variation regularization
+are adopted to enhance alignment accuracy. However, large
+pose or expression differences still lead to misalignment is-
+sues. GW AINet (Dogan, Gu, and Timofte 2019) later intro-
+duced ID loss to improve ID consistency but remained heav-
+ily dependent on precise alignment. ReFine (Chong et al.
+2025) improved alignment using a fine-tuned landmark de-
+tector and employed spatial minimality and cycle consis-
+tency losses to guide attribute transfer. ASFFNet (Li et al.
+2020) selected suitable references via landmark similarity
+and aligned them in spatial and illumination domains us-
+ing MLS and AdaIN, followed by multi-stage feature fusion.
+DMDNet (Zhao et al. 2023) used a dual-memory structure to
+separately store structural and ID features, enabling adaptive
+fusion across references. MyStyle (Nitzan et al. 2022) and
+similar methods construct identity and attribute sets from
+multiple references. Recently, MGFR (Tao et al. 2024) uti-
+lized diffusion models to fuse text, reference images, and
+ID cues via dual-control adapters and two-stage training for
+controllable face restoration.
+Methodology
+Overview
+Fig. 2 illustrates the overall architecture of IDFSR. Given a
+LR image IL, its corresponding GT image IG, and a same-
+identity reference image IR, IDFSR consists of a parameter-
+ized network θ, a style encoder Es, and a pretrained ArcFace
+ID encoder Eid (Deng et al. 2019). Prior to training, we per-
+form two preprocessing steps:
+• A face landmark detector is used to mask the facial region
+of IL, producing the masked image IM .
+• A landmark-based warping is applied to map the facial
+region of IR onto that ofIL, generating the warped image
+
+=== PAGE 3 ===
+ResBlock
+Style Emb. ( )
+AttnBlock
+ID Emb. ( )
+PreTraining FineTuning
+Ref. ( )
+LR ( )
+GT ( )
+Warped ( )
+Masked ( )
+Noisy
+Concat
+Landmark-based
+Warping
+Fine-tuning Dataset
+Diffusion UNet
+   /      : Learnable / Frozen
+...
+Figure 2: A schematic diagram of single-step diffusion in IDFSR, including input preprocessing and the overall model archi-
+tecture.
+IW .
+In the pretraining stage, we adopt Denoising Diffusion Prob-
+abilistic Model (DDPM (Ho, Jain, and Abbeel 2020)) to
+model the pixel space, using the style embedding zs =
+Es(IW ) and ID embedding zid = Eid(IG) as conditions. IM
+is concatenated with the noise as input. The simplified loss
+function at diffusion timestep t is defined as:
+Lsim = Ex0,ϵ|zs,zid,IM
+n
+∥ϵ − ϵθ([xt, IM ], t, zs, zid)∥2
+o
+.
+(1)
+where [·] denotes the concatenation operation, and xt repre-
+sents the noisy of the GT image at time stept. In the finetun-
+ing stage, we freeze the diffusion networkθ and the style en-
+coder Es, and replace zid with a trainable embedding vector.
+This vector is then optimized using a small number of same-
+identity samples, under the same training objective, enabling
+personalized and accurate ID control.
+Landmark Detection and Warping
+We use RetinaFace (Deng et al. 2020) to extract facial land-
+marks from HQ images and finetune the detector to better
+accommodate LR images. The facial region of the reference
+image IR is then aligned to that of the LR image IL via
+affine transformation based on the detected landmarks, re-
+sulting in a warped image IW . This pseudo-alignment intro-
+duces coarse spatial correspondence between the reference
+and the LR image. We provide the pseudocode of the warp-
+ing process in the Appendix.
+However, due to variations in pose or inaccuracies in land-
+mark prediction, such warping is often imperfect and may
+introduce local distortions or mismatches. Interestingly, we
+find that this imperfection does not hinder the model’s per-
+formance—instead, it acts as a form of natural data aug-
+mentation. The diversity in warped faces encourages the
+model to avoid over-reliance on precise spatial correspon-
+dence and instead to attend to global ID semantics. This
+drives the diffusion network to rely more heavily on the
+ID embedding zid for reconstructing missing facial regions,
+rather than naively copying textures from the warped refer-
+ence. As a result, our model becomes inherently robust to
+variations in reference quality and alignment. As shown in
+Fig. 3, IDFSR still generating plausible and ID-consistent
+faces even under severe misalignment.
+Pretraining and Finetuning
+Our diffusion backbone follows the U-Net architecture used
+in Guided Diffusion (Dhariwal and Nichol 2021), consist-
+ing of residual blocks, attention modules, and upsampling/-
+downsampling layers. Our innovative conditional injection
+method effectively achieves ID decoupling and fitting mod-
+eling.
+The style encoder adopts the encoder part of the diffu-
+sion U-Net. Inspired by DiffAE (Preechakul et al. 2022),
+we introduce adaptive group normalization (AdaGN (Wu
+and He 2018)) to inject style conditions. For a feature map
+h ∈ Rc×h×w, the AdaGN is formulated as:
+AdaGN(h, t, zs) = zf · (tsGroupNorm(h) + tb) , (2)
+
+=== PAGE 4 ===
+×8 ×16
+Methods PSNR↑ SSIM↑ LPIPS↓ FID↓ CLIPIQA↑ MUSIQ↑ IDS↓ PSNR↑ SSIM↑ LPIPS↓ FID↓ CLIPIQA↑ MUSIQ↑ IDS↓
+CodeFormer24.42 0.7147 0.1489 31.88 0.6873 68.98 0.3865 20.72 0.5947 0.2379 43.89 0.6834 67.85 0.6673
+PGDiff 22.73 0.6892 0.2223 46.05 0.5390 56.10 0.6080 20.47 0.6202 0.2727 55.70 0.5008 52.19 0.7355
+DR2 23.83 0.7067 0.1998 44.46 0.6307 63.35 0.5459 22.35 0.6356 0.2481 50.84 0.6102 62.60 0.7082
+DifFace 24.41 0.7255 0.1694 32.94 0.6132 60.54 0.3815 22.23 0.6737 0.2195 38.65 0.5957 57.84 0.5948
+ASFFNet 21.82 0.6624 0.1764 26.25 0.6158 65.81 0.3169 18.23 0.5732 0.2457 40.64 0.5827 63.72 0.7955
+DMDNet 22.36 0.6984 0.1733 29.76 0.6570 68.28 0.4169 17.38 0.5590 0.2497 46.34 0.6051 64.05 0.8291
+Ours (PT) 24.29 0.6996 0.1554 27.89 0.6798 69.30 0.3173 23.32 0.6863 0.2062 38.58 0.6723 68.56 0.5227
+Ours (FT) 28.85 0.7604 0.1031 26.69 0.7092 73.73 0.2242 24.09 0.7158 0.1845 35.50 0.6992 71.83 0.3625
+Table 1: Quantitative comparison on the CelebRef-HQ dataset with upsampling scales of 8 × and 16×. FT and PT refer to
+finetuning and pretraining methods, respectively.Red and blue indicates the best and the second best.
+Figure 3: Warping Analysis. From top to bottom: reference
+images, warped images, SR images, and GT images.
+where zf ∈ Rc is obtained via an affine transformation ap-
+plied to the style embedding zs:
+zf = MLPstyle(zs), (3)
+and (ts, tb) ∈ R2×c are obtained by applying an MLP to
+the sinusoidal position embedding ψ(t):
+(ts, tb) = MLPtime(ψ(t)), (4)
+In the pretraining, we leverage a pretrained ArcFace en-
+coder (Deng et al. 2019) to extract ID embeddings from the
+GT images. These ID embeddings are injected into the at-
+tention modules via cross-attention mechanisms to provide
+fine-grained ID priors. The diffusion network and the style
+encoder are trained from scratch, initialized with DiffAE
+weights pretrained on the FFHQ dataset (Karras, Laine, and
+Aila 2019). In the finetuning stage, we freeze both the U-
+Net and the style encoder, and solely optimize a learnable
+ID embedding initialized from a reference image. Note that
+the ArcFace encoder is not required during finetuning. Both
+stages share the same training hyperparameters: a maximum
+diffusion step of T = 1000, a linear β schedule, and DDIM
+sampling with 20 steps during inference.
+Experiments
+Experimental Setting
+aOur comparison experiments include both general and per-
+sonalized ones. In the pretraining phase, ID embeddings
+from reference images are used to achieve general FSR,
+while in the fine-tuning phase, we focus more on personal-
+ized FSR for the same ID. The pretraining strategy is based
+on the DiffAE model, which was trained for 2 days on four
+3090 GPUs, followed by 20 minutes of fine-tuning on a sin-
+gle 3090 GPU with the same ID samples. Detailed imple-
+mentations are provided in the Appendix.
+Datasets. We uniformly sample 10% of the IDs from
+CelebRef-HQ, with the remaining 90% used for pretraining.
+Each sampled ID is equally divided into a fine-tuning set
+and a test set. We filter out certain identities that may con-
+tain only a small number of images and additionally select
+several representative identities to better evaluate ID fitting.
+Consequently, the training set contains approximately 900
+IDs and 9,000 images, while the test set contains 56 IDs and
+586 images. Additionally, CASIA-WebFace and the video
+dataset CelebText are used for generalization evaluation af-
+ter quality filtering. See the Appendix for further details.
+Metrics and Baselines. For evaluation, we adopt metrics,
+including PSNR, SSIM, LPIPS (Zhang et al. 2018a), FID
+(Heusel et al. 2017), CLIPIQA (Wang, Chan, and Loy 2023),
+MUSIQ (Ke et al. 2021), and ID similarity (IDS) mea-
+sured by DeepFace (Serengil and Ozpinar 2020). We com-
+pare our method against SOTA reference-free and reference-
+based approaches, including CodeFormer (Zhou et al. 2022),
+DR2 (Wang et al. 2023), DifFace (Yue and Loy 2024),
+PGDiff (Yang et al. 2023), DMDNet (Zhao et al. 2023), and
+ASFFNet (Li et al. 2020).
+Qualitative Comparisons
+As shown in Fig. 4, we present a qualitative comparison
+of current SOTA FSR methods. Under moderate degrada-
+tion (8×), non-reference methods are able to achieve high-
+fidelity image reconstruction, but they still exhibit signif-
+icant discrepancies in facial consistency and fine-grained
+detail recovery. Unconditional generative models, such as
+
+=== PAGE 5 ===
+LR
+ HR PGDiff DR2 CodeF.DifFace DMD. ASFF. Ours (PT) Ours (FT) Ref.
+Figure 4: Visualization results of different methods under upsampling scales of 8 and 16, separated by double dashed lines. For
+reference-based methods—DMDNet, ASFFNet, and our IDFSR—a single ID is randomly selected as the reference image. FT
+and PT refer to finetuning and pretraining methods, respectively. Please zoom in for a better viewing.
+PGDiff and DR2, tend to generate facial hallucinations, i.e.,
+unrealistic or erroneous facial features. In contrast, condi-
+tional generative methods with discriminative constraints,
+such as DifFace, perform better in pixel-level consistency
+but still struggle to preserve fine ID features. This limita-
+tion primarily arises from the tendency of these methods to
+learn local average during training, which diminishes their
+ability to model fine-grained features. Our pretrained model
+exhibits similar characteristics to some extent, but by in-
+corporating a reference image, it outperforms non-reference
+methods in alleviating facial hallucinations and improving
+ID consistency. Meanwhile, SOTA reference-based methods
+like ASFFNet maintain a better balance between ID con-
+sistency and attribute recovery at 8× degradation. However,
+their performance significantly deteriorates under extreme
+degradation (such as 16×), with their effectiveness heavily
+reliant on precise matching between the LR and reference
+images. In contrast, our proposed personalized fine-tuning
+mechanism significantly enhances the model’s ability to pre-
+serve ID features and attribute details, demonstrating greater
+robustness under extreme low-quality conditions. Under the
+16× setting, IDFSR achieves notable advantages in both ID
+consistency and visual fidelity.
+Quantitative Comparisons
+In fact, there exists a discrepancy in embeddings between
+the training and testing stages of the pretraining method.
+Specifically, GT ID embeddings are used during pretrain-
+ing, whereas reference ID embeddings are employed during
+testing. This mismatch may lead to model performance be-
+ing influenced by the fine-grained details of the reference
+image, potentially resulting in misalignment of attribute fea-
+tures. We will delve deeper into this potential editing effect
+in the next Section.
+Methods IDV↑ ACCGen↑ ACCEmo↑ ACCRa↑ DiffAge↓
+CodeFormer50.3% 95.2% 64.3% 64.8% 4.6±4.3
+PGDiff 32.9% 88.7% 51.0% 68.8% 5.2±4.6
+DR2 38.9% 91.9% 57.6% 71.5% 5.2±5.1
+DiffFace 73.0% 95.4% 67.4% 77.3% 4.6±4.4
+ASFFNet 21.4% 72.1% 39.6% 45.2% 7.5±7.2
+DMDNet 18.7% 66.3% 36.8% 42.5% 7.6±7.3
+Ours (FT) 89.6% 98.7% 66.2% 96.6% 3.3±1.7
+Table 2: The qualitative comparison of face ID verifica-
+tion (IDV) and attribute consistency, including gender accu-
+racy (ACCGen), emotion accuracy (ACCEmo), race accuracy
+(ACCRa), and age difference (DiffAge).
+Notably, under moderate degradation (as shown in Ta-
+ble 1 ), the pretrained model does not achieve optimal per-
+formance in pixel-level consistency metrics such as PSNR,
+SSIM, and LPIPS. However, under severe degradation (e.g.,
+16×), attribute transfer significantly enhances performance,
+enabling the pretrained model to achieve SOTA results in
+pixel-level consistency. Further analysis reveals that per-
+ceptual quality metrics—including FID, CLIPIQA, and
+MUSIQ—also demonstrate competitive performance, vali-
+dating the effectiveness of the pretraining paradigm. As il-
+lustrated in Table 1, our personalized fine-tuning strategy
+achieves remarkable SOTA results across pixel-level consis-
+tency, perceptual quality, and ID consistency. Specifically,
+fine-tuning improves pixel-level consistency metrics by ap-
+proximately 15%, significantly boosts ID consistency, and
+surpasses other methods while maintaining high visual fi-
+delity.
+
+=== PAGE 6 ===
+Figure 5: Visualization of cross-ID attribute transfer. We first fit the embedding on ID A, then perform FSR using the LR
+and style ID from another ID.
+(e) SR Results
+(c) Ref. Images
+(d) Warped LR Images
+(a) GT
+ (b) Masked LR
+Figure 6: Latent Editing Effects of Style Embedding. Us-
+ing different styles of reference images usually only changes
+the action features, while the attributes and background fea-
+tures have a high degree of consistency.Face Verification and Attribute Analysis
+We further perform extensive evaluations on fine-grained
+attribute consistency to verify the semantic reconstruction
+ability of our method. Specifically, we use the DeepFace
+(Jiang et al. 2021) analysis toolkit to conduct face verifica-
+tion and attribute prediction between the GT and the corre-
+sponding SR images. Face verification is based on ID simi-
+larity, where a default threshold determines whether the GT
+and SR images belong to the same person. The attribute pre-
+diction includes four dimensions: age, gender, emotion, and
+race.
+We quantitatively compare different methods using recog-
+nition accuracy under a 16× scale setting, as shown in Ta-
+ble 2. IDFSR shows a clear advantage in ID verification ac-
+curacy. In comparison, many existing methods achieve less
+than 50% accuracy, indicating significant identity distortion
+and demonstrating the robustness of our approach under se-
+vere degradation. While most methods maintain reasonable
+gender consistency, emotion and race consistency remain
+challenging. Our method achieves 96% accuracy in race pre-
+diction, which benefits from the use of personalized ID em-
+beddings However, the accuracy for emotion prediction is
+notably lower. This is mainly because our method does not
+incorporate strong priors from the LR image space. Instead,
+it generates faces based on the reference image and cus-
+tomized embeddings, which can affect the expression. We
+further discuss this issue in the next Section.
+Ablation Study
+ID Decoupling and Generalization Verification
+We design a cross-ID experiment to evaluate the fine-grained
+modeling capability of the learned ID representation. Specif-
+ically, we fit an ID embedding on images of a subject (ID
+A), and then apply this embedding to restore images of a
+different subject (ID B). During testing, the embedding of
+ID A is used in conjunction with LR and reference images
+from other identities. As shown in Fig. 5, despite the mis-
+match in ID, the fitted ID A embedding can still effectively
+modify the target facial attributes, while preserving the back-
+ground and style. This observation suggests that the ID em-
+bedding is decoupled from the LR input and style encoding,
+indicating that it is learned independently of identity-aligned
+pixel supervision or image warping processes. Moreover, the
+success of the cross-ID experiment further demonstrates the
+strong generalization capability of the fitted ID representa-
+tion.
+Latent Editing Effects of Style Embedding
+The style embedding zs serves as the only explicitly de-
+signed pathway in our framework for capturing spatial infor-
+mation of the face, although the warping operation is not al-
+ways perfectly aligned. In Methodology, we have discussed
+the impact of warping alignment; here, we further explore
+the potential editing effect of style embedding in the context
+of FSR.
+As shown in Fig. 6, we select three images of the same
+ID with variations in lighting, makeup, and facial expres-
+sions. Two of these, which exhibit large differences in facial
+motion, are used as reference images under 16× downsam-
+pling. It can be clearly observed that the SR outputs exhibit a
+noticeable resemblance in facial expression to the reference
+
+=== PAGE 7 ===
+Figure 7: Effect of Reference Image Quantity on Finetun-
+ing Performance. Results show that performance generally
+improves with more references, with diminishing returns be-
+yond five images, where performance and stability reach a
+balance.
+images. Despite certain misalignments at the pixel level,
+our method achieves high identity consistency and visual fi-
+delity. In contrast, most existing approaches prioritize pixel-
+level alignment, which restricts the flexibility of ID gener-
+ation. Notably, aside from variations in facial expressions,
+the differences in background and fine details are minimal.
+This further validates the effectiveness of our key design in
+decoupling ID features.
+The Impact of Reference Image Quantity
+To investigate the impact of the number of reference im-
+ages on fine-tuning performance, we select samples from the
+CelebHQ-Ref test set, where each ID contains more than 10
+images. Specifically, we gradually increase the number of
+reference images used for fine-tuning, ranging from 2 to 10,
+and evaluate the performance using three normalized met-
+rics: pixel-level, ID and attribute consistency. As shown in
+Fig. 7, we report the average values and confidence intervals
+of these metrics across 10 identities.
+The overall trend shows that increasing the number of
+reference images helps improve the model’s consistency
+across all evaluation metrics. In the early stages, introduc-
+ing a small number of images brings limited improvement,
+which may be due to the pretrained model already possess-
+ing a certain level of single-image reference capability. The
+additional images provide limited information in terms of
+attribute diversity or fine-detail supplementation, especially
+when there are variations in image quality or pose. Notably,
+when the number of reference images reaches around five,
+the performance and stability tend to reach an optimal bal-
+ance.
+Component Analysis
+Starting from an unconditional diffusion model, we pro-
+gressively introduce key components to systematically an-
+alyze the contribution of each element to the final perfor-
+mance, as illustrated in Fig. 8. The most basic yet effec-
+tive diffusion-based super-resolution strategy concatenates
+Figure 8: Ablation Study on Model Components . Since
+the metrics have different scales, we normalize them to bet-
+ter illustrate the impact of each component on various per-
+formance measures.
+the low-resolution (LR) image with the noise input at each
+timestep (case1), as exemplified by SR3 (Saharia et al. 2022)
+and SRDiff (Li et al. 2022). This strategy imposes strong
+constraints that improve generation consistency, but suffers
+from reduced training efficiency and reconstruction fidelity
+under severe degradation.
+In case2, the LR image is masked before concatenation,
+effectively transforming the task into an inpainting problem.
+This introduces greater generative uncertainty. Nevertheless,
+such strong prior constraints remain crucial for low-level vi-
+sion tasks. Compared to methods relying on feature-based
+conditioning or attention mechanisms—such as DiffAE and
+Stable Diffusion (Rombach et al. 2022) (case3)—this ap-
+proach offers superior pixel-level consistency but performs
+worse in terms of perceptual quality. As shown in Fig. 8,
+case1 achieves the best consistency scores but significantly
+degrades perceptual quality, while case2 exhibits the op-
+posite trend. Case3 yields moderate performance across all
+metrics, indicating that it tends to produce structurally plau-
+sible but not precisely aligned results.
+When the ID embedding is removed under the default set-
+ting (case4), we observe that the model tends to generate ID-
+inconsistent faces due to misalignments introduced by the
+warping operation, resulting in decreased ID consistency.
+Removing the style embedding (case5) leads to reconstruc-
+tions that often lack realistic ID traits, suggesting that ID and
+style embeddings play complementary roles in preserving
+ID fidelity. The default configuration effectively integrates
+the advantages of each component: the masking operation
+provides a strong background constraint prior, while the ID
+and style embeddings enable disentangled modeling and ac-
+curate fitting of ID and facial attributes. Consequently, the
+model achieves strong performance in both ID consistency
+and attribute preservation.
+Conclusion
+In this paper, we propose IDFSR, a two-stage diffusion-
+based face super-resolution framework. During the pretrain-
+ing stage, we achieve facial disentanglement through three
+
+=== PAGE 8 ===
+key designs, while the finetuning stage enables the fit-
+ting of personalized attributes. IDFSR is both generalizable
+and customizable, demonstrating impressive identity and at-
+tribute consistency in both quantitative and qualitative eval-
+uations. Furthermore, extensive ablation studies validate the
+disentanglement and editability capabilities of our method.
+References
+Alekseev, A. K.; and Navon, I. M. 2001. The analysis of an
+ill-posed problem using multi-scale resolution and second-
+order adjoint techniques. Computer Methods in Applied Me-
+chanics and Engineering, 190(15-17): 1937–1953.
+Bulat, A.; and Tzimiropoulos, G. 2018. Super-fan: Inte-
+grated facial landmark localization and super-resolution of
+real-world low resolution faces in arbitrary poses with gans.
+In Proceedings of the IEEE conference on computer vision
+and pattern recognition, 109–117.
+Chen, J.; Chen, J.; Wang, Z.; Liang, C.; and Lin, C.-W. 2020.
+Identity-aware face super-resolution for low-resolution face
+recognition. IEEE Signal Processing Letters, 27: 645–649.
+Chen, Y .; Tai, Y .; Liu, X.; Shen, C.; and Yang, J. 2018. Fs-
+rnet: End-to-end learning face super-resolution with facial
+priors. In Proceedings of the IEEE conference on computer
+vision and pattern recognition, 2492–2501.
+Chong, M. J.; Xu, D.; Zhang, Y .; Wang, Z.; Forsyth, D.;
+Krishnan, G.; Wu, Y .; and Wang, J. 2025. Copy or Not?
+Reference-Based Face Image Restoration with Fine Details.
+In 2025 IEEE/CVF Winter Conference on Applications of
+Computer Vision (WACV), 9660–9669. IEEE.
+Dai, T.; Cai, J.; Zhang, Y .; Xia, S.-T.; and Zhang, L. 2019.
+Second-order attention network for single image super-
+resolution. In Proceedings of the IEEE/CVF conference on
+computer vision and pattern recognition, 11065–11074.
+Dai, T.; Wang, J.; Guo, H.; Li, J.; Wang, J.; and Zhu, Z. 2024.
+FreqFormer: Frequency-aware transformer for lightweight
+image super-resolution. In Proceedings of the International
+Joint Conference on Artificial Intelligence, 731–739.
+Deng, J.; Guo, J.; Ververas, E.; Kotsia, I.; and Zafeiriou, S.
+2020. Retinaface: Single-shot multi-level face localisation
+in the wild. In Proceedings of the IEEE/CVF conference on
+computer vision and pattern recognition, 5203–5212.
+Deng, J.; Guo, J.; Xue, N.; and Zafeiriou, S. 2019. Arcface:
+Additive angular margin loss for deep face recognition. In
+Proceedings of the IEEE/CVF conference on computer vi-
+sion and pattern recognition, 4690–4699.
+Dhariwal, P.; and Nichol, A. 2021. Diffusion models beat
+gans on image synthesis. Advances in neural information
+processing systems, 34: 8780–8794.
+Dogan, B.; Gu, S.; and Timofte, R. 2019. Exemplar guided
+face image super-resolution without facial landmarks. In
+Proceedings of the IEEE/CVF conference on computer vi-
+sion and pattern recognition workshops, 0–0.
+Guo, H.; Guo, Y .; Zha, Y .; Zhang, Y .; Li, W.; Dai, T.; Xia,
+S.-T.; and Li, Y . 2025. Mambairv2: Attentive state space
+restoration. In Proceedings of the Computer Vision and Pat-
+tern Recognition Conference, 28124–28133.
+Guo, H.; Li, J.; Dai, T.; Ouyang, Z.; Ren, X.; and Xia, S.-
+T. 2024. Mambair: A simple baseline for image restoration
+with state-space model. In European conference on com-
+puter vision, 222–241. Springer.
+He, J.; Shi, W.; Chen, K.; Fu, L.; and Dong, C. 2022.
+Gcfsr: a generative and controllable face super resolution
+method without facial and gan priors. In Proceedings of
+the IEEE/CVF conference on computer vision and pattern
+recognition, 1889–1898.
+Heusel, M.; Ramsauer, H.; Unterthiner, T.; Nessler, B.; and
+Hochreiter, S. 2017. Gans trained by a two time-scale up-
+date rule converge to a local nash equilibrium. Advances in
+neural information processing systems, 30.
+Ho, J.; Jain, A.; and Abbeel, P. 2020. Denoising diffusion
+probabilistic models. Advances in neural information pro-
+cessing systems, 33: 6840–6851.
+Huang, H.; He, R.; Sun, Z.; and Tan, T. 2017. Wavelet-srnet:
+A wavelet-based cnn for multi-scale face super resolution. In
+Proceedings of the IEEE international conference on com-
+puter vision, 1689–1697.
+Jiang, J.; Wang, C.; Liu, X.; and Ma, J. 2021. Deep learning-
+based face super-resolution: A survey.ACM Computing Sur-
+veys (CSUR), 55(1): 1–36.
+Karras, T.; Laine, S.; and Aila, T. 2019. A style-based gen-
+erator architecture for generative adversarial networks. In
+Proceedings of the IEEE/CVF conference on computer vi-
+sion and pattern recognition, 4401–4410.
+Ke, J.; Wang, Q.; Wang, Y .; Milanfar, P.; and Yang, F. 2021.
+Musiq: Multi-scale image quality transformer. In Proceed-
+ings of the IEEE/CVF international conference on computer
+vision, 5148–5157.
+Li, H.; Yang, Y .; Chang, M.; Chen, S.; Feng, H.; Xu, Z.; Li,
+Q.; and Chen, Y . 2022. Srdiff: Single image super-resolution
+with diffusion probabilistic models. Neurocomputing, 479:
+47–59.
+Li, X.; Li, W.; Ren, D.; Zhang, H.; Wang, M.; and Zuo, W.
+2020. Enhanced blind face restoration with multi-exemplar
+images and adaptive spatial feature fusion. InProceedings of
+the IEEE/CVF Conference on Computer Vision and Pattern
+Recognition, 2706–2715.
+Li, X.; Liu, M.; Ye, Y .; Zuo, W.; Lin, L.; and Yang, R. 2018.
+Learning warped guidance for blind face restoration. In
+Proceedings of the European conference on computer vision
+(ECCV), 272–289.
+Nitzan, Y .; Aberman, K.; He, Q.; Liba, O.; Yarom, M.; Gan-
+delsman, Y .; Mosseri, I.; Pritch, Y .; and Cohen-Or, D. 2022.
+Mystyle: A personalized generative prior. ACM Transac-
+tions on Graphics (TOG), 41(6): 1–10.
+Preechakul, K.; Chatthee, N.; Wizadwongsa, S.; and Suwa-
+janakorn, S. 2022. Diffusion autoencoders: Toward a mean-
+ingful and decodable representation. In Proceedings of
+the IEEE/CVF conference on computer vision and pattern
+recognition, 10619–10629.
+Rombach, R.; Blattmann, A.; Lorenz, D.; Esser, P.; and Om-
+mer, B. 2022. High-resolution image synthesis with latent
+
+=== PAGE 9 ===
+diffusion models. In Proceedings of the IEEE/CVF confer-
+ence on computer vision and pattern recognition , 10684–
+10695.
+Saharia, C.; Ho, J.; Chan, W.; Salimans, T.; Fleet, D. J.; and
+Norouzi, M. 2022. Image super-resolution via iterative re-
+finement. IEEE transactions on pattern analysis and ma-
+chine intelligence, 45(4): 4713–4726.
+Serengil, S. I.; and Ozpinar, A. 2020. Lightface: A hybrid
+deep face recognition framework. In 2020 innovations in
+intelligent systems and applications conference (ASYU) , 1–
+5. IEEE.
+Tao, K.; Gu, J.; Zhang, Y .; Wang, X.; and Cheng, N. 2024.
+Overcoming false illusions in real-world face restoration
+with multi-modal guided diffusion model. arXiv preprint
+arXiv:2410.04161.
+Tomar, A. S.; Arya, K.; Rajput, S. S.; and Rodriguez, C. R.
+2023. Comprehensive survey of face super-resolution tech-
+niques. Digital Image Enhancement and Reconstruction ,
+213–233.
+Wang, J.; Chan, K. C.; and Loy, C. C. 2023. Exploring clip
+for assessing the look and feel of images. In Proceedings
+of the AAAI conference on artificial intelligence, volume 37,
+2555–2563.
+Wang, Z.; Zhang, Z.; Zhang, X.; Zheng, H.; Zhou, M.;
+Zhang, Y .; and Wang, Y . 2023. Dr2: Diffusion-based robust
+degradation remover for blind face restoration. In Proceed-
+ings of the IEEE/CVF Conference on Computer Vision and
+Pattern Recognition, 1704–1713.
+Wu, Y .; and He, K. 2018. Group normalization. In Pro-
+ceedings of the European conference on computer vision
+(ECCV), 3–19.
+Yang, J.; Dai, T.; Zhu, Y .; Li, N.; Li, J.; and Xia, S.-T.
+2025. Diffusion Prior Interpolation for Flexibility Real-
+World Face Super-Resolution. In Proceedings of the AAAI
+Conference on Artificial Intelligence , volume 39, 9211–
+9219.
+Yang, P.; Zhou, S.; Tao, Q.; and Loy, C. C. 2023. PGDiff:
+Guiding diffusion models for versatile face restoration via
+partial guidance. Advances in Neural Information Process-
+ing Systems, 36: 32194–32214.
+Yue, Z.; and Loy, C. C. 2024. Difface: Blind face restora-
+tion with diffused error contraction. IEEE Transactions on
+Pattern Analysis and Machine Intelligence.
+Zhang, R.; Isola, P.; Efros, A. A.; Shechtman, E.; and Wang,
+O. 2018a. The unreasonable effectiveness of deep features as
+a perceptual metric. In Proceedings of the IEEE conference
+on computer vision and pattern recognition, 586–595.
+Zhang, Y .; Li, K.; Li, K.; Wang, L.; Zhong, B.; and Fu,
+Y . 2018b. Image super-resolution using very deep residual
+channel attention networks. In Proceedings of the European
+conference on computer vision (ECCV), 286–301.
+Zhang, Y .; Wu, Y .; and Chen, L. 2020. MSFSR: A multi-
+stage face super-resolution with accurate facial represen-
+tation via enhanced facial boundaries. In Proceedings of
+the IEEE/CVF conference on computer vision and pattern
+recognition workshops, 504–505.
+Zhao, T.; Zhang, G.; Zhong, P.; and Shen, Z. 2023. DMD-
+net: A decoupled multi-scale discriminant model for cross-
+domain fish detection. Biosystems Engineering, 234: 32–45.
+Zhou, S.; Chan, K.; Li, C.; and Loy, C. C. 2022. Towards
+robust blind face restoration with codebook lookup trans-
+former. Advances in Neural Information Processing Sys-
+tems, 35: 30599–30611.

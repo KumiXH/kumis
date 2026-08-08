@@ -1,0 +1,200 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/usr8i29ChLK7+W/AJZGzrTEv6yg</id>
+  <title>arXiv Query: search_query=ti:"SAM 2"&amp;id_list=&amp;start=0&amp;max_results=5</title>
+  <updated>2026-08-07T04:04:53Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=ti:%22SAM+2%22&amp;start=0&amp;max_results=5&amp;id_list=" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>5</opensearch:itemsPerPage>
+  <opensearch:totalResults>25</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/2510.18822v4</id>
+    <title>SAM 2++: Tracking Anything at Any Granularity</title>
+    <updated>2026-05-18T02:07:26Z</updated>
+    <link href="https://arxiv.org/abs/2510.18822v4" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2510.18822v4" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Due to the varying granularity of target states across different tasks, most existing trackers are tailored to a single task, which specificity limits their generalization, preventing them from effectively utilizing multi-task training data and leading to redundancy in both model design and parameters. Although recent unified vision models share partial architectures across tasks, they usually retain task-specific interfaces and overlook the common tracking principle behind different granularities, leaving a gap for truly unified video tracking. To unify video tracking tasks, we present SAM 2++, a unified framework that can handle target states at different granularities, including masks, boxes, and points, through an integrated design of prompt encoding, output decoding, and memory representation. First, to handle different target granularities, we design task-specific prompts that map diverse task inputs into general prompt embeddings, together with a Unified Decoder that produces task results in a common output form without redesigning the overall pipeline. Next, to satisfy memory matching, the core operation of tracking, we introduce a task-adaptive memory mechanism that unifies memory across different granularities while preserving their distinct state semantics, preventing full parameter sharing from causing interference across granularities. Finally, we introduce Tracking-Any-Granularity, the first large and diverse video tracking dataset with rich annotations at three granularities. It is constructed through a customized data engine with phased manual annotation and model-assisted completion, providing a comprehensive resource for training, benchmarking, and analyzing unified tracking models. Comprehensive experiments confirm that SAM 2++ sets a new state of the art across diverse tracking tasks at different granularities, establishing a unified and robust tracking framework.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-10-21T17:20:15Z</published>
+    <arxiv:comment>14 pages</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Jiaming Zhang</name>
+    </author>
+    <author>
+      <name>Cheng Liang</name>
+    </author>
+    <author>
+      <name>Yichun Yang</name>
+    </author>
+    <author>
+      <name>Chenkai Zeng</name>
+    </author>
+    <author>
+      <name>Yutao Cui</name>
+    </author>
+    <author>
+      <name>Xinwen Zhang</name>
+    </author>
+    <author>
+      <name>Xin Zhou</name>
+    </author>
+    <author>
+      <name>Kai Ma</name>
+    </author>
+    <author>
+      <name>Gangshan Wu</name>
+    </author>
+    <author>
+      <name>Limin Wang</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2501.13667v5</id>
+    <title>MPG-SAM 2: Adapting SAM 2 with Mask Priors and Global Context for Referring Video Object Segmentation</title>
+    <updated>2025-08-08T10:17:56Z</updated>
+    <link href="https://arxiv.org/abs/2501.13667v5" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2501.13667v5" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Referring video object segmentation (RVOS) aims to segment objects in a video according to textual descriptions, which requires the integration of multimodal information and temporal dynamics perception. The Segment Anything Model 2 (SAM 2) has shown great effectiveness across various video segmentation tasks. However, its application to offline RVOS is challenged by the translation of the text into effective prompts and a lack of global context awareness. In this paper, we propose a novel RVOS framework, termed MPG-SAM 2, to address these challenges. Specifically, MPG-SAM 2 employs a unified multimodal encoder to jointly encode video and textual features, generating semantically aligned video and text embeddings, along with multimodal class tokens. A mask prior generator utilizes the video embeddings and class tokens to create pseudo masks of target objects and global context. These masks are fed into the prompt encoder as dense prompts along with multimodal class tokens as sparse prompts to generate accurate prompts for SAM 2. To provide the online SAM 2 with a global view, we introduce a hierarchical global-historical aggregator, which allows SAM 2 to aggregate global and historical information of target objects at both pixel and object levels, enhancing the target representation and temporal consistency. Extensive experiments on several RVOS benchmarks demonstrate the superiority of MPG-SAM 2 and the effectiveness of our proposed modules. The code is available at https://github.com/rongfu-dsb/MPG-SAM2.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-01-23T13:53:33Z</published>
+    <arxiv:comment>ICCV 2025</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Fu Rong</name>
+    </author>
+    <author>
+      <name>Meng Lan</name>
+    </author>
+    <author>
+      <name>Qian Zhang</name>
+    </author>
+    <author>
+      <name>Lefei Zhang</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2408.00714v2</id>
+    <title>SAM 2: Segment Anything in Images and Videos</title>
+    <updated>2024-10-28T16:37:57Z</updated>
+    <link href="https://arxiv.org/abs/2408.00714v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2408.00714v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>We present Segment Anything Model 2 (SAM 2), a foundation model towards solving promptable visual segmentation in images and videos. We build a data engine, which improves model and data via user interaction, to collect the largest video segmentation dataset to date. Our model is a simple transformer architecture with streaming memory for real-time video processing. SAM 2 trained on our data provides strong performance across a wide range of tasks. In video segmentation, we observe better accuracy, using 3x fewer interactions than prior approaches. In image segmentation, our model is more accurate and 6x faster than the Segment Anything Model (SAM). We believe that our data, model, and insights will serve as a significant milestone for video segmentation and related perception tasks. We are releasing our main model, dataset, as well as code for model training and our demo.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-08-01T17:00:08Z</published>
+    <arxiv:comment>Website: https://ai.meta.com/sam2</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Nikhila Ravi</name>
+    </author>
+    <author>
+      <name>Valentin Gabeur</name>
+    </author>
+    <author>
+      <name>Yuan-Ting Hu</name>
+    </author>
+    <author>
+      <name>Ronghang Hu</name>
+    </author>
+    <author>
+      <name>Chaitanya Ryali</name>
+    </author>
+    <author>
+      <name>Tengyu Ma</name>
+    </author>
+    <author>
+      <name>Haitham Khedr</name>
+    </author>
+    <author>
+      <name>Roman Rädle</name>
+    </author>
+    <author>
+      <name>Chloe Rolland</name>
+    </author>
+    <author>
+      <name>Laura Gustafson</name>
+    </author>
+    <author>
+      <name>Eric Mintun</name>
+    </author>
+    <author>
+      <name>Junting Pan</name>
+    </author>
+    <author>
+      <name>Kalyan Vasudev Alwala</name>
+    </author>
+    <author>
+      <name>Nicolas Carion</name>
+    </author>
+    <author>
+      <name>Chao-Yuan Wu</name>
+    </author>
+    <author>
+      <name>Ross Girshick</name>
+    </author>
+    <author>
+      <name>Piotr Dollár</name>
+    </author>
+    <author>
+      <name>Christoph Feichtenhofer</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2408.02635v2</id>
+    <title>Interactive 3D Medical Image Segmentation with SAM 2</title>
+    <updated>2025-01-06T03:00:07Z</updated>
+    <link href="https://arxiv.org/abs/2408.02635v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2408.02635v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Interactive medical image segmentation (IMIS) has shown significant potential in enhancing segmentation accuracy by integrating iterative feedback from medical professionals. However, the limited availability of enough 3D medical data restricts the generalization and robustness of most IMIS methods. The Segment Anything Model (SAM), though effective for 2D images, requires expensive semi-auto slice-by-slice annotations for 3D medical images. In this paper, we explore the zero-shot capabilities of SAM 2, the next-generation Meta SAM model trained on videos, for 3D medical image segmentation. By treating sequential 2D slices of 3D images as video frames, SAM 2 can fully automatically propagate annotations from a single frame to the entire 3D volume. We propose a practical pipeline for using SAM 2 in 3D medical image segmentation and present key findings highlighting its efficiency and potential for further optimization. Concretely, numerical experiments on the BraTS2020 and the medical segmentation decathlon datasets demonstrate that SAM 2 still has a gap with supervised methods but can narrow the gap in specific settings and organ types, significantly reducing the annotation burden on medical professionals. Our code will be open-sourced and available at https://github.com/Chuyun-Shen/SAM_2_Medical_3D.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2024-08-05T16:58:56Z</published>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Chuyun Shen</name>
+    </author>
+    <author>
+      <name>Wenhao Li</name>
+    </author>
+    <author>
+      <name>Yuhang Shi</name>
+    </author>
+    <author>
+      <name>Xiangfeng Wang</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2505.14100v2</id>
+    <title>Unlocking the Power of SAM 2 for Few-Shot Segmentation</title>
+    <updated>2025-05-21T01:47:37Z</updated>
+    <link href="https://arxiv.org/abs/2505.14100v2" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2505.14100v2" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Few-Shot Segmentation (FSS) aims to learn class-agnostic segmentation on few classes to segment arbitrary classes, but at the risk of overfitting. To address this, some methods use the well-learned knowledge of foundation models (e.g., SAM) to simplify the learning process. Recently, SAM 2 has extended SAM by supporting video segmentation, whose class-agnostic matching ability is useful to FSS. A simple idea is to encode support foreground (FG) features as memory, with which query FG features are matched and fused. Unfortunately, the FG objects in different frames of SAM 2's video data are always the same identity, while those in FSS are different identities, i.e., the matching step is incompatible. Therefore, we design Pseudo Prompt Generator to encode pseudo query memory, matching with query features in a compatible way. However, the memories can never be as accurate as the real ones, i.e., they are likely to contain incomplete query FG, and some unexpected query background (BG) features, leading to wrong segmentation. Hence, we further design Iterative Memory Refinement to fuse more query FG features into the memory, and devise a Support-Calibrated Memory Attention to suppress the unexpected query BG features in memory. Extensive experiments have been conducted on PASCAL-5$^i$ and COCO-20$^i$ to validate the effectiveness of our design, e.g., the 1-shot mIoU can be 4.2% better than the best baseline.</summary>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2025-05-20T09:02:53Z</published>
+    <arxiv:comment>This paper is accepted by ICML'25</arxiv:comment>
+    <arxiv:primary_category term="cs.CV"/>
+    <author>
+      <name>Qianxiong Xu</name>
+    </author>
+    <author>
+      <name>Lanyun Zhu</name>
+    </author>
+    <author>
+      <name>Xuanyi Liu</name>
+    </author>
+    <author>
+      <name>Guosheng Lin</name>
+    </author>
+    <author>
+      <name>Cheng Long</name>
+    </author>
+    <author>
+      <name>Ziyue Li</name>
+    </author>
+    <author>
+      <name>Rui Zhao</name>
+    </author>
+  </entry>
+</feed>

@@ -1,0 +1,167 @@
+{
+  "key": "lafr",
+  "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\05_efficiency\\lafr_2505.23462.pdf",
+  "page_count": 17,
+  "first_page_excerpt": "LAFR: Efficient Diffusion-based Blind Face\nRestoration via Latent Codebook Alignment Adapter\nRunyi Li1 Bin Chen1 Jian Zhang1† Radu Timofte2†\n1School of Electronic and Computer Engineering, Peking University, China\n2Computer Vision Lab, CAIDAS & IFI, University of Würzburg, Germany\nAbstract\nBlind face restoration from low-quality (LQ) images is a challenging task that\nrequires not only high-fidelity image reconstruction but also the preservation of\nfacial identity. While diffusion models like Stable Diffusion have shown promise\nin generating high-quality (HQ) images, their V AE modules are typically trained\nonly on HQ data, resulting in semantic misalignment when encoding LQ inputs.\nThis mismatch significantly weakens the effectiveness of LQ conditions during\nthe denoising process. Existing approaches often tackle this issue by retraining\nthe V AE encoder, which is computationally expensive and memory-intensive. To\naddress this limitation efficiently, we proposeLAFR (Latent Alignment for Face\nRestoration), a novel codebook-based latent space adapter that aligns the latent\ndistribution of LQ images with that of HQ counterparts, enabling semantically\nconsistent diffusion sampling without altering the original V AE. To further enhance\nidentity preservation, we introduce a multi-level restoration loss that combines\nconstraints from identity embeddings and facial structural priors. Additionally,\nby leveraging the inherent structural regularity of facial images, we show that\nlightweight finetuning of diffusion prior on just 0.9% of FFHQ dataset is sufficient\nto achieve results comparable to state-of-the-art methods, reduce training time by\n70%. Extensive experiments on both synthetic and real-world face restoration\nbenchmarks demonstrate the effectiveness and efficiency of LAFR, achieving high-\nquality, identity-preserving face reconstruction from severely degraded inputs.\n1 Introduction\nFace image restoration is a critical task within the broader domain of image restoration [82; 69; 2; 2],\nwith applications ranging from photo enhancement to facial forensics [54; 35; 74]. Unlike general\nimages, facial images exhibit highly structured patterns and identity-sensitive features [52; 18; 1],\nnecessitating tailored solutions to ensure structural fidelity and identity preservation. Recent advances\nin diffusion models [16; 44; 43; 39] have positioned them as strong generative priors across various\nrestoration tasks, including super-resolution, inpainting, and deblurring. Among these, latent diffusion\nmodels have gained popularity for face image reconstruction, where inputs are encoded into a latent\nspace before restoration. However, the V AE encoder in the widely adopted Stable Diffusion [39] is\ntrained solely on high-quality (HQ) images. When applied directly to low-quality (LQ) inputs, it\nproduces misaligned latent codes, leading to suboptimal restoration performance [57; 73].\nExisting approaches [ 3; 57; 45] attempt to correct this by retraining the V AE and incorporating\ncomplex alignment modules, but at the cost of increased computational load and inference latency.\nMoreover, most diffusion models are pre-trained on general-purpose datasets such as ImageNet [5],\nwhich limits their direct applicability to face-specific tasks. Adapting these models typically requires\n†Corresponding author.\nPreprint. Under review.\narXiv:2505.23462v1  [cs.CV]  29 May 2025",
+  "figure_candidates": [
+    {
+      "page": 2,
+      "caption": "Figure 1: Comparison of our proposed LAFR with state-of-the-art face restoration methods. (a)"
+    },
+    {
+      "page": 3,
+      "caption": "Figure 2: Comparison of alignment strategies of LQ-HQ code in restoration. (a) Our proposed"
+    },
+    {
+      "page": 4,
+      "caption": "Figure 3: Overall pipeline of our proposed LAFR. We keep V AE encoder and decoder frozen, only"
+    },
+    {
+      "page": 7,
+      "caption": "Figure 4: Visualized results on CelebA-Test dataset. RF++ is short for RestoreFormer++ [63]."
+    },
+    {
+      "page": 7,
+      "caption": "Figure 5: Visualized results of real-world face restoration. RF++ is RestoreFormer++ [63] for short."
+    },
+    {
+      "page": 8,
+      "caption": "Figure 6: Performance trend on CelebA-Test as the amount of the training images increases. The"
+    },
+    {
+      "page": 8,
+      "caption": "Figure 7: T-SNE results show that compared to natural"
+    },
+    {
+      "page": 8,
+      "caption": "Figure 8: T-SNE result of distribution"
+    },
+    {
+      "page": 11,
+      "caption": "Figure 9: Performance trend of OSEDiff and our LAFR on CelebA-Test, as the amount of training"
+    },
+    {
+      "page": 12,
+      "caption": "Figure 10: Results on animation images with real-world degradations. Our method yields high-quality"
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 6,
+      "caption": "Table 1: Quantitative comparison with previous methods, which include non-diffusion, multi-step,"
+    },
+    {
+      "page": 6,
+      "caption": "Table 2: Comparison on real-world face restoration benchmarks. C-IQA, M-IQA, and M-IQ stands"
+    },
+    {
+      "page": 8,
+      "caption": "Table 3: Efficiency of our LAFR compared to diffusion-based restoration approaches. Calculation of"
+    },
+    {
+      "page": 9,
+      "caption": "Table 4: Ablation study of multi-level loss on"
+    },
+    {
+      "page": 9,
+      "caption": "Table 5: Ablation study on CelebA-Test for alignment,"
+    },
+    {
+      "page": 9,
+      "caption": "Table 6: Comparison between (1) our proposed alignment adapter and alignment module in FaithD-"
+    },
+    {
+      "page": 11,
+      "caption": "Table 7: Comparison between our proposed alignment adapter and alignment module in VQFR [13]"
+    },
+    {
+      "page": 11,
+      "caption": "Table 8: Ablation studies of different training images amount for our LAFR."
+    },
+    {
+      "page": 11,
+      "caption": "Table 9: Ablation studies of different training images amount for OSEDiff."
+    },
+    {
+      "page": 12,
+      "caption": "Table 10: Comparison between our alignment adapter and directly using LQ images as conditional"
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      3,
+      4,
+      5,
+      6,
+      9,
+      10,
+      14
+    ],
+    "identity": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      12,
+      13,
+      15,
+      16
+    ],
+    "portrait_detail": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      9,
+      10,
+      13,
+      14,
+      15,
+      16,
+      17
+    ],
+    "efficiency": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      10,
+      12,
+      13,
+      16,
+      17
+    ],
+    "datasets": [
+      1,
+      2,
+      3,
+      4,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      16
+    ],
+    "limitations": [
+      1,
+      5,
+      10,
+      12
+    ]
+  },
+  "source_urls": [],
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\lafr.txt"
+}

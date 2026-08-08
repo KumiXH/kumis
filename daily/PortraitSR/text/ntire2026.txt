@@ -1,0 +1,1179 @@
+=== PAGE 1 ===
+The Second Challenge on Real-World Face Restoration at NTIRE 2026:
+Methods and Results
+Jingkai Wang* Jue Gong* Zheng Chen* Kai Liu* Jiatong Li* Yulun Zhang*†
+Radu Timofte* Jiachen Tu Yaokun Shi Guoyi Xu Yaoxin Jiang Jiajia Liu
+Yingsi Chen Yijiao Liu Hui Li Yu Wang Congchao Zhu
+Alexandru-Gabriel Lefterache Anamaria Radoi Chuanyue Yan Tao Lu
+Yanduo Zhang Kanghui Zhao Jiaming Wang Yuqi Li WenBo Xiong
+Yifei Chen Xian Hu Wei Deng Daiguo Zhou Sujith Roy V Claudia Jesuraj
+Vikas B Spoorthi LC Nikhil Akalwadi Ramesh Ashok Tabib Uma Mudenagudi
+Yuxuan Jiang Chengxi Zeng Tianhao Peng Fan Zhang David Bull Wei Zhou
+Linfeng Li Hongyu Huang Hoyoung Lee SangYun Oh ChangYoung Jeong
+Axi Niu Jinyang Zhang Zhenguo Wu Senyan Qing Jinqiu Sun Yanning Zhang
+Abstract
+This paper provides a review of the NTIRE 2026 challenge
+on real-world face restoration, highlighting the proposed
+solutions and the resulting outcomes. The challenge focuses
+on generating natural and realistic outputs while maintain-
+ing identity consistency. Its goal is to advance state-of-the-
+art solutions for perceptual quality and realism, without im-
+posing constraints on computational resources or training
+data. Performance is evaluated using a weighted image
+quality assessment (IQA) score and employs the AdaFace
+model as an identity checker. The competition attracted
+96 registrants, with 10 teams submitting valid models; ul-
+timately, 9 teams achieved valid scores in the final ranking.
+This collaborative effort advances the performance of real-
+world face restoration while offering an in-depth overview
+of the latest trends in the field.
+1. Introduction
+Face restoration aims to reconstruct high-quality (HQ) face
+images from low-quality (LQ) inputs degraded by blur,
+noise, compression, and other distortions. Since severe
+degradation often removes a large amount of visual in-
+formation, this task is inherently ill-posed. Meanwhile,
+*Jingkai Wang, Jue Gong, Zheng Chen, Kai Liu, Jiatong Li, Yu-
+lun Zhang, and Radu Timofte are the challenge organizers, while the
+other authors participated in the challenge. Section B in the supplemen-
+tary materials contains the authors’ teams and affiliations. NTIRE 2026
+webpage:https://cvlai.net/ntire/2026. Code:https:
+/ / github . com / jkwang28 / NTIRE2026 _ RealWorld _ Face _
+Restoration.
+†Corresponding author: Yulun Zhang. yulun100@gmail.com
+with the continuous progress of portrait imaging technol-
+ogy, users increasingly expect restored face images to ex-
+hibit both rich details and high fidelity. This makes it es-
+sential for restoration methods to produce outputs that are
+not only clear but also natural and realistic. In recent years,
+deep learning has substantially advanced face restoration.
+Methods based on CNNs, Transformers [66, 77, 82, 98],
+GANs [5, 7, 74, 86], and diffusion models [8, 38, 43, 52, 61,
+65, 71, 78, 80, 84, 91] demonstrated strong performance.
+A key challenge in this field lies in how to effectively
+model face priors. Traditional image restoration methods
+often rely on statistical priors, whereas modern neural meth-
+ods tend to learn such priors directly from data. Among
+them, geometric-prior-based approaches [9, 29, 60, 90] are
+particularly valuable because they provide explicit struc-
+tural cues for facial reconstruction. However, when the
+degradation is relatively mild, users often expect the re-
+stored results to remain highly realistic, including subtle
+skin textures that are usually captured only by high-end
+imaging devices. Therefore, beyond semantic guidance,
+texture priors are also vital for recovering fine facial details.
+Recent studies [16, 66, 77, 82, 98] have extensively ex-
+plored Transformer-based designs for incorporating face
+priors. Representative methods such as CodeFormer [98]
+and DAEFR [66] employ codebooks learned from HQ face
+images as priors. Although these methods are effective at
+preserving facial information, they still show limitations
+when handling severely degraded images, especially in tran-
+sition regions between the face and the background.
+For more severely degraded inputs, generative capabil-
+ity becomes increasingly important. GAN-based meth-
+ods [5, 7, 74, 86] have shown strong ability in synthesizing
+arXiv:2604.10532v2  [cs.CV]  15 Apr 2026
+
+=== PAGE 2 ===
+plausible facial details. Among them, GFPGAN [74] is par-
+ticularly notable, not only for its effective restoration frame-
+work, but also for providing benchmark datasets widely
+used by the computer vision community. More recently,
+diffusion-based methods [8, 38, 43, 52, 61, 65, 71, 78, 80,
+84, 91] have emerged as a powerful paradigm. Benefiting
+from the strong generative priors of diffusion models, high-
+quality face restoration from severely degraded inputs has
+become increasingly feasible. DR2 [78] transforms the in-
+put into noisy states and progressively denoises it to recover
+essential semantic information. DiffBIR [38] further im-
+proves facial detail restoration by leveraging a pre-trained
+latent diffusion model as a strong prior. In addition, super-
+resolution models such as SUPIR [89] and StableSR [70]
+have also been widely adopted in this competition, further
+highlighting the effectiveness of diffusion-based techniques
+for real-world face restoration.
+Very recently, researchers have made significant
+progress in advancing the field of face restoration.
+FaceMe [40] and RefSTAR [87] combine reference images
+with diffusion models, greatly improving reference-based
+face restoration. InterLCM [32] introduces latent consis-
+tency models to the field. It uses a 4-step LCM to im-
+prove inference efficiency. OSDFace [71] uses pre-trained
+models to reduce multi-step diffusion sampling to a sin-
+gle step. This achieves faster inference while maintaining
+high restoration quality. [53] uses the Schr ¨odinger Bridge
+and Pseudo-Hashing to explore optimal transport paths dur-
+ing face restoration. FLIPNET [44] integrates restoration
+and degradation modes, which offer a new paradigm for
+learning real-world degradation. SSDiff [33] focuses on old
+photo restoration. It proposes a training-free method that
+uses a staged, region-specific guidance scheme.
+In collaboration with the 2026 New Trends in Image
+Restoration and Enhancement (NTIRE 2026) workshop, we
+organized a challenge on real-world face restoration. The
+challenge aims to recover high-quality face images from de-
+graded low-quality inputs, with an emphasis on richer tex-
+tures, more realistic facial appearances, and consistent iden-
+tity preservation. Its goal is to encourage the development
+of solutions that achieve strong restoration quality with the
+best perceptual performance, while also revealing current
+trends in face restoration design.
+This challenge is one of the challenges associated
+with the NTIRE 2026 Workshop 1 on: deepfake detec-
+tion [20], high-resolution depth [92], multi-exposure im-
+age fusion [55], AI flash portrait [18], professional image
+quality assessment [51], light field super-resolution [76],
+3D content super-resolution [73], bitstream-corrupted video
+restoration [99], X-AIGC quality assessment [42], shadow
+removal [68], ambient lighting normalization [67], control-
+lable Bokeh rendering [59], rip current detection and seg-
+1https://www.cvlai.net/ntire/2026/
+mentation [14], low light image enhancement [11], high
+FPS video frame interpolation [12], Night-time dehaz-
+ing [1, 2], learned ISP with unpaired data [49], short-
+form UGC video restoration [34], raindrop removal for
+dual-focused images [35], image super-resolution (x4) [10],
+photography retouching transfer [15], mobile real-word
+super-resolution [31], remote sensing infrared super-
+resolution [39], AI-Generated image detection [19], cross-
+domain few-shot object detection [54], financial receipt
+restoration and reasoning [17], real-world face restora-
+tion [72], reflection removal [4], anomaly detection of face
+enhancement [97], video saliency prediction [45], efficient
+super-resolution [56], 3d restoration and reconstruction in
+adverse conditions [41], image denoising [62], blind com-
+putational aberration correction [64], event-based image de-
+blurring [63], efficient burst HDR and restoration [48], low-
+light enhancement: ‘twilight cowboy’ [28], and efficient
+low light image enhancement [83].
+2. NTIRE 2026 Real-world Face Restoration
+This challenge focuses on restoring real-world degraded
+face images. The task is to recover high-quality face im-
+ages with rich high-frequency details from low-quality in-
+puts. At the same time, the output should preserve facial
+identity to a reasonable degree. There are no restrictions on
+computational resources such as model size or FLOPs. The
+main goal is to achieve the best possible image quality and
+identity consistency.
+2.1. Dataset
+We recommend FFHQ [24] as the primary training dataset,
+which provides 70,000 HQ face images. Participants may
+also use other datasets during training. Separate im-
+age sets are adopted for the development and evaluation
+phases. Specifically, the test set consists of images sampled
+from five datasets, including 50 images from CelebChild-
+Test [74], and 100 images each from LFW-Test [74],
+WIDER-Test [98], CelebA [23], and WebPhoto-Test [74].
+FFHQ.FFHQ consists of 70,000 high-quality face images
+covering diverse identities, attributes, and demographic
+characteristics. Owing to its high resolution and strong con-
+sistency, it is commonly adopted for face generation and
+restoration tasks.
+LFW-Test.LFW-Test is constructed from the Labeled
+Faces in the Wild (LFW) dataset [22] and contains 1,711
+low-quality face images captured in unconstrained environ-
+ments. It is built by taking the first image of each identity
+from the validation split.
+WIDER-Test.WIDER-Test includes 970 low-quality real-
+world images sampled from the WIDER FACE dataset. The
+set covers challenging scenarios such as large pose varia-
+tion, occlusion, and difficult lighting conditions.
+
+=== PAGE 3 ===
+Team
+No.
+Team
+Name Rank NIQE CLIPIQA ManIQA MUSIQ Q-Align FID Adaface
+Score
+Failed
+images
+ID
+Validation
+Total
+Score
+5 MiPlusCV 1 3.6897 0.9346 0.9082 77.5060 4.4648 53.6291 0.8273 1✓ 4.6055
+6 KLETech-CEVI 2 3.5486 0.9537 0.6563 77.3132 4.3771 56.0744 0.8425 1✓ 4.3429
+2 HONORAICamera 3 3.8173 0.9343 0.6026 76.1874 4.3017 52.6388 0.7770 0✓ 4.2510
+8 YuFans 4 3.8743 0.9655 0.6519 78.0809 3.9467 56.1398 0.8524 1✓ 4.2387
+10 guaguagua 5 3.9447 0.7327 0.6027 76.1343 4.4872 52.2211 0.7636 5✓ 4.0775
+1 NTR 6 4.9374 0.7638 0.6064 75.2589 4.4409 61.6428 0.6801 10✓ 3.9008
+3 MaDENN 7 4.3231 0.7020 0.5293 74.9940 4.2022 53.1356 0.7834 0✓ 3.8581
+9 SN VISION 8 7.1777 0.7563 0.5286 67.5346 3.4691 67.5720 0.7325 5✓ 3.2606
+4 ALLCAN 9 6.1302 0.5672 0.4583 62.1487 3.6028 74.7110 0.7509 2✓ 3.0075
+7 BVI N/A 4.3872 0.8193 0.6857 77.0376 4.6288 66.7819 0.5334 82× 4.0946
+Table 1. Results of NTIRE 2026 Real-world Face Restoration Challenge. The testing was conducted on the test dataset, consisting of 450
+images from CelebChild-Test, LFW-Test, WIDER-Test, CelebA, and WebPhoto-Test. Participants were required to pass the AdaFace ID
+Test first to qualify for ranking. The final results were calculated based on the weighted score of no-reference IQA metrics for the ranking.
+CelebChild-Test.CelebChild-Test contains 180 childhood
+celebrity face images collected from online sources. Many
+samples are black-and-white or of limited quality, repre-
+senting severe real-world degradation.
+WebPhoto-Test.WebPhoto-Test is derived from 188 real-
+world images collected from the Internet, from which 407
+faces are detected. It presents complex degradations, in-
+cluding aging effects, detail degradation, and color fading.
+CelebA.In this challenge, CelebA is sampled from the
+validation split of the CelebFaces Attributes (CelebA)
+dataset [23], which contains 19,867 images with a resolu-
+tion of 178×218. All images are first center-cropped to
+178×178 and then resized to 512×512.
+2.2. Competition
+Participants are ranked according to the visual quality of
+their restored face images, while preserving identity consis-
+tency with the corresponding low-quality input faces in the
+test set. Submissions must keep identity similarity above
+a predefined threshold, with at most 10 cases falling below
+the threshold, and should further pursue the highest possible
+perceptual quality scores.
+2.2.1. Challenge Phases
+Development and Validation Phase:Participants are
+given 70,000 high-quality images from the FFHQ dataset,
+together with 450 low-quality (LQ) images sampled from
+five real-world datasets. By introducing simulated degra-
+dations, they can build paired training data for supervised
+face restoration. The use of additional training datasets is
+also allowed. During this Phase, participants may submit
+their restored high-quality images to the CodaBench evalu-
+ation server and obtain perceptual quality scores, including
+CLIPIQA [69] and MUSIQ [27].
+Testing Phase:In the final testing phase, participants re-
+ceive another set of 450 low-quality test images that are dif-
+ferent from those used in development, which is also dif-
+ferent from the former challenges. They are also required
+to upload their restored results to the CodaBench server and
+send their code together with a factsheet to the organizers by
+email. The organizers will then validate the submitted code
+and release the final rankings after the challenge is finished.
+2.2.2. Evaluation Procedure
+Step 1: Identity Similarity Measurement.We adopt a
+pre-trained AdaFace [30] model to extract identity embed-
+dings from the input low-quality images and the restored
+high-quality (HQ) images, and then measure their cosine
+similarity. Since the severity of degradation varies across
+datasets, different identity thresholds are used for different
+data sources. The threshold is set to 0.3 for Wider-Test and
+WebPhoto-Test, 0.6 for LFW-Test and CelebChild-Test, and
+0.5 for CelebA.
+Step 2: Image Quality Assessment.The restored HQ
+images are assessed with several no-reference image qual-
+ity assessment (IQA) metrics, including NIQE [93], CLIP-
+IQA [69], MANIQA [85], MUSIQ [27], and Q-Align [79].
+We also compute the FID score using FFHQ as the refer-
+ence dataset. To ensure fairness and reproducibility, the
+final ranking is primarily determined by the results repro-
+duced from the submitted code, which are used for verifica-
+tion. The CodaBench submission is used as a supplemen-
+tary reference, and small score discrepancies are considered
+acceptable. The evaluation scripts are publicly available
+athttps://github.com/jkwang28/NTIRE2026_
+RealWorld_Face_Restoration, where the source
+code and pre-trained models of participating methods are
+also provided. The teams are ultimately ranked based on
+the overall perceptual score, which is computed by
+Score=CLIPIQA+MANIQA+ MUSIQ
+100 + QALIGN
+5
++ max
+
+0, 10−NIQE
+10
+
++ max
+
+0, 100−FID
+100
+
+.
+
+=== PAGE 4 ===
+3. Challenge Results
+Table 1 presents the final rankings and results of the teams.
+A comprehensive description of the evaluation process is
+outlined in Sec. 2.2. All ten participating teams, together
+with their method details, are summarized in Sec. 4. Team
+member information can be found in the appendix. Mi-
+PlusCV achieved first place in this year’s challenge, fol-
+lowed by CEVI-KLETech, HONORAICamera, YuFans,
+and guaguagua. Only one team, BVI, failed the AdaFace
+ID test and therefore did not receive a valid final ranking.
+3.1. Architectures and main ideas
+Throughout this year’s challenge, the strongest methods
+largely revolved around adapting powerful pre-trained im-
+age generators to the face restoration task. Based on the
+top-ranked teams in Table 1, we summarize the main ideas
+as follows.
+1.One-step or distilled diffusion priors dominate the
+top ranks.The first, third, and fourth-ranked teams
+all rely on strong one-step or fixed-timestep generative
+backbones. MiPlusCV combines OSDFace [71] with
+a Z-Image-based one-step diffusion restorer [3], HON-
+ORAICamera fine-tunes Z-Image-Turbo with OMGSR-
+style training [81], and YuFans directly builds on SD-
+Face/OSDFace with an SDXL-Turbo prior [58, 71].
+This indicates that high perceptual quality can now be
+achieved with a single forward generation stage rather
+than only with expensive multi-step diffusion.
+2.Metric-oriented refinement becomes a key differen-
+tiator.Several top teams do not stop at a strong base
+restorer, but explicitly optimize for the challenge met-
+rics. MiPlusCV performs post-training refinement using
+CLIPIQA, MANIQA, and MUSIQ rewards, while Yu-
+Fans applies direct CLIPIQA-guided pixel optimization
+at test time [69]. These results show that lightweight
+metric-aware refinement can produce clear leaderboard
+gains when the backbone already provides strong real-
+ism and identity preservation.
+3.Semantic and structural guidance remains essen-
+tial for identity-safe restoration.The second-ranked
+CEVI-KLETech method augments a three-stage baseline
+with semantic facial parsing and wavelet-domain correc-
+tion, allowing different facial regions to receive different
+amounts of refinement. This is consistent with a broader
+trend in this year’s submissions: even when the main
+generator is a large pre-trained diffusion model, explicit
+face-aware priors are still important for maintaining sta-
+ble anatomy and identity.
+4.Modular multi-stage designs are still highly compet-
+itive.Instead of training a single monolithic model
+end-to-end, the leading methods usually separate coarse
+recovery, perceptual enhancement, and optional post-
+processing. MiPlusCV uses a two-stage restoration
+pipeline, CEVI-KLETech inserts a lightweight correc-
+tion module between diffusion and naturalness stages,
+and guaguagua adapts a large FLUX.2 model with
+degradation-aware structured control and LoRA. This
+modular design makes it easier to reuse strong genera-
+tive priors while adding task-specific refinement blocks.
+5.Foundation-model adaptation is replacing purely
+task-specific restoration backbones.The top teams
+extensively build on large generative priors such as Z-
+Image, SDXL-Turbo, DiffBIR, and FLUX.2 rather than
+relying only on traditional face restoration networks.
+This year’s challenge, therefore, highlights a clear shift
+toward adapting foundation image generators for percep-
+tual face restoration, often with parameter-efficient tun-
+ing and task-specific control signals.
+3.2. Participants
+This year, the real-world face restoration challenge received
+96 registrations, among which 10 teams submitted valid
+models. Following AdaFace-based identity verification, 9
+teams remained eligible for the final ranking. Together,
+these submissions offer a representative view of current
+real-world face restoration methods operating under the
+dual requirements of perceptual quality and identity con-
+sistency.
+3.3. Fairness
+To ensure a fair competition, we establish the following
+rules.(1)Participants are recommended to use the FFHQ
+dataset for training, and the training data must not con-
+tain any overlapping images with the five test datasets,
+namely LFW-Test, WIDER-Test, CelebChild-Test, CelebA,
+and WebPhoto-Test.(2)The use of additional training
+datasets, such as FFHQR, is allowed.(3)The use of no-
+reference IQA and simulated degradation pipelines in both
+training and testing is regarded as fair practice.
+3.4. Conclusions
+The main conclusions drawn from this year’s challenge are
+summarized as follows:
+1. Perceptual face restoration is increasingly dominated by
+efficient generative paradigms, especially recent one-
+step and distilled approaches in practice.
+2. Strong results depend not only on the restoration back-
+bone itself, but also on targeted refinement strategies
+such as semantic wavelet correction, metric-aware post-
+training, or test-time IQA optimization.
+3. Strong results do not rely on unconstrained generation
+alone, but combine foundation-model generation with
+semantic, structural, or identity-preserving constraints to
+preserve identity and facial structure.
+
+=== PAGE 5 ===
+Figure 1. MiPlusCV adopts a two-stage pipeline that combines OSDFace-based coarse restoration with a Z-Image-based one-step detail
+enhancement stage.
+4. Challenge Methods and Teams
+4.1. MiPlusCV
+Description.MiPlusCV adopts a two-stage restoration
+framework. The first stage uses OSDFace [71] to recover
+coarse facial structure and suppress severe degradations,
+while the second stage refines facial details with a one-step
+diffusion restorer built on the pre-trained Z-Image founda-
+tion model [3]. The design is tailored to achieve strong per-
+ceptual quality under the no-reference IQA metrics.
+Implementation Details.The second stage is trained with
+LoRA adapters and direct image-level supervision rather
+than iterative diffusion sampling. Its objective combines
+anℓ 1 fidelity term, an edge-aware DISTS perceptual loss,
+ArcFace-based identity supervision [13], and adversarial
+learning with a DINOv2-based discriminator [47].
+Training and optimization.Shown in Fig. 1, the one-step
+model is optimized with AdamW usingβ 1 = 0.5,β 2 =
+0.999, and a learning rate of1×10 −4. Training uses FFHQ
+together with an additional 40,000 DSLR-captured high-
+resolution face images. After supervised training, the team
+further performs reward-based post-training using CLIP-
+IQA, MANIQA, and MUSIQ as optimization signals.
+4.2. CEVI-KLETech
+Description.CEVI-KLETech proposes Semantic-Aware
+Frequency-Guided Residual Correction (SA-FGRC), a
+lightweight module inserted between a three-stage baseline
+composed of a StyleGAN2-based fidelity model [25], Diff-
+BIR [38], and a DINOv2-guided naturalness module [47].
+Their core observation is that different facial regions require
+different amounts of high-frequency correction.
+Implementation Details.SA-FGRC first decomposes the
+stage-2 restoration with a 2D Haar wavelet transform into
+one low-frequency band and three high-frequency bands. A
+BiSeNet parser [88] then groups the face into skin, eyes,
+mouth, hair, and background, and five lightweight CNNs
+predict region-specific residual corrections for the high-
+frequency bands only. The low-frequency band remains un-
+touched to preserve coarse structure and identity.
+Figure 2. Overview of the CEVI-KLETech pipeline. A semantic-
+aware wavelet correction block is inserted between the diffusion
+and naturalness stages.
+Figure 3. Overview of the HONORAICamera pipeline.
+Training and optimization.As it is illustrated in Fig. 2, only
+the SA-FGRC module is trained, while the three backbone
+stages remain frozen. The loss combines high-frequency
+reconstruction, a FID-proxy term, ArcFace identity super-
+vision [13], and LPIPS perceptual loss [95]. The team trains
+on 399 FFHQ images with precomputed stage-2 outputs us-
+ing AdamW with learning rate1×10 −4, cosine annealing
+for 30 epochs, and batch size 4.
+
+=== PAGE 6 ===
+Figure 4. YuFans combines a one-step SDFace restoration stage with CLIPIQA-guided pixel optimization at test time.
+Figure 5. Overview of DeSC-Face. The degraded image is encoded into degraded latent tokens, which are used both as the main condition
+for the LoRA-adapted FLUX.2 backbone and as the input to the structured control branch. The scene-token stream is iteratively restored
+and then decoded into the final output image.
+4.3. HONORAICamera
+Description.HONORAICamera builds on the diffusion-
+based generative prior of Z-Image-Turbo [3] and adopts
+the training strategy of OMGSR [81] for real-world face
+restoration. The method fixes both training and inference to
+timestep 244, aiming to balance reconstruction quality and
+computational efficiency in a one-step generative setting.
+Implementation Details.The team synthesizes training
+pairs with the Real-ESRGAN degradation pipeline, includ-
+ing blur kernels, Gaussian and Poisson noise, and JPEG
+compression. The resulting training process transfers the
+generative prior of Z-Image-Turbo to the restoration task
+while keeping the output aligned with the challenge resolu-
+tion and portrait content, as shown in Fig. 3.
+Two-stage training.The first stage performs generative-
+prior transfer at 1,024×1,024 on LSDIR, FFHQ, DIV2K,
+and Flickr2K train with a total batch size 128. The second
+stage fine-tunes the model on FFHQ at512×512, which
+matches the test resolution, and optimizes MSE, Dv3D,
+GAN, and LRR losses together with an additional CLIP loss
+that explicitly targets higher perceptual scores.
+4.4. YuFans
+Description.YuFans proposes a two-stage pipeline that
+combines one-step diffusion restoration with test-time IQA-
+guided pixel optimization. Stage 1 uses SDFace [71], a
+one-step SDXL-Turbo-based face restorer, while Stage 2
+directly optimizes the restored pixels with differentiable
+CLIPIQA [69] under strong fidelity regularization.
+
+=== PAGE 7 ===
+Implementation Details.Shown in Fig. 4, the first stage
+produces an initial restoration with a pre-trained SDFace
+model. The second stage treats that result as initialization
+and performs 10 Adam gradient-ascent steps with learning
+rate 0.001 to maximize CLIPIQA while penalizing devia-
+tion from the SDFace output and enforcing total-variation
+smoothness. The fidelity and TV weights are set toλ f =
+20.0andλ tv = 0.001, respectively.
+Training and optimization.YuFans does not further train the
+base restorer. The team directly uses the pre-trained SDFace
+checkpoint originally trained on FFHQ [24] and performs
+only test-time optimization in the second stage. CLIPIQA
+is implemented with the PyIQA toolbox [6].
+4.5. guaguagua
+Description.The guaguagua team updates its submis-
+sion toDeSC-Face, short for Degradation-Aware Structured
+Control for Blind Face Restoration. Built on the official
+FLUX.2-klein-4B checkpoint, the method encodes the de-
+graded input into latent tokens and uses them in two ways:
+as the main condition for the restoration backbone and as
+the input to a dedicated structured control branch. A sepa-
+rate scene-token stream is then iteratively restored and de-
+coded into the final face image.
+Implementation Details.As shown in Fig. 5, DeSC-Face
+concatenates scene tokens and degraded tokens along the
+sequence dimension before passing them through a LoRA-
+adapted FLUX.2 transformer. Its degradation-aware con-
+troller performs local smoothing and residual decomposi-
+tion on degraded latents, then extracts structural anchors,
+structure queries, and degradation confidence. These sig-
+nals are injected into the backbone as token-wise residual
+biases and modulation offsets, enabling the restoration tra-
+jectory to adapt to the estimated corruption pattern while
+keeping the scene stream as the only decoded output.
+Training and inference.The updated factsheet states that
+the submission is trained only on FFHQ and synthetically
+degraded FFHQ counterparts, without external data. Op-
+timization uses LoRA rank 16, mixed precision bf16, 10
+epochs, batch size 2 per device with gradient accumulation,
+learning rate5×10 −5, and degradation scale range 0 to
+16. Inference processes the five official test subsets inde-
+pendently with a fixed restoration prompt and seed 42, and
+reports 23.06 seconds per image in the official wrapper.
+4.6. NTR
+Description.NTR directly adopts the pre-trained DiffBIR
+v2.1 [38] model as its restoration backbone. DiffBIR is a
+two-stage blind image restoration framework that combines
+regression-based degradation removal with a generative dif-
+fusion prior for realistic texture synthesis, as illustrated by
+the updated architecture diagram in Fig. 6.
+Degradation Removal Texture Synthesis
+DegradedFaceXLQ
+SwinIR(Stage 1) ˆXclean
+IRControlNet(Stage 2)
+Stable Diffusion2.1
+RestoredFaceˆX
+Figure 6. Architecture diagram of the DiffBIR v2.1 two-stage
+pipeline used by NTR. Stage 1 removes degradations with SwinIR,
+and Stage 2 synthesizes facial textures with IRControlNet condi-
+tioned on Stable Diffusion 2.1.
+Implementation Details.The first stage is a SwinIR [37]-
+based cleaning module that removes blur, noise, and com-
+pression artifacts and outputs a coarse clean estimate. The
+second stage is an IRControlNet built on Stable Diffusion
+2.1 [57, 94], which conditions on the coarse estimate and
+synthesizes high-frequency facial textures.
+Training and inference.The team uses the released DiffBIR
+v2.1 weights without additional fine-tuning. Inference uses
+the EDM DPM++ 3M SDE sampler [26] with 10 diffusion
+steps, guidance scale 6.0, strength 1.0, FP16 precision, and
+random seed 231. The factsheet reports roughly 1.0–1.5
+seconds per image on a single NVIDIA H100 GPU.
+4.7. MaDENN
+Description.MaDENN builds upon CodeFormer [98] and
+focuses on strengthening the training methodology. Their
+solution combines second-order Real-ESRGAN degra-
+dation synthesis [75], ArcFace-based identity preserva-
+tion [13], and ROI-aware supervision on semantically criti-
+cal facial components, as illustrated in Fig. 7.
+Implementation Details.Compared with the original
+CodeFormer training recipe, MaDENN enlarges the degra-
+dation space with a second-order Real-ESRGAN process
+and adds two extra supervision sources. The first is an Ar-
+cFace identity loss that keeps restored faces close to the
+ground-truth identity embedding. The second is a triplet
+ROI loss on the left eye, right eye, and mouth, where
+RoIAlign-based crops and a dedicated ROI discriminator
+encourage better local structure and bilateral symmetry.
+Training setup.The team fine-tunes a public CodeFormer
+checkpoint on FFHQ [24], excluding samples from the
+FFHQ-Ref-Test split [21]. The codebook and HQ decoder
+remain frozen, while the LQ encoder, transformer, and con-
+trollable feature transformation layers stay trainable. Opti-
+mization uses AdamW with learning rate1×10 −5 for 500K
+iterations and batch size 4.
+4.8. SN VISION
+Description.SN VISION presentsSDXL ControlNet
+with TinyEnhancer, a two-pass face restoration pipeline
+that combines lightweight face-aware preprocessing with
+diffusion-based generation. In the first pass, TinyEnhancer
+restores a cleaner intermediate image with auxiliary edge
+
+=== PAGE 8 ===
+Figure 7. Overall architecture and training objective of MaDENN. The baseline CodeFormer architecture is extended with identity-
+preserving and ROI-aware supervision, while low-quality inputs are synthesized with a second-order Real-ESRGAN degradation pipeline.
+Pipeline Diagram
+LQ Image→[TinyEnhancer + HED + FaceParsing]→
+Enhanced
+Enhanced→[HED + FaceParsing]→Edge 2 + Mask2
+Enhanced∥Edge 2 ∥Mask 2 (5ch)→SDXL ControlNet
+→Restored
+Restored + Enhanced→Color Transfer→Final Output
+Figure 8. The SN VISION pipeline first enhances the degraded
+face with TinyEnhancer and auxiliary structural cues, then feeds
+the enhanced RGB image together with refined edge and face-
+mask maps into SDXL ControlNet for final restoration.
+and face-mask cues. In the second pass, the enhanced RGB
+image together with refined edge and parsing maps forms
+a 5-channel ControlNet condition for SDXL-based genera-
+tion [50, 94].
+Implementation Details.TinyEnhancer is a U-Net-style
+model with channel and spatial attention, gated fusion, an
+OutputRefiner module, and an adaptive Gaussian blur pre-
+processor. It takes a 5-channel input consisting of RGB,
+face mask, and edge map. The second pass re-extracts HED
+edges and face parsing masks from the enhanced image,
+concatenates them with the RGB output, and feeds the re-
+sulting 5-channel tensor into an SDXL ControlNet. The
+team adopts txt2img rather than img2img so that LQ arti-
+facts are not directly propagated into the diffusion process,
+and finishes with Reinhard LAB color transfer.
+Training and inference.All components are trained on
+FFHQ [24] with synthetic degradations at1024×1024. The
+ControlNet branch is initialized from DreamshaperXL v2.1
+Turbo with zero-initialized weights for the extra condition-
+ing channels and optimized with AdamW at a learning rate
+of1×10 −5, batch size 4, for 135k steps. TinyEnhancer is
+trained with L1, perceptual, and adversarial losses; the HED
+Figure 9. The workflow of PRIDE-Face. GFPGAN provides the
+structural prior in the first stage, while DiffBIR synthesizes high-
+fidelity details in the second stage.
+branch is fine-tuned from pretrained weights; and the face
+parsing branch is trained as a U-Net segmentation model.
+At inference time, the team uses 50 diffusion steps with
+seed 42 and tunes several generation parameters separately
+for each test subset.
+4.9. ALLCAN
+Description.ALLCAN proposes PRIDE-Face, a two-stage
+framework built on DiffBIR [38]. The 1st stage replaces the
+default restoration module with GFPGAN [74] to extract a
+stronger facial structural prior. The 2nd stage uses diffusion
+to synthesize realistic high-frequency facial details.
+Implementation Details.PRIDE-Face treats the GFPGAN
+output only as an intermediate spatial condition, rather than
+the final restored result, because the team found that direct
+GFPGAN outputs tend to over-smooth textures. To better
+preserve identity during diffusion generation, the method
+adds an explicit identity loss based on face-recognition em-
+beddings between the generated result and the input image.
+Guidance calibration.The team further fixes the classifier-
+free guidance scale at 1.5 to suppress overly aggressive
+high-frequency hallucinations and improve perceptual nat-
+uralness. This calibrated setting is used together with the
+stronger first-stage structural prior to balance realism and
+identity consistency.
+
+=== PAGE 9 ===
+Figure 10. The BVI extends TADSR with a residual noise re-
+finer and a detail-aware training strategy inside the one-step stu-
+dent branch.
+4.10. BVI
+Description.BVI builds on the Time-Aware one-step
+Diffusion Network for real-world image super-resolution
+(TADSR) [96]. Their main modification is a residual noise
+refiner inserted into the one-step student branch, together
+with a detail-aware training strategy that strengthens local
+high-frequency restoration while keeping the efficiency of
+one-step diffusion.
+Implementation Details.The time-aware encoder and stu-
+dent branch first predict a base noise estimate from the low-
+quality input and student timestep. A lightweight residual
+refiner then predicts a corrective term that is added to the
+base noise prediction before decoding. The corrected la-
+tent is forwarded to the frozen teacher and LoRA branch
+following the original TADSR design. To emphasize lo-
+cal structure, the team adds weighted Charbonnier losses
+on high-frequency residuals and image gradients, together
+with a ratio-capped regularizer that prevents the refinement
+branch from overwhelming the student prediction.
+Training setup.The method follows the TADSR train-
+ing recipe with LSDIR [36], BVI-AOM [46], FFHQ-style
+data [24], and Real-ESRGAN degradation synthesis [75].
+The challenge setting uses a scale factor of 1 and retains the
+original diffusion-prior training formulation of TADSR.
+Acknowledgements
+This work is supported by the National Natural Science
+Foundation of China (62501386, 625B2116, 625B1025),
+CCF-Tencent Rhino-Bird Open Research Fund. This work
+is also sponsored by Al Hundred Schools Program and is
+carried out using the Ascend AI technology stack. This
+work is partially supported by the Humboldt Foundation.
+We thank the NTIRE 2026 sponsors: OPPO, Kuaishou, and
+the University of Wurzburg (Computer Vision Lab).
+A. Teams and Affiliations
+MiPlusCV
+Title:Two-Stage OSDFace and Z-Image Face Restoration
+Members:
+Wei Deng1(dengwei1@xiaomi.com), WenBo Xiong1, Yifei
+Chen1, Xian Hu1, Daiguo Zhou1
+Affiliations:
+1MiLM Plus, Xiaomi Inc., China
+CEVI-KLETech
+Title:Semantic-Aware Wavelet Frequency Refiner for
+Face Restoration
+Members:
+Nikhil Akalwadi 1(nikhil.akalwadi@kletech.ac.in), Sujith
+Roy V1, Claudia Jesuraj1, Vikas B1, Spoorthi LC1, Ramesh
+Ashok Tabib1, Uma Mudenagudi1
+Affiliations:
+1KLE Technological University, Hubballi, India
+HONORAICamera
+Title:Diffusion-based Generative Prior for Real-World
+Face Restoration
+Members:
+Yingsi Chen 1(chenyingsi@honor.com), Yijiao Liu 1, Hui
+Li1, Yu Wang1, Congchao Zhu1
+Affiliations:
+1Honor Device Co. Ltd
+YuFans
+Title:SDFace with CLIPIQA-Guided Pixel Optimization
+Members:
+Wei Zhou 1(weichow@u.nus.edu), Linfeng Li 1, Hongyu
+Huang2
+Affiliations:
+1National University of Singapore
+2Zhejiang University
+guaguagua
+Title:DeSC-Face: Degradation-Aware Structured Control
+for Blind Face Restoration
+Members:
+Axi Niu1, Jinyang Zhang1(zhangjinyang@mail.nwpu.edu.cn),
+Zhenguo Wu1, Senyan Qing1
+Affiliations:
+1Northwestern Polytechnical University, China
+NTR
+Title:DiffBIR v2.1 for Real-World Face Restoration
+Members:
+Jiachen Tu1(jtu9@illinois.edu), Guoyi Xu1, Yaoxin Jiang1,
+Jiajia Liu1, Yaokun Shi1
+Affiliations:
+1University of Illinois Urbana-Champaign
+
+=== PAGE 10 ===
+MaDENN
+Title:Identity-Preserving CodeFormer with ROI-Aware
+Supervision
+Members:
+Alexandru-Gabriel Lefterache 1(alefterache@upb.ro), Ana-
+maria Radoi1
+Affiliations:
+1UNSTPB POLITEHNICA Bucharest, Romania
+SN VISION
+Title:SDXL ControlNet with TinyEnhancer: A Two-Pass
+Pipeline for Face Restoration
+Members:
+Hoyoung Lee 1(hoyounglee@snowcorp.com), SangYun
+Oh1, ChangYoung Jeong1
+Affiliations:
+1SNOW Corporation
+ALLCAN
+Title:PRIDE-Face
+Members:
+Chuanyue Yan 1(chuanyueyan0820@163.com), Tao Lu 1,
+Yanduo Zhang1, Kanghui Zhao1, Jiaming Wang1, Yuqi Li2
+Affiliations:
+1Wuhan Institute of Technology
+2City University of New York
+BVI
+Title:TADSR with Residual Noise Refinement for Face
+Restoration
+Members:
+Yuxuan Jiang 1(dd22654@bristol.ac.uk), Chengxi Zeng 1,
+Tianhao Peng1, Fan Zhang1, David Bull1
+Affiliations:
+1University of Bristol
+References
+[1] Radu Ancuti, Codruta Ancuti, Radu Timofte, and Cosmin
+Ancuti. NT-HAZE: A Benchmark Dataset for Realistic
+Night-time Image Dehazing . InCVPRW, 2026. 2
+[2] Radu Ancuti, Alexandru Brateanu, Florin Vasluianu, Raul
+Balmez, Ciprian Orhei, Codruta Ancuti, Radu Timofte, Cos-
+min Ancuti, et al. NTIRE 2026 Nighttime Image Dehazing
+Challenge Report . InCVPRW, 2026. 2
+[3] Huanqia Cai, Sihan Cao, Ruoyi Du, Peng Gao, Steven
+Hoi, Zhaohui Hou, Shijie Huang, Dengyang Jiang, Xin Jin,
+Liangchen Li, et al. Z-image: An efficient image generation
+foundation model with single-stream diffusion transformer.
+arXiv preprint arXiv:2511.22699, 2025. 4, 5, 6
+[4] Jie Cai, Kangning Yang, Zhiyuan Li, Florin Vasluianu, Radu
+Timofte, et al. NTIRE 2026 Challenge on Single Image Re-
+flection Removal in the Wild: Datasets, Results, and Meth-
+ods . InCVPRW, 2026. 2
+[5] Kelvin CK Chan, Xintao Wang, Xiangyu Xu, Jinwei Gu, and
+Chen Change Loy. Glean: Generative latent bank for large-
+factor image super-resolution. InCVPR, 2021. 1
+[6] Chaofeng Chen and Jiadi Mo. IQA-PyTorch: Pytorch
+toolbox for image quality assessment. [Online]. Avail-
+able:https : / / github . com / chaofengc / IQA -
+PyTorch, 2022. 7
+[7] Chaofeng Chen, Xiaoming Li, Yang Lingbo, Xianhui Lin,
+Lei Zhang, and Kwan-Yee K. Wong. Progressive semantic-
+aware style transformation for blind face restoration. In
+CVPR, 2021. 1
+[8] Xiaoxu Chen, Jingfan Tan, Tao Wang, Kaihao Zhang, Wen-
+han Luo, and Xiaocun Cao. Towards real-world blind face
+restoration with generative diffusion prior.arXiv preprint
+arXiv:2312.15736, 2023. 1, 2
+[9] Yu Chen, Ying Tai, Xiaoming Liu, Chunhua Shen, and Jian
+Yang. Fsrnet: End-to-end learning face super-resolution with
+facial priors. InCVPR, 2018. 1
+[10] Zheng Chen, Kai Liu, Jingkai Wang, Xianglong Yan, Jianze
+Li, Ziqing Zhang, Jue Gong, Jiatong Li, Lei Sun, Xi-
+aoyang Liu, Radu Timofte, Yulun Zhang, et al. The Fourth
+Challenge on Image Super-Resolution (×4) at NTIRE 2026:
+Benchmark Results and Method Overview . InCVPRW,
+2026. 2
+[11] George Ciubotariu, Sharif S M A, Abdur Rehman, Fayaz Ali,
+Rizwan Ali Naqvi, Marcos Conde, Radu Timofte, et al. Low
+Light Image Enhancement Challenge at NTIRE 2026 . In
+CVPRW, 2026. 2
+[12] George Ciubotariu, Zhuyun Zhou, Yeying Jin, Zongwei Wu,
+Radu Timofte, et al. High FPS Video Frame Interpolation
+Challenge at NTIRE 2026 . InCVPRW, 2026. 2
+[13] Jiankang Deng, Jia Guo, Xue Niannan, and Stefanos
+Zafeiriou. ArcFace: Additive angular margin loss for deep
+face recognition. InCVPR, 2019. 5, 7
+[14] Andrei Dumitriu, Aakash Ralhan, Florin Miron, Florin Tatui,
+Radu Tudor Ionescu, Radu Timofte, et al. NTIRE 2026 Rip
+Current Detection and Segmentation (RipDetSeg) Challenge
+Report . InCVPRW, 2026. 2
+[15] Omar Elezabi, Marcos V . Conde, Zongwei Wu, Yeying Jin,
+Radu Timofte, et al. Photography Retouching Transfer,
+NTIRE 2026 Challenge: Report . InCVPRW, 2026. 2
+[16] Yuchao Gu, Xintao Wang, Liangbin Xie, Chao Dong, Gen
+Li, Ying Shan, and Ming-Ming Cheng. VQFR: Blind face
+restoration with vector-quantized dictionary and parallel de-
+coder. InECCV, 2022. 1
+[17] Bochen Guan, Jinlong Li, Kangning Yang, Chuang Ke, Jie
+Cai, Florin Vasluianu, Radu Timofte, et al. NTIRE 2026
+Challenge on End-to-End Financial Receipt Restoration and
+Reasoning from Degraded Images: Datasets, Methods and
+Results . InCVPRW, 2026. 2
+[18] Ya-nan Guan, Shaonan Zhang, Hang Guo, Yawen Wang,
+Xinying Fan, Jie Liang, Hui Zeng, Guanyi Qin, Lishen Qu,
+Tao Dai, Shu-Tao Xia, Lei Zhang, Radu Timofte, et al.
+NTIRE 2026 The 3rd Restore Any Image Model (RAIM)
+Challenge: AI Flash Portrait (Track 3) . InCVPRW, 2026. 2
+[19] Aleksandr Gushchin, Khaled Abud, Ekaterina Shumitskaya,
+Artem Filippov, Georgii Bychkov, Sergey Lavrushkin,
+
+=== PAGE 11 ===
+Mikhail Erofeev, Anastasia Antsiferova, Changsheng Chen,
+Shunquan Tan, Radu Timofte, Dmitriy Vatolin, et al. NTIRE
+2026 Challenge on Robust AI-Generated Image Detection in
+the Wild . InCVPRW, 2026. 2
+[20] Benedikt Hopf, Radu Timofte, et al. Robust Deepfake De-
+tection, NTIRE 2026 Challenge: Report . InCVPRW, 2026.
+2
+[21] Chi-Wei Hsiao, Yu-Lun Liu, Cheng-Kun Yang, Sheng-Po
+Kuo, Yucheun Kevin Jou, and Chia-Ping Chen. Ref-ldm:
+A latent diffusion model for reference-based face image
+restoration. InAdvances in Neural Information Processing
+Systems, pages 74840–74867. Curran Associates, Inc., 2024.
+7
+[22] Gary B. Huang, Marwan Mattar, Tamara Berg, and Eric
+Learned-Miller. Labeled Faces in the Wild: A Database
+forStudying Face Recognition in Unconstrained Environ-
+ments. InWorkshop on Faces in ’Real-Life’ Images: De-
+tection, Alignment, and Recognition, 2008. 2
+[23] Tero Karras, Timo Aila, Samuli Laine, and Jaakko Lehtinen.
+Progressive growing of GANs for improved quality, stability,
+and variation. InICLR, 2018. 2, 3
+[24] Tero Karras, Samuli Laine, and Timo Aila. A style-based
+generator architecture for generative adversarial networks. In
+CVPR, 2019. 2, 7, 8, 9
+[25] Tero Karras, Samuli Laine, Miika Aittala, Janne Hellsten,
+Jaakko Lehtinen, and Timo Aila. Analyzing and improving
+the image quality of stylegan. InCVPR, 2020. 5
+[26] Tero Karras, Miika Aittala, Timo Aila, and Samuli Laine.
+Elucidating the design space of diffusion-based generative
+models.NeurIPS, 2022. 7
+[27] Junjie Ke, Qifei Wang, Yilin Wang, Peyman Milanfar, and
+Feng Yang. MUSIQ: Multi-scale Image Quality Trans-
+former . InICCV, 2021. 3
+[28] Aleksei Khalin, Egor Ershov, Artem Panshin, Sergey Ko-
+rchagin, Georgiy Lobarev, Arseniy Terekhin, Sofiia Doro-
+gova, Amir Shamsutdinov, Yasin Mamedov, Bakhtiyar
+Khalfin, Bogdan Sheludko, Emil Zilyaev, Nikola Bani ´c,
+Georgy Perevozchikov, Radu Timofte, et al. NTIRE 2026
+Low-light Enhancement: Twilight Cowboy Challenge . In
+CVPRW, 2026. 2
+[29] Deokyun Kim, Minseon Kim, Gihyun Kwon, and Dae-Shik
+Kim. Progressive face super-resolution via attention to facial
+landmark. InBMVC, 2019. 1
+[30] Minchul Kim, Anil K Jain, and Xiaoming Liu. Adaface:
+Quality adaptive margin for face recognition. InCVPR,
+2022. 3
+[31] Jiatong Li, Zheng Chen, Kai Liu, Jingkai Wang, Zihan Zhou,
+Xiaoyang Liu, Libo Zhu, Radu Timofte, Yulun Zhang, et al.
+The First Challenge on Mobile Real-World Image Super-
+Resolution at NTIRE 2026: Benchmark Results and Method
+Overview . InCVPRW, 2026. 2
+[32] Senmao Li, Kai Wang, Joost van de Weijer, Fahad Shahbaz
+Khan, Chun-Le Guo, Shiqi Yang, Yaxing Wang, Jian Yang,
+and Ming-Ming Cheng. INTERLCM: Low-quality images as
+intermediate states of latent consistency models for effective
+blind face restoration. InICLR, 2025. 2
+[33] Wenjie Li, Xiangyi Wang, Heng Guo, Guangwei Gao, and
+Zhanyu Ma. Self-Supervised Selective-Guided Diffusion
+Model for Old-Photo Face Restoration. InNeurIPS, 2025.
+2
+[34] Xin Li, Jiachao Gong, Xijun Wang, Shiyao Xiong, Bingchen
+Li, Suhang Yao, Chao Zhou, Zhibo Chen, Radu Timofte,
+et al. NTIRE 2026 Challenge on Short-form UGC Video
+Restoration in the Wild with Generative Models: Datasets,
+Methods and Results . InCVPRW, 2026. 2
+[35] Xin Li, Yeying Jin, Suhang Yao, Beibei Lin, Zhaoxin Fan,
+Wending Yan, Xin Jin, Zongwei Wu, Bingchen Li, Peishu
+Shi, Yufei Yang, Yu Li, Zhibo Chen, Bihan Wen, Robby Tan,
+Radu Timofte, et al. NTIRE 2026 The Second Challenge on
+Day and Night Raindrop Removal for Dual-Focused Images:
+Methods and Results . InCVPRW, 2026. 2
+[36] Yawei Li, Kai Zhang, Jingyun Liang, Jiezhang Cao, Ce Liu,
+Rui Gong, Yulun Zhang, Hao Tang, Yun Liu, Denis Deman-
+dolx, Rakesh Ranjan, Radu Timofte, and Luc Van Gool. Ls-
+dir: A large scale dataset for image restoration. InCVPRW,
+2023. 9
+[37] Jingyun Liang, Jiezhang Cao, Guolei Sun, Kai Zhang,
+Luc Van Gool, and Radu Timofte. SwinIR: Image restora-
+tion using swin transformer. InInternational Conference on
+Computer Vision Workshops, 2021. 7
+[38] Xinqi Lin, Jingwen He, Ziyan Chen, Zhaoyang Lyu, Bo Dai,
+Fanghua Yu, Wanli Ouyang, Yu Qiao, and Chao Dong. Diff-
+BIR: Toward blind image restoration via generative diffusion
+prior.European Conference on Computer Vision, 2024. 1, 2,
+5, 7, 8
+[39] Kai Liu, Haoyang Yue, Zeli Lin, Zheng Chen, Jingkai Wang,
+Jue Gong, Radu Timofte, Yulun Zhang, et al. The First Chal-
+lenge on Remote Sensing Infrared Image Super-Resolution
+at NTIRE 2026: Benchmark Results and Method Overview .
+InCVPRW, 2026. 2
+[40] Siyu Liu, Zheng-Peng Duan, Jia OuYang, Jiayi Fu, Hyunhee
+Park, Zikun Liu, Chun-Le Guo, and Chongyi Li. FaceMe:
+Robust Blind Face Restoration with Personal Identification.
+InAAAI, 2025. 2
+[41] Shuhong Liu, Ziteng Cui, Chenyu Bao, Xuangeng Chu, Lin
+Gu, Bin Ren, Radu Timofte, Marcos V . Conde, et al. 3D
+Restoration and Reconstruction in Adverse Conditions: Re-
+alX3D Challenge Results . InCVPRW, 2026. 2
+[42] Xiaohong Liu, Xiongkuo Min, Guangtao Zhai, Qiang Hu,
+Jiezhang Cao, Yu Zhou, Wei Sun, Farong Wen, Zitong Xu,
+Yingjie Zhou, Huiyu Duan, Lu Liu, Jiarui Wang, Siqi Luo,
+Chunyi Li, Li Xu, Zicheng Zhang, Yue Shi, Yubo Wang,
+Minghong Zhang, Chunchao Guo, Zhichao Hu, Mingtao
+Chen, Xiele Wu, Xin Ma, Zhaohe Lv, Yuanhao Xue, Jiaqi
+Wang, Xinxing Sha, Radu Timofte, et al. NTIRE 2026 X-
+AIGC Quality Assessment Challenge: Methods and Results
+. InCVPRW, 2026. 2
+[43] Yunqi Miao, Jiankang Deng, and Jungong Han. Waveface:
+Authentic face restoration with efficient frequency recovery.
+InCVPR, 2024. 1, 2
+[44] Yunqi Miao, Zhiyu Qu, Mingqi Gao, Changrui Chen, Jifei
+Song, Jungong Han, and Jiankang Deng. Unlocking the
+Potential of Diffusion Priors in Blind Face Restoration. In
+ICCV, 2025. 2
+[45] Andrey Moskalenko, Alexey Bryncev, Ivan Kosmynin, Kira
+Shilovskaya, Mikhail Erofeev, Dmitry Vatolin, Radu Timo-
+
+=== PAGE 12 ===
+fte, et al. NTIRE 2026 Challenge on Video Saliency Predic-
+tion: Methods and Results . InCVPRW, 2026. 2
+[46] Jakub Nawała, Yuxuan Jiang, Fan Zhang, Xiaoqing Zhu, Joel
+Sole, and David Bull. Bvi-aom: A new training dataset for
+deep video compression optimization. InICIP, 2024. 9
+[47] Maxime Oquab, Timoth ´ee Darcet, Th ´eo Moutakanni, Huy
+V o, Marc Szafraniec, Vasil Khalidov, Pierre Fernandez,
+Daniel Haziza, Francisco Massa, Alaaeldin El-Nouby, et al.
+Dinov2: Learning robust visual features without supervision.
+arXiv preprint arXiv:2304.07193, 2023. 5
+[48] Hyunhee Park, Eunpil Park, Sangmin Lee, Radu Timofte,
+et al. NTIRE 2026 Challenge on Efficient Burst HDR and
+Restoration: Datasets, Methods, and Results . InCVPRW,
+2026. 2
+[49] Georgy Perevozchikov, Daniil Vladimirov, Radu Timofte,
+et al. NTIRE 2026 Challenge on Learned Smartphone ISP
+with Unpaired Data: Methods and Results . InCVPRW,
+2026. 2
+[50] Dustin Podell, Zion English, Kyle Lacey, Andreas
+Blattmann, Tim Dockhorn, Jonas M ¨uller, Joe Penna, and
+Robin Rombach. Sdxl: Improving latent diffusion mod-
+els for high-resolution image synthesis.arXiv preprint
+arXiv:2307.01952, 2023. 8
+[51] Guanyi Qin, Jie Liang, Bingbing Zhang, Lishen Qu, Ya-nan
+Guan, Hui Zeng, Lei Zhang, Radu Timofte, et al. NTIRE
+2026 The 3rd Restore Any Image Model (RAIM) Chal-
+lenge: Professional Image Quality Assessment (Track 1) .
+InCVPRW, 2026. 2
+[52] Xinmin Qiu, Congying Han, Zicheng Zhang, Bonan Li,
+Tiande Guo, and Xuecheng Nie. Diffbfr: Bootstrapping dif-
+fusion model for blind face restoration. InACM MM, 2023.
+1, 2
+[53] Xinmin Qiu, Chen Gege, Bonan Li, Congying Han, Tiande
+Guo, and Zicheng Zhang. Feature out! Let Raw Image as
+Your Condition for Blind Face Restoration. InICML, 2025.
+2
+[54] Xingyu Qiu, Yuqian Fu, Jiawei Geng, Bin Ren, Jiancheng
+Pan, Zongwei Wu, Hao Tang, Yanwei Fu, Radu Timo-
+fte, Nicu Sebe, Mohamed Elhoseiny, et al. The Second
+Challenge on Cross-Domain Few-Shot Object Detection at
+NTIRE 2026: Methods and Results . InCVPRW, 2026. 2
+[55] Lishen Qu, Yao Liu, Jie Liang, Hui Zeng, Wen Dai, Ya-nan
+Guan, Guanyi Qin, Shihao Zhou, Jufeng Yang, Lei Zhang,
+Radu Timofte, et al. NTIRE 2026 The 3rd Restore Any Im-
+age Model (RAIM) Challenge: Multi-Exposure Image Fu-
+sion in Dynamic Scenes (Track2) . InCVPRW, 2026. 2
+[56] Bin Ren, Hang Guo, Yan Shu, Jiaqi Ma, Ziteng Cui, Shuhong
+Liu, Guofeng Mei, Lei Sun, Zongwei Wu, Fahad Shahbaz
+Khan, Salman Khan, Radu Timofte, Yawei Li, et al. The
+Eleventh NTIRE 2026 Efficient Super-Resolution Challenge
+Report . InCVPRW, 2026. 2
+[57] Robin Rombach, Andreas Blattmann, Dominik Lorenz,
+Patrick Esser, and Bj¨orn Ommer. High-resolution image syn-
+thesis with latent diffusion models. InCVPR, 2022. 7
+[58] Axel Sauer, Dominik Lorenz, Andreas Blattmann, and Robin
+Rombach. Adversarial diffusion distillation. InECCV, 2024.
+4
+[59] Tim Seizinger, Florin-Alexandru Vasluianu, Marcos V .
+Conde, Jeffrey Chen, Zhuyun Zhou, Zongwei Wu, Radu
+Timofte, et al. The First Controllable Bokeh Rendering
+Challenge at NTIRE 2026 . InCVPRW, 2026. 2
+[60] Ziyi Shen, Wei-Sheng Lai, Tingfa Xu, Jan Kautz, and Ming-
+Hsuan Yang. Deep semantic face deblurring. InCVPR, 2018.
+1
+[61] Maitreya Suin and Rama Chellappa. CLR-Face: Conditional
+latent refinement for blind face restoration using score-based
+diffusion models. InIJCAI, 2024. 1, 2
+[62] Lei Sun, Hang Guo, Bin Ren, Shaolin Su, Xian Wang, Danda
+Pani Paudel, Luc Van Gool, Radu Timofte, Yawei Li, et al.
+The Third Challenge on Image Denoising at NTIRE 2026:
+Methods and Results . InCVPRW, 2026. 2
+[63] Lei Sun, Weilun Li, Xian Wang, Zhendong Li, Letian
+Shi, Dannong Xu, Deheng Zhang, Mengshun Hu, Shuang
+Guo, Shaolin Su, Radu Timofte, Danda Pani Paudel, Luc
+Van Gool, et al. The Second Challenge on Event-Based
+Image Deblurring at NTIRE 2026: Methods and Results . In
+CVPRW, 2026. 2
+[64] Lei Sun, Xiaolong Qian, Qi Jiang, Xian Wang, Yao
+Gao, Kailun Yang, Kaiwei Wang, Radu Timofte, Danda
+Pani Paudel, Luc Van Gool, et al. NTIRE 2026 The First
+Challenge on Blind Computational Aberration Correction:
+Methods and Results . InCVPRW, 2026. 2
+[65] Keda Tao, Jinjin Gu, Yulun Zhang, Xiucheng Wang, and Nan
+Cheng. Overcoming false illusions in real-world face restora-
+tion with multi-modal guided diffusion model. InICLR,
+2025. 1, 2
+[66] Yu-Ju Tsai, Yu-Lun Liu, Lu Qi, Kelvin CK Chan, and Ming-
+Hsuan Yang. Dual associated encoder for face restoration. In
+ICLR, 2024. 1
+[67] Florin-Alexandru Vasluianu, Tim Seizinger, Jeffrey Chen,
+Zhuyun Zhou, Zongwei Wu, Radu Timofte, et al. Learning-
+Based Ambient Lighting Normalization: NTIRE 2026 Chal-
+lenge Results and Findings . InCVPRW, 2026. 2
+[68] Florin-Alexandru Vasluianu, Tim Seizinger, Zhuyun Zhou,
+Zongwei Wu, Radu Timofte, et al. Advances in Single-
+Image Shadow Removal: Results from the NTIRE 2026
+Challenge . InCVPRW, 2026. 2
+[69] Jianyi Wang, Kelvin CK Chan, and Chen Change Loy. Ex-
+ploring clip for assessing the look and feel of images. In
+AAAI, 2023. 3, 4, 6
+[70] Jianyi Wang, Zongsheng Yue, Shangchen Zhou, Kelvin C.K.
+Chan, and Chen Change Loy. Exploiting diffusion prior for
+real-world image super-resolution.IJCV, 2024. 2
+[71] Jingkai Wang, Jue Gong, Lin Zhang, Zheng Chen, Xing Liu,
+Hong Gu, Yutong Liu, Yulun Zhang, and Xiaokang Yang.
+One-step diffusion model for face restoration. InCVPR,
+2025. 1, 2, 4, 5, 6
+[72] Jingkai Wang, Jue Gong, Zheng Chen, Kai Liu, Jiatong Li,
+Yulun Zhang, Radu Timofte, et al. The Second Challenge
+on Real-World Face Restoration at NTIRE 2026: Methods
+and Results . InCVPRW, 2026. 2
+[73] Longguang Wang, Yulan Guo, Yingqian Wang, Juncheng
+Li, Sida Peng, Ye Zhang, Radu Timofte, Minglin Chen, Yi
+Wang, Qibin Hu, Wenjie Lei, et al. NTIRE 2026 Challenge
+
+=== PAGE 13 ===
+on 3D Content Super-Resolution: Methods and Results . In
+CVPRW, 2026. 2
+[74] Xintao Wang, Yu Li, Honglun Zhang, and Ying Shan. To-
+wards real-world blind face restoration with generative facial
+prior. InCVPR, 2021. 1, 2, 8
+[75] Xintao Wang, Liangbin Xie, Chao Dong, and Ying Shan.
+Real-esrgan: Training real-world blind super-resolution with
+pure synthetic data. In2021 IEEE/CVF International Con-
+ference on Computer Vision Workshops (ICCVW), pages
+1905–1914, Montreal, BC, Canada, 2021. 7, 9
+[76] Yingqian Wang, Zhengyu Liang, Fengyuan Zhang, Wending
+Zhao, Longguang Wang, Juncheng Li, Jungang Yang, Radu
+Timofte, Yulan Guo, et al. NTIRE 2026 Challenge on Light
+Field Image Super-Resolution: Methods and Results . In
+CVPRW, 2026. 2
+[77] Zhouxia Wang, Jiawei Zhang, Tianshui Chen, Wenping
+Wang, and Ping Luo. Restoreformer++: Towards real-
+world blind face restoration from undegraded key-value
+pairs.IEEE TPAMI, 2023. 1
+[78] Zhixin Wang, Xiaoyun Zhang, Ziying Zhang, Huangjie
+Zheng, Mingyuan Zhou, Ya Zhang, and Yanfeng Wang. Dr2:
+Diffusion-based robust degradation remover for blind face
+restoration. InCVPR, 2023. 1, 2
+[79] Haoning Wu, Zicheng Zhang, Weixia Zhang, Chaofeng
+Chen, Chunyi Li, Liang Liao, Annan Wang, Erli Zhang,
+Wenxiu Sun, Qiong Yan, Xiongkuo Min, Guangtai Zhai, and
+Weisi Lin. Q-align: Teaching lmms for visual scoring via
+discrete text-defined levels. InICML, 2024. 3
+[80] Rongyuan Wu, Lingchen Sun, Zhiyuan Ma, and Lei Zhang.
+One-step effective diffusion network for real-world image
+super-resolution. InNeurIPS, 2024. 1, 2
+[81] Zhiqiang Wu, Zhaomang Sun, Tong Zhou, Bingtao Fu, Ji
+Cong, Yitong Dong, Huaqi Zhang, Xuan Tang, Mingsong
+Chen, and Xian Wei. Omgsr: You only need one mid-
+timestep guidance for real-world image super-resolution.
+arXiv preprint arXiv:2508.08227, 2025. 4, 6
+[82] Lianxin Xie, Csbingbing Zheng, Wen Xue, Le Jiang, Cheng
+Liu, Si Wu, and Hau San Wong. Learning degradation-
+unaware representation with prior-based latent transforma-
+tions for blind face restoration. InCVPR, 2024. 1
+[83] Jiebin Yan, Chenyu Tu, Qinghua Lin, Zongwei WU, Weixia
+Zhang, Zhihua Wang, Peibei Cao, Yuming Fang, Xiaoning
+Liu, Zhuyun Zhou, Radu Timofte, et al. Efficient Low Light
+Image Enhancement: NTIRE 2026 Challenge Report . In
+CVPRW, 2026. 2
+[84] Peiqing Yang, Shangchen Zhou, Qingyi Tao, and
+Chen Change Loy. PGDiff: Guiding diffusion models
+for versatile face restoration via partial guidance. In
+NeurIPS, 2023. 1, 2
+[85] Sidi Yang, Tianhe Wu, Shuwei Shi, Shanshan Lao, Yuan
+Gong, Mingdeng Cao, Jiahao Wang, and Yujiu Yang.
+MANIQA: Multi-dimension attention network for no-
+reference image quality assessment. InCVPRW, 2022. 3
+[86] Tao Yang, Peiran Ren, Xuansong Xie, and Lei Zhang. Gan
+prior embedded network for blind face restoration in the
+wild. InCVPR, 2021. 1
+[87] Zhicun Yin, Junjie Chen, Ming Liu, Zhixin Wang, Fan Li,
+Renjing Pei, Xiaoming Li, Rynson W. H. Lau, and Wang-
+meng Zuo. RefSTAR: Blind Face Image Restoration with
+Reference Selection, Transfer, and Reconstruction. InAAAI,
+2026. 2
+[88] Changqian Yu, Jingdong Wang, Chao Peng, Changxin Gao,
+Gang Yu, and Nong Sang. Bisenet: Bilateral segmenta-
+tion network for real-time semantic segmentation. InECCV,
+2018. 5
+[89] Fanghua Yu, Jinjin Gu, Zheyuan Li, Jinfan Hu, Xiangtao
+Kong, Xintao Wang, Jingwen He, Yu Qiao, and Chao Dong.
+Scaling up to excellence: Practicing model scaling for photo-
+realistic image restoration in the wild. InCVPR, 2024. 2
+[90] Xin Yu, Basura Fernando, Richard Hartley, and Fatih Porikli.
+Super-resolving very low-resolution face images with sup-
+plementary attributes. InCVPR, 2018. 1
+[91] Zongsheng Yue and Chen Change Loy. DifFace: Blind Face
+Restoration with Diffused Error Contraction .IEEE TPAMI,
+2024. 1, 2
+[92] Pierluigi Zama Ramirez, Fabio Tosi, Luigi Di Stefano, Radu
+Timofte, Alex Costanzino, Matteo Poggi, Samuele Salti, Ste-
+fano Mattoccia, et al. NTIRE 2026 Challenge on High-
+Resolution Depth of non-Lambertian Surfaces . InCVPRW,
+2026. 2
+[93] Lin Zhang, Lei Zhang, and Alan C. Bovik. A feature-
+enriched completely blind image quality evaluator.IEEE
+TIP, 2015. 3
+[94] Lvmin Zhang, Anyi Rao, and Maneesh Agrawala. Adding
+conditional control to text-to-image diffusion models. In
+ICCV, 2023. 7, 8
+[95] Richard Zhang, Phillip Isola, Alexei A. Efros, Eli Shecht-
+man, and Oliver Wang. The unreasonable effectiveness of
+deep features as a perceptual metric. InCVPR, 2018. 5
+[96] Tainyi Zhang, Zheng-Peng Duan, Peng-Tao Jiang, Bo Li,
+Ming-Ming Cheng, Chun-Le Guo, and Chongyi Li. Time-
+aware one step diffusion network for real-world image super-
+resolution.arXiv preprint arXiv:2508.16557, 2025. 9
+[97] Yan Zhong, Qiufang Ma, Zhen Wang, Tingting Jiang, Radu
+Timofte, et al. NTIRE 2026 Challenge Report on Anomaly
+Detection of Face Enhancement for UGC Images . In
+CVPRW, 2026. 2
+[98] Shangchen Zhou, Kelvin C.K. Chan, Chongyi Li, and
+Chen Change Loy. Towards robust blind face restoration
+with codebook lookup transformer. InNeurIPS, 2022. 1,
+2, 7
+[99] Wenbin Zou, Tianyi Liu, Kejun Wu, Huiping Zhuang, Zong-
+wei Wu, Zhuyun Zhou, Radu Timofte, et al. NTIRE 2026
+Challenge on Bitstream-Corrupted Video Restoration: Meth-
+ods and Results . InCVPRW, 2026. 2

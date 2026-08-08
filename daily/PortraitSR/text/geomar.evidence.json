@@ -1,0 +1,269 @@
+{
+  "key": "geomar",
+  "file": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\papers\\01_single_face\\geomar_2608.03923.pdf",
+  "page_count": 20,
+  "first_page_excerpt": "arXiv:2608.03923v1  [cs.CV]  4 Aug 2026\nGeoMAR: Unleashing Geometrically Aligned Features for Masked\nAutoregressive Blind Face Restoration\nLu Gan∗\nSchool of Artificial Intelligence,\nSun Yat-sen University\nZhuhai, China\nganlu33@mail2.sysu.edu.cn\nHanyu Yan∗\nSchool of Artificial Intelligence,\nSun Yat-sen University\nZhuhai, China\nyanhy27@mail2.sysu.edu.cn\nChaofeng Chen\nInstitute for Math and AI, Wuhan\nSchool of Artificial Intelligence,\nWuhan University\nWuhan, China\nchaofengchen@whu.edu.cn\nJunqi Hu\nSchool of Artificial Intelligence,\nSun Yat-sen University\nZhuhai, China\nhujq28@mail2.sysu.edu.cn\nDan Zeng†\nSchool of Artificial Intelligence,\nSun Yat-sen University\nZhuhai, China\nThe Technology Innovation Center\nfor Collaborative Applications of\nNatural Resources Data in GBA, MNR\nGuangzhou, China\nzengd8@mail.sysu.edu.cn\nT5 text encoder\n(b) Multi-step Code Prediction Refinement\nStep 0\n(a) Geometric Priors Extractor & Injector\nStep T-1\nOne-step Prediction\nStep t\nCodebook\n0\n2\nN\n1\n...\n0\n2\nN\n1\n...\nCodebook\n0\n2\nN\n1\n...\nStep T-1\nOne-step Prediction\nStep t\nCodebook\n0\n2\nN\n1\n...\nVLM\nFace shape Nose\nMouth\nEye\nEyebrow\nEncoder\nVisual feature space Textual embedding spaceGeometric-aware\nfeature space\nEyebrow\nTexture and geometric\ntext descriptions\nMouth\nEye\nNose\nFace shape\naligned\nFigure 1: Our motivations are twofold: (a) aligned geometry-aware feature extraction and (b) multi-step latent code refinement.\nAbstract\nCodebook-based blind face restoration (BFR) often suffers from am-\nbiguous conditioning features and a fragile prediction mechanism\nunder severe degradation. To address these challenges, we propose\nGeoMAR, a framework designed to unleash geometrically aligned\nfeatures with masked autoregressive (MAR) refinement for robust\nface restoration. For feature conditioning, we introduce a dual-input\nextraction pipeline to extract component-based geometric descrip-\ntions with explicit, spatially faithful anchors. These textual priors\nare integrated with low-quality (LQ) features via an Aligned Geo-\nmetric Priors Injector, which employs a KV-Q exchange strategy to\n∗Both authors contributed equally to this research.\n†Corresponding author: zengd8@mail.sysu.edu.cn.\nThis work is licensed under a Creative Commons Attribution-NonCommercial-\nNoDerivatives 4.0 International License.\nMM ’26, Rio de Janeiro, Brazil\n©2026 Copyright held by the owner/author(s).\nACM ISBN 979-8-4007-2213-4/2026/11\nhttps://doi.org/10.1145/3767308.3836198\ngenerate geometrically aligned features. For prediction mechanism,\nwe reformulate the one-step mapping into a multi-step MAR pro-\ncess. This coarse-to-fine generation progressively refines complex\nfacial regions based on increasingly reliable context. Experiments\non one synthetic and three real-world benchmarks demonstrate\nthat GeoMAR achieves highly competitive perceptual quality and\ncoherent visual structures compared with existing methods. The\ncode is available at https://github.com/BRL-SYSU/GeoMAR.git.\nCCS Concepts\n•Computing methodologies→Computer vision.\nKeywords\nblind face restoration, masked autoregressive modeling\nACM Reference Format:\nLu Gan, Hanyu Yan, Chaofeng Chen, Junqi Hu, and Dan Zeng. 2026. Geo-\nMAR: Unleashing Geometrically Aligned Features for Masked Autoregres-\nsive Blind Face Restoration. InProceedings of the 34th ACM International Con-\nference on Multimedia (MM ’26), November 10–14, 2026, Rio de Janeiro, Brazil.\nACM, New York, NY, USA, 20 pages. https://doi.org/10.1145/3767308.3836198",
+  "figure_candidates": [
+    {
+      "page": 1,
+      "caption": "Figure 1: Our motivations are twofold: (a) aligned geometry-aware feature extraction and (b) multi-step latent code refinement."
+    },
+    {
+      "page": 3,
+      "caption": "Figure 2: An overview of GeoMAR, which takes LQ images and geometry-aware facial component descriptions as inputs to"
+    },
+    {
+      "page": 5,
+      "caption": "Figure 3: Qualitative comparison on three real-world datasets: LFW-Test, WebPhoto-Test and WIDER-Test."
+    },
+    {
+      "page": 6,
+      "caption": "Figure 4: Qualitative comparison on the synthetic CelebA-Test dataset under two degradation levels (FID=144 and FID=267)."
+    },
+    {
+      "page": 7,
+      "caption": "Figure 5: Qualitative comparison of different textual priors"
+    },
+    {
+      "page": 7,
+      "caption": "Figure 6: Qualitative comparison of different query designs."
+    },
+    {
+      "page": 8,
+      "caption": "Figure 7: Generalization of MAR. MAR improves restoration"
+    },
+    {
+      "page": 8,
+      "caption": "Figure 8: Comparison with and without geometric priors"
+    },
+    {
+      "page": 12,
+      "caption": "Figure 9: Comparison of the tag description accuracy between"
+    },
+    {
+      "page": 12,
+      "caption": "Fig. 15 reveal that MAR enables better restoration through iterative"
+    },
+    {
+      "page": 13,
+      "caption": "Figure 10: Extreme cases on SCface Distance-3."
+    },
+    {
+      "page": 14,
+      "caption": "Figure 11: Failure cases under severe occlusions."
+    },
+    {
+      "page": 14,
+      "caption": "Fig. 18, Fig. 19, Fig. 20, and Fig. 21 present results on LFW-Test,"
+    },
+    {
+      "page": 15,
+      "caption": "Figure 12: Qualitative comparison of different textual priors on two real-world datasets."
+    },
+    {
+      "page": 15,
+      "caption": "Figure 13: Qualitative comparisons of different types of query on two real-world datasets."
+    },
+    {
+      "page": 16,
+      "caption": "Figure 14: Qualitative comparisons of different steps𝑇in masked auto-regressive on two real-world datasets."
+    },
+    {
+      "page": 17,
+      "caption": "Figure 15: Qualitative comparisons of CodeFormer with and without MAR on two real-world datasets."
+    },
+    {
+      "page": 17,
+      "caption": "Figure 16: Qualitative comparisons of DAEFR with and without MAR on two real-world datasets."
+    },
+    {
+      "page": 18,
+      "caption": "Figure 17: Qualitative comparisons of GeoMAR with and without MAR on two real-world datasets."
+    },
+    {
+      "page": 18,
+      "caption": "Figure 18: Visual comparisons of different methods on LFW-Test dataset."
+    },
+    {
+      "page": 19,
+      "caption": "Figure 19: Visual comparisons of different methods on WebPhoto-Test dataset."
+    },
+    {
+      "page": 19,
+      "caption": "Figure 20: Visual comparisons of different methods on WIDER-Test dataset."
+    },
+    {
+      "page": 20,
+      "caption": "Figure 21: Visual comparisons of different methods on synthetic CelebA-Test dataset."
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 5,
+      "caption": "Table 1: Quantitative comparison on three real-world datasets. Red, blue and cyan indicate the best, second and third-best,"
+    },
+    {
+      "page": 6,
+      "caption": "Table 2: Quantitative comparison on the synthetic CelebA-Test dataset under two degradation levels (FID=144 and FID=267)."
+    },
+    {
+      "page": 7,
+      "caption": "Table 3: Ablation study of GeoMAR design on CelebA-Test"
+    },
+    {
+      "page": 7,
+      "caption": "Table 4: Ablation study on geometric priors design."
+    },
+    {
+      "page": 7,
+      "caption": "Table 5: Ablation of query types in geometric prior injector."
+    },
+    {
+      "page": 7,
+      "caption": "Table 4, our design achieves the best FID. Although the ‘w/o Geo-"
+    },
+    {
+      "page": 8,
+      "caption": "Table 6: Generalization of MAR across BFR methods (FID). △"
+    },
+    {
+      "page": 8,
+      "caption": "Table 7: Quantitative results with different prediction steps"
+    },
+    {
+      "page": 12,
+      "caption": "Table 8: System prompt template and a component-based example used in the VLM pipeline."
+    },
+    {
+      "page": 12,
+      "caption": "Table 9: GeoMAR parameter breakdown."
+    },
+    {
+      "page": 12,
+      "caption": "Table 10: Comparison of model complexity and reported in-"
+    },
+    {
+      "page": 13,
+      "caption": "Table 14: Quantitative comparison on SCface Distance-3."
+    },
+    {
+      "page": 13,
+      "caption": "Table 11: Quantitative results of CodeFormer with and with-"
+    },
+    {
+      "page": 13,
+      "caption": "Table 12: Per-image end-to-end runtime breakdown of Geo-"
+    },
+    {
+      "page": 13,
+      "caption": "Table 13: Ablation study on the effect of the contrastive align-"
+    },
+    {
+      "page": 13,
+      "caption": "Table 14, GeoMAR achieves the best FID and MANIQA among the"
+    },
+    {
+      "page": 13,
+      "caption": "Table 16. SFT and the projected T5 features are retained as the com-"
+    },
+    {
+      "page": 14,
+      "caption": "Table 15: Robustness to imperfect geometric priors. “Dropout”"
+    },
+    {
+      "page": 14,
+      "caption": "Table 16: Fine-grained additive ablation on CelebA-Test."
+    },
+    {
+      "page": 14,
+      "caption": "Table 17: Sensitivity to the VLM used for geometric-prior"
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      1,
+      2,
+      3,
+      5,
+      7,
+      8,
+      11,
+      12,
+      13
+    ],
+    "identity": [
+      14
+    ],
+    "portrait_detail": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      17,
+      19
+    ],
+    "efficiency": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+    ],
+    "datasets": [
+      1,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      11,
+      12,
+      13,
+      14,
+      18,
+      19,
+      20
+    ],
+    "limitations": [
+      2,
+      8,
+      11,
+      14
+    ]
+  },
+  "source_urls": [
+    {
+      "page": 1,
+      "url": "https://doi.org/10.1145/3767308.3836198"
+    },
+    {
+      "page": 1,
+      "url": "https://github.com/BRL-SYSU/GeoMAR.git"
+    }
+  ],
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\PortraitSR\\text\\geomar.txt"
+}

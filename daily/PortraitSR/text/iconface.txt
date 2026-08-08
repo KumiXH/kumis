@@ -1,0 +1,1616 @@
+=== PAGE 1 ===
+IConFace: Fine-Grained Identity Conditioning for
+Reference-Aware Face Restoration
+Axi Niu*, Jinyang Zhang*, Senyan Qing
+Northwestern Polytechnical University
+nax@nwpu.edu.cn zhangjinyang@mail.nwpu.edu.cn qingsenyan@nwpu.edu.cn
+Homepage: https://cosmicrealm.github.io/IConFace/
+Abstract
+Severefacedegradationcanremoveperson-specificevidence,
+making restoration underdetermined. A generative prior may
+recover a sharp, plausible face yet miss localized traits that
+persist across images of the same person. Same-identity ref-
+erences supply this missing evidence, while the degraded ob-
+servation anchors target structure. We proposeIConFace, a
+fine-grained identity-conditioned framework that optionally
+conditionsrestorationonuptothreesame-identityreferences.
+Its hybrid concat backbone retains degraded and reference
+observations as dense visual tokens, preserving localized
+reference evidence. An identity pathway provides compact
+multi-reference guidance, while a degraded-structure path-
+way injects full-field and local-residual memories to rein-
+force target-aligned structure. We also introduce a human-
+auditedbenchmarkthatmeasureswhetherpersistentlocalized
+identity details survive restoration. IConFace achieves lead-
+ing reference compatibility, especially under severe degra-
+dation, and the highest observed preservation rate on this
+benchmark. Without references, it achieves leading learned
+perceptual quality across five blind-restoration benchmarks.
+Joint reference-based and paired-target evaluations show that
+reference-supported identity recovery and exact target agree-
+ment are complementary.
+Introduction
+Blind face restoration (BFR) recovers a high-quality face
+from an observation corrupted by unknown and potentially
+severedegradations.Low-levelrestorationbenefitsfromfea-
+ture and attention modeling (Niu et al. 2025, 2024b) and
+diffusion-based priors (Niu et al. 2024a; Tu et al. 2026). For
+faces,generative,codebook,transformer,anddiffusionpriors
+have substantially improved sharpness and realism (Menon
+et al. 2020; Wang et al. 2021a; Gu et al. 2022; Zhou et al.
+2022; Wang et al. 2022; Lin et al. 2024; Miao et al. 2025).
+Yetseveredegradationcaneraseperson-specificevidence:a
+population prior may synthesize a plausible face but cannot
+determine which traits were present before degradation. We
+focus onpersistent localized identity details, such as moles,
+scars, freckle patterns, and pigmentation regions that recur
+across captures (Fig. 1).
+Same-identityreferencescansupplyevidencethatisweak
+ormissinginthedegradedobservation(Lietal.2018,2020b,
+*These authors contributed equally.
+Ref1 Ref2 Ref3 LQ
+CodeFormer (blind) RefSTAR (ref.) Ours GT
+Figure 1:Reference-supported detail with target-aligned
+structure (FFHQ-Ref Moderate, case 19802).Ref1 and
+the paired GT show a forehead mark largely obscured in
+the degraded observation. IConFace recovers this cue more
+clearlythanCodeFormerandRefSTARwhilepreservingGT-
+consistent periocular structure.
+2022; Hsiao et al. 2024; Liu et al. 2025; Chong et al. 2025;
+Yin et al. 2026). Multiple captures help separate recurring
+identity cues from incidental appearance, but also encode
+capture-specific pose, expression, illumination, and texture,
+risking reference-state transfer. The degraded observation
+remains target-aligned and anchors pose, expression, and
+recoverable structure.
+We proposeIConFace(Fig. 2) to combine these two ev-
+idence sources. Its hybrid concat backbone retains the de-
+graded observation and optional references as dense visual-
+token segments alongside the noisy scene latent. A norm-
+weightedidentitypathwayprovidescompactmulti-reference
+guidance,whileadegraded-structurepathwayrepeatedlyre-
+inforces target-aligned evidence through an input residual
+arXiv:2605.02814v2  [cs.CV]  5 Aug 2026
+
+=== PAGE 2 ===
+Figure 2:IConFace framework.The current noisy scene latent is concatenated with VAE-encoded degraded-image and
+optional reference tokens, keeping target-aligned degraded evidence and spatially distributed reference evidence accessible
+to the FLUX backbone. Norm-weighted AdaFace aggregation provides compact multi-reference identity guidance, while the
+degraded-structure adapter adds an input residual and full-field/local-residual memories. Purple dashed arrows denote optional
+routes: when references are available, they enter both the VAE and AdaFace; otherwise, the reference-token branch is omitted
+and the degraded image serves as the AdaFace identity anchor. FLUX predicts a clean latent for VAE decoding. Snowflakes
+denote frozen modules.
+and full-field/local-residual memories. The model accepts
+zero to three references.
+Beyond perceptual and global-identity evaluation (Wang
+et al. 2026), reference-aware restoration must distinguish
+compatibility with cross-capture identity evidence from
+agreementwithonepairedtarget.WethereforecombineRe-
+fAvg, paired-GT fidelity, and supplementary pose, expres-
+sion, and parsing diagnostics to assess identity recovery and
+target-state retention. Since these global measures do not
+identify which trait survives, we also introduce a human-
+audited detail-preservation benchmark whose retained traits
+are supported by both the paired target and a same-identity
+reference.
+Across three reference-aware benchmarks, IConFace
+achievesthestrongestreferencecompatibility,withtheclear-
+est gains under severe degradation, and the highest ob-
+servedlocalized-detailpreservationrate.Withoutreferences,
+it achieves leading learned perceptual quality across five
+blind-restoration benchmarks. Our contributions are:
+•We propose a fine-grained multi-reference identity-
+conditioningdesignthatretainsreferencesasspatiallydis-
+tributedvisualtokensandcomplementsthemwithnorm-
+weightedglobalidentityaggregation,preservinglocalized
+evidence.
+•Weintroduceadegraded-structurereinforcementpathway
+that injects an input residual and full-field/local-residual
+memories, keeping restoration anchored to the target ob-
+servation.
+•We develop a human-audited localized-detail benchmark
+and evaluate IConFace against diverse methods across
+multipledatasets,showingthehighestobservedpreserva-
+tionrate,leadingreferencecompatibilityandlearnedper-
+ceptual quality, and clear qualitative gains in fine-grained
+identity recovery.
+Related Work
+Blindfacerestoration.Blindfacerestorationreconstructsa
+portrait without subject-specific auxiliary images. Early ap-
+proaches use facial components or learned dictionaries (Li
+et al. 2020a). Generative-prior methods embed pretrained
+facedistributionsintorestorationnetworks(Yangetal.2021;
+Wang et al. 2021a), while codebook and transformer meth-
+ods retrieve or compose high-quality representations from
+discrete or key–value priors (Gu et al. 2022; Zhou et al.
+2022; Wang et al. 2022, 2023). Diffusion-based approaches
+further improve realism and degradation robustness (Zhao
+et al. 2023; Qiu et al. 2023; Yang et al. 2023; Lin et al.
+2024; Miao et al. 2025; Wang et al. 2025). These methods
+conditiononlyonthedegradedobservation;whencorruption
+removesapersistentidentitydetail,apopulationpriorcannot
+determine which subject-specific evidence is missing.
+Reference-based face restoration.Reference-based
+methods supplement the degraded observation with same-
+identity images. GFRNet predicts a spatial warp from one
+guidance image, ASFFNet selects and fuses aligned exem-
+plars,andDMDNetstoresgenericandidentity-specificcom-
+ponent features (Li et al. 2018, 2020b, 2022). Later gener-
+ative approaches use per-subject personalization, key–value
+conditioning,identityadapters,sharedattention,orcompact
+identity prompts (Varanka et al. 2024; Hsiao et al. 2024;
+Zhangetal.2025;Liuetal.2025);ReFineandRefSTARem-
+phasize detail transfer or reference feature selection (Chong
+
+=== PAGE 3 ===
+et al. 2025; Yin et al. 2026). These designs range from com-
+pact global summaries to dense or selectively aligned local
+features. Compact summaries may omit spatially localized
+evidence, whereas richer transfer can import the reference
+capture’s pose, expression, illumination, or incidental ap-
+pearance. IConFace retains both input sources as dense to-
+kens and adds asymmetric conditioning to reinforce their
+complementary roles.
+Identity representation and evaluation.Margin-based
+recognizers provide compact identity representations with
+strongglobaldiscriminability(Dengetal.2019;Mengetal.
+2021; Kim, Jain, and Liu 2022). Restoration methods reuse
+theseembeddingsforconditioning,supervision,andcosine-
+similarity evaluation (Hsiao et al. 2024; Liu et al. 2025;
+Chong et al. 2025). Global similarity is useful but cannot
+identify which localized trait was recovered or distinguish
+identity recovery from reference-state transfer. Paired-target
+metricsmeasureagreementwithonecapture,perceptualmet-
+rics measure visual quality, and target/reference state com-
+parisons expose possible shifts toward a reference. Existing
+fine-detail studies still emphasize global similarity, qualita-
+tive comparison, and user preference (Chong et al. 2025).
+Method
+Overview and Dense Evidence Backbone
+Given a degraded imageIdeg and same-identity references
+R={I 1
+ref , . . . , IN
+ref }, IConFace defines
+ˆI=G θ(Ideg,R), N∈ {0,1,2,3},(1)
+which operates in reference-aware mode forN >0and no-
+reference mode forN= 0. The degraded image is directly
+associated with the target observation and anchors its layout
+andrecoverablestructure;Rsuppliesadditionalevidencefor
+persistent identity traits.
+The backbone is FLUX.2-Klein-base-4B (Black Forest
+Labs 2025). Its VAE encoderE, decoderD, and text en-
+coder are frozen, while the transformer is adapted through
+LoRA(Huetal.2022)togetherwiththeproposedcondition-
+ingmodules.Afixedrestorationpromptprovidestextcontext
+and is omitted below. At flow statezσ, the scene, degraded,
+and reference latent grids are independently packed without
+interpolation or spatial resampling:
+zdeg =E(I deg), z r
+ref =E(I r
+ref),
+xscene = Pack(zσ), x deg = Pack(zdeg),
+xr
+ref = Pack(zr
+ref), x in = [xscene;x deg;x 1
+ref;. . .;x N
+ref].
+(2)
+The grids have the same spatial resolution, andPackonly
+rearranges each(B, C, H, W)tensor into a token sequence.
+Visualtokensusesource-aware3DRoPEtopreservespatial
+layout and distinguish the scene, degraded observation, and
+referencegroups;detailsareprovidedinthesupplement.Ref-
+erencesremaindensespatialtokensequencesratherthanbe-
+ingrepresentedsolelybyaglobalidentityvector;forN= 0,
+the reference segment is omitted. Dense concatenation ex-
+poses both evidence sources to the backbone but does not
+prescribe their roles, motivating the two asymmetric path-
+ways below.
+Asymmetric Identity-Structure Conditioning
+Multi-reference identity guidance.For each available
+referencer∈ V, frozen AdaFaceA(Kim, Jain, and Liu
+2022) producesar ∈R 512, decomposed as
+er = ar
+∥ar∥2
+, q r =∥a r∥2.(3)
+Followinghypersphericalfacerecognition(Dengetal.2019;
+Kim, Jain, and Liu 2022; Meng et al. 2021),er represents
+angular identity evidence and the pre-normalization mag-
+nitudeq r serves as a relative recognizability proxy, not a
+calibrated probability. We use these magnitudes to weight
+the same-identity directions and select the effective identity
+anchor:
+wr = exp(logq r/T)P
+j∈V exp(logq j/T) ,
+eref = Norm
+ X
+r∈V
+wrer
+!
+,
+eid =
+eref ,V ̸=∅,
+Norm(A(Ideg)),V=∅.
+(4)
+The degraded fallback preserves the conditioning interface
+atN= 0and is used only for forward conditioning, never
+asareferencesupervisiontarget.Fortransformerstreams∈
+{dbl,sgl}, the projected anchor predicts image-modulation
+deltas:
+hid =ϕ id(eid),
+∆s =ψ s(hid) = (∆s,shift,∆ s,scale,∆ s,gate),
+m′
+ℓ =m ℓ +γ ℓ ⊙∆ s(ℓ).
+(5)
+The learned positive scalesγ ℓ control the three modula-
+tion components at each image block. This pathway does
+not modify the text stream. The compact embedding sup-
+plies global identity guidance, while dense reference tokens
+remain available for localized evidence that the embedding
+may not retain.
+Degraded-structure anchoring.The degraded image is
+the only input aligned with the target observation. Because
+xdeg andx scene share a spatial grid, we inject a low-rank
+input residual into the scene stream and form a two-route
+compressed memory:
+x′
+scene =x scene +s degWin(xdeg),
+Hdeg =W m(xdeg),
+Mfull =P f(Hdeg),
+Mres =P r(Hdeg −Smooth(H deg)),
+Mdeg = [Mfull;M res].
+(6)
+Heres degisafixedstructurestrength,andP f , Prarelearned-
+query poolers.The full-field routesummarizes thecomplete
+projectedfield,whilethelocal-residualrouteemphasizeslo-
+calizeddeviationsafterfixedsmoothing.Together,theyretain
+complementary spatial scales of target-aligned structure.
+Each image block reads the memory through stream-
+specific low-rank K/V projections:
+h′
+ℓ =h ℓ +s degAttn(Qℓhℓ, KℓMdeg, VℓMdeg).(7)
+
+=== PAGE 4 ===
+Reference-aware qualitative comparisons
+Reference LQ ReF-LDM InstantR. FaceMe RefSTAR Ours GT
+CelebA-Test-Ref: case 00645
+FFHQ-Ref Moderate: case 03016
+FFHQ-Ref Severe: case 12744
+Figure 3:Reference-aware qualitative comparisons on three benchmarks.Each row shows one displayed reference, LQ,
+restoration outputs, and the paired GT; bottom-right insets enlarge a row-matched facial region. Methods use their official
+reference configurations, with one reference displayed when more are used.
+Together, the input residual and block-wise memory keep
+target-aligned degraded evidence accessible throughout de-
+noising,whilethedensereferencetokensandglobalidentity
+pathway provide complementary identity information.
+Training Objectives and Inference
+For clean target latentz0 =E(I gt), noiseϵ∼ N(0, I), and
+interpolation levelσ∈[0,1], flow matching (Lipman et al.
+2023) uses
+zσ = (1−σ)z 0 +σϵ,
+u⋆ =ϵ−z 0,
+ˆuθ =F θ(zσ, σ;I deg,R),
+Lfm =E z0,ϵ,σ
+
+∥ˆuθ −(ϵ−z 0)∥2
+2
+
+.
+(8)
+The flow-matching objective regresses the target veloc-
+ity uniformly over timesteps. For reference-aware samples,
+frozen AdaFace additionally constrains the decoded clean-
+latent estimate:
+˜z0 =z σ −σˆuθ, ˜I=D(˜z 0),
+Lref-id = 1−cos(A( ˜I),sg(e ref)),
+Lgt-id = 1−cos(A( ˜I),sg(e gt)),
+(9)
+wheree gt = Norm(A(Igt))andsgstops gradients through
+the identity targets. An adaptive clean-target stabilizer in-
+creases with reference–target embedding disagreement:
+λ⋆
+h =λ h clamp(1−cos(e ref , egt),0,1),
+ℓid =ω(σ) [(1−λ ⋆
+h)Lref-id +λ ⋆
+hLgt-id], (10)
+whereλ h = 0.25,ω(σ) = max(1−σ,0.25) 2, andℓid = 0
+whenV=∅. The timestep weight reduces identity super-
+vision at high-noise states rather than hard-masking them.
+WithL id =E[ℓ id],
+L=α fmLfm +λ idLid,(11)
+withα fm = 0.75andλ id = 0.30.
+Training varies reference availability from zero to three.
+At inference, the predicted velocity field is integrated over
+the sampling schedule to obtainˆz0, which is decoded as
+ˆI=D(ˆz 0). The supplement reports reference sampling,
+token budgets, low-rank dimensions, optimization settings,
+and a controlled reference-count diagnostic.
+Experiments
+Experimental Setup
+We train for 12 epochs on the official identity-based FFHQ-
+Ref split (Karras, Laine, and Aila 2019; Hsiao et al. 2024)
+at512×512, using online Real-ESRGAN/BSRGAN degra-
+dations (Wang et al. 2021b; Zhang et al. 2021). FFHQ-Ref
+val is used only qualitatively. Results use 12 steps, guidance
+4.0, and seed 42; other settings are supplementary.
+Figure 4:Localized-detail preservation.Rates over 167
+auditedtraitssupportedbythepairedGTandasame-identity
+reference; error bars indicate estimation uncertainty.
+
+=== PAGE 5 ===
+Figure 5:Localized-detail preservation.IConFace preserves the three-mole cheek pattern and its spatial arrangement more
+completely than competing restorations, which omit or weaken some moles. Insets enlarge the region.
+Set LQ CodeFormer GFP-GAN VQFR RF++ DAEFR IConFace
+LFW
+CelebChild
+WebPhoto
+Wider-Test
+CelebA-Test
+Figure6:No-referencecomparisonsonfivebenchmarks.RowsshowLQandsixoutputs.Acrossvariedages,poses,occlusions,
+and illumination, IConFace restores sharp, coherent facial structure and local detail.
+Ref LQ Concat + Struct + ID ID+Struct
+(1R)
+Full (2R) GT
+FFHQ-Ref Moderate: case 03234
+Arc 1.000
+ Arc 0.479
+ Arc 0.553
+ Arc 0.602
+ Arc 0.643
+ Arc 0.648
+ Arc 0.656
+ Arc 0.607
+FFHQ-Ref Severe: case 31223
+Arc 1.000
+ Arc 0.047
+ Arc 0.467
+ Arc 0.523
+ Arc 0.535
+ Arc 0.540
+ Arc 0.588
+ Arc 0.545
+Figure7:Qualitativecomponentablations.ArclabelscomparewithdisplayedRef 1;headlineidentitymetricsuseallprotocol
+references.
+Using the released target–reference mappings (Hsiao
+et al. 2024), reference-aware tests cover CelebA-Test-Ref
+(2,533) (Liu et al. 2015), FFHQ-Ref Moderate (857), and
+Severe (857), against DMDNet, ReF-LDM, InstantRestore,
+FaceMe, and RefSTAR (Li et al. 2022; Hsiao et al. 2024;
+Zhangetal.2025;Liuetal.2025;Yinetal.2026).Blindtests
+coverCelebA-Test(3,000),LFW(1,711)(Huangetal.2007),
+CelebChild (360), WebPhoto (407), and Wider-Test (970),
+against CodeFormer, VQFR, GFP-GAN, RestoreFormer++,
+and DAEFR (Zhou et al. 2022; Gu et al. 2022; Wang et al.
+2021a, 2023; Tsai et al. 2024).
+We evaluate reference compatibility with RefAvg under
+
+=== PAGE 6 ===
+Table 1: Reference-aware comparison under each method’s official reference configuration; RefAvg uses only its supplied
+references.
+Method Dataset RefAvg ArcF ace ↑RefAvg MagF ace ↑MUSIQ↑CLIP-IQA↑MANIQA↑
+DMDNet(TPAMI’22)
+CelebA-Test
+Ref
+0.462 0.51972.7250.625 0.495
+ReF-LDM(NeurIPS’24)0.561 0.616 74.426 0.675 0.527
+InstantRestore(SIGGRAPH’25)0.522 0.583 71.324 0.555 0.494
+FaceMe(AAAI’25)0.534 0.591 70.716 0.586 0.480
+RefSTAR(AAAI’26)0.594 0.65271.6330.631 0.509
+IConFace (ours)0.633 0.678 76.068 0.727 0.635
+DMDNet(TPAMI’22)
+FFHQ-Ref
+Moderate
+0.567 0.610 72.024 0.633 0.477
+ReF-LDM(NeurIPS’24)0.634 0.67175.254 0.708 0.544
+InstantRestore(SIGGRAPH’25)0.600 0.643 69.358 0.568 0.463
+FaceMe(AAAI’25)0.635 0.67472.480 0.610 0.491
+RefSTAR(AAAI’26)0.648 0.686 72.890 0.646 0.501
+IConFace (ours)0.688 0.717 76.220 0.738 0.613
+DMDNet(TPAMI’22)
+FFHQ-Ref
+Severe
+0.137 0.174 62.177 0.543 0.355
+ReF-LDM(NeurIPS’24)0.588 0.624 75.744 0.717 0.552
+InstantRestore(SIGGRAPH’25)0.467 0.516 69.998 0.581 0.467
+FaceMe(AAAI’25)0.455 0.507 72.251 0.610 0.493
+RefSTAR(AAAI’26)0.580 0.628 73.012 0.645 0.512
+IConFace (ours)0.682 0.713 75.679 0.726 0.600
+Table 2: Paired-GT similarity to protocol references. Similarities are averaged per sample; Moderate and Severe share the
+FFHQ-Ref pairs.
+ArcFace MagFace
+DatasetNMean±Std<0.7<0.6<0.5Mean±Std<0.7<0.6<0.5
+CelebA-Test-Ref 2,5330.612±0.07488.04% 45.20% 5.29%0.672±0.07265.10% 14.57% 1.30%
+FFHQ-Ref 8570.687±0.06456.36% 8.87% 0.35%0.722±0.06734.07% 4.67% 0.47%
+Table 3: No-reference restoration on five benchmarks; all three columns are learned perceptual-quality metrics.
+Method Dataset MUSIQ↑CLIP↑MANIQA↑Method Dataset MUSIQ↑CLIP↑MANIQA↑
+CodeFormer(NeurIPS’22)
+LFW
+75.484 0.689 0.527 CodeFormer(NeurIPS’22)
+Wider-Test
+73.407 0.699 0.496
+GFP-GAN(CVPR’21)75.5700.6760.551GFP-GAN(CVPR’21)74.7690.7000.550
+VQFR(ECCV’22)74.9010.725 0.543VQFR(ECCV’22)72.0110.7220.514
+RF++(TPAMI’23)72.2510.7020.511 RF++(TPAMI’23)71.5180.7170.477
+DAEFR(ICLR’24)75.8400.697 0.542 DAEFR(ICLR’24)74.1430.6970.520
+IConFace (ours)76.712 0.758 0.645IConFace (ours)75.496 0.729 0.616
+CodeFormer(NeurIPS’22)
+CelebChild
+74.8520.686 0.521 CodeFormer(NeurIPS’22)
+CelebA-Test
+75.5540.671 0.538
+GFP-GAN(CVPR’21)74.822 0.674 0.530 GFP-GAN(CVPR’21)75.4660.6720.568
+VQFR(ECCV’22)74.4590.711 0.542VQFR(ECCV’22)74.4060.6910.552
+RF++(TPAMI’23)71.6900.7020.506 RF++(TPAMI’23)73.9140.689 0.553
+DAEFR(ICLR’24)74.8830.6970.537DAEFR(ICLR’24)75.251 0.668 0.545
+IConFace (ours)75.603 0.750 0.613IConFace (ours)75.988 0.724 0.631
+CodeFormer(NeurIPS’22)
+WebPhoto
+74.0040.6920.503
+GFP-GAN(CVPR’21)75.213 0.702 0.543
+VQFR(ECCV’22)71.602 0.690 0.502
+RF++(TPAMI’23)71.4870.6950.490
+DAEFR(ICLR’24)72.705 0.669 0.494
+IConFace (ours)75.795 0.719 0.593
+Table4:ComponentablationsonFFHQ-RefModerateandSevere.Allretaindenseconcat;RefAvgusesallprotocolreferences.
+Dataset Variant RefAvg ArcF ace ↑RefAvg MagF ace ↑MUSIQ↑CLIP-IQA↑MANIQA↑
+FFHQ-Ref Moderate
+Concat 0.644 0.675 75.917 0.724 0.599
+Concat + Struct 0.645 0.675 75.9800.7330.606
+Concat + ID0.663 0.695 76.0280.7160.609
+ID + Struct (1R)0.674 0.702 76.135 0.736 0.611
+Full (2R)0.688 0.717 76.220 0.738 0.613
+FFHQ-Ref Severe
+Concat 0.602 0.632 75.205 0.717 0.595
+Concat + Struct 0.612 0.642 75.3160.723 0.597
+Concat + ID0.634 0.672 75.4280.7210.596
+ID + Struct (1R)0.663 0.693 75.485 0.725 0.597
+Full (2R)0.682 0.713 75.679 0.726 0.600
+independentArcFace/MagFaceandlearnedperceptualqual-
+ity with MUSIQ, CLIP-IQA, and MANIQA (Ke et al.2021;
+Wang, Chan, and Loy 2023; Yang et al. 2022). The supple-
+ment additionally reports paired-GT identity, paired-target
+reconstructionmetrics(Wangetal.2004;Zhangetal.2018),
+and target-state diagnostics for pose, expression, and se-
+mantic parsing. All IConFace results use fixed model pa-
+rameters and inference settings; only reference availability
+changes, without mode-specific weights or test-time opti-
+mization. Baselines follow their intended protocols.
+
+=== PAGE 7 ===
+Why Reference Similarity?
+Reference-aware restoration cannot be evaluated solely by
+agreement with one paired target. Same-identity references
+differ in pose, expression, illumination, and incidental ap-
+pearance, so even clean references need not closely match
+the paired GT. Table 2 quantifies this cross-capture gap.
+On CelebA-Test-Ref, sample-level GT–reference means are
+0.612/0.672for ArcFace/MagFace, and 88.04%/65.10% of
+samples fall below 0.7. On FFHQ-Ref, the corresponding
+means are0.687/0.722, with 56.36%/34.07% below 0.7.
+Thus, even a faithful reconstruction of one target capture
+need not approach unit similarity to the protocol references.
+This cross-capture gap motivates a separate reference-
+basedmeasure.RefAvgcomputesoutput-to-referencecosine
+similarities for every reference available under a method’s
+protocol, averages the similarities within each sample, and
+then averages across the dataset. It neither averages refer-
+ence embeddings beforehand nor selects the most favorable
+reference, reducing dependence on any single capture.
+Training uses AdaFace for identity supervision, whereas
+evaluationusesindependentArcFaceandMagFacerecogniz-
+ers.ThecleanGT–referencedistributioninTable2calibrates
+the scale of RefAvg rather than defining a restoration upper
+bound. Accordingly, RefAvg measures compatibility with
+supplied cross-capture identity evidence, while paired-GT
+fidelity measures agreement with the target capture; supple-
+mentary target-state diagnostics provide additional evidence
+of target-state retention.
+Reference-Aware Restoration
+Table1followseachmethod’sofficialreferenceuseandeval-
+uates RefAvg against the references actually supplied to that
+method. The supplement additionally reports a common-
+Ref1 controlled comparison in which every method receives
+and is evaluated against the same protocol reference.
+IConFace achieves the highest RefAvg ArcFace and
+RefAvgMagFace on all three benchmarks. Under Severe
+degradation, its margins over the strongest baseline for each
+recognizer are0.094and0.085, substantially larger than on
+the easier splits. These margins support the task motivation:
+externalidentity evidencebecomes morevaluable asthede-
+graded observation loses person-specific information.
+IConFace also achieves the highest CLIP-IQA and
+MANIQA on all three benchmarks and the highest MUSIQ
+onCelebA-Test-RefandFFHQ-RefModerate.UnderSevere
+degradation,itcombinesthestrongestRefAvgwiththehigh-
+estCLIP-IQAandMANIQA.ItsRefAvgscoresfallnearthe
+calibrated GT–reference cross-capture range in Table 2.
+Figure3providesqualitativecomparisons;onSevere,sup-
+plementarypose/expression/parsingdiagnosticsyieldtarget-
+preference rates of 95.0/73.0/94.9%.
+Persistent Localized Identity Detail Preservation
+RefAvg measures global identity compatibility but cannot
+determinewhetheraspecificlocalizedtraitsurvivesrestora-
+tion. From 235 high-recall candidates, cross-image human
+audit retains 167 cases whose primary trait is supported by
+both the paired GT and at least one same-identity reference.
+Each output is evaluated against the paired GT using the au-
+dited trait description; the supplement details the complete
+protocol.
+AsshowninFig.4,IConFacepreserves160of167audited
+traits (95.8%), achieving the highest observed preservation
+rateamongallevaluatedmethods,comparedwith92.2%for
+the next-best method. Figure 5 illustrates a representative
+case in which IConFace preserves all three moles along the
+cheek at their corresponding locations, whereas competing
+methods omit or weaken part of this localized pattern.
+No-Reference Restoration
+Table 3 compares IConFace with five established blind face
+restorersacrossfivebenchmarks.IConFaceachievesleading
+learnedperceptualqualityacrossthesebenchmarks.Figure6
+showssharp,coherentrestorationsacrossdiverseages,poses,
+occlusions,illumination,anddegradationconditions.Inpar-
+ticular,IConFacerecoversclearereyesandfacial-component
+details,preservesvisibleocclusionboundariesandsurround-
+ing facial structure, and reduces the over-smoothed or lo-
+cally distorted appearance observed in several competing
+outputs. The supplement additionally reports paired-target
+reconstruction on CelebA-Test.
+Ablation Studies
+Weevaluatefivearchitecturevariantsunderthesametraining
+protocol on FFHQ-Ref Moderate and Severe.Concatis the
+dense-token baseline;Concat + StructandConcat + IDas-
+sessthetwoconditioningpathwaysindividually,ID+Struct
+(1R)combines them with one degraded-memory route, and
+Full (2R)uses the proposed two-route memory.
+Table 4 reveals a clear division of roles between the two
+pathways. Degraded-structure reinforcement primarily im-
+proveslearnedperceptualquality,whereasidentityguidance
+produceslargergainsinreferencecompatibility,particularly
+underSeveredegradation.Enablingbothpathwaysimproves
+identity compatibility and perceptual quality together. The
+comparison betweenID + Struct (1R)andFull (2R)further
+supports the two-route design: separate full-field and local-
+residualmemoriesyieldthestrongestvalueforeveryreported
+metric on both splits. Figure 7 shows the same progression
+qualitatively.Structurereinforcementstabilizesfacialgeom-
+etry,identityguidancerecoversamorereference-compatible
+appearance, and the full model combines clearer local fea-
+tures with target-aligned pose and structure, with the effect
+most apparent under Severe degradation. Additional exam-
+ples appear in the supplement.
+Conclusion
+We propose IConFace, retaining degraded and optional ref-
+erence observations as dense tokens with compact iden-
+tity guidance and full-field/local-residual structure memory.
+Across three reference-aware benchmarks, it achieves the
+strongest reference compatibility, particularly under severe
+degradation, and the highest observed rate on a human-
+audited localized-detail benchmark. It also delivers leading
+learned perceptual quality on five blind-restoration bench-
+marks, demonstrating strong performance in both settings.
+
+=== PAGE 8 ===
+References
+Black Forest Labs. 2025. FLUX.2: Frontier Visual Intelli-
+gence. https://bfl.ai/blog/flux-2.
+Chong, M. J.; Xu, D.; Zhang, Y.; Wang, Z.; Forsyth, D.;
+Krishnan, G.; Wu, Y.; and Wang, J. 2025. Copy or Not?
+Reference-Based Face Image Restoration with Fine Details.
+InIEEE/CVF Winter Conference on Applications of Com-
+puter Vision (WACV), 9642–9651.
+Deng, J.; Guo, J.; Xue, N.; and Zafeiriou, S. 2019. ArcFace:
+Additive Angular Margin Loss for Deep Face Recognition.
+InIEEE/CVF Conference on Computer Vision and Pattern
+Recognition (CVPR), 4690–4699.
+Gu, Y.; Wang, X.; Xie, L.; Dong, C.; Li, G.; Shan, Y.; and
+Cheng, M.-M. 2022. VQFR: Blind Face Restoration with
+Vector-QuantizedDictionaryandParallelDecoder. InEuro-
+pean Conference on Computer Vision (ECCV), 126–143.
+Hsiao,C.-W.;Liu,Y.-L.;Yang,C.-K.;Kuo,S.-P.;Jou,Y.K.;
+andChen,C.-P.2024. ReF-LDM:ALatentDiffusionModel
+forReference-basedFaceImageRestoration. InAdvancesin
+Neural Information Processing Systems (NeurIPS).
+Hu,E.J.;Shen,Y.;Wallis,P.;Allen-Zhu,Z.;Li,Y.;Wang,S.;
+Wang,L.;andChen,W.2022. LoRA:Low-RankAdaptation
+of Large Language Models. InInternational Conference on
+Learning Representations (ICLR).
+Huang,G.B.;Ramesh,M.;Berg,T.;andLearned-Miller,E.
+2007. Labeled Faces in the Wild: A Database for Studying
+FaceRecognitioninUnconstrainedEnvironments. Technical
+Report 07-49, University of Massachusetts, Amherst.
+Karras, T.; Laine, S.; and Aila, T. 2019. A Style-Based
+GeneratorArchitectureforGenerativeAdversarialNetworks.
+InIEEE/CVF Conference on Computer Vision and Pattern
+Recognition (CVPR), 4401–4410.
+Ke, J.; Wang, Q.; Wang, Y.; Milanfar, P.; and Yang, F.
+2021. MUSIQ: Multi-Scale Image Quality Transformer.
+InIEEE/CVFInternationalConferenceonComputerVision
+(ICCV), 5148–5157.
+Kim, M.; Jain, A. K.; and Liu, X. 2022. AdaFace: Quality
+Adaptive Margin for Face Recognition. InProceedings of
+the IEEE/CVF Conference on Computer Vision and Pattern
+Recognition (CVPR), 18750–18759.
+Li, X.; Chen, C.; Zhou, S.; Lin, X.; Zuo, W.; and Zhang, L.
+2020a. Blind Face Restoration via Deep Multi-scale Com-
+ponent Dictionaries. InProceedings of the European Con-
+ference on Computer Vision (ECCV), 399–415.
+Li, X.; Li, W.; Ren, D.; Zhang, H.; Wang, M.; and Zuo,
+W. 2020b. Enhanced Blind Face Restoration with Multi-
+Exemplar Images and Adaptive Spatial Feature Fusion. In
+Proceedings of the IEEE/CVF Conference on Computer Vi-
+sion and Pattern Recognition (CVPR), 2706–2715.
+Li, X.; Liu, M.; Ye, Y.; Zuo, W.; Lin, L.; and Yang, R.
+2018.LearningWarpedGuidanceforBlindFaceRestoration.
+InProceedings of the European Conference on Computer
+Vision (ECCV), 272–289.
+Li, X.; Zhang, S.; Zhou, S.; Zhang, L.; and Zuo, W. 2022.
+LearningDualMemoryDictionariesforBlindFaceRestora-
+tion.IEEE Transactions on Pattern Analysis and Machine
+Intelligence, 45(5): 5904–5919.
+Lin, X.; He, J.; Chen, Z.; Lyu, Z.; Dai, B.; Yu, F.; Qiao, Y.;
+Ouyang, W.; and Dong, C. 2024. DiffBIR: Toward Blind
+Image Restoration with Generative Diffusion Prior. InPro-
+ceedings of the European Conference on Computer Vision
+(ECCV).
+Lipman,Y.;Chen,R.T.;Ben-Hamu,H.;Nickel,M.;andLe,
+M.2023. FlowMatchingforGenerativeModeling. InInter-
+national Conference on Learning Representations (ICLR).
+Liu,S.;Duan,Z.-P.;OuYang,J.;Fu,J.;Park,H.;Liu,Z.;Guo,
+C.; and Li, C. 2025. FaceMe: Robust Blind Face Restora-
+tion with Personal Identification. InAAAI Conference on
+Artificial Intelligence.
+Liu,Z.;Luo,P.;Wang,X.;andTang,X.2015.DeepLearning
+Face Attributes in the Wild. InIEEE International Confer-
+ence on Computer Vision (ICCV), 3730–3738.
+Meng,Q.;Zhao,S.;Huang,Z.;andZhou,F.2021. MagFace:
+AUniversalRepresentationforFaceRecognitionandQuality
+Assessment.InProceedingsoftheIEEE/CVFConferenceon
+Computer Vision and Pattern Recognition (CVPR), 14225–
+14234.
+Menon, S.; Damian, A.; Hu, S.; Ravi, N.; and Rudin, C.
+2020.PULSE:Self-SupervisedPhotoUpsamplingviaLatent
+Space Exploration of Generative Models. InProceedings of
+the IEEE/CVF Conference on Computer Vision and Pattern
+Recognition, 2437–2445.
+Miao, Y.; Qu, Z.; Gao, M.; Chen, C.; Song, J.; Han, J.; and
+Deng,J.2025. UnlockingthePotentialofDiffusionPriorsin
+BlindFaceRestoration. InProceedingsoftheIEEE/CVFIn-
+ternationalConferenceonComputerVision(ICCV),13471–
+13480.
+Niu, A.; Pham, T. X.; Zhang, K.; Sun, J.; Zhu, Y.; Yan, Q.;
+Kweon, I. S.; and Zhang, Y. 2024a. ACDMSR: Acceler-
+ated Conditional Diffusion Models for Single Image Super-
+Resolution.IEEETransactionsonBroadcasting,70(2):492–
+504.
+Niu, A.; Wang, P.; Zhu, Y.; Sun, J.; Yan, Q.; and Zhang, Y.
+2024b. GRAN:GhostResidualAttentionNetworkforSingle
+ImageSuperResolution.MultimediaToolsandApplications,
+83(10): 28505–28522.
+Niu, A.; Zhang, K.; Pham, T. X.; Wang, P.; Sun, J.; Kweon,
+I. S.; and Zhang, Y. 2025. Learning From Multi-Perception
+Features for Real-Word Image Super-Resolution.IEEE
+Transactions on Circuits and Systems for Video Technology,
+35(7): 6535–6548.
+Qiu, X.; Han, C.; Zhang, Z.; Li, B.; Guo, T.; and Nie, X.
+2023. DiffBFR: Bootstrapping Diffusion Model Towards
+Blind Face Restoration. InProceedings of the 31st ACM
+International Conference on Multimedia, 7785–7795.
+Tsai, Y.-J.; Liu, Y.-L.; Qi, L.; Chan, K. C.; and Yang, M.-
+H. 2024. Dual Associated Encoder for Face Restoration.
+InInternational Conference on Learning Representations
+(ICLR).
+Tu,Y.;Yan,Q.;Niu,A.;andTang,J.2026. TPGDiff:Hierar-
+chical Triple-Prior Guided Diffusion for Image Restoration.
+arXiv preprint arXiv:2601.20306.
+Varanka, T.; Toivonen, T.; Tripathy, S.; Zhao, G.; and Acar,
+E.2024. PFStorer:PersonalizedFaceRestorationandSuper-
+Resolution. InProceedingsoftheIEEE/CVFConferenceon
+Computer Vision and Pattern Recognition (CVPR).
+Wang, J.; Chan, K. C.; and Loy, C. C. 2023. Exploring
+CLIP for Assessing the Look and Feel of Images. InAAAI
+
+=== PAGE 9 ===
+Conference on Artificial Intelligence, 2555–2563.
+Wang,J.;Gong,J.;Chen,Z.;Liu,K.;Li,J.;Zhang,Y.;Tim-
+ofte, R.; et al. 2026. The Second Challenge on Real-World
+Face Restoration at NTIRE 2026: Methods and Results. In
+Proceedings of the IEEE/CVF Conference on Computer Vi-
+sion and Pattern Recognition Workshops (CVPRW).
+Wang, J.; Gong, J.; Zhang, L.; Chen, Z.; Liu, X.; Gu, H.;
+Liu, Y.; Zhang, Y.; and Yang, X. 2025. OSDFace: One-Step
+Diffusion Model for Face Restoration. InProceedings of
+the IEEE/CVF Conference on Computer Vision and Pattern
+Recognition (CVPR).
+Wang, X.; Li, Y.; Zhang, H.; and Shan, Y. 2021a. Towards
+Real-World Blind Face Restoration with Generative Facial
+Prior. InIEEE/CVF Conference on Computer Vision and
+Pattern Recognition (CVPR), 9168–9178.
+Wang, X.; Xie, L.; Dong, C.; and Shan, Y. 2021b. Real-
+ESRGAN:TrainingReal-WorldBlindSuper-Resolutionwith
+Pure Synthetic Data. InProceedings of the IEEE/CVF In-
+ternationalConferenceonComputerVisionWorkshops(IC-
+CVW), 1905–1914.
+Wang, Z.; Bovik, A. C.; Sheikh, H. R.; and Simoncelli, E. P.
+2004. Image Quality Assessment: From Error Visibility to
+Structural Similarity.IEEE Transactions on Image Process-
+ing, 13(4): 600–612.
+Wang, Z.; Zhang, J.; Chen, R.; Wang, W.; and Luo, P. 2022.
+RestoreFormer: High-Quality Blind Face Restoration from
+Undegraded Key-Value Pairs. InIEEE/CVF Conference on
+Computer Vision and Pattern Recognition (CVPR), 17512–
+17521.
+Wang, Z.; Zhang, J.; Chen, R.; Wang, W.; and Luo, P. 2023.
+RestoreFormer++: Towards Real-World Blind Face Restora-
+tion from Undegraded Key-Value Pairs.IEEE Transactions
+on Pattern Analysis and Machine Intelligence, 46(4): 2555–
+2566.
+Yang, P.; Zhou, S.; Tao, Q.; and Loy, C. C. 2023. PGDiff:
+GuidingDiffusionModelsforVersatileFaceRestorationvia
+Partial Guidance. InAdvances in Neural Information Pro-
+cessing Systems (NeurIPS).
+Yang,S.;Wu,T.;Shi,S.;Lao,S.;Gong,Y.;Cao,M.;Wang,
+J.; and Yang, Y. 2022. MANIQA: Multi-Dimension Atten-
+tion Network for No-Reference Image Quality Assessment.
+InProceedings of the IEEE/CVF Conference on Computer
+VisionandPatternRecognitionWorkshops(CVPRW),1191–
+1200.
+Yang, T.; Ren, P.; Xie, X.; and Zhang, L. 2021. GAN Prior
+Embedded Network for Blind Face Restoration in the Wild.
+InIEEE/CVF Conference on Computer Vision and Pattern
+Recognition (CVPR), 672–681.
+Yin, Z.; Chen, J.; Liu, M.; Wang, Z.; Li, F.; Pei, R.; Li, X.;
+Lau, R. W. H.; and Zuo, W. 2026. RefSTAR: Blind Face
+Image Restoration with Reference Selection, Transfer, and
+Reconstruction. InProceedings of the AAAI Conference on
+Artificial Intelligence.
+Zhang, H.; Alaluf, Y.; Ma, S.; Kadambi, A.; Wang, J.; and
+Aberman,K.2025. InstantRestore:Single-StepPersonalized
+Face Restoration with Shared-Image Attention. InProceed-
+ings of the Special Interest Group on Computer Graphics
+and Interactive Techniques Conference Conference Papers,
+1–10.
+Zhang,K.;Liang,J.;VanGool,L.;andTimofte,R.2021.De-
+signingaPracticalDegradationModelforDeepBlindImage
+Super-Resolution. InProceedingsoftheIEEE/CVFInterna-
+tional Conference on Computer Vision (ICCV), 4791–4800.
+Zhang,R.;Isola,P.;Efros,A.A.;Shechtman,E.;andWang,
+O.2018.TheUnreasonableEffectivenessofDeepFeaturesas
+aPerceptualMetric. InIEEE/CVFConferenceonComputer
+Vision and Pattern Recognition (CVPR), 586–595.
+Zhao, Y.; Hou, T.; Su, Y.-C.; Jia, X.; Li, Y.; and Grund-
+mann, M. 2023. Towards Authentic Face Restoration with
+Iterative Diffusion Models and Beyond. InProceedings of
+theIEEE/CVFInternationalConferenceonComputerVision
+(ICCV), 7312–7322.
+Zhou, S.; Chan, K. C.; Li, C.; and Loy, C. C. 2022. To-
+wardsRobustBlindFaceRestorationwithCodebookLookup
+Transformer. InAdvancesinNeuralInformationProcessing
+Systems (NeurIPS).
+
+=== PAGE 10 ===
+Supplementary Material for
+IConFace: Fine-Grained Identity Conditioning for
+Reference-Aware Face Restoration
+Axi Niu∗, Jinyang Zhang∗, Senyan Qing
+Northwestern Polytechnical University
+nax@nwpu.edu.cn zhangjinyang@mail.nwpu.edu.cn qingsenyan@nwpu.edu.cn
+Homepage: https://cosmicrealm.github.io/IConFace/
+Supplementary Contents
+This supplement follows the experimental order of the main
+paperandseparatesreproducibilitydetails,quantitativecon-
+trols,andvisualevidence.Thecompactmapbelowstatesthe
+role of each module.
+•Implementation and Evaluation Protocolssupports the
+Method and Experimental Setup with training, conditioning,
+token-packing, and metric definitions.
+•Reference-Aware Evaluationsupports the reference-aware re-
+sults through a common-Ref1 control, reference-count analysis,
+paired-targetfidelity,andIConFacetarget-versus-referencestate
+alignment.
+•Localized Identity-Detail Evaluationdocuments benchmark
+construction, the human-verified protocol, and preservation re-
+sults.
+•No-Reference Evaluationcomplements the blind-restoration
+results with paired-target reconstruction evidence.
+•Ablation Analysisextends the main-paper ablation with quali-
+tative component comparisons on both FFHQ-Ref splits.
+Implementation and Evaluation Protocols
+Training and Inference
+Training data.FFHQ-Ref is the reference-aware bench-
+mark released with ReF-LDM. We directly use its offi-
+cialidentity-basedtrain/validation/testpartitionsandtarget–
+reference mappings without modifying the identity parti-
+tion or reference assignments. We use the training split for
+model fitting and reserve the validation split for preview
+and qualitative validation. Each clean target is resized and
+center-cropped to512×512, then degraded online by select-
+ing BSRGAN- or Real-ESRGAN-style synthesis with equal
+probability. The BSRGAN branch randomizes the order of
+isotropicoranisotropicblur,stageddownsampling,Gaussian
+noise, and JPEG compression. The Real-ESRGAN branch
+applies a two-stage composition of mixed Gaussian, gener-
+alized,plateau,orsinckernels,stochasticresizing,Gaussian
+or Poisson noise, and JPEG compression. The resulting LQ
+imageisbicubicallyresizedbackto512×512.Same-identity
+references are sampled independently and receive standard
+spatial preprocessing but no synthetic degradation.
+Optimizationandinference.IConFaceusestheFLUX.2-
+klein-base-4B restoration backbone and adds rank 16 LoRA
+adapters together with the identity and degraded-structure
+modules described in the main paper. LoRA is applied to
+image-attentionQKV/projectionandimage-MLPlinearlay-
+ers.Thefinalmodelhasabout139.8Mtrainableparameters.
+*These authors contributed equally.
+Training uses512×512crops on four GPUs in bf16, with
+per-device batch size 1 and gradient accumulation 4, giving
+an effective global batch size of 16. We train the final model
+for12epochs.AdamWusesweightdecay10 −4,100warmup
+steps, and cosine decay. The base learning rate is10−5;
+LoRAuses5×10 −7,theidentityprojectoruses3×10 −5,and
+otherrestorationparametersuse10 −5.Degradationstrength
+is sampled from 0–16 with bucket probabilities 0.5, 0.3, and
+0.2 for ranges 0–3, 4–8, and 9–16. All reported results use
+12samplingsteps,guidancescale4.0,baseseed42,and512
+resolution.
+Reference Sampling and Conditioning
+Training samplesN= 0/1/2/3references with probabil-
+ities 30/30/20/20, respectively. When fewer references are
+available, the actual number is used without duplication.
+The identity pathway uses AdaFace IR50 embeddings with
+norm-weighted multi-reference aggregation at temperature
+1.0. Reference and degraded visual tokens remain in the
+concat sequence, so the identity pathway is an additional
+reliability bias rather than the sole carrier of reference evi-
+dence.
+The degraded-structure pathway injects a rank 16 low-
+rankinputresidualwithstrength1.0andsupplies256pooled
+memory tokens to all 5 double-stream and 20 single-stream
+blocksthroughrank16K/Vprojectors.Its171full-fieldand
+85 local-residual tokens provide complementary degraded-
+sidecontext.Thelocalresidualisformedbysubtracting5×5
+average-pooledfeatures,emphasizingspatiallylocalizedde-
+viations around the pooled full-field representation.
+Token Packing and Source-Aware 3D RoPE
+All image and text conditions use the four-axis FLUX.2 ro-
+tary position layout(t, h, w, l). Scene and degraded latents
+share the same spatial grid and are independently packed
+from(B, C, H, W)to(B, HW, C)without interpolation or
+spatial resampling. Scene tokens use ids(0, h, w,0), while
+texttokensuseids(0,0,0, l).Thedegradedimagecondition
+is assigned a separate temporal group witht= 2. Reference
+images arepacked asgrouped visualtokens witht= 10 +r
+for reference indexr, which lets the transformer distinguish
+the generated scene, degraded observation, and each refer-
+ence without changing the spatial(h, w)axes. For a token
+iwith position idp i = (t i, hi, wi, li), the query and key
+vectors are split over axesa∈ {t, h, w, l}with dimensions
+da = [32,32,32,32]. For each two-channel pairmon axis
+
+=== PAGE 11 ===
+a, the RoPE computation is
+ωa,m =θ −2m/da , θ= 2000,(1a)
+R(ρ, ω) =
+h
+cos(ρω)−sin(ρω)
+sin(ρω) cos(ρω)
+i
+,(1b)
+˜qi,a,m =R(p a
+i , ωa,m)qi,a,m,(1c)
+˜kj,a,m =R(p a
+j , ωa,m)kj,a,m,(1d)
+Attnij ∝exp
+
+˜q⊤
+i ˜kj√
+d
+!
+.(1e)
+This construction preserves the ordinary spatial axes while
+using the temporal axis to mark scene, degraded, and refer-
+ence token groups.
+Evaluation Protocols and Metrics
+Reference-awareevaluationfollowstheofficialCelebA-Test-
+Ref and FFHQ-Ref test sample IDs, paired targets, and ref-
+erence mappings released with ReF-LDM. The two FFHQ-
+Ref splits share clean targets and references but use dif-
+ferent degradation strengths. No-reference evaluation uses
+paired CelebA-Test and the real-world LFW, CelebChild,
+WebPhoto, and Wider-Test sets. The headline reference-
+awarecomparisonfollowseachmethod’sofficiallysupported
+reference configuration, and each output is evaluated only
+againstthemethod-specificreferencesetsuppliedunderthat
+configuration.Weadditionallyconductacommon-Ref 1con-
+trolled comparison in which every method receives and is
+evaluated against the same protocol reference.
+For each reference-aware sample, letˆI (m)
+i be the output
+of methodm,G i be the paired GT target, andR(m)
+i be the
+method-specific reference set supplied under the evaluated
+configuration.RefAvgArcFaceandRefAvgMagFacearedataset
+averages of per-sample mean cosine similarities: Define the
+encoder-specific cosine similarity as
+sE(X, Y) = E(X) ⊤E(Y)
+∥E(X)∥ 2 ∥E(Y)∥ 2
+.(2)
+Then
+RefAvgMetric(m) = 1
+N
+NX
+i=1
+1
+|R(m)
+i |
+X
+R∈R(m)
+i
+sE
+
+ˆI (m)
+i , R
+
+.
+(3)
+whereEis the corresponding frozen ArcFace or MagFace
+encoder. The average is taken over similarities, not by first
+averaging reference embeddings. GTArcFaceand GTMagFace
+compare ˆI (m)
+i withG i. ArcFace and MagFace are indepen-
+dentofthetraining-timeAdaFaceanchor.PSNR,SSIM,and
+LPIPSserveaspaired-targetreconstructionmetrics.MUSIQ,
+CLIP-IQA,andMANIQAmeasurelearnedperceptualqual-
+ity without requiring a paired target.
+For target-state diagnostics, all inputs are resized to
+512×512. InsightFacebuffalo_lselects the largest de-
+tected face and extracts 68 facial landmarks and three Euler
+poseangles.Detectionusesa640×640inputandathreshold
+of 0.5; failed cases are retried with 25% reflected padding.
+Pose error is the mean absolute angular difference over the
+three pose components. The expression proxy comprises
+mouth opening, mean eye opening, and smile width, each
+normalized by the corresponding image’s interocular dis-
+tance; expression error averages their absolute differences.
+Semantic parsing uses the 19-class ParseNet and reports
+mean IoU over seven grouped regions: skin, brows, eyes,
+nose, mouth/lips, hair, and face foreground. Failures are
+excluded only from the affected metric denominator and
+recorded separately; all IConFace samples reported in the
+target-state analysis are valid for all three diagnostics.
+Reference-Aware Evaluation
+The four analyses below extend the main-paper reference-
+awareevaluation.Acommon-Ref 1 controlmatchessupplied
+identity evidence across methods, the reference-count diag-
+nostic measures sensitivity to reference availability, paired-
+target metrics evaluate agreement with one target capture,
+andtarget-versus-referencemarginsquantifyretentionofthe
+target capture state.
+Common-Ref1 Controlled Comparison
+The main comparison follows each method’s officially sup-
+portedreferenceconfiguration.Tocontrolthesuppliediden-
+tity evidence, we additionally evaluate every method using
+the same protocol Ref1. Each method receives this image
+through the reference interface of its official implementa-
+tion, and no other same-identity reference is supplied. Un-
+der this setting, the method-specific reference set becomes
+R(m)
+i ={R i,1}for every method, so RefAvg reduces to the
+output-to-Ref1 cosine similarity.
+For identity encoderE, the controlled similarity is
+Ref1SimE(m) = 1
+N
+NX
+i=1
+sE
+
+ˆI (m,1)
+i , Ri,1
+
+,(4)
+where ˆI (m,1)
+i is the output of methodmconditioned on the
+common protocol Ref1. For DMDNet, whose specific dic-
+tionary interface expects two exemplar tensors, the wrapper
+duplicates Ref1 internally rather than supplying a second
+distinct identity image.
+Under matched Ref1 input, Table 1 shows that IConFace
+ranks first under both independent identity encoders and all
+three perceptual metrics on each dataset. RefSTAR is gen-
+erally the closest identity competitor, whereas ReF-LDM
+is generally the closest perceptual-quality competitor. The
+identity margin is largest under Severe degradation: Ref1-
+SimArcFaceis 0.742 for IConFace and 0.580 for RefSTAR.
+Reference-Count Diagnostic
+This diagnostic isolates the effect of reference availability
+within IConFace. On fixed samples for which all three pro-
+tocol references are available, we run the same checkpoint
+and inference configuration withN= 0,1,2,3, supplying
+the firstNreferences whenN >0. We report paired-GT
+identity and similarity to Ref3.
+
+=== PAGE 12 ===
+Table1:Controlledreference-awarecomparisonusingthecommonprotocolRef 1.EverymethodreceivesthesameRef 1through
+the reference interface of its official implementation. Ref1-Sim is the cosine similarity between the restored output and that
+reference; perceptual metrics are computed from the same restored outputs.
+Method Dataset Ref 1-SimArcF ace ↑Ref 1-SimMagF ace ↑MUSIQ↑CLIP-IQA↑MANIQA↑
+DMDNet(TPAMI’22)
+CelebA-Test
+Ref
+0.469 0.52572.7800.625 0.494
+ReF-LDM(NeurIPS’24)0.569 0.620 73.662 0.660 0.513
+InstantRestore(SIGGRAPH’25)0.545 0.601 71.046 0.551 0.490
+FaceMe(AAAI’25)0.548 0.601 70.666 0.580 0.481
+RefSTAR(AAAI’26)0.594 0.65271.6330.631 0.509
+IConFace0.693 0.725 76.065 0.721 0.629
+DMDNet(TPAMI’22)
+FFHQ-Ref
+Moderate
+0.566 0.610 72.010 0.631 0.476
+ReF-LDM(NeurIPS’24)0.630 0.66774.303 0.692 0.521
+InstantRestore(SIGGRAPH’25)0.610 0.652 68.946 0.563 0.458
+FaceMe(AAAI’25)0.643 0.68272.249 0.608 0.491
+RefSTAR(AAAI’26)0.648 0.686 72.890 0.646 0.501
+IConFace0.730 0.753 76.191 0.727 0.604
+DMDNet(TPAMI’22)
+FFHQ-Ref
+Severe
+0.135 0.174 62.077 0.540 0.353
+ReF-LDM(NeurIPS’24)0.556 0.588 74.924 0.703 0.527
+InstantRestore(SIGGRAPH’25)0.471 0.516 69.667 0.575 0.462
+FaceMe(AAAI’25)0.454 0.506 71.903 0.609 0.494
+RefSTAR(AAAI’26)0.580 0.628 73.012 0.645 0.512
+IConFace0.742 0.762 75.548 0.708 0.586
+Table 2: Reference-count diagnostic on fixed three-reference subsets: 1,921 CelebA-Test-Ref samples and 841 samples from
+each FFHQ-Ref split, with identical sample IDs used for all values ofN. GT columns measure paired-target identity. Ref3 is
+held out forN≤2and supplied atN= 3.
+DatasetNGT ArcF ace ↑GT MagF ace ↑Ref 3-SimArcF ace ↑Ref 3-SimMagF ace ↑
+CelebA-Test-Ref
+0 0.545 0.560 0.340 0.394
+1 0.685 0.713 0.530 0.590
+2 0.723 0.747 0.556 0.615
+3 0.739 0.763 0.626 0.675
+FFHQ-Ref Moderate
+0 0.627 0.649 0.442 0.491
+1 0.762 0.780 0.629 0.665
+2 0.793 0.808 0.648 0.682
+3 0.806 0.819 0.692 0.721
+FFHQ-Ref Severe
+0 0.143 0.164 0.099 0.130
+1 0.665 0.696 0.605 0.645
+2 0.703 0.730 0.625 0.665
+3 0.720 0.745 0.688 0.718
+Table2showsthatpaired-GTidentityincreasesmonoton-
+ically as references are added on all three datasets, with the
+largest change fromN= 0toN= 1under Severe degra-
+dation, where GTArcFace rises from 0.143 to 0.665. Later
+referencesprovidesmalleradditionalgains,andsimilarityto
+Ref3 also rises with reference availability.
+Paired-Target Fidelity
+The main reference-aware comparison and the paired-target
+results below follow each method’s officially supported ref-
+erence configuration. The preceding common-Ref1 experi-
+ment separately controls the supplied reference image. The
+GT–reference distribution establishes the cross-capture gap
+between identity evidence and one target photograph, while
+the results below provide complementary paired-target fi-
+delity and IConFace target-versus-reference state alignment
+without repeating the headline RefAvg scores.
+Table3showsthatIConFaceachievesthestrongestpaired-
+GT identity under Severe degradation, where the degraded
+observation contains the least recoverable identity evidence.
+Target-versus-Reference State Alignment
+Underseveredegradation,strongerrelianceonsame-identity
+referencesisexpectedbecausethedegradedobservationmay
+nolongercontainsufficientperson-specificevidence.Wedis-
+tinguishdesiredtransferofpersistentidentityevidencefrom
+undesired transfer of capture-specific state. This IConFace
+diagnostic evaluates the latter for pose, expression, and se-
+mantic layout by comparing each output with its paired GT
+and the supplied references. Letdpose be the mean abso-
+lute error over the three InsightFace pose angles,dexpr the
+mean absolute difference over the normalized mouth-, eye-
+, and smile-related proxies, andspar the grouped ParseNet
+mIoU. Let ¯d(k)
+i and¯s(par)
+i denote the corresponding output-
+to-referencemeasurementsaveragedoverR∈ R i.Wedefine
+
+=== PAGE 13 ===
+Table 3: Paired-target fidelity on the reference-aware benchmarks. GT ArcFace/MagFace measure identity agreement with the
+paired target; PSNR, SSIM, and LPIPS are paired-target reconstruction metrics. All methods follow the officially supported
+reference configurations used in the main comparison.
+Dataset Method GT ArcF ace ↑GT MagF ace ↑PSNR↑SSIM↑LPIPS↓
+CelebA-Test-Ref
+DMDNet(TPAMI’22)0.740 0.75325.535 0.696 0.253
+ReF-LDM(NeurIPS’24)0.783 0.80223.901 0.638 0.268
+InstantRestore(SIGGRAPH’25)0.770 0.78825.400 0.702 0.219
+FaceMe(AAAI’25)0.801 0.812 25.947 0.698 0.253
+RefSTAR(AAAI’26)0.808 0.82824.856 0.6800.221
+IConFace 0.726 0.750 22.327 0.632 0.277
+FFHQ-Ref Moderate
+DMDNet(TPAMI’22)0.804 0.82225.844 0.7260.234
+ReF-LDM(NeurIPS’24)0.837 0.85323.971 0.664 0.232
+InstantRestore(SIGGRAPH’25)0.812 0.83125.452 0.727 0.213
+FaceMe(AAAI’25)0.870 0.883 26.335 0.733 0.173
+RefSTAR(AAAI’26)0.848 0.86125.150 0.7080.202
+IConFace 0.808 0.820 22.755 0.671 0.218
+FFHQ-Ref Severe
+DMDNet(TPAMI’22)0.182 0.207 20.111 0.570 0.449
+ReF-LDM(NeurIPS’24)0.654 0.68219.563 0.566 0.347
+InstantRestore(SIGGRAPH’25)0.534 0.57221.372 0.647 0.323
+FaceMe(AAAI’25)0.536 0.57520.606 0.616 0.338
+RefSTAR(AAAI’26)0.632 0.671 20.404 0.610 0.328
+IConFace0.721 0.74618.376 0.570 0.357
+the target margins
+∆(k)
+i = ¯d(k)
+i −d k(ˆIi, Gi), k∈ {pose,expr},(5)
+∆(par)
+i =s par(ˆIi, Gi)−¯s(par)
+i .(6)
+A positive margin means that the output is closer to the
+paired target than to the sample-balanced mean reference
+state.Averagingreferencemeasurementswithineachsample
+before aggregation prevents samples with more references
+fromreceivinggreaterweight.Wereportthemedianmargin
+and the percentages of target-preferred, reference-preferred,
+and tied samples.
+Table 4 yields positive median margins and majority tar-
+getpreferenceforeveryfeatureanddataset.OnCelebA-Test-
+Ref and FFHQ-Ref Moderate, 91.2–100.0% of samples are
+target-preferred.UnderSeveredegradation,targetpreference
+remains 95.0% for pose, 94.9% for parsing, and 73.0% for
+expression. These results show that IConFace remains pre-
+dominantly aligned with the paired target for the measured
+pose, expression, and semantic-layout attributes while using
+reference identity evidence.
+Figures 1–3 visualize how cross-capture reference ev-
+idence complements target-aligned pose and expression
+acrossthethreedegradationsettings.Ref 1 isdisplayedasvi-
+sual context; aggregate identity evaluation uses the method-
+specific reference sets, while Tables 3 and 4 provide paired-
+target and state-alignment measures.
+Table 4: Target-versus-reference state alignment of ICon-
+Face. Reference measurements are averaged per sample be-
+fore comparison with the paired GT, so every sample con-
+tributes once. Positive margins indicate target preference.
+Pose is in degrees, expression uses interocular-normalized
+landmark errors, and parsing uses mIoU differences. Tar-
+get/Ref/Tie report the percentages of samples assigned to
+each outcome.
+Feature Median margin↑Target (%)↑Ref / Tie (%)
+CelebA-Test-Ref(N= 2,533)
+Pose 5.993 99.1 0.9 / 0.0
+Expression 0.0252 91.2 8.8 / 0.0
+Parsing 0.315 100.0 0.0 / 0.0
+FFHQ-Ref Moderate(N= 857)
+Pose 7.641 98.9 1.1 / 0.0
+Expression 0.0280 95.3 4.7 / 0.0
+Parsing 0.360 99.9 0.1 / 0.0
+FFHQ-Ref Severe(N= 857)
+Pose 5.963 95.0 5.0 / 0.0
+Expression 0.0124 73.0 27.0 / 0.0
+Parsing 0.203 94.9 5.1 / 0.0
+Localized Identity-Detail Evaluation
+Benchmark Construction
+PID-167 evaluates persistent localized identity traits jointly
+supported by the paired GT and at least one same-identity
+reference. Qwen3-VL-4B-Instruct scans 2,533 CelebA-Test-
+Ref and 857 FFHQ-Ref Moderate GT images at 512 resolu-
+tionusingdeterministicdecoding,yielding136and99high-
+recall candidates. Eligible traits include localized moles,
+birthmarks, freckles, scars, stable pigmentation, dimples,
+cleft chins, and stable asymmetries; temporary or capture-
+dependent attributes such as hair, makeup, acne, and acces-
+soriesareexcluded.Cross-imagehumanauditretains82and
+85 cases, respectively, giving 167 cases whose primary trait
+is confirmed in the paired GT and at least one reference.
+The model-assisted stage proposes candidates only; retained
+
+=== PAGE 14 ===
+Table 5: PID-167 construction and retained-set sources.
+Item Cases
+Construction
+Qwen3-VL high-recall candidates 235
+Human-audited retained cases 167
+Retained-set sources
+CelebA-Test-Ref 82
+FFHQ-Ref Moderate 512 85
+Total unique cases 167
+traits are determined by human audit.
+Each released case contains one primary audited trait
+with a localized description and recorded reference support.
+FFHQ-Ref Severe shares the same clean targets and is not
+duplicated as a second source split.
+Eachbenchmarkrecordspecifiesthesourcesplitandsam-
+ple identifier, GT/reference mappings, trait location and au-
+dited description, checksums, and degraded-input path. To-
+gether, these fields uniquely identify the evaluation subset
+within the original benchmarks.
+Evaluation Protocol
+For preliminary output assessment, Qwen3-VL-4B-Instruct
+receivesonlythepairedGT,onerestoredoutput,andtheau-
+dited trait description; neither references nor method names
+are included in the model input. Deterministic decoding is
+used. A trait is preserved only when the same localized fea-
+ture remains visible in the corresponding facial region; un-
+clear, erased, displaced, hallucinated, or heavily distorted
+traits are marked as not preserved. For primary featurefi
+and methodm, the preservation rate is
+PID(m) = 1
+167
+167X
+i=1
+1[fi is preserved bym].(7)
+Everyreportedbinaryjudgmentwassubsequentlyreviewed
+manually.
+Results
+Table5recordsthebenchmarkconstruction:humanauditing
+retains 167 of 235 high-recall candidates, comprising 82
+CelebA-Test-Ref cases and 85 FFHQ-Ref Moderate cases.
+The main paper reports the aggregate comparison over all
+167 cases; Table 6 resolves the result by source split.
+IConFace preserves 78 of 82 traits on CelebA-Test-Ref
+(95.1%) and 82 of 85 on FFHQ-Ref Moderate (96.5%),
+yieldingthehighestobservedrateonbothsourcesplits.Fig-
+ure 4 visualizes representative moles, scars, and pigmenta-
+tion cues through enlarged red-box crops. In these selected
+cases, IConFace retains the reference-supported local cues
+moreconsistentlythanthedisplayedbaselines,visuallysup-
+porting the split-level quantitative comparison.
+Table 6: Human-verified PID-167 preservation by source
+split. The aggregate 167-case comparison appears in main-
+paper Fig. 4; higher is better.
+Split Method Cases Preserved
+Preservation
+Rate↑
+CelebA-Test-Ref
+DMDNet(TPAMI’22)82 63 0.768
+ReF-LDM(NeurIPS’24)82 74 0.902
+InstantRestore(SIGGRAPH’25)82 68 0.829
+FaceMe(AAAI’25)82 69 0.841
+RefSTAR(AAAI’26)82 75 0.915
+IConFace 82 780.951
+FFHQ-Ref Moderate
+DMDNet(TPAMI’22)85 63 0.741
+ReF-LDM(NeurIPS’24)85 71 0.835
+InstantRestore(SIGGRAPH’25)85 68 0.800
+FaceMe(AAAI’25)85 70 0.824
+RefSTAR(AAAI’26)85 79 0.929
+IConFace 85 820.965
+Table 7: No-reference paired-target reconstruction on
+CelebA-Test.
+Method PSNR SSIM LPIPS
+CodeFormer(NeurIPS’22)25.146 0.685 0.227
+GFP-GAN(CVPR’21)25.105 0.696 0.241
+VQFR(ECCV’22)23.233 0.658 0.244
+RF++(TPAMI’23)25.313 0.685 0.226
+DAEFR(ICLR’24)22.591 0.628 0.250
+IConFace 22.291 0.635 0.288
+No-Reference Evaluation
+Without references, the reference-token segment is omitted
+and the degraded image supplies the identity anchor. The
+main paper reports learned perceptual quality across five
+benchmarks;Table7complementsthatanalysiswithpaired-
+target reconstruction on CelebA-Test.
+Figures 5–9 provide no-reference comparisons on all five
+benchmarks, covering varied ages, poses, expressions, oc-
+clusions,illumination,compression,blur,andlowresolution.
+Together,thegalleriesshowconsistentperceptualrestoration
+across these domains.
+Ablation Analysis
+Figures10and11extendmain-paperTable4andFig.7with
+full-page comparisons of the five component configurations
+on FFHQ-Ref Moderate and Severe. Lower-right Arc labels
+report ArcFace similarity to the displayed Ref1.
+
+=== PAGE 15 ===
+CelebA-Test-Ref
+Ref1 LQ DMDNet ReF-LDM Inst.Restore FaceMe RefSTAR IConFace GT
+CelebA-Test-Ref: case 18646
+CelebA-Test-Ref: case 20257
+CelebA-Test-Ref: case 26060
+CelebA-Test-Ref: case 02060
+CelebA-Test-Ref: case 24093
+CelebA-Test-Ref: case 00218
+CelebA-Test-Ref: case 27315
+CelebA-Test-Ref: case 18375
+CelebA-Test-Ref: case 08806
+Figure1:Reference-awarecomparisonsonnineCelebA-Test-Refcases,includingsubstantialRef 1–GTcross-capturedifferences
+and broader restoration examples.
+
+=== PAGE 16 ===
+FFHQ-Ref Moderate
+Ref1 LQ DMDNet ReF-LDM Inst.Restore FaceMe RefSTAR IConFace GT
+FFHQ-Ref-Moderate: case 57244
+FFHQ-Ref-Moderate: case 31223
+FFHQ-Ref-Moderate: case 48700
+FFHQ-Ref-Moderate: case 08081
+FFHQ-Ref-Moderate: case 44570
+FFHQ-Ref-Moderate: case 55156
+FFHQ-Ref-Moderate: case 54575
+FFHQ-Ref-Moderate: case 02647
+FFHQ-Ref-Moderate: case 15714
+Figure 2: Reference-aware comparisons on nine FFHQ-Ref Moderate cases combining Ref1–GT cross-capture variation with
+representative restoration behavior.
+
+=== PAGE 17 ===
+FFHQ-Ref Severe
+Ref1 LQ DMDNet ReF-LDM Inst.Restore FaceMe RefSTAR IConFace GT
+FFHQ-Ref-Severe: case 02293
+FFHQ-Ref-Severe: case 48700
+FFHQ-Ref-Severe: case 04716
+FFHQ-Ref-Severe: case 12051
+FFHQ-Ref-Severe: case 02647
+FFHQ-Ref-Severe: case 13427
+FFHQ-Ref-Severe: case 14836
+FFHQ-Ref-Severe: case 27211
+FFHQ-Ref-Severe: case 09880
+Figure3:Reference-awarecomparisonsonnineFFHQ-RefSeverecasescombiningpronouncedreference–targetvariationwith
+severe degradations in which the observation retains less person-specific evidence.
+
+=== PAGE 18 ===
+Figure 4: Expanded localized identity-detail examples from PID-167. Columns show Ref1, Ref2, LQ, representative reference-
+awareoutputs,IConFace,andGT.Eachfullimageispairedwithalocalenlargement,withtheredboxmarkingitssourceregion.
+References are shown here for audit context but are not included in the Qwen3-VL output-assessment input. Table 6 reports the
+source-split quantitative comparison; the main paper reports aggregate rates.
+
+=== PAGE 19 ===
+CelebA-Test
+LQ CodeFormer GFP-GAN VQFR RF++ DAEFR IConFace
+CelebA-Test: case00000216
+CelebA-Test: case00002645
+CelebA-Test: case00000893
+CelebA-Test: case00000894
+CelebA-Test: case00001737
+CelebA-Test: case00000032
+CelebA-Test: case00000060
+CelebA-Test: case00002781
+CelebA-Test: case00002191
+Figure5:Extendedno-referencecomparisonsonninepairedCelebA-Testcases.Paired-targetreconstructionmetricsarereported
+in Table 7.
+
+=== PAGE 20 ===
+LFW
+LQ CodeFormer GFP-GAN VQFR RF++ DAEFR IConFace
+LFW: caseAdrian_Annus_0001_00
+LFW: caseBen_Davis_0001_00
+LFW: caseThomas_Haeggstroem_0001_00
+LFW: caseBrian_Scalabrine_0001_00
+LFW: caseAbdul_Majeed_Shobokshi_0001_00
+LFW: caseCurtis_Joseph_0001_00
+LFW: caseAlfonso_Portillo_0001_00
+LFW: caseAdrien_Brody_0001_00
+LFW: caseAJ_Lamas_0001_00
+Figure 6: Extended no-reference comparisons on nine LFW cases spanning varied pose, expression, occlusion, and image
+quality.
+
+=== PAGE 21 ===
+CelebChild
+LQ CodeFormer GFP-GAN VQFR RF++ DAEFR IConFace
+CelebChild: caseChild__040_Zooey_Deschanel_00
+CelebChild: caseAdult__005_Chloe_Grace_Moretz_01
+CelebChild: caseChild__107_John_Wayne_00
+CelebChild: caseChild__061_Demi_Moore_00
+CelebChild: caseAdult__034_Lady_Gaga_01
+CelebChild: caseAdult__012_Jackie_Chan_01
+CelebChild: caseAdult__007_Benedict_Cumberbatch_01
+CelebChild: caseChild__001_Ryan_Gosling_00
+CelebChild: caseAdult__000_Adele_01
+Figure 7: Extended no-reference comparisons on nine CelebChild cases covering both child and adult images.
+
+=== PAGE 22 ===
+WebPhoto
+LQ CodeFormer GFP-GAN VQFR RF++ DAEFR IConFace
+WebPhoto: case00022_00
+WebPhoto: case00105_00
+WebPhoto: case00018_01
+WebPhoto: case00030_00
+WebPhoto: case00010_02
+WebPhoto: case00059_00
+WebPhoto: case00000_00
+WebPhoto: case00006_04
+WebPhoto: case00009_00
+Figure 8: Extended no-reference comparisons on nine WebPhoto cases with low resolution, illumination variation, color shifts,
+and compression artifacts.
+
+=== PAGE 23 ===
+Wider-Test
+LQ CodeFormer GFP-GAN VQFR RF++ DAEFR IConFace
+Wider-Test: case0060
+Wider-Test: case0000
+Wider-Test: case0001
+Wider-Test: case0038
+Wider-Test: case0039
+Wider-Test: case0049
+Wider-Test: case0011
+Wider-Test: case0020
+Wider-Test: case0029
+Figure 9: Extended no-reference comparisons on nine Wider-Test cases with strong blur, low resolution, and pose variation.
+
+=== PAGE 24 ===
+FFHQ-Ref Moderate component ablations
+Ref1 LQ Concat Concat +
+Struct
+Concat +
+ID
+ID + Struct
+(1R)
+Full (2R) GT
+case01198
+Arc 1.000
+ Arc 0.620
+ Arc 0.659
+ Arc 0.664
+ Arc 0.663
+ Arc 0.663
+ Arc 0.691
+ Arc 0.610
+case00717
+Arc 1.000
+ Arc 0.532
+ Arc 0.442
+ Arc 0.427
+ Arc 0.491
+ Arc 0.484
+ Arc 0.524
+ Arc 0.551
+case15714
+Arc 1.000
+ Arc 0.505
+ Arc 0.526
+ Arc 0.491
+ Arc 0.524
+ Arc 0.535
+ Arc 0.499
+ Arc 0.587
+case02487
+Arc 1.000
+ Arc 0.536
+ Arc 0.637
+ Arc 0.644
+ Arc 0.677
+ Arc 0.679
+ Arc 0.689
+ Arc 0.647
+case03234
+Arc 1.000
+ Arc 0.479
+ Arc 0.553
+ Arc 0.602
+ Arc 0.643
+ Arc 0.648
+ Arc 0.656
+ Arc 0.607
+case12192
+Arc 1.000
+ Arc 0.534
+ Arc 0.453
+ Arc 0.446
+ Arc 0.478
+ Arc 0.458
+ Arc 0.501
+ Arc 0.564
+case68241
+Arc 1.000
+ Arc 0.548
+ Arc 0.590
+ Arc 0.588
+ Arc 0.620
+ Arc 0.631
+ Arc 0.619
+ Arc 0.560
+case57113
+Arc 1.000
+ Arc 0.469
+ Arc 0.441
+ Arc 0.470
+ Arc 0.502
+ Arc 0.490
+ Arc 0.503
+ Arc 0.519
+case41552
+Arc 1.000
+ Arc 0.460
+ Arc 0.486
+ Arc 0.478
+ Arc 0.502
+ Arc 0.516
+ Arc 0.535
+ Arc 0.507
+Figure 10: Qualitative component ablations on nine FFHQ-Ref Moderate cases. The five output columns correspond to the
+configurations evaluated quantitatively in the main paper. Arc labels report ArcFace cosine similarity to the displayed Ref1.
+
+=== PAGE 25 ===
+FFHQ-Ref Severe component ablations
+Ref1 LQ Concat Concat +
+Struct
+Concat +
+ID
+ID + Struct
+(1R)
+Full (2R) GT
+case27262
+Arc 1.000
+ Arc 0.398
+ Arc 0.513
+ Arc 0.530
+ Arc 0.603
+ Arc 0.635
+ Arc 0.650
+ Arc 0.654
+case53894
+Arc 1.000
+ Arc 0.199
+ Arc 0.427
+ Arc 0.468
+ Arc 0.523
+ Arc 0.513
+ Arc 0.528
+ Arc 0.518
+case63440
+Arc 1.000
+ Arc 0.113
+ Arc 0.283
+ Arc 0.329
+ Arc 0.431
+ Arc 0.425
+ Arc 0.464
+ Arc 0.489
+case31223
+Arc 1.000
+ Arc 0.047
+ Arc 0.467
+ Arc 0.523
+ Arc 0.535
+ Arc 0.540
+ Arc 0.588
+ Arc 0.545
+case54276
+Arc 1.000
+ Arc 0.110
+ Arc 0.416
+ Arc 0.521
+ Arc 0.647
+ Arc 0.641
+ Arc 0.647
+ Arc 0.675
+case37245
+Arc 1.000
+ Arc 0.040
+ Arc 0.460
+ Arc 0.449
+ Arc 0.545
+ Arc 0.543
+ Arc 0.570
+ Arc 0.502
+case32665
+Arc 1.000
+ Arc 0.270
+ Arc 0.496
+ Arc 0.511
+ Arc 0.547
+ Arc 0.555
+ Arc 0.619
+ Arc 0.573
+case53440
+Arc 1.000
+ Arc 0.038
+ Arc 0.514
+ Arc 0.586
+ Arc 0.621
+ Arc 0.640
+ Arc 0.667
+ Arc 0.554
+case17658
+Arc 1.000
+ Arc 0.251
+ Arc 0.473
+ Arc 0.536
+ Arc 0.612
+ Arc 0.599
+ Arc 0.671
+ Arc 0.732
+Figure 11: Qualitative component ablations on nine FFHQ-Ref Severe cases. Separating the Severe examples from Fig. 10
+makes local identity details and structure changes easier to inspect. Arc labels report ArcFace cosine similarity to the displayed
+Ref1.

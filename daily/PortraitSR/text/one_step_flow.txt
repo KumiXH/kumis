@@ -1,0 +1,643 @@
+=== PAGE 1 ===
+1
+Linearized Coupling Flow with Shortcut Constraints
+for One-Step Face Restoration
+Xiaohui Sun, Hanlin Wu ,Member, IEEE
+Abstract—Face restoration can be formulated as a continuous-
+time transformation between image distributions via Flow Match-
+ing (FM). However, standard FM typically employs independent
+coupling, ignoring the statistical correlation between low-quality
+(LQ) and high-quality (HQ) data. This leads to intersecting
+trajectories and high velocity-field curvature, requiring multi-
+step integration. We propose Shortcut-constrained Coupling Flow
+for Face Restoration (SCFlowFR) to address these challenges.
+By establishing a data-dependent coupling, we explicitly model
+the LQ–HQ dependency to minimize path crossovers and pro-
+mote near-linear probability flow. Furthermore, we employ a
+conditional mean estimator to refine the source distribution’s
+anchor, effectively tightening the transport cost and stabilizing
+the velocity field. To ensure stable one-step inference, a shortcut
+constraint is introduced to supervise average velocities over
+arbitrary intervals, mitigating discretization bias in large-step
+updates. SCFlowFR achieves state-of-the-art one-step restoration,
+providing a superior trade-off between perceptual fidelity and
+computational efficiency.
+Index Terms—Data-dependent coupling, face restoration, flow
+matching, shortcut constraints.
+I. INTRODUCTION
+F
+ACE restoration, a classical ill-posed inverse problem,
+seeks to reconstruct high-quality (HQ) facial images from
+corrupted low-quality (LQ) observations. It is fundamental
+to various signal processing applications, including biometric
+identification and video communication [1], [2]. While recent
+generative paradigms have significantly advanced restoration
+fidelity, a critical trade-off persists between reconstruction
+quality and efficiency [3], [4].
+Diffusion Models (DMs) formulate restoration as a gradual
+refinement process [5], [6], [7], achieving impressive percep-
+tual quality and fidelity by integrating a stochastic differential
+equation (SDE) [8]. However, their iterative nature requires
+dozens of sampling steps, leading to high inference latency that
+hinders real-time signal processing. Recently, Flow Matching
+(FM) [9], [10] has emerged as an efficient deterministic
+alternative. FM learns a time-dependent velocity fieldv θ
+that satisfies the continuity equation, defining an ordinary
+differential equation (ODE) to transport a source distribution
+ρ0 to the target HQ distributionρ 1.
+Despite its potential, standard FM-based restoration [11],
+[12] typically assumes anindependent coupling, where source
+samples (e.g., Gaussian noise) and target HQ images are
+This work was supported in part by the National Natural Science Foun-
+dation of China under Grant 62401064, and in part by the Fundamental
+Research Funds for the Central Universities under Grant 2024JJ040 and Grant
+2024TD001.(Corresponding author: Hanlin Wu.)
+The authors are with the School of Information Science and Technol-
+ogy, Beijing Foreign Studies University, Beijing 100089, China (e-mail:
+hlwu@bfsu.edu.cn).
+HQHQLQ
+(c)
+LQHQnoise
+(a) (d)(b)
+HQnoise
+𝜌𝜌0 𝜌𝜌1 𝜌𝜌0 𝜌𝜌1 𝜌𝜌0 𝜌𝜌1 𝜌𝜌0 𝜌𝜌1
+( ,, )tv xt tθ ∆
+'( , ', )tvxt tθ ∆
+( , ,2 )tv xt tθ ∆
+⊥⊥ coupled coupled
+Fig. 1. (a) Intersecting paths in independent coupling. (b) Resulting curved
+velocity field in vanilla FM. (c) Straighter trajectories via data-dependent
+coupling. (d) One-step sampling via shortcut-constrained average velocity.
+paired without considering the observed LQ signal. From a
+statistical perspective, this ignores the inherent conditional
+dependency between the LQ input and the HQ ground truth.
+As illustrated in Fig. 1 (a), independent pairing yields inter-
+secting interpolation paths. Since the resulting ODE flow
+is deterministic and non-intersecting, the model is forced
+to learn a highly non-linear velocity field with significant
+trajectory curvature (Fig. 1 (b)). In such curved dynamics, the
+approximation of the instantaneous derivative during one-step
+inference is highly susceptible to discretization errors, leading
+to degraded fidelity [13], [14].
+To address the challenges of non-linear transport and in-
+tegration instability, we propose Shortcut-constrained Cou-
+pling Flow for Face Restoration (SCFlowFR). Our frame-
+work optimizes the transport dynamics through three key
+innovations. First, we establish adata-dependent coupling
+that reformulates the transport as a conditional process. By
+leveraging the mutual information between the LQ and HQ
+domains, we minimize path crossovers and promote near-linear
+probability flow (Fig. 1 (c)). Second, we utilize aconditional
+mean estimationas a Bayesian-like prior to anchor the source
+distribution. This strategy effectively minimizes the expected
+squared displacement (transport cost) and stabilizes the learned
+velocity field. Third, we integrate ashortcut constraintthat
+supervises the model to predict the average velocity over
+arbitrary time intervals rather than the instantaneous derivative.
+This enables the model to implicitly compensate for residual
+curvature, ensuring stable and accurate one-step inference even
+under complex degradations (Fig. 1 (d)).
+The main contributions can be summarized as follows:
+1) We propose a novel FM framework that establishes a
+data-dependent coupling, explicitly modeling the LQ–HQ
+dependency to linearize the transport trajectory.
+2) We employ aconditional mean estimatorthat refines
+the source distribution’s center, thereby tightening the
+transport cost bound and reducing velocity field variance.
+3) We introduce ashortcut constraintthat supervises av-
+erage velocities over arbitrary time intervals, enabling
+arXiv:2603.03648v2  [cs.CV]  8 Apr 2026
+
+=== PAGE 2 ===
+2
+LQ Coarse
+HQ
+1 − 𝑡𝑡
+𝑡𝑡
+ℒFM = 𝐳𝐳1 − 𝐳𝐳0 − 𝒗𝒗𝜃𝜃(𝒛𝒛𝑡𝑡, 𝑡𝑡, 𝒄𝒄, Δ𝑡𝑡= 0) 2
+2
+𝒩𝒩(𝟎𝟎, 𝜎𝜎𝟐𝟐𝐈𝐈)
+𝒗𝒗𝜃𝜃
+target
+𝒛𝒛0
+𝒛𝒛1
+𝒛𝒛𝑡𝑡
+Shortcut Constraint
+Coupling Flow Matching
+𝒛𝒛𝑡𝑡+Δ𝑡𝑡
+One-step (Δ𝑡𝑡)
+One-step (Δ𝑡𝑡= 0)
+One-step (Δ𝑡𝑡)
+𝒗𝒗𝜃𝜃(𝒛𝒛𝑡𝑡, 𝑡𝑡, 𝒄𝒄, 2Δ𝑡𝑡)
+Δ𝑡𝑡𝒄𝒄
+Δ𝑡𝑡𝒄𝒄
+2 × Δ𝑡𝑡 𝒄𝒄
+Δ𝑡𝑡= 0 𝒄𝒄
+𝒄𝒄 ℒSC
+
+
+Conditional
+Mean Estimator
+Fig. 2. Overview of SCFlowFR. We construct a coupled LQ–HQ transport path (left), conditioning the velocity fieldv θ on a coarse estimatecfromτ ϕ. A
+shortcut constraint then enables average velocity prediction over time interval∆t.
+stable and accurate one-step inference.
+4) Extensive experiments demonstrate that our method
+achieves state-of-the-art (SOTA) restoration quality with
+efficiency comparable to non-iterative baselines.
+II. METHODOLOGY
+This section details SCFlowFR framework for efficient one-
+step face restoration, as illustrated in Fig. 2.
+A. Background on FM
+FM [9] transforms samples from a source distributionρ 0 to
+a targetρ 1 by learning a parameterized velocity fieldv θ(x, t)
+that defines a probability flow ordinary differential equation
+(ODE):
+˙xt =v θ(xt, t), t∈[0,1].(1)
+In standard FM, the source and target are typically assumed
+independent, i.e.,ρ(x 0,x 1) =ρ 0(x0)ρ1(x1). Training uses
+straight-line interpolants(1−t)x 0 +tx 1 to define target
+velocities. However, sincex 0 andx 1 are arbitrarily paired,
+their interpolated paths frequently cross at intermediate times,
+as illustrated in Fig. 1 (a). Since ODE flows are deterministic
+and non-intersecting, the model must warp these paths into
+complex, winding trajectories—forcingv θ to be highly non-
+linear, as illustrated in Fig. 1 (b), which harms both learning
+accuracy and integration stability.
+B. Data-Dependent Coupling for Linearized Transport
+We establish a data-dependent coupling between the source
+and target distributions, tailored for the inherent pairing in
+face restoration. Since LQ and HQ images share substantial
+semantic and structural content, we can naturally condition the
+source distribution on the target.
+Following recent practices [11], [15], we model this cou-
+pling in a compact latent space. LetE(·)denote a pretrained
+encoder. We define the HQ target latent asz 1 =E(HQ)∼
+ρ1(z1). For eachz 1, we construct a conditional source latent
+z0 by encoding the corresponding LQ input, defining the joint
+coupling as:
+ρ(z0,z 1) =ρ 1(z1)ρ(z 0 |z 1),(2)
+whereρ(z 0 |z 1)is a narrow distribution centered at the
+encoded degraded image. Specifically,
+z0 =E(LQ) +ε,ε∼ N(0, σ 2I),(3)
+with a small varianceσ∈[0.03,0.08]ensuring smooth density
+while preserving tight coupling. This formulation defines the
+straight-line interpolationz t = (1−t)z 0 +tz 1 and yields two
+key properties (see Appendix A for a formal analysis):
+Property 1: Reduced Conditional Velocity Variance.The
+ODE is driven by the marginal velocityv t(z), defined as the
+conditional expectation of individual linear paths [16]:
+vt(z) =E[z 1 −z 0 |z t =z].(4)
+Under independent coupling, multiple distinct pairs(z 0,z 1)
+can correspond to the same intermediate statez t, leading to
+high conditional variance ofz 1 −z 0 and thus an ambiguous
+velocity field. Conversely, our tight conditional couplingρ(z0 |
+z1)makes the pair nearly deterministic givenz t, reducing this
+variance and straightening the trajectories.
+Property 2: Reduced Transport Kinetic Energy.For
+the ODE solutionZ t, the expected kinetic energy is upper
+bounded by the expected squared displacement between end-
+points:
+E
+Z 1
+0
+∥ ˙Zt∥2 dt≤E[∥z 1 −z 0∥2].(5)
+Independent pairing inflates this bound, leading to inefficient
+transport. By anchoringz 0 near the semantically aligned
+z1, our coupling effectively minimizesE[∥z 1 −z 0∥2]. This
+aligns the dynamics closer to the Optimal Transport (OT)
+plan, mitigating discretization errors crucial for stable few-
+step inference.
+C. Conditional Mean Estimation for Tight Coupling
+While data-dependent coupling structurally improves the
+flow, the tightness of the bound in Eq. (5) depends critically
+on the alignment betweenz 0 andz 1. Under severe real-world
+degradations, the raw LQ observation often lacks reliable
+structural cues, causing its encoded latentE(LQ)to deviate
+significantly fromz 1, which inflates the transport cost.
+To mitigate this, we observe thatE[∥z 1−z0∥2]is minimized
+whenz 0 is centered at the conditional meanE[z 1 |LQ].
+Although this mean is intractable, a regression-based restorer
+
+=== PAGE 3 ===
+3
+τϕ, trained withℓ 2 loss on synthetic data, provides a practical
+approximation:
+c=E
+
+τϕ(LQ)
+
+≈E[E(HQ)|LQ],(6)
+which serves as a more accurate center for the source distri-
+bution. We redefine the conditional source distribution as
+ρ(z0 |z 1) =N(c, σ 2I),(7)
+further tightening the upper bound in Eq. (5), yielding
+straighter trajectories and a smoother velocity field.
+Furthermore,cacts as a semantic conditioning signal for
+the velocity networkv θ(zt, t,c), providing crucial guidance
+for accurate velocity estimation. Consequently, we trainv θ to
+approximate the target velocity field in Eq. (4) by regressing
+the ground-truth displacementz 1 −z 0:
+LFM(θ) =E z0,z1,t
+vθ(zt, t,c)−(z 1 −z 0)
+2
+.(8)
+D. Shortcut Constraints for One-Step Inference
+Although our conditional coupling produces near-linear
+trajectories with reduced transport cost, one-step integration
+still incurs endpoint errors due to imperfect velocity estimation
+and coarse discretization. To mitigate this, we introduce a
+shortcut constraint [13] that corrects the bias by learning the
+average velocity, enabling high-fidelity one-step inference.
+To facilitate accurate large-step integration, we equip the
+velocity network with step-size awareness. Instead of predict-
+ing only the instantaneous derivative,v θ learns to output the
+average velocityover an arbitrary time interval∆t, defined as:
+z′
+t+∆t =z t +v θ(zt, t,c,∆t)·∆t.(9)
+As∆t→0, this shortcut direction naturally reduces to the
+instantaneous velocity field (Eq. (4)); for∆t >0, the model
+predicts the integrated motion over larger increments.
+We achieve this by leveraging a self-consistency constraint,
+ensuring that taking one large shortcut step of size2∆t
+from statez t yields the same displacement as taking two
+consecutive steps of size∆t. To stabilize training and avoid
+collapse, target velocities are computed via an Exponential
+Moving Average (EMA) network parameterized byθ −:
+vtarget
+θ− = 1
+2
+
+vθ−(zt, t,c,∆t) +v θ−(z′
+t+∆t, t+ ∆t,c,∆t)
+
+.
+(10)
+The corresponding shortcut training objectiveL SC is given by:
+LSC(θ) =E z0,z1,t,∆t
+vθ(zt, t,c,2∆t)−v target
+θ−
+2
+.(11)
+During training, each batch is divided into two subsets:
+one optimizes the FM loss (Eq. 8) with∆t= 0, and the
+other enforces the shortcut constraint (Eq. 11) with randomly
+sampled∆t >0, jointly learning an LQ-to-HQ mapping with
+consistent dynamics across step sizes.
+During inference, given an LQ image, we compute the
+conditional priorc=E
+
+τϕ(LQ)
+
+, sample the anchored source
+z0 ∼ N(c, σ 2I), and generate the target latent in a single step:
+ˆz1 =z 0 +v θ(z0,0,c,∆t= 1).(12)
+Finally, ˆz1 is passed through a pretrained decoderDto
+reconstruct the restored HQ image.
+III. EXPERIMENTS
+A. Experiment Setups
+Datasets.We train SCFlowFR on the FFHQ dataset [21],
+which contains 70,000 HR images. All images are resized
+to 512×512 resolution before training. During evaluation, we
+first assess SCFlowFR performance on the synthetic dataset
+CelebA-Test [22], which contains 3,000 paired HQ and LQ
+images. To further validate the generalization capability of
+SCFlowFR in real-world scenarios, we conduct additional ex-
+periments on three wild datasets: LFW-Test [23], CelebChild-
+Test [23], and WebPhoto-Test [23], all of which comprise
+facial images affected by varying degrees of degradation.
+Training Details.For both training and evaluation, we used
+the synthetic degradation pipeline of Codeformer [23]. A pre-
+trained SwinIR [24] served as the conditional mean estimator
+τϕ, whilev θ was implemented as a U-Net [25]. The parameters
+of SwinIR and the V AE were frozen. Training was performed
+with a batch size of 16 for 200k iterations using the Adam
+optimizer and a learning rate1×10 −4. Moreover, we trained
+a lightweight variant, SCFlowFR-Tiny, by replacing the V AE
+and U-Net with compact architectures [26], training it for 150k
+iterations under the same settings.
+Metrics.On synthetic datasets, we employed full-reference
+image accessment metrics including FID, PSNR, and LPIPS
+and no-reference metrics, MUSIQ [27] and BRISQUE [28].
+For wild datasets, evaluation was conducted exclusively using
+the no-reference metrics NIQE and BRISQUE. Efficiency was
+assessed via comparisons of parameter counts and inference
+throughput (FPS).
+B. Comparisons with State-of-the-Art Methods
+We compare our method with the following baselines:
+DMDNet [18], RestoreFormer [19], StableSR [7], DiffBIR
+[15], OSEDiff [20], PMRF [17], and FlowIE [11]. For com-
+parison, we categorize them by inference steps: DMDNet,
+RestoreFormer, and OSEDiff are one-step methods, while Sta-
+bleSR, DiffBIR, PMRF, and FlowIE are multi-step methods.
+CelebA-Test.As shown in Table I, among one-step meth-
+ods, SCFlowFR achieves the best scores on FID, PSNR, and
+MUSIQ, while securing second-best on the remaining met-
+rics, demonstrating its comprehensive restoration quality. The
+lightweight variant SCFlowFR-Tiny also ranks highly, con-
+firming that a compact architecture retains strong perceptual
+performance. More importantly, compared to computationally
+expensive multi-step approaches, our method establishes a
+superior efficiency-quality trade-off: it delivers top-tier restora-
+tion in a single step with runtime orders of magnitude faster
+than iterative diffusion or FM methods, enabling real-time
+applications. We further present qualitative results in Fig. 3.
+SCFlowFR effectively preserves crucial image information,
+avoiding the over-generation or distortion caused by noise
+interference, while successfully restoring fine-grained details.
+Notably, it achieves a level of visual fidelity comparable to
+that of multi-step inference models, resulting in realistic and
+highly faithful restoration.
+Wild Datasets.We conducted comparative experiments
+using the four-step inference results from both SCFlowFR and
+
+=== PAGE 4 ===
+4
+TABLE I
+QUANTITATIVE RESULTS ON THECELEBA-TEST DATASET. AMONG ALL ONE-STEP METHODS,BEST IN RED,SECOND-BEST IN BLUE.
+Type Method Steps Efficiency Quality Metrics
+Params (M)↓FPS↑FID↓PSNR (dB)↑LPIPS↓MUSIQ↑BRISQUE↓
+Multi-step
+DiffBIR [15] 50 1667 0.11 16.91 24.15 0.30 76.05 -1.09
+StableSR [7] 30 1410 5.80 16.96 24.33 0.27 71.56 20.64
+PMRF [17] 25 183 2.85 21.70 23.59 0.31 61.79 24.49
+FlowIE [11] 5 1717 1.17 17.10 23.45 0.27 73.38 2.28
+One-step
+DMDNet [18] 1 40 8.40 29.85 24.09 0.30 69.76 19.26
+RestoreFormer [19] 1 17 22.96 21.22 23.27 0.30 72.55 -4.69
+OSEDiff [20] 1 1775 3.91 24.27 23.12 0.27 70.23 18.95
+SCFlowFR-Tiny (Ours) 1 96 34.32 16.36 24.25 0.31 69.71 0.90
+SCFlowFR (Ours) 1 405 8.62 15.62 24.26 0.29 72.66 -1.54
+Fig. 3. Qualitative comparisons on the CelebA-Test dataset.
+TABLE II
+NO-REFERENCE METRICS ON THREE WILD DATASETS. BEST IN RED,
+SECOND-BEST IN BLUE. “BR.”DENOTESBRISQUE.
+Method LFW CelebChild WebPhoto
+NIQE↓BR.↓NIQE↓BR.↓NIQE↓BR.↓
+StableSR [7] 5.24 -0.22 4.91 3.23 5.78 2.02
+DiffBIR [15] 5.68 -3.09 5.48 1.40 6.01 4.58
+OSEDiff [20] 4.72 2.78 5.07 9.82 5.26 5.89
+FlowIE [11] 4.27 1.16 4.44 7.39 4.80 6.83
+SCFlowFR 4.11 -1.01 4.25 3.23 4.38 2.89
+SCFlowFR-Tiny 3.96 1.65 4.04 0.82 4.23 1.97
+its lightweight variant, benchmarking against relevant SOTA
+methods. As shown in Table II, SCFlowFR-Tiny achieves
+superior NIQE and BRISQUE scores across nearly all three
+wild datasets. Its advantage over the larger variant stems
+from better alignment with mild, less structured real-world
+degradations, yielding more natural restoration without over-
+parameterization. Further qualitative results are provided in
+Appendix B.
+C. Ablation Studies
+Discussion on Training Strategies.To validate the neces-
+sity of the shortcut training strategy and investigate the impact
+of different training strategies on performance, we designed
+corresponding ablation studies. First, we compared a model
+trained solely with theL FM loss, denoted as Model-w/o-L SC.
+As shown in Table 3, the results demonstrate significantly
+degraded performance. Second, we evaluated the training
+strategy proposed by Consistency-FM [29], denoted as Model-
+w/-Lconsis. Since the model failed to achieve satisfactory
+performance under one-step inference, we report its five-step
+results, which still indicate inadequate performance.
+TABLE III
+ABLATION STUDIES ON THECELEBA-TEST DATASET. BEST
+PERFORMANCE IS HIGHLIGHTED IN RED.
+Method Steps FID↓PSNR(dB)↑BRISQUE↓
+Model-w/o-LSC 1 287.23 20.85 51.22
+Model-w/-Lconsis 5 18.54 24.04 3.17
+Model-w/o-cond 1 19.01 23.08 1.55
+Ours 1 16.36 24.25 0.90
+Discussion on Conditional Guidance.Our conditional
+guidance strategy leverages a pre-restored image as the con-
+textual input to the velocity network, providing a semantically
+aligned prior for the HQ target. To verify its contribution, we
+train an ablated model that removes this conditional branch,
+denoted Model-w/o-cond. As shown in Table III, the absence
+of conditional guidance leads to consistent degradation in FID,
+PSNR, and BRISQUE, confirming that the pre-restored image
+as a conditional signal is essential for achieving accurate and
+robust one-step restoration.
+IV. CONCLUSION
+We propose SCFlowFR, a face restoration method based
+on Shortcut-constrained coupling FM. Unlike conventional
+approaches starting from Gaussian noise, SCFlowFR estab-
+lishes data-dependent coupling by centering the source on
+a coarse reconstruction from the LQ input and uses it for
+conditional guidance—reducing path crossovers and promot-
+ing near-linear transport. A shortcut constraint enforces self-
+consistency via average velocity supervision, enabling accurate
+one-step inference. Experiments show SCFlowFR achieves
+SOTA one-step quality with efficiency comparable to non-
+iterative baselines. Future work will extend this framework to
+general image restoration and inpainting to enhance robustness
+and versatility.
+
+=== PAGE 5 ===
+5
+REFERENCES
+[1] J. Wang, S. Xia, C. Zou, G. Wu, and Z. He, “Freqformer: Frequency-
+enhanced face super-resolution via dual-synergy learning,”IEEE Signal
+Process. Lett., 2025.
+[2] C. Wu, T. Zhang, X. Zhang, N. He, and Y . Xu, “Video face super-
+resolution with high-precision identity preservation,”IEEE Signal Pro-
+cess. Lett., vol. 33, pp. 406–410, 2025.
+[3] S. Luo, Y . Tan, L. Huang, J. Li, and H. Zhao, “Latent consistency
+models: Synthesizing high-resolution images with few-step inference,”
+arXiv preprint arXiv:2310.04378, 2023.
+[4] T. Yin, M. Gharbi, R. Zhang, E. Shechtman, F. Durand, W. T. Freeman,
+and T. Park, “One-step diffusion with distribution matching distillation,”
+inProc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR), 2024,
+pp. 6613–6623.
+[5] Z. Yue, J. Wang, and C. C. Loy, “Resshift: Efficient diffusion model for
+image super-resolution by residual shifting,”Adv. Neural Inf. Process.
+Syst., vol. 36, pp. 13 294–13 307, 2023.
+[6] R. Wu, T. Yang, L. Sun, Z. Zhang, S. Li, and L. Zhang, “Seesr: Towards
+semantics-aware real-world image super-resolution,” inProc. IEEE/CVF
+Conf. Comput. Vis. Pattern Recognit. (CVPR), 2024, pp. 25 456–25 467.
+[7] J. Wang, Z. Yue, S. Zhou, K. C. K. Chan, and C. C. Loy, “Exploiting
+diffusion prior for real-world image super-resolution,”Int. J. Comput.
+Vis., vol. 132, no. 12, pp. 5929–5949, 2024.
+[8] Y . Song, J. Sohl-Dickstein, D. P. Kingma, A. Kumar, S. Ermon, and
+B. Poole, “Score-based generative modeling through stochastic differ-
+ential equations,”arXiv preprint arXiv:2011.13456, 2020.
+[9] Y . Lipman, R. T. Q. Chen, H. Ben-Hamu, M. Nickel, and M. Le, “Flow
+matching for generative modeling,” inProc. Int. Conf. Learn. Represent.
+(ICLR), 2023.
+[10] X. Liu, C. Gong, and Q. Liu, “Flow straight and fast: Learning to
+generate and transfer data with rectified flow,” inProc. Int. Conf. Learn.
+Represent. (ICLR), 2023.
+[11] Y . Zhu, W. Zhao, A. Li, Y . Tang, J. Zhou, and J. Lu, “Flowie:
+Efficient image enhancement via rectified flow,” inProc. IEEE/CVF
+Conf. Comput. Vis. Pattern Recognit. (CVPR), 2024, pp. 13–22.
+[12] S. Martin, A. Gagneux, P. Hagemann, and G. Steidl, “Pnp-flow:
+Plug-and-play image restoration with flow matching,”arXiv preprint
+arXiv:2410.02423, 2024.
+[13] K. Frans, D. Hafner, S. Levine, and P. Abbeel, “One step diffusion via
+shortcut models,” inProc. Int. Conf. Learn. Represent. (ICLR), 2025.
+[14] E. Cohen, I. Achituve, I. Diamant, A. Netzer, and H. V . Habi, “Efficient
+image restoration via latent consistency flow matching,”arXiv preprint
+arXiv:2502.03500, 2025.
+[15] X. Lin, J. He, Z. Chen, Z. Lyu, B. Dai, F. Yu, Y . Qiao, W. Ouyang,
+and C. Dong, “Diffbir: Toward blind image restoration with generative
+diffusion prior,” inProc. Eur. Conf. Comput. Vis. (ECCV). Springer,
+2024, pp. 430–448.
+[16] M. S. Albergo, M. Goldstein, N. M. Boffi, R. Ranganath, and E. Vanden-
+Eijnden, “Stochastic interpolants with data-dependent couplings,” in
+Proc. Int. Conf. Mach. Learn. (ICML). PMLR, 2024, pp. 921–937.
+[17] G. Ohayon, T. Michaeli, and M. Elad, “Posterior-mean rectified flow:
+Towards minimum mse photo-realistic image restoration,” inProc. Int.
+Conf. Learn. Represent. (ICLR), 2025.
+[18] X. Li, S. Zhang, S. Zhou, L. Zhang, and W. Zuo, “Learning dual memory
+dictionaries for blind face restoration,”IEEE Trans. Pattern Anal. Mach.
+Intell., vol. 45, no. 5, pp. 5904–5917, 2022.
+[19] Z. Wang, J. Zhang, R. Chen, W. Wang, and P. Luo, “Restoreformer:
+High-quality blind face restoration from undegraded key-value pairs,” in
+Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR), 2022,
+pp. 17 512–17 521.
+[20] R. Wu, L. Sun, Z. Ma, and L. Zhang, “One-step effective diffusion
+network for real-world image super-resolution,”Adv. Neural Inf. Process.
+Syst., vol. 37, pp. 92 529–92 553, 2024.
+[21] T. Karras, S. Laine, and T. Aila, “A style-based generator architecture
+for generative adversarial networks,” inProc. IEEE/CVF Conf. Comput.
+Vis. Pattern Recognit. (CVPR), 2019, pp. 4401–4410.
+[22] Z. Liu, P. Luo, X. Wang, and X. Tang, “Deep learning face attributes
+in the wild,” inProc. IEEE Int. Conf. Comput. Vis. (ICCV), 2015, pp.
+3730–3738.
+[23] X. Wang, Y . Li, H. Zhang, and Y . Shan, “Towards real-world blind
+face restoration with generative facial prior,” inProc. IEEE/CVF Conf.
+Comput. Vis. Pattern Recognit. (CVPR), 2021, pp. 9168–9178.
+[24] J. Liang, J. Cao, G. Sun, K. Zhang, L. V . Gool, and R. Timofte, “Swinir:
+Image restoration using swin transformer,” inProc. IEEE/CVF Int. Conf.
+Comput. Vis. (ICCV), 2021, pp. 1833–1844.
+[25] O. Ronneberger, P. Fischer, and T. Brox, “U-net: Convolutional networks
+for biomedical image segmentation,” inProc. Int. Conf. Med. Image
+Comput. Comput.-Assist. Intervent. (MICCAI). Springer, 2015, pp. 234–
+241.
+[26] Madebyollin, “TAESD: Tiny autoencoder for stable diffusion,”
+https://github.com/madebyollin/taesd, 2022, [Online]. Available:
+https://github.com/madebyollin/taesd.
+[27] J. Ke, Q. Wang, Y . Wang, P. Milanfar, and F. Yang, “Musiq: Multi-scale
+image quality transformer,” inProc. IEEE/CVF Int. Conf. Comput. Vis.
+(ICCV), 2021, pp. 5148–5157.
+[28] A. Mittal, A. K. Moorthy, and A. C. Bovik, “No-reference image quality
+assessment in the spatial domain,”IEEE Trans. Image Process., vol. 21,
+no. 12, pp. 4695–4708, 2012.
+[29] L. Yang, Z. Zhang, Z. Zhang, X. Liu, M. Xu, W. Zhang, C. Meng, S. Er-
+mon, and B. Cui, “Consistency flow matching: Defining straight flows
+with velocity consistency,”arXiv preprint arXiv:2407.02398, 2024.
+
+=== PAGE 6 ===
+6
+SUPPLEMENTARY MATERIAL
+Appendix A contains mathematical proofs for the two
+properties in Section II, demonstrating how our data-dependent
+coupling mitigates path crossover and curvature in standard
+FM. Appendix B presents additional visual results on diverse
+wild datasets to validate real-world robustness.
+A. Theoretical Analysis of Data-Dependent Coupling
+Property 1 (Reduced Conditional Velocity Variance).Let
+zt = (1−t)z 0 +tz 1 be the probability path. The conditional
+variance of the velocity fieldλ t(z) =E[∥(z 1 −z0)−v t(z)∥2 |
+zt =z]is strictly reduced under our data-dependent coupling
+ρ(z0,z 1) =ρ 1(z1)ρ(z0 |z 1)compared to the independent
+couplingρ ind(z0,z 1) =ρ 0(z0)ρ1(z1).
+Proof.From the linear interpolantz t = (1−t)z 0 +tz 1, the
+instantaneous velocity is
+˙zt =z 1 −z 0 = 1
+t (zt −z 0).(13)
+For a fixed statez t =zat timet, the conditional velocity
+varianceλ t(z)is:
+λt(z) = Var( ˙zt |z t =z) = 1
+t2 Var(z0 |z t =z).(14)
+1) Independent Coupling Case:Under independent cou-
+pling,z 0 (typicallyN(0,I)) andz 1 are sampled indepen-
+dently. The conditionz t =zdefines a broad posterior:
+ρind(z0 |z t =z)∝ρ 0(z0)ρ1
+ z−(1−t)z 0
+t
+
+.(15)
+Sinceρ 0 andρ 1 represent the entire source and target man-
+ifolds, for any givenz, there exists a vast set of(z 0,z 1)
+pairs that can intersect atz. This results in a high conditional
+varianceVar ind(z0 |z t =z)≈Global Variance, which forces
+the marginal velocityv t(z)to average over many conflicting
+directions, causing high trajectory curvature.
+2) Data-Dependent Coupling Case:In SCFlowFR, we
+model the ill-posed relationship asz 0 =G(z 1)+η, whereGis
+the degradation process andη∼ N(0, σ 2
+ηI)accounts for the
+intrinsic posterior uncertainty. Substituting the path constraint
+z1 = 1
+t (z−(1−t)z 0)into this coupling yields an implicit
+constraint onz 0:
+z0 =G
+ z−(1−t)z 0
+t
+
++η.(16)
+AssumingGis locally Lipschitz with constantL <∞and
+the Jacobian is non-singular, by the implicit function theorem
+we have
+Vardep(z0 |z t =z)≤ σ2
+η
+(1−L·t/(1−t)) 2 ,(17)
+which isO(σ 2
+η)and strictly smaller than the global vari-
+ance whenσ 2
+η ≪Var ind. This tight coupling reduces path
+crossovers, aligningv t(z)with the linear trajectoriesz 1 −z 0
+and linearizing the transport asσ η →0.
+Property 2 (Reduced Transport Kinetic Energy).For the
+probability flow ODE ˙Zt =v t(Zt)whereZ 0 ∼ρ 0 and
+Z1 ∼ρ 1, the expected kinetic energy is bounded by the ex-
+pected squared displacement of the coupling:E
+R 1
+0 ∥ ˙Zt∥2 dt≤
+E[∥z1 −z 0∥2]. Our data-dependent coupling minimizes this
+bound compared to independent coupling.
+Proof.By the definition of the marginal velocity field in
+Eq. (4),v t(z) =E[z 1 −z 0 |z t =z]. Applying Jensen’s
+Inequality to the convex function yields:
+∥vt(z)∥2 ≤E[∥z 1 −z 0∥2 |z t =z].(18)
+Taking the expectation overz t ∼ρ t(z)and applying the law
+of iterated expectations:
+Eρt[∥vt(zt)∥2]≤E ρt[E[∥z1 −z 0∥2 |z t]] =E ρ[∥z1 −z 0∥2].
+(19)
+Integrating overt∈[0,1]and noting that the RHS is a constant
+determined by the couplingρ(z 0,z 1), we obtain:
+E
+Z 1
+0
+∥ ˙Zt∥2 dt=
+Z 1
+0
+Eρt[∥vt(zt)∥2]dt≤E ρ[∥z1 −z 0∥2].
+(20)
+The expected squared displacementE[∥z 1 −z 0∥2]represents
+the transport cost between the source and target distributions.
+1) In the Independent Case, wherez 0 is sampled regard-
+less ofz 1, the expectation becomesE[∥z 1∥2] +E[∥z 0∥2]−
+2E[z1]⊤E[z0]. Sincez 0 is typically a zero-mean Gaussian
+N(0,I), this term is dominated by the global second moments
+of both manifolds, leading to a large transport cost and highly
+inefficient, long-range trajectories.
+2) In our Data-Dependent Case, we utilize the structural
+dependency between LQ and HQ. Lettingz 0 =E(LQ) +ε,
+whereE(LQ)is semantically aligned with the targetz 1, the
+displacement becomes:
+E[∥z1 −(E(LQ) +ε)∥ 2] =E[∥z 1 − E(LQ)∥ 2] +σ 2.(21)
+BecauseE(LQ)provides a coarse estimate ofz 1, the term
+∥z1−E(LQ)∥ 2 is restricted to the residual reconstruction error,
+which is significantly smaller than the global variance.
+B. Additional Visual Results
+As illustrated in Fig. 4, our approach excels in restoring
+fine facial details, generating more realistic hair strands with
+clearer textures and preserving authentic skin texture with
+wrinkles. These visual improvements align with the quan-
+titative gains, demonstrating the model’s ability to produce
+perceptually convincing reconstructions in unconstrained wild
+scenarios.
+LQStableSRDiffBIROSEDiffFlowIESCFlowFR-TinySCFlowFR
+Fig. 4. Qualitative comparisons on three wild datasets. From top to bottom:
+samples from the CelebChild, LFW, and WebPhoto datasets, respectively.
