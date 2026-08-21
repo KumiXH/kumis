@@ -1,0 +1,922 @@
+[
+  {
+    "key": "ldm",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\papers\\01_history_and_tokenizers\\ldm_2112.10752.pdf",
+    "page_count": 12,
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\text\\ldm.txt",
+    "first_page_excerpt": "High-Resolution Image Synthesis with Latent Diffusion Models\nRobin Rombach1 ∗ Andreas Blattmann1 ∗ Dominik Lorenz1 Patrick Esser\n Bj¨orn Ommer1\n1Ludwig Maximilian University of Munich & IWR, Heidelberg University, Germany\n Runway ML\nhttps://github.com/CompVis/latent-diffusion\nAbstract\nBy decomposing the image formation process into a se-\nquential application of denoising autoencoders, diffusion\nmodels (DMs) achieve state-of-the-art synthesis results on\nimage data and beyond. Additionally, their formulation al-\nlows for a guiding mechanism to control the image gen-\neration process without retraining. However , since these\nmodels typically operate directly in pixel space, optimiza-\ntion of powerful DMs often consumes hundreds of GPU\ndays and inference is expensive due to sequential evalu-\nations. To enable DM training on limited computational\nresources while retaining their quality and ﬂexibility, we\napply them in the latent space of powerful pretrained au-\ntoencoders. In contrast to previous work, training diffusion\nmodels on such a representation allows for the ﬁrst time\nto reach a near-optimal point between complexity reduc-\ntion and detail preservation, greatly boosting visual ﬁdelity.\nBy introducing cross-attention layers into the model archi-\ntecture, we turn diffusion models into powerful and ﬂexi-\nble generators for general conditioning inputs such as text\nor bounding boxes and high-resolution synthesis becomes\npossible in a convolutional manner . Our latent diffusion\nmodels (LDMs) achieve new state of the art scores for im-\nage inpainting and class-conditional image synthesis and\nhighly competitive performance on various tasks, includ-\ning unconditional image generation, text-to-image synthe-\nsis, and super-resolution, while signiﬁcantly reducing com-\nputational requirements compared to pixel-based DMs.\n1. Introduction\nImage synthesis is one of the computer vision ﬁelds with\nthe most spectacular recent development, but also among\nthose with the greatest computational demands. Espe-\ncially high-resolution synthesis of complex, natural scenes\nis presently dominated by scaling up likelihood-based mod-\nels, potentially containing billions of parameters in autore-\ngressive (AR) transformers [\n64,65]. In contrast, the promis-\ning results of GANs [ 3, 26, 39] have been revealed to be\nmostly conﬁned to data with comparably limited variability\nas their adversarial learning procedure does not easily scale\nto modeling complex, multi-modal distributions. Recently,\ndiffusion models [\n79], which are built from a hierarchy of\ndenoising autoencoders, have shown to achieve impressive\n∗The ﬁrst two authors contributed equally to this work.\nInput\nours (f = 4)\nPSNR: 27.4 R-FID: 0.58\nDALL-E (f = 8)\nPSNR: 22.8 R-FID: 32.01\nVQGAN (f = 16)\nPSNR: 19.9 R-FID: 4.98\nFigure 1. Boosting the upper bound on achievable quality with\nless agressive downsampling. Since diffusion models offer excel-\nlent inductive biases for spatial data, we do not need the heavy spa-\ntial downsampling of related generative models in latent space, but\ncan still greatly reduce the dimensionality of the data via suitable\nautoencoding models, see Sec.\n3. Images are from the DIV2K [ 1]\nvalidation set, evaluated at 5122 px. We denote the spatial down-\nsampling factor by f . Reconstruction FIDs [ 28] and PSNR are\ncalculated on ImageNet-val. [ 12]; see also Tab. 8.\nresults in image synthesis [29,82] and beyond [7,44,47,56],\nand deﬁne the state-of-the-art in class-conditional image\nsynthesis [\n15,30] and super-resolution [70]. Moreover, even\nunconditional DMs can readily be applied to tasks such\nas inpainting and colorization [\n82] or stroke-based syn-\nthesis [ 52], in contrast to other types of generative mod-\nels [19, 45, 67]. Being likelihood-based models, they do not\nexhibit mode-collapse and training instabilities as GANs\nand, by heavily exploiting parameter sharing, they can\nmodel highly complex distributions of natural images with-\nout involving billions of parameters as in AR models [\n65].\nDemocratizing High-Resolution Image Synthesis DMs\nbelong to the class of likelihood-based models, whose\nmode-covering behavior makes them prone to spend ex-\ncessive amounts of capacity (and thus compute resources)\non modeling imperceptible details of the data [\n16, 71]. Al-\nthough the reweighted variational objective [29] aims to ad-\ndress this by undersampling the initial denoising steps, DMs\nare still computationally demanding, since training and\nevaluating such a model requires repeated function evalu-\nations (and gradient computations) in the high-dimensional\nspace of RGB images. As an example, training the most\npowerful DMs often takes hundreds of GPU days (e.g. 150 -\n1000 V100 days in [\n15]) and repeated evaluations on a noisy\nversion of the input space render also inference expensive,\n10684",
+    "figure_candidates": [
+      {
+        "page": 1,
+        "caption": "Figure 1. Boosting the upper bound on achievable quality with"
+      },
+      {
+        "page": 2,
+        "caption": "Figure 2. Illustrating perceptual and semantic compression: Most"
+      },
+      {
+        "page": 4,
+        "caption": "Figure 3. We condition LDMs either via concatenation or by a"
+      },
+      {
+        "page": 5,
+        "caption": "Figure 4. Samples from LDMs trained on CelebAHQ [38], FFHQ [40], LSUN-Churches [98], LSUN-Bedrooms [98] and class-conditional"
+      },
+      {
+        "page": 5,
+        "caption": "Figure 5. Analyzing the training of class-conditional LDMs with"
+      },
+      {
+        "page": 5,
+        "caption": "Figure 6. Inference speed vs sample quality: Comparing"
+      },
+      {
+        "page": 6,
+        "caption": "Figure 7. Top: Samples from our LDM for layout-to-image syn-"
+      },
+      {
+        "page": 7,
+        "caption": "Figure 8. A LDM trained on 2562 resolution can generalize to"
+      },
+      {
+        "page": 7,
+        "caption": "Figure 9. ImageNet 64 →256 super-resolution on ImageNet-V al."
+      },
+      {
+        "page": 8,
+        "caption": "Figure 10. Qualitative results on object removal with our big, w/"
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 6,
+        "caption": "Table 1. Evaluation metrics for unconditional image synthe-"
+      },
+      {
+        "page": 6,
+        "caption": "Table 2. Evaluation of text-conditional image synthesis on"
+      },
+      {
+        "page": 7,
+        "caption": "Table 3. Comparison of a class-conditional ImageNet LDM with"
+      },
+      {
+        "page": 7,
+        "caption": "Table 4. ×4 upscaling results on ImageNet-V al. ( 2562); †: FID"
+      },
+      {
+        "page": 8,
+        "caption": "Table 5. Task 1: Subjects were shown ground truth and generated"
+      },
+      {
+        "page": 8,
+        "caption": "Table 6. Assessing inpainting efﬁciency. †: Deviations from Fig. 6"
+      },
+      {
+        "page": 8,
+        "caption": "Table 7. Comparison of inpainting performance on 30k crops of"
+      }
+    ],
+    "keyword_pages": {
+      "architecture": [
+        1,
+        2,
+        3,
+        4,
+        6,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "compression": [
+        1,
+        4,
+        5,
+        7,
+        8
+      ],
+      "training": [
+        1,
+        2,
+        3,
+        6,
+        7,
+        9,
+        10,
+        11,
+        12
+      ],
+      "dataset": [
+        2,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "ablation": [],
+      "limitations": []
+    }
+  },
+  {
+    "key": "vqgan",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\papers\\01_history_and_tokenizers\\vqgan_2012.09841.pdf",
+    "page_count": 11,
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\text\\vqgan.txt",
+    "first_page_excerpt": "Taming Transformers for High-Resolution Image Synthesis\nPatrick Esser* Robin Rombach* Bj¨orn Ommer\nHeidelberg Collaboratory for Image Processing, IWR, Heidelberg University, Germany\n*Both authors contributed equally to this work\nFigure 1. Our approach enables transformers to synthesize high-resolution images like this one, which contains 1280x460 pixels.\nAbstract\nDesigned to learn long-range interactions on sequential\ndata, transformers continue to show state-of-the-art results\non a wide variety of tasks. In contrast to CNNs, they contain\nno inductive bias that prioritizes local interactions. This\nmakes them expressive, but also computationally infeasi-\nble for long sequences, such as high-resolution images. We\ndemonstrate how combining the effectiveness of the induc-\ntive bias of CNNs with the expressivity of transformers en-\nables them to model and thereby synthesize high-resolution\nimages. We show how to (i) use CNNs to learn a context-\nrich vocabulary of image constituents, and in turn (ii) utilize\ntransformers to efﬁciently model their composition within\nhigh-resolution images. Our approach is readily applied\nto conditional synthesis tasks, where both non-spatial in-\nformation, such as object classes, and spatial information,\nsuch as segmentations, can control the generated image.\nIn particular , we present the ﬁrst results on semantically-\nguided synthesis of megapixel images with transformers.\nProject page at\nhttps://git.io/JLlvY .\n1. Introduction\nTransformers are on the rise—they are now the de-facto\nstandard architecture for language tasks [\n64, 50, 51, 5]\nand are increasingly adapted in other areas such as audio\n[\n12] and vision [ 8, 15]. In contrast to the predominant vi-\nsion architecture, convolutional neural networks (CNNs),\nthe transformer architecture contains no built-in inductive\nprior on the locality of interactions and is therefore free\nto learn complex relationships among its inputs. However,\nthis generality also implies that it has to learn all relation-\nships, whereas CNNs have been designed to exploit prior\nknowledge about strong local correlations within images.\nThus, the increased expressivity of transformers comes with\nquadratically increasing computational costs, because all\npairwise interactions are taken into account. The result-\ning energy and time requirements of state-of-the-art trans-\nformer models thus pose fundamental problems for scaling\nthem to high-resolution images with millions of pixels.\nObservations that transformers tend to learn convolu-\ntional structures [\n15] thus beg the question: Do we have\nto re-learn everything we know about the local structure\nand regularity of images from scratch each time we train\na vision model, or can we efﬁciently encode inductive im-\nage biases while still retaining the ﬂexibility of transform-\ners? We hypothesize that low-level image structure is well\ndescribed by a local connectivity, i.e. a convolutional ar-\nchitecture, whereas this structural assumption ceases to be\neffective on higher semantic levels. Moreover, CNNs not\nonly exhibit a strong locality bias, but also a bias towards\n12873",
+    "figure_candidates": [
+      {
+        "page": 1,
+        "caption": "Figure 1. Our approach enables transformers to synthesize high-resolution images like this one, which contains 1280x460 pixels."
+      },
+      {
+        "page": 3,
+        "caption": "Figure 2. Our approach uses a convolutional VQGAN to learn a codebook of context-rich visual parts, whose composition is subsequently"
+      },
+      {
+        "page": 5,
+        "caption": "Figure 3. Sliding attention window."
+      },
+      {
+        "page": 6,
+        "caption": "Figure 4. Transformers within our setting unify a wide range of"
+      },
+      {
+        "page": 6,
+        "caption": "Fig. 4 shows that the same approach as for the previous ex-"
+      },
+      {
+        "page": 7,
+        "caption": "Figure 5. Samples generated from semantic layouts on S-FLCKR."
+      },
+      {
+        "page": 7,
+        "caption": "Figure 6. Applying the sliding attention window approach (Fig. 3)"
+      },
+      {
+        "page": 8,
+        "caption": "Figure 7. Evaluating the importance of effective codebook for HQ-Faces (CelebA-HQ and FFHQ) for a ﬁxed sequence length|s|= 16 ·16 ="
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 5,
+        "caption": "Table 1. Comparing Transformer and PixelSNAIL architectures"
+      },
+      {
+        "page": 7,
+        "caption": "Table 2. FID score comparison for semantic image synthesis"
+      },
+      {
+        "page": 8,
+        "caption": "Table 3. FID score comparison for face image synthesis. CelebA-"
+      },
+      {
+        "page": 8,
+        "caption": "Table 4. FID score comparison for class-conditional synthesis."
+      },
+      {
+        "page": 8,
+        "caption": "Table 5. Reconstruction FID on ImageNet (validation split)."
+      }
+    ],
+    "keyword_pages": {
+      "architecture": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "compression": [
+        5,
+        6,
+        8
+      ],
+      "training": [
+        2,
+        4,
+        5,
+        9,
+        10,
+        11
+      ],
+      "dataset": [
+        5,
+        6,
+        7,
+        8,
+        10,
+        11
+      ],
+      "ablation": [],
+      "limitations": []
+    }
+  },
+  {
+    "key": "sd3",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\papers\\02_image_vae\\sd3_2403.03206.pdf",
+    "page_count": 28,
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\text\\sd3.txt",
+    "first_page_excerpt": "Scaling Rectified Flow Transformers for High-Resolution Image Synthesis\nPatrick Esser * Sumith Kulal Andreas Blattmann Rahim Entezari Jonas M ¨uller Harry Saini Yam Levi\nDominik Lorenz Axel Sauer Frederic Boesel Dustin Podell Tim Dockhorn Zion English\nKyle Lacey Alex Goodwin Yannik Marek Robin Rombach *\nStability AI\nFigure 1. High-resolution samples from our 8B rectified flow model, showcasing its capabilities in typography, precise prompt following\nand spatial reasoning, attention to fine details, and high image quality across a wide variety of styles.\nAbstract\nDiffusion models create data from noise by invert-\ning the forward paths of data towards noise and\nhave emerged as a powerful generative modeling\ntechnique for high-dimensional, perceptual data\nsuch as images and videos. Rectified flow is a re-\ncent generative model formulation that connects\ndata and noise in a straight line. Despite its better\ntheoretical properties and conceptual simplicity, it\nis not yet decisively established as standard prac-\ntice. In this work, we improve existing noise sam-\npling techniques for training rectified flow mod-\nels by biasing them towards perceptually relevant\nscales. Through a large-scale study, we demon-\n*Equal contribution . <first.last>@stability.ai.\nstrate the superior performance of this approach\ncompared to established diffusion formulations\nfor high-resolution text-to-image synthesis. Ad-\nditionally, we present a novel transformer-based\narchitecture for text-to-image generation that uses\nseparate weights for the two modalities and en-\nables a bidirectional flow of information between\nimage and text tokens, improving text comprehen-\nsion, typography, and human preference ratings.\nWe demonstrate that this architecture follows pre-\ndictable scaling trends and correlates lower vali-\ndation loss to improved text-to-image synthesis as\nmeasured by various metrics and human evalua-\ntions. Our largest models outperform state-of-the-\nart models, and we will make our experimental\ndata, code, and model weights publicly available.\n1\narXiv:2403.03206v1  [cs.CV]  5 Mar 2024",
+    "figure_candidates": [
+      {
+        "page": 1,
+        "caption": "Figure 1. High-resolution samples from our 8B rectified flow model, showcasing its capabilities in typography, precise prompt following"
+      },
+      {
+        "page": 5,
+        "caption": "Figure 2. Our model architecture. Concatenation is indicated by ⊙ and element-wise multiplication by ∗. The RMS-Norm for Q and K"
+      },
+      {
+        "page": 7,
+        "caption": "Figure 3. Rectified flows are sample efficient. Rectified Flows"
+      },
+      {
+        "page": 9,
+        "caption": "Figure 4. Training dynamics of model architectures. Compara-"
+      },
+      {
+        "page": 9,
+        "caption": "Figure 5. Effects of QK-normalization. Normalizing the Q- and"
+      },
+      {
+        "page": 9,
+        "caption": "Figure 5, the additional normalization prevents the attention"
+      },
+      {
+        "page": 10,
+        "caption": "Figure 6. Timestep shifting at higher resolutions. Top right: Hu-"
+      },
+      {
+        "page": 10,
+        "caption": "Figure 7. Human Preference Evaluation against currrent"
+      },
+      {
+        "page": 11,
+        "caption": "Figure 8 are only FLOPs from video training and do not"
+      },
+      {
+        "page": 11,
+        "caption": "Figure 12 illustrates how training a larger model for longer"
+      },
+      {
+        "page": 12,
+        "caption": "Figure 8. Quantitative effects of scaling. We analyze the impact of model size on performance, maintaining consistent training"
+      },
+      {
+        "page": 12,
+        "caption": "Figure 9. Impact of T5. We observe T5 to be important for"
+      },
+      {
+        "page": 21,
+        "caption": "Figure 10. FID scores after training flow models with different sizes (parameterized via their depth) on the latent space of different"
+      },
+      {
+        "page": 21,
+        "caption": "Figure 11 visualizes the distributions of thelogit-normal sampler and the mode sampler introduced in Section 3.1. Notably,"
+      },
+      {
+        "page": 22,
+        "caption": "Figure 11. The mode (left) and logit-normal (right) distributions that we explore for biasing the sampling of training timesteps."
+      },
+      {
+        "page": 22,
+        "caption": "Figure 12. Qualitative effects of scaling. Displayed are examples demonstrating the impact of scaling training steps (left to right: 50k,"
+      },
+      {
+        "page": 23,
+        "caption": "Figure 13. Comparison between base models and DPO-finetuned models. DPO-finetuning generally results in more aesthetically pleasing"
+      },
+      {
+        "page": 23,
+        "caption": "Figure 13 shows samples of the respective base models and DPO-finetuned models."
+      },
+      {
+        "page": 24,
+        "caption": "Figure 14. Human preference evaluation between base models and DPO-finetuned models. Human evaluators prefer DPO-finetuned"
+      },
+      {
+        "page": 25,
+        "caption": "Figure 15. Zero Shot Text manipulation and insertion with the 2B Edit model"
+      },
+      {
+        "page": 27,
+        "caption": "Figure 16. Results of deduplicating our training datasets for various filtering thresholds."
+      },
+      {
+        "page": 28,
+        "caption": "Figure 17. SSCD-based deduplication prevents memorization. To assess how well our SSCD-based deduplication works, we extract"
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 6,
+        "caption": "Table 1. Global ranking of variants. For this ranking, we apply"
+      },
+      {
+        "page": 6,
+        "caption": "Table 2. Metrics for different variants. FID and CLIP scores of"
+      },
+      {
+        "page": 7,
+        "caption": "Table 3. Improved Autoencoders. Reconstruction performance"
+      },
+      {
+        "page": 7,
+        "caption": "Table 4. Improved Captions . Using a 50/50 mixing ratio of"
+      },
+      {
+        "page": 11,
+        "caption": "Table 5. GenEval comparisons. Our largest model (depth=38)"
+      },
+      {
+        "page": 11,
+        "caption": "Table 6. Impact of model size on sampling efficiency. The table"
+      },
+      {
+        "page": 24,
+        "caption": "Table 7. Key figures for preencoding frozen input networks. Mem is the memory required to load the model on the GPU. FP [ms] is"
+      }
+    ],
+    "keyword_pages": {
+      "architecture": [
+        1,
+        2,
+        4,
+        5,
+        7,
+        9,
+        11,
+        12,
+        15,
+        16,
+        17,
+        20,
+        21,
+        23,
+        24,
+        26
+      ],
+      "compression": [
+        7,
+        20,
+        21
+      ],
+      "training": [
+        3,
+        16,
+        17
+      ],
+      "dataset": [
+        2,
+        5,
+        6,
+        7,
+        9,
+        10,
+        11,
+        13,
+        20,
+        21,
+        23,
+        24,
+        26,
+        27
+      ],
+      "ablation": [],
+      "limitations": []
+    }
+  },
+  {
+    "key": "magvit",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\papers\\03_video_vae\\magvit_2212.05199.pdf",
+    "page_count": 11,
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\text\\magvit.txt",
+    "first_page_excerpt": "MAGVIT: Masked Generative Video Transformer\nLijun Yu‡†⋄∗, Yong Cheng†, Kihyuk Sohn†, Jos´e Lezama†, Han Zhang†, Huiwen Chang†,\nAlexander G. Hauptmann‡, Ming-Hsuan Yang†, Yuan Hao†, Irfan Essa†∤, and Lu Jiang†⋄\n‡Carnegie Mellon University, †Google Research, ∤Georgia Institute of Technology\n⋄ Correspondence to lijun@cmu.edu, lujiang@google.com\n0100200300MAGVITTATSVideo Diffusion\n160x 250x(b) Efficiency\n(a) Quality\n0200400MAGVITTATS(prior best)CCVS\n76-77%332386\n0.045.090.0MAGVITTATS(prior best)Video Diffusion\n89.3+13%79.357.0\n306090MAGVITRaMViD(prior best)NÜWA\n62-26%8487\n01020MAGVITVideo Diffusion(prior best)RaMViD\n9.9-39%16.216.5\nUCF-101 CG FVD↓\nBAIR FP FVD↓Kinetics-600 FP FVD↓\nUCF-101 CG IS↑\nEstimated Relative Inference RuntimeInference ThroughputAt128×128native resolutionMAGVIT-B37 fpson 1x\n(c) Flexibility\nClass-conditional Generation (CG)\nFrame Prediction (FP)\nFrame Interpolation\nOutpainting\nInpainting\nSqueezingSomething\n10 tasks in one model\nMAGVIT-L65 fpson 1x\nAnd other tasks …\nGPUV100\nTPUv4i\nFigure 1. Overview of the video generation quality, efficiency, and flexibility of the proposed MAGVIT model. (a) MAGVIT achieves\nthe state-of-the-art FVD [61] and Inception Score (IS) [49] on two video generation tasks and three benchmarks, in comparison with prior\nbest diffusion models (RaMViD [35], Video Diffusion [33]) and autoregressive models (CCVS [41], TATS [21], N¨UW A [70]). (b) It is two\norders of magnitude faster than diffusion models and 60× faster than autoregressive models. (c) A single MAGVIT model accommodates\ndifferent generation tasks, ranging from class-conditional generation to dynamic inpainting of a moving object.\nAbstract\nWe introduce the MAsked Generative VIdeo Transformer,\nMAGVIT, to tackle various video synthesis tasks with a\nsingle model. We introduce a 3D tokenizer to quantize a\nvideo into spatial-temporal visual tokens and propose an\nembedding method for masked video token modeling to fa-\ncilitate multi-task learning. We conduct extensive experi-\nments to demonstrate the quality, efficiency, and flexibility\nof MAGVIT. Our experiments show that (i) MAGVIT per-\nforms favorably against state-of-the-art approaches and es-\ntablishes the best-published FVD on three video generation\nbenchmarks, including the challenging Kinetics-600. (ii)\nMAGVIT outperforms existing methods in inference time by\ntwo orders of magnitude against diffusion models and by\n60× against autoregressive models. (iii) A single MAGVIT\nmodel supports ten diverse generation tasks and general-\nizes across videos from different visual domains. The source\ncode and trained models will be released to the public at\nhttps://magvit.cs.cmu.edu.\n∗Work partially done during a research internship at Google Research.\n1. Introduction\nRecent years have witnessed significant advances in\nimage and video content creation based on learning\nframeworks ranging from generative adversarial networks\n(GANs) [15, 43, 48, 59, 66], diffusion models [25, 33, 35,\n47, 65], to vision transformers [44, 45, 69]. Inspired by\nthe recent success of generative image transformers such as\nDALL·E [46] and other approaches [12,18,20,73], we pro-\npose an efficient and effective video generation model by\nleveraging masked token modeling and multi-task learning.\nWe introduce the MAsked Generative VIdeo Trans-\nformer (MAGVIT) for multi-task video generation. Specif-\nically, we build and train a single MAGVIT model to per-\nform a variety of diverse video generation tasks and demon-\nstrate the model’s efficiency, effectiveness, and flexibility\nagainst state-of-the-art approaches. Fig. 1(a) shows the\nquality metrics of MAGVIT on a few benchmarks with ef-\nficiency comparisons in (b), and generated examples under\ndifferent task setups such as frame prediction/interpolation,\nout/in-painting, and class conditional generation in (c).\nThis CVPR paper is the Open Access version, provided by the Computer Vision Foundation.\nExcept for this watermark, it is identical to the accepted version;\nthe final published version of the proceedings is available on IEEE Xplore.\n10459",
+    "figure_candidates": [
+      {
+        "page": 1,
+        "caption": "Figure 1. Overview of the video generation quality, efficiency, and flexibility of the proposed MAGVIT model. (a) MAGVIT achieves"
+      },
+      {
+        "page": 3,
+        "caption": "Figure 2. MAGVIT pipeline overview. The 3D-VQ encoder quantizes a video into discrete tokens, while the 3D-VQ decoder maps them"
+      },
+      {
+        "page": 3,
+        "caption": "Fig. 2 illustrates the training in the second stage. At each"
+      },
+      {
+        "page": 4,
+        "caption": "Figure 3. Comparison between MTM decoding for image [12]"
+      },
+      {
+        "page": 4,
+        "caption": "Fig. 3 compares the non-autoregressive image decod-"
+      },
+      {
+        "page": 5,
+        "caption": "Fig. 4 compares the generated videos to baseline models."
+      },
+      {
+        "page": 6,
+        "caption": "Figure 4. Comparison of class-conditional generation samples on UCF-101. 16-frame videos are generated at 128 ×128 resolution 25"
+      },
+      {
+        "page": 6,
+        "caption": "Figure 5. Inference-time generation efficiency comparison.The"
+      },
+      {
+        "page": 6,
+        "caption": "Fig. 5 compares the sequence lengths and inference steps"
+      },
+      {
+        "page": 7,
+        "caption": "Figure 6. Multi-task generation samples on four datasets: SSv2 [23], nuScenes [9], Objectron [2], and Web videos. The left column"
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 5,
+        "caption": "Table 1. Generation performance on the UCF-101 dataset."
+      },
+      {
+        "page": 5,
+        "caption": "Table 2. Frame prediction performance on the BAIR and"
+      },
+      {
+        "page": 5,
+        "caption": "Table 3. Image quality metrics on BAIR frame prediction."
+      },
+      {
+        "page": 7,
+        "caption": "Table 4. Multi-task generation performance on BAIR and SSV2 evaluated by FVD. Gray values denote unseen tasks during training."
+      },
+      {
+        "page": 7,
+        "caption": "Table 5. Comparison of conditional masked token modelingon"
+      },
+      {
+        "page": 8,
+        "caption": "Table 6. Comparison of decoding methods on BAIR frame pre-"
+      },
+      {
+        "page": 8,
+        "caption": "Table 7. Comparison of tokenizer architectures and initializa-"
+      }
+    ],
+    "keyword_pages": {
+      "architecture": [
+        1,
+        2,
+        3,
+        7,
+        8,
+        10
+      ],
+      "compression": [
+        3
+      ],
+      "training": [
+        1,
+        3,
+        4,
+        10,
+        11
+      ],
+      "dataset": [
+        2,
+        3,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "ablation": [
+        6
+      ],
+      "limitations": []
+    }
+  },
+  {
+    "key": "wfvae",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\papers\\03_video_vae\\wfvae_2411.17459.pdf",
+    "page_count": 11,
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\text\\wfvae.txt",
+    "first_page_excerpt": "WF-V AE: Enhancing Video V AE by Wavelet-Driven Energy Flow for Latent\nVideo Diffusion Model\nZongjian Li1,3,*, Bin Lin1,3,*\n, Yang Ye1,3, Liuhan Chen1,3, Xinhua Cheng1,3,\nShenghai Yuan1,3, Li Yuan1,2,†\n1Peking University, 2Peng Cheng Laboratory, 3Rabbitpre Intelligence\nAbstract\nVideo Variational Autoencoder (VAE) encodes videos into\na low-dimensional latent space, becoming a key compo-\nnent of most Latent Video Diffusion Models (LVDMs) to\nreduce model training costs. However, as the resolution\nand duration of generated videos increase, the encoding\ncost of Video VAEs becomes a limiting bottleneck in train-\ning LVDMs. Moreover, the block-wise inference method\nadopted by most LVDMs can lead to discontinuities of la-\ntent space when processing long-duration videos. The key\nto addressing the computational bottleneck lies in decom-\nposing videos into distinct components and efficiently en-\ncoding the critical information. Wavelet transform can\ndecompose videos into multiple frequency-domain compo-\nnents and improve the efficiency significantly, we thus pro-\npose Wavelet Flow VAE (WF-VAE) , an autoencoder that\nleverages multi-level wavelet transform to facilitate low-\nfrequency energy flow into latent representation. Further-\nmore, we introduce a method called Causal Cache, which\nmaintains the integrity of latent space during block-wise\ninference. Compared to state-of-the-art video VAEs, WF-\nVAE demonstrates superior performance in bothPSNR and\nLPIPS metrics, achieving 2× higher throughput and 4×\nlower memory consumption while maintaining competitive\nreconstruction quality. Our code and models are available\nat https://github.com/PKU-YuanGroup/WF-VAE.\n1. Introduction\nThe release of Sora [5], a video generation model devel-\noped by OpenAI, has pushed the boundaries of synthesiz-\ning photorealistic videos, drawing unprecedented attention\nto the field of video generation. Recent advancements in\nLatent Video Diffusion Models (LVDMs), such as Open-\nSora Plan [19], Open-Sora [49], CogVideoX [40], EasyAn-\nimate [39], Movie Gen [25], and ConsisID [44], have led\nto substantial improvements in video generation quality.\n*Equal contribution\n†Corresponding author.\n35.7\n35.8\nCogVideoX(Chn=16)\nWF-V AE-L(Chn=16)\n0 2 4 6 8 10 12\nThroughput (video/s)\n30\n31\n32\n33\nAllegro V AE\nCV-V AE\nOD-V AE\nOpen-Sora WF-V AE-S\nWF-V AE-L\nPSNR\nFigure 1. Performance comparison of video V AEs. Bubble\narea indicates the memory usage during inference. All mea-\nsurements are conducted on 33 frames with 256×256 resolution\nvideos. “Chn” represents the number of latent channels. Higher\nPSNR and throughput indicate better performance.\nThese methods establish a compressed latent space [27]\nusing a pre-trained video Variational Autoencoder (V AE),\nwhere the compression quality fundamentally determines\nthe generative performance.\nCurrent video V AEs remain constrained by fully convo-\nlutional architectures inherited from the image era. They\naddress video flickering and redundant information by in-\ncorporating spatio-temporal interaction and spatio-temporal\ncompression layers. Several recent works, including OD-\nV AE [6, 19], CogVideoX [40], CV-V AE [48], and Alle-\ngro [50] adopt dense 3D structure to achieve high-quality\nvideo compression. While these methods demonstrate\nimpressive reconstruction performance, they require pro-\nhibitively intensive computational resources. In contrast,\nalternative approaches such as Movie Gen [25] and Open-\nSora [49] utilize 2+1D architecture, resulting in reduced\ncomputational requirements at the cost of lower reconstruc-\nThis CVPR paper is the Open Access version, provided by the Computer Vision Foundation.\nExcept for this watermark, it is identical to the accepted version;\nthe final published version of the proceedings is available on IEEE Xplore.\n17778",
+    "figure_candidates": [
+      {
+        "page": 1,
+        "caption": "Figure 1. Performance comparison of video V AEs. Bubble"
+      },
+      {
+        "page": 3,
+        "caption": "Figure 2. Overview of WF-V AE.Our architecture consists of a backbone and a main energy flow pathway. The pathway functions as"
+      },
+      {
+        "page": 4,
+        "caption": "Figure 3. (a) Causal Cache with a temporal kernel size of 3 and"
+      },
+      {
+        "page": 5,
+        "caption": "Figure 4. Computational performance of encoding and decoding. We evaluate the encoding, decoding time, and memory consumption"
+      },
+      {
+        "page": 6,
+        "caption": "Figure 5. Qualitative comparison of reconstruction performance. We select two scenarios to comprehensively evaluate the visual"
+      },
+      {
+        "page": 7,
+        "caption": "Figure 6. Generated videos using WF-V AE with Latte-L. Top:"
+      },
+      {
+        "page": 7,
+        "caption": "Figure 7. Training dynamics under different settings."
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 5,
+        "caption": "Table 1. Quantitative metrics of reconstruction performance. Results demostrate that WF-V AE achieves state-of-the-art on reconstrcu-"
+      },
+      {
+        "page": 7,
+        "caption": "Table 2. Quantitative evaluation of different V AE models"
+      },
+      {
+        "page": 8,
+        "caption": "Table 3. Scalability of WF-V AE.We evaluated PSNR and LPIPS"
+      },
+      {
+        "page": 8,
+        "caption": "Table 4. Ablation studies on model architecture. We evaluate"
+      },
+      {
+        "page": 8,
+        "caption": "Table 5. Quantitative analysis of visual quality degradation"
+      }
+    ],
+    "keyword_pages": {
+      "architecture": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        7,
+        8,
+        9,
+        10
+      ],
+      "compression": [
+        1,
+        3,
+        4,
+        5,
+        7,
+        8
+      ],
+      "training": [
+        4,
+        7,
+        10
+      ],
+      "dataset": [
+        4,
+        5,
+        6,
+        7,
+        9,
+        10
+      ],
+      "ablation": [
+        7,
+        8
+      ],
+      "limitations": [
+        2,
+        8
+      ]
+    }
+  },
+  {
+    "key": "dit",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\papers\\04_dit_training\\dit_2212.09748.pdf",
+    "page_count": 25,
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\text\\dit.txt",
+    "first_page_excerpt": "Scalable Diffusion Models with Transformers\nWilliam Peebles*\nUC Berkeley\nSaining Xie\nNew York University\nFigure 1. Diffusion models with transformer backbones achieve state-of-the-art image quality. We show selected samples from two\nof our class-conditional DiT-XL/2 models trained on ImageNet at 512×512 and 256×256 resolution, respectively.\nAbstract\nWe explore a new class of diffusion models based on the\ntransformer architecture. We train latent diffusion models\nof images, replacing the commonly-used U-Net backbone\nwith a transformer that operates on latent patches. We an-\nalyze the scalability of our Diffusion Transformers (DiTs)\nthrough the lens of forward pass complexity as measured by\nGﬂops. We ﬁnd that DiTs with higher Gﬂops—through in-\ncreased transformer depth/width or increased number of in-\nput tokens—consistently have lower FID. In addition to pos-\nsessing good scalability properties, our largest DiT-XL/2\nmodels outperform all prior diffusion models on the class-\nconditional ImageNet 512×512 and 256×256 benchmarks,\nachieving a state-of-the-art FID of 2.27 on the latter.\n1. Introduction\nMachine learning is experiencing a renaissance powered\nby transformers. Over the past ﬁve years, neural architec-\ntures for natural language processing [8, 42], vision [10]\nand several other domains have largely been subsumed by\ntransformers [60]. Many classes of image-level genera-\ntive models remain holdouts to the trend, though—while\ntransformers see widespread use in autoregressive mod-\nels [3,6,43,47], they have seen less adoption in other gener-\native modeling frameworks. For example, diffusion models\nhave been at the forefront of recent advances in image-level\ngenerative models [9,46]; yet, they all adopt a convolutional\nU-Net architecture as the de-facto choice of backbone.\n* Work done during an internship at Meta AI, FAIR Team.\nCode and project page available here.\n1\narXiv:2212.09748v2  [cs.CV]  2 Mar 2023",
+    "figure_candidates": [
+      {
+        "page": 1,
+        "caption": "Figure 1. Diffusion models with transformer backbones achieve state-of-the-art image quality. We show selected samples from two"
+      },
+      {
+        "page": 2,
+        "caption": "Figure 2. ImageNet generation with Diffusion Transformers (DiTs). Bubble area indicates the ﬂops of the diffusion model. Left:"
+      },
+      {
+        "page": 3,
+        "caption": "Figure 3. The Diffusion Transformer (DiT) architecture. Left: We train conditional latent DiT models. The input latent is decomposed"
+      },
+      {
+        "page": 4,
+        "caption": "Figure 4. Input speciﬁcations for DiT. Given patch size p× p,"
+      },
+      {
+        "page": 5,
+        "caption": "Figure 5. Comparing different conditioning strategies. adaLN-"
+      },
+      {
+        "page": 6,
+        "caption": "Figure 6. Scaling the DiT model improves FID at all stages of training. We show FID-50K over training iterations for 12 of our DiT"
+      },
+      {
+        "page": 6,
+        "caption": "Figure 5 shows the results. The adaLN-Zero block yields"
+      },
+      {
+        "page": 7,
+        "caption": "Figure 7. Increasing transformer forward pass Gﬂops increases sample quality. Best viewed zoomed-in. We sample from all 12 of"
+      },
+      {
+        "page": 8,
+        "caption": "Figure 8. Transformer Gﬂops are strongly correlated with FID."
+      },
+      {
+        "page": 8,
+        "caption": "Figure 6 (top) demonstrates how FID changes as model"
+      },
+      {
+        "page": 8,
+        "caption": "Figure 9. Larger DiT models use large compute more efﬁ-"
+      },
+      {
+        "page": 8,
+        "caption": "Figure 9, we plot FID as a function of total training compute"
+      },
+      {
+        "page": 9,
+        "caption": "Figure 10. Scaling-up sampling compute does not compensate"
+      },
+      {
+        "page": 12,
+        "caption": "Figure 11. Additional selected samples from our 512×512 and 256×256 resolution DiT-XL/2 models.We use a classiﬁer-free guidance"
+      },
+      {
+        "page": 14,
+        "caption": "Figure 12. DiT scaling behavior on several generative modeling metrics.Left: We plot model performance as a function of total training"
+      },
+      {
+        "page": 15,
+        "caption": "Figure 13. Training loss curves for all DiT models. We plot the loss over training for all DiT models (the sum of the noise prediction"
+      },
+      {
+        "page": 16,
+        "caption": "Figure 14. Uncurated 512× 512 DiT-XL/2 samples."
+      },
+      {
+        "page": 16,
+        "caption": "Figure 15. Uncurated 512× 512 DiT-XL/2 samples."
+      },
+      {
+        "page": 17,
+        "caption": "Figure 16. Uncurated 512× 512 DiT-XL/2 samples."
+      },
+      {
+        "page": 17,
+        "caption": "Figure 17. Uncurated 512× 512 DiT-XL/2 samples."
+      },
+      {
+        "page": 18,
+        "caption": "Figure 18. Uncurated 512× 512 DiT-XL/2 samples."
+      },
+      {
+        "page": 18,
+        "caption": "Figure 19. Uncurated 512× 512 DiT-XL/2 samples."
+      },
+      {
+        "page": 19,
+        "caption": "Figure 20. Uncurated 512× 512 DiT-XL/2 samples."
+      },
+      {
+        "page": 19,
+        "caption": "Figure 21. Uncurated 512× 512 DiT-XL/2 samples."
+      },
+      {
+        "page": 20,
+        "caption": "Figure 22. Uncurated 512× 512 DiT-XL/2 samples."
+      },
+      {
+        "page": 20,
+        "caption": "Figure 23. Uncurated 512× 512 DiT-XL/2 samples."
+      },
+      {
+        "page": 21,
+        "caption": "Figure 24. Uncurated 512× 512 DiT-XL/2 samples."
+      },
+      {
+        "page": 21,
+        "caption": "Figure 25. Uncurated 512× 512 DiT-XL/2 samples."
+      },
+      {
+        "page": 22,
+        "caption": "Figure 26. Uncurated 256× 256 DiT-XL/2 samples."
+      },
+      {
+        "page": 22,
+        "caption": "Figure 27. Uncurated 256× 256 DiT-XL/2 samples."
+      },
+      {
+        "page": 23,
+        "caption": "Figure 28. Uncurated 256× 256 DiT-XL/2 samples."
+      },
+      {
+        "page": 23,
+        "caption": "Figure 29. Uncurated 256× 256 DiT-XL/2 samples."
+      },
+      {
+        "page": 24,
+        "caption": "Figure 30. Uncurated 256× 256 DiT-XL/2 samples."
+      },
+      {
+        "page": 24,
+        "caption": "Figure 31. Uncurated 256× 256 DiT-XL/2 samples."
+      },
+      {
+        "page": 25,
+        "caption": "Figure 32. Uncurated 256× 256 DiT-XL/2 samples."
+      },
+      {
+        "page": 25,
+        "caption": "Figure 33. Uncurated 256× 256 DiT-XL/2 samples."
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 5,
+        "caption": "Table 1. Details of DiT models. We follow ViT [10] model con-"
+      },
+      {
+        "page": 5,
+        "caption": "Table 1 gives details of the conﬁgs."
+      },
+      {
+        "page": 9,
+        "caption": "Table 2. Benchmarking class-conditional image generation on"
+      },
+      {
+        "page": 9,
+        "caption": "Table 3. Benchmarking class-conditional image generation on"
+      },
+      {
+        "page": 13,
+        "caption": "Table 4. Details of all DiT models. We report detailed information about every DiT model in our paper. Note that FID-50K here is"
+      },
+      {
+        "page": 13,
+        "caption": "Table 5. Decoder ablation. We tested different pre-trained V AE"
+      },
+      {
+        "page": 13,
+        "caption": "Table 6. Gﬂop counts for baseline diffusion models that use U-"
+      }
+    ],
+    "keyword_pages": {
+      "architecture": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "compression": [
+        6
+      ],
+      "training": [
+        3,
+        10
+      ],
+      "dataset": [
+        5,
+        11
+      ],
+      "ablation": [
+        13
+      ],
+      "limitations": []
+    }
+  },
+  {
+    "key": "flashvsr",
+    "pdf": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\papers\\05_flashvsr_case\\flashvsr_2510.12747.pdf",
+    "page_count": 12,
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\text\\flashvsr.txt",
+    "first_page_excerpt": "FlashVSR: Towards Real-time Diffusion-Based Streaming Video Super\nResolution\nJunhao Zhuang1,2 Shi Guo2† Xin Cai3 Xiaohui Li4\nYihao Liu2 Chun Yuan1† Tianfan Xue3,2,5\n1Tsinghua University 2Shanghai AI Lab\n3CUHK MMLab 4Shanghai Jiao Tong University 5CPII under InnoHK\n†Corresponding authors\nhttps://zhuang2002.github.io/FlashVSR/\nFigure 1. Efficiency and performance comparison in high-resolution video restoration. Compared to state-of-the-art VSR models (e.g.,\nDOVE and SeedVR2-3B), FlashVSR restores sharper textures and more detailed structures overall. It achieves near real-time performance\nat 17 FPS on768×1408videos using a single A100 GPU, corresponding to a measured 11.8×speedup over the fastest one-step diffusion\nVSR model.(Zoom in for best view).\nAbstract\nDiffusion models have recently advanced video restora-\ntion, but applying them to real-world and AIGC-generated\nvideo super-resolution (VSR) remains challenging due to\nhigh latency, prohibitive computation, and poor general-\nization to ultra-high resolutions. Our goal in this work\nis to make diffusion-based VSR practical by achieving ef-\nficiency, scalability, and near real-time performance. To\nthis end, we proposeFlashVSR, the first diffusion-based\none-step streaming framework for efficient video super-\nresolution. FlashVSR runs at∼17 FPS for768×1408\nThis CVPR paper is the Open Access version, provided by the Computer Vision Foundation.\nExcept for this watermark, it is identical to the accepted version;\nthe final published version of the proceedings is available on IEEE Xplore.\n43482",
+    "figure_candidates": [
+      {
+        "page": 1,
+        "caption": "Figure 1. Efficiency and performance comparison in high-resolution video restoration. Compared to state-of-the-art VSR models (e.g.,"
+      },
+      {
+        "page": 4,
+        "caption": "Figure 2. Overview of the three-stage training pipeline of FlashVSR, covering video–image joint SR training, adaptation with block-sparse"
+      },
+      {
+        "page": 5,
+        "caption": "Figure 3. Locality-Constrained Sparse Attention. Left: At ultra-high resolutions, performing inference beyond the trained positional"
+      },
+      {
+        "page": 5,
+        "caption": "Fig. 3. Because of this effect, many existing VSR meth-"
+      },
+      {
+        "page": 5,
+        "caption": "Figure 4. Training pipeline of the TC Decoder."
+      },
+      {
+        "page": 7,
+        "caption": "Figure 5. Visualization results of video super-resolution on real-world and AIGC videos."
+      },
+      {
+        "page": 8,
+        "caption": "Fig. 5. For clarity, we also enlarge selected patches to better"
+      }
+    ],
+    "table_candidates": [
+      {
+        "page": 6,
+        "caption": "Table 1. Quantitative comparison on synthetic (YouHQ40, REDS, SPMCS), real-world (VideoLQ), and AIGC (AIGC30) datasets, covering"
+      },
+      {
+        "page": 6,
+        "caption": "Table 2. Efficiency comparison (peak memory, runtime, and parameters) on101×768×1408videos."
+      },
+      {
+        "page": 7,
+        "caption": "Table 3. 13.6% sparse attention achieves similar reconstruction quality to full attention with∼7.4×lower computation."
+      },
+      {
+        "page": 7,
+        "caption": "Table 4. Ablation of tiny conditional decoder."
+      },
+      {
+        "page": 8,
+        "caption": "Table 5. Ablation of Locality-constrained Attention. Both Boundary-Truncated and Boundary-Preserved outperform Global Attention"
+      }
+    ],
+    "keyword_pages": {
+      "architecture": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "compression": [],
+      "training": [
+        3,
+        5,
+        9,
+        10
+      ],
+      "dataset": [
+        2,
+        3,
+        6,
+        7,
+        9,
+        10,
+        11
+      ],
+      "ablation": [
+        2,
+        7,
+        8
+      ],
+      "limitations": []
+    }
+  }
+]

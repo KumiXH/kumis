@@ -1,0 +1,18 @@
+{
+  "valid": true,
+  "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\explanatory\\image_video_tensor_flow.svg",
+  "canvas": {
+    "width": 1500.0,
+    "height": 900.0
+  },
+  "counts": {
+    "elements": 64,
+    "shape_labels": 9,
+    "residual_paths": 0,
+    "condition_paths": 1
+  },
+  "errors": [],
+  "warnings": [
+    "canvas is not portrait; confirm the top-to-bottom layout remains readable"
+  ]
+}

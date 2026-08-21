@@ -1,0 +1,18 @@
+{
+  "valid": true,
+  "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\explanatory\\encoder_decoder_timeline.svg",
+  "canvas": {
+    "width": 1500.0,
+    "height": 720.0
+  },
+  "counts": {
+    "elements": 89,
+    "shape_labels": 4,
+    "residual_paths": 0,
+    "condition_paths": 0
+  },
+  "errors": [],
+  "warnings": [
+    "canvas is not portrait; confirm the top-to-bottom layout remains readable"
+  ]
+}

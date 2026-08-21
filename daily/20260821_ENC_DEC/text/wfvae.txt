@@ -1,0 +1,1002 @@
+=== PAGE 1 ===
+WF-V AE: Enhancing Video V AE by Wavelet-Driven Energy Flow for Latent
+Video Diffusion Model
+Zongjian Li1,3,*, Bin Lin1,3,*
+, Yang Ye1,3, Liuhan Chen1,3, Xinhua Cheng1,3,
+Shenghai Yuan1,3, Li Yuan1,2,†
+1Peking University, 2Peng Cheng Laboratory, 3Rabbitpre Intelligence
+Abstract
+Video Variational Autoencoder (VAE) encodes videos into
+a low-dimensional latent space, becoming a key compo-
+nent of most Latent Video Diffusion Models (LVDMs) to
+reduce model training costs. However, as the resolution
+and duration of generated videos increase, the encoding
+cost of Video VAEs becomes a limiting bottleneck in train-
+ing LVDMs. Moreover, the block-wise inference method
+adopted by most LVDMs can lead to discontinuities of la-
+tent space when processing long-duration videos. The key
+to addressing the computational bottleneck lies in decom-
+posing videos into distinct components and efficiently en-
+coding the critical information. Wavelet transform can
+decompose videos into multiple frequency-domain compo-
+nents and improve the efficiency significantly, we thus pro-
+pose Wavelet Flow VAE (WF-VAE) , an autoencoder that
+leverages multi-level wavelet transform to facilitate low-
+frequency energy flow into latent representation. Further-
+more, we introduce a method called Causal Cache, which
+maintains the integrity of latent space during block-wise
+inference. Compared to state-of-the-art video VAEs, WF-
+VAE demonstrates superior performance in bothPSNR and
+LPIPS metrics, achieving 2× higher throughput and 4×
+lower memory consumption while maintaining competitive
+reconstruction quality. Our code and models are available
+at https://github.com/PKU-YuanGroup/WF-VAE.
+1. Introduction
+The release of Sora [5], a video generation model devel-
+oped by OpenAI, has pushed the boundaries of synthesiz-
+ing photorealistic videos, drawing unprecedented attention
+to the field of video generation. Recent advancements in
+Latent Video Diffusion Models (LVDMs), such as Open-
+Sora Plan [19], Open-Sora [49], CogVideoX [40], EasyAn-
+imate [39], Movie Gen [25], and ConsisID [44], have led
+to substantial improvements in video generation quality.
+*Equal contribution
+†Corresponding author.
+35.7
+35.8
+CogVideoX(Chn=16)
+WF-V AE-L(Chn=16)
+0 2 4 6 8 10 12
+Throughput (video/s)
+30
+31
+32
+33
+Allegro V AE
+CV-V AE
+OD-V AE
+Open-Sora WF-V AE-S
+WF-V AE-L
+PSNR
+Figure 1. Performance comparison of video V AEs. Bubble
+area indicates the memory usage during inference. All mea-
+surements are conducted on 33 frames with 256×256 resolution
+videos. “Chn” represents the number of latent channels. Higher
+PSNR and throughput indicate better performance.
+These methods establish a compressed latent space [27]
+using a pre-trained video Variational Autoencoder (V AE),
+where the compression quality fundamentally determines
+the generative performance.
+Current video V AEs remain constrained by fully convo-
+lutional architectures inherited from the image era. They
+address video flickering and redundant information by in-
+corporating spatio-temporal interaction and spatio-temporal
+compression layers. Several recent works, including OD-
+V AE [6, 19], CogVideoX [40], CV-V AE [48], and Alle-
+gro [50] adopt dense 3D structure to achieve high-quality
+video compression. While these methods demonstrate
+impressive reconstruction performance, they require pro-
+hibitively intensive computational resources. In contrast,
+alternative approaches such as Movie Gen [25] and Open-
+Sora [49] utilize 2+1D architecture, resulting in reduced
+computational requirements at the cost of lower reconstruc-
+This CVPR paper is the Open Access version, provided by the Computer Vision Foundation.
+Except for this watermark, it is identical to the accepted version;
+the final published version of the proceedings is available on IEEE Xplore.
+17778
+
+=== PAGE 2 ===
+tion quality. Previous architectures have inadequately lever-
+aged temporal redundancy in video data, necessitating the
+use of redundant spatio-temporal interaction layers to im-
+prove video compression quality.
+Many attempts employ block-wise inference strategies to
+trade computation time for memory, thus addressing com-
+putational bottlenecks in processing high-resolution, long-
+duration videos. EasyAnimate [39] introduced Slice V AE
+to encode and decode video frames in groups, but this ap-
+proach leads to discontinuous output videos. Several meth-
+ods, including Open-Sora [49], Open-Sora Plan [19], Alle-
+gro [50], implement tiling inference strategies but often pro-
+duce spatio-temporal artifacts in overlapping regions. Al-
+though CogVideoX [40] employ caching to ensure convolu-
+tion continuity, its reliance on group normalization [37] dis-
+rupts the independence of temporal feature, thus preventing
+lossless block-wise inference. These limitations highlight
+two core challenges faced by video V AEs: ( 1) excessive
+computational demands due to redundant architecture, and
+(2) compromised latent space integrity resulting from ex-
+isting tiling inference strategies, which cause artifacts and
+flickering in reconstructed videos.
+Wavelet transform [23, 26] decomposes videos into mul-
+tiple frequency-domain components. This decomposition
+enables prioritization strategies for encoding crucial video
+components. In this work, we propose Wavelet Flow
+V AE (WF-V AE), a novel autoencoder that utilizes multi-
+level wavelet transforms for extracting multi-scale pyrami-
+dal features and establishes a main energy flow pathway
+for these features to flow into latent representation. This
+pathway bypasses low-frequency video information to la-
+tent space, skipping the backbone network. Our WF-V AE
+enables a simplified backbone design with reduced 3D con-
+volutions, significantly reducing computational costs. To
+address the potential latent space disruption, we propose
+Causal Cache mechanism. This approach leverages the
+properties of causal convolution. It maintains the continuity
+of the convolution sliding window through a caching strat-
+egy, which ensures numerical identity between block-wise
+inference and direct inference results. Experimental results
+show that WF-V AE achieves state-of-the-art reconstruction
+quality and computational efficiency performance. To sum-
+marize, major contributions of our work include:
+• We propose WF-V AE, which leverages multi-level
+wavelet transforms to extract pyramidal features and es-
+tablishes a main energy flow pathway for video informa-
+tion flow into a latent representation.
+• We introduce a lossless block-wise inference mechanism
+called Causal Cache, which maintains identical perfor-
+mance as direct inference across videos of any duration.
+• Extensive experimental evaluations of video reconstruc-
+tion and generation demonstrate that WF-V AE achieves
+state-of-the-art performance.
+2. Related Work
+Variational Autoencoders. [18] introduced the V AE
+based on variational inference, establishing a novel gener-
+ative network structure. Subsequent research [24, 31, 35]
+demonstrated that training and inference in V AE latent
+space could substantially reduce computational costs for
+diffusion models. [27] further proposed a two-stage im-
+age synthesis approach by decoupling perceptual com-
+pression from diffusion model. After that, numerous
+studies explored video V AEs with a focus on more effi-
+cient video compression, including Open-Sora Plan [19],
+CogVideoX [40], and other models [3, 6, 41, 48, 50, 51].
+Current video V AE architectures primarily derive from ear-
+lier image V AE design [9, 27] and use a convolutional back-
+bone. LiteV AE [29] employs a wavelet-based encoder in-
+spired by latent-pixel similarity but overlooks energy per-
+spectives, causing encoding-decoding energy asymmetry.
+Latent Video Diffusion Models. In the early stages of
+Latent Video Diffusion Models (LVDMs) development,
+models like AnimateDiff [13], and MagicTime [45, 46]
+primarily utilized the U-Net backbone [28] for denoising,
+without temporal compression in V AEs. Following the
+paradigm introduced by Sora, recent open-source models
+such as Open-Sora [49], Open-Sora Plan [19, 20], and
+CogVideoX [40] have adopted DiT backbone with a spa-
+tiotemporally compressed V AE. Some methods, including
+Open-Sora [49] and Movie Gen [25], employ a 2+1D de-
+sign in either the DiT backbone or the V AE to reduce train-
+ing costs. For LVDMs, the upper limit of video generation
+quality is primarily determined by the V AE’s reconstruction
+quality. As overhead increases rapidly with scale, optimiz-
+ing the V AE becomes essential for processing large-scale
+data and enabling extensive pre-training.
+3. Method
+3.1. Wavelet Transform
+Preliminary. The Haar wavelet transform [23, 26], a fun-
+damental form of wavelet transform, is widely used in sig-
+nal processing [11, 12, 15, 42, 43]. It efficiently cap-
+tures spatio-temporal information by decomposing signals
+through two complementary filters. The first is the Haar
+scaling filter h = 1√
+2 [1, 1], which acts as a low-pass fil-
+ter that captures the average or approximation coefficients.
+The second is the Haar wavelet filterg = 1√
+2 [1, −1], which
+functions as a high-pass filter that extracts the detail coef-
+ficients. These orthogonal filters are designed to be simple
+yet effective, with the scaling filter smoothing the signal and
+the wavelet filter detecting local changes or discontinuities.
+Multi-level Wavelet Transform. For a video signal V ∈
+Rc×t×h×w, where c, t, h, and w denote the number of chan-
+nels, temporal frames, height, and width respectively, the
+3D Haar wavelet transform at layer l is defined as:
+17779
+
+=== PAGE 3 ===
+Input Video
+Conv In (Cin)
+DownBlock1
+DownBlock2
+Conv Out
+Latent
+Representation
+Conv Out (Cout)
+UpBlock1
+UpBlock2
+Conv In
+Multi-level
+Haar IWT
+In In
+Out Out
+(a) Architecture of WF-VAE
+Concat/SplitMain Energy Flow Pathway
+In Inflow Block Out Outflow Block
+Output Video
+(c) Multi-Level Haar IWT
+IWT
+IWT
+IWT
+Out
+Out
+Cout
+(b) Multi-Level Haar WT
+WT
+WT
+WT
+Cin
+In
+In
+Multi-level
+Haar WT
+Figure 2. Overview of WF-V AE.Our architecture consists of a backbone and a main energy flow pathway. The pathway functions as
+a “highway” for the main flow of video energy, channeling this energy into the backbone through concatenations, allowing more critical
+video information to be preserved in the latent representation.
+S(l)
+ijk = S(l−1) ∗ (fi ⊗ fj ⊗ fk), (1)
+where fi, fj, fk ∈ { h, g} represent the filters applied
+along each dimension, and ∗ represents the convolution
+operation. The transform begins with S(0) = V, and
+for subsequent layers, S(l) = S(l−1)
+hhh , indicating that
+each layer operates on the low-frequency component from
+the previous layer. At each decomposition layer l, the
+transform produces eight sub-band components: W (l) =
+{S(l)
+hhh, S(l)
+hhg, S(l)
+hgh, S(l)
+ghh, S(l)
+hgg , S(l)
+ggh , S(l)
+ghg , S(l)
+ggg }. Here,
+S(l)
+hhh represents the low-frequency component across all
+dimensions, while S(l)
+ggg captures high-frequency details.
+To implement different downsampling rates in the tempo-
+ral and spatial dimensions, a combination of 2D and 3D
+wavelet transforms can be implemented. Specifically, to ob-
+tain a compression rate of 4×8×8 (temporal×height×width),
+we can employ a combination of a two-layer 3D wavelet
+transform followed by a one-layer 2D wavelet transform.
+3.2. Architecture Design of WF-V AE
+Through analyzing different sub-bands, we find that video
+energy is mainly concentrated in the low-frequency sub-
+band S(1)
+hhh. Based on this observation, we establish an
+energy flow pathway, as illustrated in Fig. 2, so that low-
+frequency information can smoothly flow from video to la-
+tent representation during the encoding process and then
+flow back to the video during the decoding process. This
+would inherently allow the model to pay more attention to
+low-frequency information and apply higher compression
+rates to high-frequency details. With the additional path,
+we can reduce the computational cost brought by the dense
+3D convolutions in the backbone.
+Specifically, given a video V, we apply multi-level
+wavelet transform to obtain pyramid features W (1), W (2)
+and W (3). We utilize W (1) as the input for the encoder
+and the target output for the decoder. The backbone and
+multi-level wavelet transform downsample the feature maps
+simultaneously at every downsampling layer, enabling the
+concatenation of features from two branches in the back-
+bone. We employ Inflow Block to transform the channel
+numbers of W (2) and W (3) to Cf low, which are then con-
+catenated with feature maps from backbone. We compare
+Cf low to the width of the energy flow pathway, as ana-
+lyzed in Sec. 4.3. On the decoder side, we maintain a
+structure symmetrical to the encoder. We split feature maps
+with Cf low channels from the backbone and process them
+through Outflow Block to obtain ˆW (2), ˆW (3). To allow in-
+formation to flow from the lower layer to thehhh sub-band
+of the next layer, we have:
+ˆS(2)
+hhh = IW T ( ˆW (3)) + ˆS(2)
+outf low,hhh. (2)
+Similarly, at the decoder output layer:
+ˆS(1)
+hhh = IW T ( ˆW (2)) + ˆS(1)
+outf low,hhh. (3)
+Overall, we strategically design shortcuts to prioritize
+low-frequency information, thereby enhancing its represen-
+tation within the latent space.
+17780
+
+=== PAGE 4 ===
+3.3. Causal Cache
+Causal padding Causal cache
+Chunk 0 Chunk 1 Chunk 2
+(a) Illustration of Casual Cache.
+Tiling Inference Causal Cache
+(b) Qualitative comparison of tiling inference and Causal Cache
+Figure 3. (a) Causal Cache with a temporal kernel size of 3 and
+stride 1. (b) Comparison of tiling inference and Causal Cache,
+highlighting how tiling causes locallycolor and shape distortions
+at overlaps, leading to global flickering in reconstructed videos.
+We replace regular 3D convolutions with causal 3D con-
+volutions [41] in WF-V AE. The causal convolution applies
+kt −1 temporal padding at the start with kernel sizekt. This
+padding strategy ensures that the first frame remains inde-
+pendent from subsequent frames, thus enabling the process-
+ing of images and videos within a unified architecture. Fur-
+thermore, we leverage the causal convolution properties to
+achieve lossless inference. We first extract the initial frame
+from a video withT frames. The remaining T −1 frames are
+then partitioned into temporal chunks, where Tchunk repre-
+sents the chunk size. Let st denote the temporal convo-
+lutional stride, and m = 0 , 1, 2, · · · represents the chunk
+block index. To maintain the continuity of convolution slid-
+ing windows, each chunk caches its tail frames for the next
+chunk. The number of cached frames is given by:
+Tcache(m) = kt + mTchunk − st⌊ mTchunk
+st
++ 1⌋. (4)
+For example, kt = 3 , st = 1 , Tchunk = 4 , the equation
+yields Tcache(m) = 2 , as illustrated in Fig. 3a. Similarly,
+with kt = 3 , st = 2 , Tchunk = 4 , we obtain Tcache(m) =
+1, indicating only the last frame requires to be cached. Spe-
+cial cases exist, such as when kt = 4 , st = 3 , Tchunk = 4 ,
+which results in Tcache(m) = ( m mod 3 + 1). Fig. 3b pro-
+vides a qualitative comparison between Causal Cache and
+the tiling strategy, illustrating how it effectively mitigates
+significant distortions in both color and shape.
+3.4. Training Objective
+Following the training strategies of [10, 27], our loss func-
+tion combines multiple components, including reconstruc-
+tion loss (comprising L1 and perceptual loss [47]), adver-
+sarial loss, and KL regularization [18]. Our model is char-
+acterized by a low-frequency energy flow and symmetry be-
+tween the encoder and decoder. To maintain this architec-
+tural principle, we introduce a regularization term denoted
+as LWL (WL loss), which enforces structural consistency
+by penalizing deviations from the intended energy flow:
+LWL = | ˆW (2) − W (2)| + | ˆW (3) − W (3)|. (5)
+The final loss function is formulated as follows:
+L = Lrecon + λadvLadv + λK LLK L+ λWLLWL. (6)
+We examine the impact of the weighting factor λwl
+in Sec. 4.3. Following [10], we implement dynamic adver-
+sarial loss weighting to balance the relative gradient magni-
+tudes between adversarial and reconstruction losses:
+λadv = 1
+2
+ ∥∇GL [Lrecon]∥
+∥∇GL [Ladv]∥ + δ
+
+, (7)
+where ∇GL [·] denotes the gradient with respect to last layer
+of decoder, and δ = 10 −6 is used for numerical stability.
+4. Experiments
+4.1. Experimental Setup
+Baseline Models. To assess the effectiveness of WF-
+V AE, we perform a comprehensive evaluation, comparing
+its performance and efficiency against several state-of-the-
+art V AE models. The models considered are: (1) OD-
+V AE [6], a 3D causal convolutional V AE used in Open-
+Sora Plan 1.2 [19]; (2) Open-Sora V AE [49]; (3) CV-
+V AE [48]; (4) CogVideoX V AE [40]; (5) Allegro V AE [50];
+(6) SVD-V AE [4], which does not compress temporally and
+(7) SD-V AE [27], a widely used image V AE. Among these,
+CogVideoX V AE adopts a latent dimension of 16, whereas
+others utilize a latent dimension of 4. Notably, most V AEs
+have been validated on LVDMs, making them highly repre-
+sentative for comparison.
+Dataset & Evaluation. We utilize the Kinetics-400
+dataset [16] for both training and validation. For test-
+ing, we employ the Panda70M [7] and WebVid-10M [2]
+datasets. To comprehensively evaluate the model’s recon-
+struction performance, we select Peak Signal-to-Noise Ra-
+tio (PSNR) [14], Learned Perceptual Image Patch Similar-
+ity (LPIPS) [47], and Structural Similarity Index Measure
+(SSIM) [36] as primary evaluation metrics. Additionally,
+we use reconstruction Fr ´echet Video Distance (rFVD) [34]
+to assess visual quality and temporal coherence. To assess
+our model’s performance in generating results with the dif-
+fusion model, we utilize the UCF-101 [33] and SkyTime-
+lapse [38] datasets for conditional and unconditional train-
+ing 100,000 steps. Following [22, 32], we extract 16-frame
+17781
+
+=== PAGE 5 ===
+Method TCPR Chn WebVid-10M Panda-70M
+PSNR(↑) SSIM(↑) LPIPS(↓) rFVD(↓) PSNR(↑) SSIM(↑) LPIPS(↓) rFVD(↓)
+SD-V AE [27] 64(1×8×8) 4 30.19 0.8377 0.0568 284.90 30.46 0.8896 0.0395 182.99
+SVD-V AE [4] 64(1×8×8) 4 31.18 0.8689 0.0546 188.74 31.04 0.9059 0.0379 137.67
+CV-V AE [48] 256(4×8×8) 4 30.76 0.8566 0.0803 369.23 30.18 0.8796 0.0672 296.28
+OD-V AE [6] 256(4×8×8) 4 30.69 0.8635 0.0553 255.92 30.31 0.8935 0.0439 191.23
+Open-Sora V AE [49]256(4×8×8) 4 31.14 0.8572 0.1001 475.23 31.37 0.8973 0.0662 298.47
+Allegro [50] 256(4×8×8) 4 32.18 0.8963 0.0524 209.68 31.70 0.9158 0.0421 172.72
+WF-V AE-S (Ours)256(4×8×8) 4 31.39 0.8737 0.0517 188.04 31.27 0.9025 0.0420 146.91
+WF-V AE-L (Ours)256(4×8×8) 4 32.32 0.8920 0.0513 186.00 32.10 0.9142 0.0411 146.24
+CogVideoX-V AE [40]256(4×8×8) 16 35.72 0.9434 0.0277 59.83 35.79 0.9527 0.0198 43.23
+WF-V AE-L (Ours)256(4×8×8) 16 35.76 0.9430 0.0230 54.36 35.87 0.9538 0.0175 39.40
+Table 1. Quantitative metrics of reconstruction performance. Results demostrate that WF-V AE achieves state-of-the-art on reconstrcu-
+tion performance comparing with other V AEs on WebVid-10M [2] and Panda70M [7] datasets. TCPR represents the token compression
+rate, and Chn indicates the number of latent channels. The highest result is highlighted inbold, and the second highest result is underlined.
+256² 512² 768²
+Pixels
+0
+20
+40
+60Encode Memory (GB)
+256² 512² 768²
+Pixels
+0.0
+0.5
+1.0Encode Time (s)
+256² 512² 768²
+Pixels
+20
+40
+60Decode Memory (GB)
+256² 512² 768²
+Pixels
+0
+1
+2Decode Time (s)
+WF-V AE-S WF-V AE-L Allegro V AE OD-V AE CogVideoX CV-V AE
+Figure 4. Computational performance of encoding and decoding. We evaluate the encoding, decoding time, and memory consumption
+across 33 frames with 256×256, 512×512, and 768×768 resolutions (benchmark models without causal convolution are tested with 32
+frames). WF-V AE surpasses other V AE models by a large margin in terms of both inference speed and memory efficiency.
+clips of 2,048 videos to compute FVD 16. Additionally, we
+evaluate the Inception Score (IS) [30] exclusively on the
+UCF-101 dataset, as suggested by [22]. We select Latte-
+L [22] as the denoiser. Since we focus not on the genera-
+tive performance but on whether the latent spaces of various
+video V AEs facilitate practical diffusion model training, we
+chose not to use the higher-performing Latte-XL.
+Training Strategy. We employ the AdamW [17, 21] op-
+timizer with parameters β1 = 0 .9 and β2 = 0 .999, and
+set a fixed learning rate of 1 × 10−5. Our training process
+comprises three stages: (I) the first stage aligns with [6],
+where we preprocess videos to 25 frames with 256 × 256
+resolution, and a total batch size of 8. (II) we refresh the
+discriminator, increase the number of frames to 49, and re-
+duce the FPS by half to enhance motion dynamics. (III) we
+observe that a large λlpips significantly affects video stabil-
+ity; therefore, we refresh the discriminator once more and
+set λlpips to 0.1. All three stages employ L1 loss: the ini-
+tial stage is trained for 800,000 steps, while the subsequent
+stages are each trained for 200,000 steps. The training pro-
+cess utilizes 8 NVIDIA H100 GPUs. We implement a 3D
+discriminator and initiate GAN training from the start. All
+training hyperparameters are detailed in the appendix.
+4.2. Comparison With Baseline Models
+We compare WF-V AE with baseline models in three key
+aspects: computational efficiency, reconstruction perfor-
+mance, and diffusion-based generation performance. To en-
+sure fairness in comparing metrics and model efficiency, we
+disable block-wise inference strategies across all V AEs.
+Computational Efficiency. The computational efficiency
+evaluations are conducted using an H100 GPU with float32
+precision. Performance evaluations are performed at 33
+frames across multiple input resolutions. Due to non-causal
+convolution architecture, Allegro V AE is evaluated using
+32-frame videos to maintain consistency. All benchmark
+V AEs use direct inference without block-wise inference
+strategies for a fair comparison. As shown in Fig. 4, WF-
+V AE demonstrates superior inference performance com-
+pared to other V AEs. For instance, WF-V AE-L requires
+7170 MB of memory for encoding a video at 512×512 res-
+olution, whereas OD-V AE demands approximately 31944
+MB (445% higher). Similarly, CogVideoX consumes
+around 35849.33 MB (499% higher), and Allegro V AE
+requires 55664 MB (776% higher). These results high-
+light WF-V AE’s significant advantages in large-scale train-
+17782
+
+=== PAGE 6 ===
+Ground Truth
+ WF-VAE-L(Chn=16)
+CogVideo-X(Chn=16)
+WF-VAE-S
+WF-VAE-L
+WF-VAE-S
+Ground Truth
+ WF-VAE-L
+WF-VAE-L(Chn=16)
+CogVideo-X(Chn=16) Allegro
+ OD-VAE
+Allegro
+ OD-VAE
+ Open-Sora
+ CV-VAE
+Open-Sora
+ CV-VAE
+Figure 5. Qualitative comparison of reconstruction performance. We select two scenarios to comprehensively evaluate the visual
+quality of videos reconstructed by existing V AEs. Top: scenario containsrich details. Bottom: scenario contains fast motion.
+ing and data processing. In terms of encoding speed, WF-
+V AE-L achieves an encoding time of 0.0513 seconds, while
+OD-V AE, CogVideoX, and Allegro V AE exhibit encoding
+times of 0.0945 seconds, 0.1810 seconds, and 0.3731 sec-
+onds, respectively, which are approximately 184%, 352%,
+and 727% slower. As illustrated in Fig. 4, WF-V AE demon-
+strates notable advantages in computational efficiency dur-
+ing the decoding process.
+Video Reconstruction Performance. We present a quan-
+titative comparison of reconstruction performance between
+WF-V AE and baseline models in Tab. 1 and qualitative re-
+construction results in Fig. 5. Despite having the lowest
+computational cost, WF-V AE-S outperforms popular open-
+source video V AEs such as OD-V AE [6] and Open-Sora
+V AE [49] on both datasets. When increasing the model
+complexity, WF-V AE-L competes well with Allegro [50],
+outperforming it in PSNR, LPIPS and FVD but slightly lag-
+ging in SSIM. However, WF-V AE-L is significantly more
+computationally efficient than Allegro. Additionally, we
+compare WF-V AE-L with CogVideoX [40] using 16 latent
+channels. Except for a slightly lower SSIM on the Webvid-
+10M, WF-V AE-L outperforms CogVideoX across all other
+metrics. These results indicate that WF-V AE achieves com-
+petitive reconstruction performance compared to state-of-
+the-art open-source video V AEs, while substantially im-
+proving computational efficiency.
+Video Generation Evaluation. Fig. 6 and Tab. 2 qual-
+itatively and quantitatively demonstrate the video genera-
+tion results of the diffusion model using WF-V AE. WF-
+V AE achieves the best performance in terms of FVD and IS
+17783
+
+=== PAGE 7 ===
+Method Chn SkyTimelapse UCF101
+FVD16↓ FVD16↓ IS↑
+Allegro [50] 4 117.28 1045.66 67.16
+OD-V AE [6] 4 130.79 1109.87 58.48
+WF-V AE-S (Ours) 4 103.44 1005.10 65.89
+WF-V AE-L (Ours) 4 113.67 929.55 70.53
+CogVideoX [40] 16 109.20 1117.57 57.47
+WF-V AE-L (Ours)16 108.69 947.18 71.86
+Table 2. Quantitative evaluation of different V AE models
+for video generation. We assess video generation quality using
+FVD16 on both SkyTimelapse and UCF-101 datasets, and IS on
+UCF-101 following prior work [22].
+Figure 6. Generated videos using WF-V AE with Latte-L. Top:
+results trained with the SkyTimelapse dataset. Bottom: results
+trained with the UCF-101 dataset.
+20K 40K 60K 80K 100K
+Step
+26
+28
+30
+32
+34Validation PSNR
+Chn=4
+Chn=8
+Chn=16
+Chn=32
+20K 40K 60K 80K 100K
+Step
+27.00
+27.25
+27.50
+27.75
+28.00
+28.25Validation PSNR
+WL=0
+WL=0.01
+WL=0.05
+WL=0.1
+WL=0.1 (L2)
+WL=0.5
+20K 40K 60K 80K 100K
+Step
+27.00
+27.25
+27.50
+27.75
+28.00
+28.25Validation PSNR
+Cflow=64
+Cflow=128
+Cflow=256
+20K 40K 60K 80K 100K
+Step
+0.02
+0.04
+0.06
+0.08
+0.10Validation LPIPS
+(a) Number of latent channels.
+20K 40K 60K 80K 100K
+Step
+0.07
+0.08
+0.09
+0.10Validation LPIPS
+ (b) WL Loss weights λWL.
+20K 40K 60K 80K 100K
+Step
+0.07
+0.08
+0.09
+0.10Validation LPIPS
+ (c) Number of energy flow path channels Cf low.
+Figure 7. Training dynamics under different settings.
+metrics. For instance, in the SkyTimelapse dataset, among
+models with 4 latent channels, WF-V AE-S achieves the
+best FVD score, 10.23 lower than WF-V AE-L and 27.35
+lower than OD-V AE. For models with 16 latent channels,
+WF-V AE-L’s FVD score is 0.51 lower than CogVideoX’s.
+This might be because the higher dimensionality of the la-
+tent space makes convergence more difficult, resulting in
+slightly inferior performance compared to WF-V AE with 4
+latent channels under the same training steps.
+4.3. Ablation Study
+Increasing the latent dimension. Recent works [8, 9]
+show that the number of latent channels significantly im-
+pacts reconstruction quality. We experiment with 4, 8, 16,
+and 32 latent channels. Fig. 7a illustrates that reconstruction
+performance improves significantly as the number of latent
+channels increases. However, larger latent channels may in-
+crease convergence difficulty in training diffusion model, as
+evidenced by the results presented in Tab. 2.
+Exploration of WL loss weight λWL. To ensure struc-
+tural symmetry in WF-V AE, we introduce WL loss. As
+shown in Fig. 7b, the model substantially decreases PSNR
+performance when λWL = 0 . Our experiments demon-
+strate optimal results for both PSNR and LPIPS metrics
+when λWL = 0 .1. Furthermore, our analysis of different
+loss functions reveals that utilizing L1 loss produces supe-
+rior results compared to L2 loss.
+Expanding the energy flow path. The low-frequency in-
+formation flows into the latent representation through the
+energy flow pathway, and the number of channels in this
+path, Cf low, determines the intensity of low-frequency in-
+formation injection into the backbone. We conducted ex-
+periments with Cf low values of 64, 128, and 256. As shown
+in Fig. 7c, we find that when Cf low is 128, it can balance
+reconstruction and computational performance.
+Increasing the number of base channels. To further ex-
+ploit the capabilities of the WF-V AE architecture, we in-
+crease the model complexity by expanding the number of
+17784
+
+=== PAGE 8 ===
+Model BC Params (M) Kinetics-400
+Enc Dec PSNR ↑ LPIPS↓
+WF-V AE-S 128 38 108 28.21 0.0779
+WF-V AE-M 160 58 164 28.44 0.0699
+WF-V AE-L 192 84 232 28.66 0.0661
+Table 3. Scalability of WF-V AE.We evaluated PSNR and LPIPS
+on Kinetics-400 [16]. Reconstruction performance improves as
+model complexity increases.
+base channels. The channel dimensionality increases by one
+base channel width after each downsampling layer, starting
+from the number of base channels. As shown in Tab. 3, we
+experiment with three configurations: 128, 160, and 192
+base channels. The results demonstrate that the model’s
+performance improves as the number of base channels in-
+creases. Despite the corresponding rise in model param-
+eters, the computational cost remains comparatively low
+compared to benchmark models, as shown in Fig. 4.
+Ablation studies of model architecture. First, We eval-
+uate the effectiveness of the energy pathway by examining
+its impact when removed from layer 3 alone and both lay-
+ers 2 and 3. Specifically, we eliminate the wavelet transform
+layer and inflow-outflow module, setting theconcat input
+to a zero tensor. This analysis highlights the advantages of
+integrating low-frequency video energy into the backbone.
+Second, we investigate the importance of the proposed WL
+Loss in regularizing the encoder-decoder. Third, we ana-
+lyze the effect of replacing the normalization method with
+layer normalization [1] for Causal Cache. The results of
+these ablation studies are shown in Tab. 4.
+Settings Kinetics-400
+L1 L2 L3 WL Loss NM PSNR ↑ LPIPS↓
+✓ L 27.85 0.0737
+✓ ✓ ✓ L 27.94 0.0737
+✓ ✓ ✓ L 27.90 0.0692
+✓ ✓ ✓ ✓ L 28.21 0.0690
+✓ ✓ ✓ ✓ G 28.03 0.0684
+Table 4. Ablation studies on model architecture. We evaluate
+the impact of three key components: energy flow pathways across
+network layers, WL loss, and normalization methods (L: layer nor-
+malization [1], G: group normalization [37]).
+4.4. Causal Cache
+To validate the lossless inference capability of Causal
+Cache, we compare our approach with existing block-
+wise inference methods implemented in several open-
+source LVDMs. OD-V AE [6] and Allegro [50] offer
+spatio-temporal tiling inference implementations, while
+CogVideoX [40] adopts a temporal caching strategy. As
+demonstrated in Tab. 5, both tiling strategies and conven-
+tional caching methods exhibited performance degradation,
+while Causal Cache achieves lossless inference with per-
+formance metrics identical to direct inference.
+Method Chn BWI Panda70M
+PSNR↑ LPIPS↓
+✗ 31.71 0.0422Allegro [50] 4 ✓ 25.31(-6.40) 0.1124(+0.0702)
+✗ 30.31 0.0439OD-V AE [6] 4 ✓ 28.51(-1.80) 0.0552(+0.0113)
+✗ 32.10 0.0411WF-V AE-L (Ours)4 ✓ 32.10(0.00) 0.0411(0.0000)
+CogVideoX [40] 16 ✗ 35.79 0.0198
+✓ 35.41(-0.38) 0.0218(+0.0020)
+✗ 35.87 0.0175WF-V AE-L (Ours)16 ✓ 35.87(0.00) 0.0175(0.0000)
+Table 5. Quantitative analysis of visual quality degradation
+induced by block-wise inference. Values in red indicate degra-
+dation compared to direct inference, while values in green demon-
+strate preservation of quality. BWI denotes Block-Wise Inference.
+Experiments are conducted on 33 frames with 256×256 resolution.
+5. Conclusion
+In this paper, we propose WF-V AE, an innovative au-
+toencoder that utilizes multi-level wavelet transform to ex-
+tract pyramidal features, thus creating a primary energy
+flow pathway for encoding low-frequency video informa-
+tion into a latent representation. Additionally, we introduce
+a lossless block-wise inference mechanism called Causal
+Cache, which completely resolves video flickering associ-
+ated with prior tiling strategies. Our experiments demon-
+strate that WF-V AE achieves state-of-the-art reconstruction
+performance while maintaining low computational costs.
+WF-V AE significantly reduces the expenses associated with
+large-scale video pre-training, potentially inspiring future
+designs of video V AEs.
+Limitations and Future Work. The initial design of
+the decoder incorporated insights from [27], employing a
+highly complex structure that resulted in more parameters
+in the backbone of the decoder compared to the encoder.
+Although the computational cost remains manageable, we
+consider these parameters redundant. Consequently, we aim
+to streamline the model in future work to fully leverage the
+advantages of our architecture.
+Acknowledgments
+We thank all the anonymous reviewers for their constructive
+comments. This work was supported in part by the Natural
+Science Foundation of China (No. 62202014, 62332002,
+62425101, 62088102).
+17785
+
+=== PAGE 9 ===
+References
+[1] Jimmy Lei Ba, Jamie Ryan Kiros, and Geoffrey E Hin-
+ton. Layer normalization. arXiv preprint arXiv:1607.06450,
+2016. 8
+[2] Max Bain, Arsha Nagrani, Gul Varol, and Andrew Zisser-
+man. Frozen in time: A joint video and image encoder for
+end-to-end retrieval. In 2021 IEEE/CVF International Con-
+ference on Computer Vision (ICCV), Oct 2021. 4, 5
+[3] Fan Bao, Chendong Xiang, Gang Yue, Guande He,
+Hongzhou Zhu, Kaiwen Zheng, Min Zhao, Shilong Liu,
+Yaole Wang, and Jun Zhu. Vidu: a highly consistent,
+dynamic and skilled text-to-video generator with diffusion
+models. arXiv preprint arXiv:2405.04233, 2024. 2
+[4] Andreas Blattmann, Tim Dockhorn, Sumith Kulal, Daniel
+Mendelevitch, Maciej Kilian, Dominik Lorenz, Yam Levi,
+Zion English, Vikram V oleti, Adam Letts, et al. Stable video
+diffusion: Scaling latent video diffusion models to large
+datasets. arXiv preprint arXiv:2311.15127, 2023. 4, 5
+[5] Tim Brooks, Bill Peebles, Connor Holmes, Will DePue,
+Yufei Guo, Li Jing, David Schnurr, Joe Taylor, Troy Luh-
+man, Eric Luhman, et al. Video generation models as world
+simulators. OpenAI Blog, 1:8, 2024. 1
+[6] Liuhan Chen, Zongjian Li, Bin Lin, Bin Zhu, Qian Wang,
+Shenghai Yuan, Xing Zhou, Xinghua Cheng, and Li Yuan.
+Od-vae: An omni-dimensional video compressor for im-
+proving latent video diffusion model. arXiv preprint
+arXiv:2409.01199, 2024. 1, 2, 4, 5, 6, 7, 8
+[7] Tsai-Shien Chen, Aliaksandr Siarohin, Willi Menapace,
+Ekaterina Deyneka, Hsiang-wei Chao, Byung Eun Jeon,
+Yuwei Fang, Hsin-Ying Lee, Jian Ren, Ming-Hsuan Yang,
+and Sergey Tulyakov. Panda-70m: Captioning 70m videos
+with multiple cross-modality teachers. In Proceedings of
+the IEEE/CVF Conference on Computer Vision and Pattern
+Recognition (CVPR), pages 13320–13331, June 2024. 4, 5
+[8] Xiaoliang Dai, Ji Hou, Chih-Yao Ma, Sam Tsai, Jialiang
+Wang, Rui Wang, Peizhao Zhang, Simon Vandenhende, Xi-
+aofang Wang, Abhimanyu Dubey, et al. Emu: Enhanc-
+ing image generation models using photogenic needles in a
+haystack. arXiv preprint arXiv:2309.15807, 2023. 7
+[9] Patrick Esser, Sumith Kulal, Andreas Blattmann, Rahim
+Entezari, Jonas M ¨uller, Harry Saini, Yam Levi, Dominik
+Lorenz, Axel Sauer, Frederic Boesel, et al. Scaling recti-
+fied flow transformers for high-resolution image synthesis.
+In Forty-first international conference on machine learning,
+2024. 2, 7
+[10] Patrick Esser, Robin Rombach, and Bjorn Ommer. Taming
+transformers for high-resolution image synthesis. In Pro-
+ceedings of the IEEE/CVF Conference on Computer Vision
+and Pattern Recognition (CVPR), pages 12873–12883, June
+2021. 4
+[11] Shahaf E Finder, Roy Amoyal, Eran Treister, and Oren
+Freifeld. Wavelet convolutions for large receptive fields. In
+European Conference on Computer Vision, pages 363–380.
+Springer, 2024. 2
+[12] Rinon Gal, Dana Cohen Hochberg, Amit Bermano, and
+Daniel Cohen-Or. Swagan: A style-based wavelet-driven
+generative model. ACM Transactions on Graphics (TOG) ,
+40(4):1–11, 2021. 2
+[13] Yuwei Guo, Ceyuan Yang, Anyi Rao, Zhengyang Liang,
+Yaohui Wang, Yu Qiao, Maneesh Agrawala, Dahua Lin, and
+Bo Dai. Animatediff: Animate your personalized text-to-
+image diffusion models without specific tuning. Interna-
+tional Conference on Learning Representations, 2024. 2
+[14] Alain Hore and Djemel Ziou. Image quality metrics: Psnr
+vs. ssim. In 2010 20th international conference on pattern
+recognition, pages 2366–2369. IEEE, 2010. 4
+[15] Huaibo Huang, Ran He, Zhenan Sun, and Tieniu Tan.
+Wavelet-srnet: A wavelet-based cnn for multi-scale face su-
+per resolution. In Proceedings of the IEEE international con-
+ference on computer vision, pages 1689–1697, 2017. 2
+[16] Will Kay, Joao Carreira, Karen Simonyan, Brian Zhang,
+Chloe Hillier, Sudheendra Vijayanarasimhan, Fabio Viola,
+Tim Green, Trevor Back, Paul Natsev, Mustafa Suleyman,
+and Andrew Zisserman. The kinetics human action video
+dataset, 2017. 4, 8
+[17] DiederikP. Kingma and Jimmy Ba. Adam: A method for
+stochastic optimization. arXiv: Learning,arXiv: Learning ,
+Dec 2014. 5
+[18] DiederikP. Kingma and Max Welling. Auto-encoding vari-
+ational bayes. arXiv: Machine Learning,arXiv: Machine
+Learning, Dec 2013. 2, 4
+[19] Bin Lin, Yunyang Ge, Xinhua Cheng, Zongjian Li, Bin Zhu,
+Shaodong Wang, Xianyi He, Yang Ye, Shenghai Yuan, Li-
+uhan Chen, et al. Open-sora plan: Open-source large video
+generation model. arXiv preprint arXiv:2412.00131, 2024.
+1, 2, 4
+[20] Bin Lin, Yang Ye, Bin Zhu, Jiaxi Cui, Munan Ning, Peng
+Jin, and Li Yuan. Video-llava: Learning united visual rep-
+resentation by alignment before projection. arXiv preprint
+arXiv:2311.10122, 2023. 2
+[21] Ilya Loshchilov and Frank Hutter. Decoupled weight decay
+regularization. arXiv preprint arXiv:1711.05101, 2017. 5
+[22] Xin Ma, Yaohui Wang, Gengyun Jia, Xinyuan Chen, Zi-
+wei Liu, Yuan-Fang Li, Cunjian Chen, and Yu Qiao. Latte:
+Latent diffusion transformer for video generation. arXiv
+preprint arXiv:2401.03048, 2024. 4, 5, 7
+[23] S.G. Mallat. A theory for multiresolution signal decomposi-
+tion: the wavelet representation. IEEE Transactions on Pat-
+tern Analysis and Machine Intelligence , page 674–693, Jun
+1989. 2
+[24] Gautam Mittal, Jesse Engel, Curtis Hawthorne, and Ian Si-
+mon. Symbolic music generation with diffusion models.
+arXiv: Sound,arXiv: Sound, Mar 2021. 2
+[25] Adam Polyak, Amit Zohar, Andrew Brown, Andros Tjandra,
+Animesh Sinha, Ann Lee, Apoorv Vyas, Bowen Shi, Chih-
+Yao Ma, Ching-Yao Chuang, David Yan, Dhruv Choudhary,
+Dingkang Wang, Geet Sethi, Guan Pang, Haoyu Ma, Ishan
+Misra, Ji Hou, Jialiang Wang, Kiran Jagadeesh, Kunpeng
+Li, Luxin Zhang, Mannat Singh, Mary Williamson, Matt
+Le, Matthew Yu, Mitesh Kumar Singh, Peizhao Zhang, Pe-
+ter Vajda, Quentin Duval, Rohit Girdhar, Roshan Sumbaly,
+Sai Saketh Rambhatla, Sam Tsai, Samaneh Azadi, Samyak
+Datta, Sanyuan Chen, Sean Bell, Sharadh Ramaswamy,
+Shelly Sheynin, Siddharth Bhattacharya, Simran Motwani,
+Tao Xu, Tianhe Li, Tingbo Hou, Wei-Ning Hsu, Xi Yin, Xi-
+aoliang Dai, Yaniv Taigman, Yaqiao Luo, Yen-Cheng Liu,
+Yi-Chiao Wu, Yue Zhao, Yuval Kirstain, Zecheng He, Zijian
+17786
+
+=== PAGE 10 ===
+He, Albert Pumarola, Ali Thabet, Artsiom Sanakoyeu, Arun
+Mallya, Baishan Guo, Boris Araya, Breena Kerr, Carleigh
+Wood, Ce Liu, Cen Peng, Dimitry Vengertsev, Edgar Schon-
+feld, Elliot Blanchard, Felix Juefei-Xu, Fraylie Nord, Jeff
+Liang, John Hoffman, Jonas Kohler, Kaolin Fire, Karthik
+Sivakumar, Lawrence Chen, Licheng Yu, Luya Gao, Markos
+Georgopoulos, Rashel Moritz, Sara K. Sampson, Shikai Li,
+Simone Parmeggiani, Steve Fine, Tara Fowler, Vladan Petro-
+vic, and Yuming Du. Movie gen: A cast of media foundation
+models, 2024. 1, 2
+[26] Ale ˇs Proch´azka, Lucie Gr´afov´a, Oldrich Vyˇsata, and Neuro-
+center Caregroup. Three-dimensional wavelet transform in
+multi-dimensional biomedical volume processing. In Proc.
+of the IASTED International Conference on Graphics and
+Virtual Reality, Cambridge, volume 263, page 268, 2011. 2
+[27] Robin Rombach, Andreas Blattmann, Dominik Lorenz,
+Patrick Esser, and Bj ¨orn Ommer. High-resolution image
+synthesis with latent diffusion models. In Proceedings of
+the IEEE/CVF conference on computer vision and pattern
+recognition, pages 10684–10695, 2022. 1, 2, 4, 5, 8
+[28] Olaf Ronneberger, Philipp Fischer, and Thomas Brox. U-
+net: Convolutional networks for biomedical image segmen-
+tation. In Medical image computing and computer-assisted
+intervention–MICCAI 2015: 18th international conference,
+Munich, Germany, October 5-9, 2015, proceedings, part III
+18, pages 234–241. Springer, 2015. 2
+[29] Seyedmorteza Sadat, Jakob Buhmann, Derek Bradley, Otmar
+Hilliges, and Romann M Weber. Litevae: Lightweight and
+efficient variational autoencoders for latent diffusion models.
+In The Thirty-eighth Annual Conference on Neural Informa-
+tion Processing Systems, 2024. 2
+[30] Masaki Saito, Eiichi Matsumoto, and Shunta Saito. Tempo-
+ral generative adversarial nets with singular value clipping.
+In 2017 IEEE International Conference on Computer Vision
+(ICCV), Oct 2017. 5
+[31] Abhishek Sinha, Jiaming Song, Chenlin Meng, and Stefano
+Ermon. D2c: Diffusion-denoising models for few-shot con-
+ditional generation. arXiv: Learning,arXiv: Learning , Jun
+2021. 2
+[32] Ivan Skorokhodov, Sergey Tulyakov, and Mohamed Elho-
+seiny. Stylegan-v: A continuous video generator with the
+price, image quality and perks of stylegan2. In Proceedings
+of the IEEE/CVF conference on computer vision and pattern
+recognition, pages 3626–3636, 2022. 4
+[33] Khurram Soomro, Amir Zamir, and Mubarak Shah. Ucf101:
+A dataset of 101 human actions classes from videos in
+the wild. arXiv: Computer Vision and Pattern Recogni-
+tion,arXiv: Computer Vision and Pattern Recognition , Dec
+2012. 4
+[34] Thomas Unterthiner, Sjoerdvan Steenkiste, Karol Kurach,
+Rapha¨el Marinier, Marcin Michalski, and Sylvain Gelly.
+Fvd: A new metric for video generation. International Con-
+ference on Learning Representations,International Confer-
+ence on Learning Representations, Mar 2019. 4
+[35] Arash Vahdat, Karsten Kreis, and Jan Kautz. Score-based
+generative modeling in latent space. Neural Information
+Processing Systems,Neural Information Processing Systems,
+Dec 2021. 2
+[36] Zhou Wang, Alan C Bovik, Hamid R Sheikh, and Eero P Si-
+moncelli. Image quality assessment: from error visibility to
+structural similarity. IEEE transactions on image processing,
+13(4):600–612, 2004. 4
+[37] Yuxin Wu and Kaiming He. Group normalization. In Pro-
+ceedings of the European conference on computer vision
+(ECCV), pages 3–19, 2018. 2, 8
+[38] Wei Xiong, Wenhan Luo, Lin Ma, Wei Liu, and Jiebo Luo.
+Learning to generate time-lapse videos using multi-stage dy-
+namic generative adversarial networks. Cornell University -
+arXiv,Cornell University - arXiv, Sep 2017. 4
+[39] Jiaqi Xu, Xinyi Zou, Kunzhe Huang, Yunkuo Chen, Bo Liu,
+MengLi Cheng, Xing Shi, and Jun Huang. Easyanimate:
+A high-performance long video generation method based on
+transformer architecture. arXiv preprint arXiv:2405.18991,
+2024. 1, 2
+[40] Zhuoyi Yang, Jiayan Teng, Wendi Zheng, Ming Ding, Shiyu
+Huang, Jiazheng Xu, Yuanming Yang, Wenyi Hong, Xiao-
+han Zhang, Guanyu Feng, et al. Cogvideox: Text-to-video
+diffusion models with an expert transformer. arXiv preprint
+arXiv:2408.06072, 2024. 1, 2, 4, 5, 6, 7, 8
+[41] Lijun Yu, Jos ´e Lezama, Nitesh Bharadwaj Gundavarapu,
+Luca Versari, Kihyuk Sohn, David Minnen, Yong Cheng,
+Agrim Gupta, Xiuye Gu, Alexander G Hauptmann, et al.
+Language model beats diffusion-tokenizer is key to visual
+generation. In ICLR, 2024. 2, 4
+[42] Shenghai Yuan, Jijia Chen, Wenchao Jiang, Zhiming Zhao,
+and Song Guo. Lhnetv2: A balanced low-cost hybrid net-
+work for single image dehazing. IEEE Transactions on Mul-
+timedia, 2024. 2
+[43] Shenghai Yuan, Jijia Chen, Jiaqi Li, Wenchao Jiang, and
+Song Guo. Lhnet: A low-cost hybrid network for single im-
+age dehazing. In Proceedings of the 31st ACM International
+Conference on Multimedia, pages 7706–7717, 2023. 2
+[44] Shenghai Yuan, Jinfa Huang, Xianyi He, Yunyuan Ge, Yu-
+jun Shi, Liuhan Chen, Jiebo Luo, and Li Yuan. Identity-
+preserving text-to-video generation by frequency decompo-
+sition. arXiv preprint arXiv:2411.17440, 2024. 1
+[45] Shenghai Yuan, Jinfa Huang, Yujun Shi, Yongqi Xu, Ruijie
+Zhu, Bin Lin, Xinhua Cheng, Li Yuan, and Jiebo Luo. Mag-
+ictime: Time-lapse video generation models as metamorphic
+simulators. arXiv preprint arXiv:2404.05014, 2024. 2
+[46] Shenghai Yuan, Jinfa Huang, Yongqi Xu, Yaoyang Liu,
+Shaofeng Zhang, Yujun Shi, Rui-Jie Zhu, Xinhua Cheng,
+Jiebo Luo, and Li Yuan. Chronomagic-bench: A bench-
+mark for metamorphic evaluation of text-to-time-lapse video
+generation. Advances in Neural Information Processing Sys-
+tems, 37:21236–21270, 2024. 2
+[47] Richard Zhang, Phillip Isola, Alexei A. Efros, Eli Shecht-
+man, and Oliver Wang. The unreasonable effectiveness of
+deep features as a perceptual metric. In 2018 IEEE/CVF
+Conference on Computer Vision and Pattern Recognition ,
+Jun 2018. 4
+[48] Sijie Zhao, Yong Zhang, Xiaodong Cun, Shaoshu Yang,
+Muyao Niu, Xiaoyu Li, Wenbo Hu, and Ying Shan. Cv-vae:
+A compatible video vae for latent generative video models.
+arXiv preprint arXiv:2405.20279, 2024. 1, 2, 4, 5
+[49] Zangwei Zheng, Xiangyu Peng, Tianji Yang, Chenhui Shen,
+Shenggui Li, Hongxin Liu, Yukun Zhou, Tianyi Li, and Yang
+You. Open-sora: Democratizing efficient video production
+17787
+
+=== PAGE 11 ===
+for all. arXiv preprint arXiv:2412.20404, 2024. 1, 2, 4, 5, 6
+[50] Yuan Zhou, Qiuyue Wang, Yuxuan Cai, and Huan Yang. Al-
+legro: Open the black box of commercial-level video gener-
+ation model. arXiv preprint arXiv:2410.15458, 2024. 1, 2,
+4, 5, 6, 7, 8
+[51] Bin Zhu, Bin Lin, Munan Ning, Yang Yan, Jiaxi Cui, HongFa
+Wang, Yatian Pang, Wenhao Jiang, Junwu Zhang, Zongwei
+Li, et al. Languagebind: Extending video-language pretrain-
+ing to n-modality by language-based semantic alignment.
+arXiv preprint arXiv:2310.01852, 2023. 2
+17788

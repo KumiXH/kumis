@@ -1,0 +1,4 @@
+*.part
+*.py[cod]
+__pycache__/
+.codex_artifact_tool/node_modules/

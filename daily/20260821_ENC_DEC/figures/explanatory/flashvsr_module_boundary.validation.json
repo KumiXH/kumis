@@ -1,0 +1,18 @@
+{
+  "valid": true,
+  "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\explanatory\\flashvsr_module_boundary.svg",
+  "canvas": {
+    "width": 1500.0,
+    "height": 980.0
+  },
+  "counts": {
+    "elements": 64,
+    "shape_labels": 2,
+    "residual_paths": 1,
+    "condition_paths": 2
+  },
+  "errors": [],
+  "warnings": [
+    "canvas is not portrait; confirm the top-to-bottom layout remains readable"
+  ]
+}

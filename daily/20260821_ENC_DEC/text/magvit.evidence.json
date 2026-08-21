@@ -1,0 +1,113 @@
+{
+  "key": "magvit",
+  "pdf": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\papers\\03_video_vae\\magvit_2212.05199.pdf",
+  "page_count": 11,
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\text\\magvit.txt",
+  "first_page_excerpt": "MAGVIT: Masked Generative Video Transformer\nLijun Yu‡†⋄∗, Yong Cheng†, Kihyuk Sohn†, Jos´e Lezama†, Han Zhang†, Huiwen Chang†,\nAlexander G. Hauptmann‡, Ming-Hsuan Yang†, Yuan Hao†, Irfan Essa†∤, and Lu Jiang†⋄\n‡Carnegie Mellon University, †Google Research, ∤Georgia Institute of Technology\n⋄ Correspondence to lijun@cmu.edu, lujiang@google.com\n0100200300MAGVITTATSVideo Diffusion\n160x 250x(b) Efficiency\n(a) Quality\n0200400MAGVITTATS(prior best)CCVS\n76-77%332386\n0.045.090.0MAGVITTATS(prior best)Video Diffusion\n89.3+13%79.357.0\n306090MAGVITRaMViD(prior best)NÜWA\n62-26%8487\n01020MAGVITVideo Diffusion(prior best)RaMViD\n9.9-39%16.216.5\nUCF-101 CG FVD↓\nBAIR FP FVD↓Kinetics-600 FP FVD↓\nUCF-101 CG IS↑\nEstimated Relative Inference RuntimeInference ThroughputAt128×128native resolutionMAGVIT-B37 fpson 1x\n(c) Flexibility\nClass-conditional Generation (CG)\nFrame Prediction (FP)\nFrame Interpolation\nOutpainting\nInpainting\nSqueezingSomething\n10 tasks in one model\nMAGVIT-L65 fpson 1x\nAnd other tasks …\nGPUV100\nTPUv4i\nFigure 1. Overview of the video generation quality, efficiency, and flexibility of the proposed MAGVIT model. (a) MAGVIT achieves\nthe state-of-the-art FVD [61] and Inception Score (IS) [49] on two video generation tasks and three benchmarks, in comparison with prior\nbest diffusion models (RaMViD [35], Video Diffusion [33]) and autoregressive models (CCVS [41], TATS [21], N¨UW A [70]). (b) It is two\norders of magnitude faster than diffusion models and 60× faster than autoregressive models. (c) A single MAGVIT model accommodates\ndifferent generation tasks, ranging from class-conditional generation to dynamic inpainting of a moving object.\nAbstract\nWe introduce the MAsked Generative VIdeo Transformer,\nMAGVIT, to tackle various video synthesis tasks with a\nsingle model. We introduce a 3D tokenizer to quantize a\nvideo into spatial-temporal visual tokens and propose an\nembedding method for masked video token modeling to fa-\ncilitate multi-task learning. We conduct extensive experi-\nments to demonstrate the quality, efficiency, and flexibility\nof MAGVIT. Our experiments show that (i) MAGVIT per-\nforms favorably against state-of-the-art approaches and es-\ntablishes the best-published FVD on three video generation\nbenchmarks, including the challenging Kinetics-600. (ii)\nMAGVIT outperforms existing methods in inference time by\ntwo orders of magnitude against diffusion models and by\n60× against autoregressive models. (iii) A single MAGVIT\nmodel supports ten diverse generation tasks and general-\nizes across videos from different visual domains. The source\ncode and trained models will be released to the public at\nhttps://magvit.cs.cmu.edu.\n∗Work partially done during a research internship at Google Research.\n1. Introduction\nRecent years have witnessed significant advances in\nimage and video content creation based on learning\nframeworks ranging from generative adversarial networks\n(GANs) [15, 43, 48, 59, 66], diffusion models [25, 33, 35,\n47, 65], to vision transformers [44, 45, 69]. Inspired by\nthe recent success of generative image transformers such as\nDALL·E [46] and other approaches [12,18,20,73], we pro-\npose an efficient and effective video generation model by\nleveraging masked token modeling and multi-task learning.\nWe introduce the MAsked Generative VIdeo Trans-\nformer (MAGVIT) for multi-task video generation. Specif-\nically, we build and train a single MAGVIT model to per-\nform a variety of diverse video generation tasks and demon-\nstrate the model’s efficiency, effectiveness, and flexibility\nagainst state-of-the-art approaches. Fig. 1(a) shows the\nquality metrics of MAGVIT on a few benchmarks with ef-\nficiency comparisons in (b), and generated examples under\ndifferent task setups such as frame prediction/interpolation,\nout/in-painting, and class conditional generation in (c).\nThis CVPR paper is the Open Access version, provided by the Computer Vision Foundation.\nExcept for this watermark, it is identical to the accepted version;\nthe final published version of the proceedings is available on IEEE Xplore.\n10459",
+  "figure_candidates": [
+    {
+      "page": 1,
+      "caption": "Figure 1. Overview of the video generation quality, efficiency, and flexibility of the proposed MAGVIT model. (a) MAGVIT achieves"
+    },
+    {
+      "page": 3,
+      "caption": "Figure 2. MAGVIT pipeline overview. The 3D-VQ encoder quantizes a video into discrete tokens, while the 3D-VQ decoder maps them"
+    },
+    {
+      "page": 3,
+      "caption": "Fig. 2 illustrates the training in the second stage. At each"
+    },
+    {
+      "page": 4,
+      "caption": "Figure 3. Comparison between MTM decoding for image [12]"
+    },
+    {
+      "page": 4,
+      "caption": "Fig. 3 compares the non-autoregressive image decod-"
+    },
+    {
+      "page": 5,
+      "caption": "Fig. 4 compares the generated videos to baseline models."
+    },
+    {
+      "page": 6,
+      "caption": "Figure 4. Comparison of class-conditional generation samples on UCF-101. 16-frame videos are generated at 128 ×128 resolution 25"
+    },
+    {
+      "page": 6,
+      "caption": "Figure 5. Inference-time generation efficiency comparison.The"
+    },
+    {
+      "page": 6,
+      "caption": "Fig. 5 compares the sequence lengths and inference steps"
+    },
+    {
+      "page": 7,
+      "caption": "Figure 6. Multi-task generation samples on four datasets: SSv2 [23], nuScenes [9], Objectron [2], and Web videos. The left column"
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 5,
+      "caption": "Table 1. Generation performance on the UCF-101 dataset."
+    },
+    {
+      "page": 5,
+      "caption": "Table 2. Frame prediction performance on the BAIR and"
+    },
+    {
+      "page": 5,
+      "caption": "Table 3. Image quality metrics on BAIR frame prediction."
+    },
+    {
+      "page": 7,
+      "caption": "Table 4. Multi-task generation performance on BAIR and SSV2 evaluated by FVD. Gray values denote unseen tasks during training."
+    },
+    {
+      "page": 7,
+      "caption": "Table 5. Comparison of conditional masked token modelingon"
+    },
+    {
+      "page": 8,
+      "caption": "Table 6. Comparison of decoding methods on BAIR frame pre-"
+    },
+    {
+      "page": 8,
+      "caption": "Table 7. Comparison of tokenizer architectures and initializa-"
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      1,
+      2,
+      3,
+      7,
+      8,
+      10
+    ],
+    "compression": [
+      3
+    ],
+    "training": [
+      1,
+      3,
+      4,
+      10,
+      11
+    ],
+    "dataset": [
+      2,
+      3,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "ablation": [
+      6
+    ],
+    "limitations": []
+  }
+}

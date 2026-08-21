@@ -1,0 +1,93 @@
+{
+  "key": "flashvsr",
+  "pdf": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\papers\\05_flashvsr_case\\flashvsr_2510.12747.pdf",
+  "page_count": 12,
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\text\\flashvsr.txt",
+  "first_page_excerpt": "FlashVSR: Towards Real-time Diffusion-Based Streaming Video Super\nResolution\nJunhao Zhuang1,2 Shi Guo2† Xin Cai3 Xiaohui Li4\nYihao Liu2 Chun Yuan1† Tianfan Xue3,2,5\n1Tsinghua University 2Shanghai AI Lab\n3CUHK MMLab 4Shanghai Jiao Tong University 5CPII under InnoHK\n†Corresponding authors\nhttps://zhuang2002.github.io/FlashVSR/\nFigure 1. Efficiency and performance comparison in high-resolution video restoration. Compared to state-of-the-art VSR models (e.g.,\nDOVE and SeedVR2-3B), FlashVSR restores sharper textures and more detailed structures overall. It achieves near real-time performance\nat 17 FPS on768×1408videos using a single A100 GPU, corresponding to a measured 11.8×speedup over the fastest one-step diffusion\nVSR model.(Zoom in for best view).\nAbstract\nDiffusion models have recently advanced video restora-\ntion, but applying them to real-world and AIGC-generated\nvideo super-resolution (VSR) remains challenging due to\nhigh latency, prohibitive computation, and poor general-\nization to ultra-high resolutions. Our goal in this work\nis to make diffusion-based VSR practical by achieving ef-\nficiency, scalability, and near real-time performance. To\nthis end, we proposeFlashVSR, the first diffusion-based\none-step streaming framework for efficient video super-\nresolution. FlashVSR runs at∼17 FPS for768×1408\nThis CVPR paper is the Open Access version, provided by the Computer Vision Foundation.\nExcept for this watermark, it is identical to the accepted version;\nthe final published version of the proceedings is available on IEEE Xplore.\n43482",
+  "figure_candidates": [
+    {
+      "page": 1,
+      "caption": "Figure 1. Efficiency and performance comparison in high-resolution video restoration. Compared to state-of-the-art VSR models (e.g.,"
+    },
+    {
+      "page": 4,
+      "caption": "Figure 2. Overview of the three-stage training pipeline of FlashVSR, covering video–image joint SR training, adaptation with block-sparse"
+    },
+    {
+      "page": 5,
+      "caption": "Figure 3. Locality-Constrained Sparse Attention. Left: At ultra-high resolutions, performing inference beyond the trained positional"
+    },
+    {
+      "page": 5,
+      "caption": "Fig. 3. Because of this effect, many existing VSR meth-"
+    },
+    {
+      "page": 5,
+      "caption": "Figure 4. Training pipeline of the TC Decoder."
+    },
+    {
+      "page": 7,
+      "caption": "Figure 5. Visualization results of video super-resolution on real-world and AIGC videos."
+    },
+    {
+      "page": 8,
+      "caption": "Fig. 5. For clarity, we also enlarge selected patches to better"
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 6,
+      "caption": "Table 1. Quantitative comparison on synthetic (YouHQ40, REDS, SPMCS), real-world (VideoLQ), and AIGC (AIGC30) datasets, covering"
+    },
+    {
+      "page": 6,
+      "caption": "Table 2. Efficiency comparison (peak memory, runtime, and parameters) on101×768×1408videos."
+    },
+    {
+      "page": 7,
+      "caption": "Table 3. 13.6% sparse attention achieves similar reconstruction quality to full attention with∼7.4×lower computation."
+    },
+    {
+      "page": 7,
+      "caption": "Table 4. Ablation of tiny conditional decoder."
+    },
+    {
+      "page": 8,
+      "caption": "Table 5. Ablation of Locality-constrained Attention. Both Boundary-Truncated and Boundary-Preserved outperform Global Attention"
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "compression": [],
+    "training": [
+      3,
+      5,
+      9,
+      10
+    ],
+    "dataset": [
+      2,
+      3,
+      6,
+      7,
+      9,
+      10,
+      11
+    ],
+    "ablation": [
+      2,
+      7,
+      8
+    ],
+    "limitations": []
+  }
+}

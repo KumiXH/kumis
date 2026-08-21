@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900">
+<rect width="100%" height="100%" fill="#FFFFFF"/>
+
+<style>
+  text { font-family: 'Microsoft YaHei', 'Noto Sans CJK SC', Arial, sans-serif; fill: #17212B; }
+  .title { font-size: 32px; font-weight: 700; }
+  .subtitle { font-size: 17px; fill: #4B5B66; }
+  .year { font-size: 19px; font-weight: 700; fill: #B31B34; }
+  .label { font-size: 16px; font-weight: 700; }
+  .body { font-size: 14px; }
+  .shape { font-size: 13px; fill: #394B56; }
+  .small { font-size: 12px; fill: #52636E; }
+  .node { rx: 7; ry: 7; stroke-width: 2; }
+  .conv { fill: #D8EBF7; stroke: #1479AD; }
+  .conditionBox { fill: #DFF3E9; stroke: #07845F; }
+  .latent { fill: #EEE6F7; stroke: #8052A5; }
+  .attention { fill: #FBE6C4; stroke: #DC8500; }
+  .operation { fill: #EDF0F2; stroke: #687984; }
+  .main { fill: none; stroke: #263238; stroke-width: 2.2; marker-end: url(#arrow); }
+  .condition { fill: none; stroke: #07845F; stroke-width: 2.2; marker-end: url(#arrowGreen); }
+  .residual { fill: none; stroke: #8052A5; stroke-width: 2; stroke-dasharray: 8 6; marker-end: url(#arrowPurple); }
+  .axis { stroke: #AAB5BC; stroke-width: 3; }
+</style>
+<defs>
+  <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#263238"/></marker>
+  <marker id="arrowGreen" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#07845F"/></marker>
+  <marker id="arrowPurple" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#8052A5"/></marker>
+</defs>
+
+<text x="70" y="60" class="title">主流 DiT 编解码器张量流 / Tensor Flow</text>
+<text x="70" y="94" class="subtitle">图像与视频使用同一训练边界：先训练 tokenizer，再冻结 latent 接口训练 DiT；复原模型可额外注入观测条件。</text>
+<g id="main-flow" data-flow="top-to-bottom">
+<rect x="95" y="145" width="360" height="90" class="node conditionBox"/>
+<text x="275" y="178" class="label" text-anchor="middle">图像 Image</text>
+<text x="275" y="207" class="shape" text-anchor="middle">x: [B,3,H,W] = [B,3,1024,1024]</text>
+<rect x="95" y="290" width="360" height="105" class="node conv"/>
+<text x="275" y="326" class="label" text-anchor="middle">2D Encoder / Tokenizer</text>
+<text x="275" y="352" class="shape" text-anchor="middle">f8, C=4/16; or discrete K tokens</text>
+<text x="275" y="376" class="small" text-anchor="middle">SD-VAE / SD3 / FLUX / TiTok / DC-AE</text>
+<rect x="95" y="455" width="360" height="100" class="node latent"/>
+<text x="275" y="490" class="label" text-anchor="middle">Image latent</text>
+<text x="275" y="518" class="shape" text-anchor="middle">[B,C,H/8,W/8] -> patchify -> [B,N,D]</text>
+<rect x="95" y="620" width="360" height="105" class="node attention"/>
+<text x="275" y="657" class="label" text-anchor="middle">Image DiT / MM-DiT</text>
+<text x="275" y="684" class="shape" text-anchor="middle">denoise / flow-match latent tokens</text>
+<rect x="95" y="780" width="360" height="80" class="node conv"/>
+<text x="275" y="815" class="label" text-anchor="middle">Frozen Decoder -> RGB</text>
+<text x="275" y="841" class="shape" text-anchor="middle">[B,C,H/8,W/8] -> [B,3,H,W]</text>
+<path d="M275 235 L275 290" class="main"/>
+<path d="M275 395 L275 455" class="main"/>
+<path d="M275 555 L275 620" class="main"/>
+<path d="M275 725 L275 780" class="main"/>
+<rect x="650" y="145" width="400" height="90" class="node conditionBox"/>
+<text x="850" y="178" class="label" text-anchor="middle">视频 Video</text>
+<text x="850" y="207" class="shape" text-anchor="middle">v: [B,3,T,H,W] = [B,3,81,720,1280]</text>
+<rect x="650" y="290" width="400" height="105" class="node conv"/>
+<text x="850" y="326" class="label" text-anchor="middle">Causal 3D Encoder / Tokenizer</text>
+<text x="850" y="352" class="shape" text-anchor="middle">temporal x4/8, spatial x8/32; first-frame policy</text>
+<text x="850" y="376" class="small" text-anchor="middle">CogVideoX / WF-VAE / LTX / Cosmos / Wan</text>
+<rect x="650" y="455" width="400" height="100" class="node latent"/>
+<text x="850" y="490" class="label" text-anchor="middle">Video latent</text>
+<text x="850" y="518" class="shape" text-anchor="middle">[B,C,T/f_t,H/f_s,W/f_s] -> 3D patch tokens</text>
+<rect x="650" y="620" width="400" height="105" class="node attention"/>
+<text x="850" y="657" class="label" text-anchor="middle">Video DiT / Flow Transformer</text>
+<text x="850" y="684" class="shape" text-anchor="middle">causal/full attention, text and image conditions</text>
+<rect x="650" y="780" width="400" height="80" class="node conv"/>
+<text x="850" y="815" class="label" text-anchor="middle">Causal Decoder -> Video</text>
+<text x="850" y="841" class="shape" text-anchor="middle">stream/cache or chunked decode</text>
+<path d="M850 235 L850 290" class="main"/>
+<path d="M850 395 L850 455" class="main"/>
+<path d="M850 555 L850 620" class="main"/>
+<path d="M850 725 L850 780" class="main"/>
+</g>
+<rect x="1135" y="260" width="295" height="145" class="node conditionBox"/>
+<text x="1282" y="298" class="label" text-anchor="middle">复原观测条件</text>
+<text x="1282" y="324" class="small" text-anchor="middle">Restoration observation</text>
+<text x="1282" y="353" class="body" text-anchor="middle">LQ RGB / mask / metadata</text>
+<text x="1282" y="379" class="shape" text-anchor="middle">project -> latent-aligned feature</text>
+<path d="M1135 335 L1050 520" class="condition" data-route="right"/>
+<rect x="1135" y="610" width="295" height="145" class="node operation"/>
+<text x="1282" y="648" class="label" text-anchor="middle">训练边界</text>
+<text x="1282" y="675" class="body" text-anchor="middle">1. Tokenizer/VAE 预训练</text>
+<text x="1282" y="701" class="body" text-anchor="middle">2. 冻结 latent 训练 DiT</text>
+<text x="1282" y="727" class="body" text-anchor="middle">3. 任务适配 / decoder 替换</text>
+</svg>

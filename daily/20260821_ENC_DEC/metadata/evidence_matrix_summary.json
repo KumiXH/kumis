@@ -1,0 +1,14 @@
+{
+  "architecture_rows": 20,
+  "training_rows": 15,
+  "dataset_rows": 11,
+  "flashvsr_rows": 4,
+  "terminology_rows": 12,
+  "files": [
+    "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\metadata\\architecture_matrix.csv",
+    "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\metadata\\training_matrix.csv",
+    "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\metadata\\dataset_matrix.csv",
+    "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\metadata\\flashvsr_modules.csv",
+    "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\metadata\\terminology.csv"
+  ]
+}

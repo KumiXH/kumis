@@ -1,0 +1,798 @@
+[
+  {
+    "arxiv_id": "2310.05737",
+    "html_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\metadata\\raw\\ar5iv_2310.05737.html",
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\text\\ar5iv_2310.05737.txt",
+    "html_bytes": 247249,
+    "converted": true,
+    "text_chars": 65716,
+    "figures": [
+      {
+        "src": "/html/2310.05737/assets/reconstruction.png",
+        "caption": "Figure 3: Image reconstruction samples with different tokenizers . We compare the VQGAN used in MaskGIT  ( Chang et al. 2022 ) with two of our models trained on ImageNet and web images  ( Chen et al. 2022 ) . Original images are by Eric TERRADE and Barth Bailey on Unsplash."
+      },
+      {
+        "src": "/html/2310.05737/assets/ImageNet512.png",
+        "caption": "Figure 5: Class-conditional generation samples on ImageNet 512 × \\times 512 . We compare with each of the previous works with a random sample from the same image class."
+      },
+      {
+        "src": "/html/2310.05737/assets/model_arch.png",
+        "caption": "Figure 7: MAGVIT-v2 tokenizer architecture . T-Causal Conv refers to temporally causal convolution."
+      },
+      {
+        "src": "/html/2310.05737/assets/figures/../figures/raterui.png",
+        "caption": "Figure 8: Rating interface for subjective compression evaluation ."
+      }
+    ]
+  },
+  {
+    "arxiv_id": "2405.20279",
+    "html_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\metadata\\raw\\ar5iv_2405.20279.html",
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\text\\ar5iv_2405.20279.txt",
+    "html_bytes": 6020,
+    "converted": false,
+    "text_chars": 0,
+    "figures": []
+  },
+  {
+    "arxiv_id": "2406.07550",
+    "html_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\metadata\\raw\\ar5iv_2406.07550.html",
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\text\\ar5iv_2406.07550.txt",
+    "html_bytes": 364350,
+    "converted": true,
+    "text_chars": 68861,
+    "figures": [
+      {
+        "src": "/html/2406.07550/assets/recon_vis_compare.png",
+        "caption": "Figure 1 : We propose TiTok , a compact 1D tokenizer leveraging region redundancy to represent an image with only 32 tokens for image reconstruction and generation."
+      },
+      {
+        "src": "/html/2406.07550/assets/plot_model_speed.png",
+        "caption": "Figure 2 : A speed and quality comparison of TiTok and prior arts on ImageNet 256 × 256 256\\times 256 and 512 × 512 512\\times 512 generation benchmarks. Speed-up is compared against DiT-XL/2  [ 49 ] . The sampling speed (de-tokenization included) is measured with an A100 GPU."
+      },
+      {
+        "src": "/html/2406.07550/assets/framework_vertical.png",
+        "caption": "Figure 3 :\nIllustration of image reconstruction (a) and generation (b) with the TiTok framework (c). TiTok contains an encoder E ​ n ​ c Enc , a quantizer Q ​ u ​ a ​ n ​ t Quant , and a decoder D ​ e ​ c Dec .\nImage patches, along with a few ( e.g . , 32) latent tokens, are passed through the Vision Transformer (ViT) encoder.\nThe latent tokens are then vector-quantized.\nThe quantized tokens, along with the mask tokens  [ 15 , 24 ] , are fed to the ViT decoder to reconstruct the image."
+      },
+      {
+        "src": "/html/2406.07550/assets/gen_vis_ditstyle.png",
+        "caption": "Figure 5 :\nVisualization of generated images from TiTok variants with MaskGIT  [ 9 ] . Corresponding ImageNet class names are shown below the images."
+      },
+      {
+        "src": "/html/2406.07550/assets/gen_vis_random_l32.png",
+        "caption": "Figure 6 :\nVisualization of generated images from TiTok-L-32 with MaskGIT  [ 9 ] across random ImageNet classes."
+      },
+      {
+        "src": "/html/2406.07550/assets/recon_vis_ditstyle.png",
+        "caption": "Figure 7 :\nVisual comparison of reconstruction results.\nScaling model size enables a better image quality while using a more compact latent space size. It is also observed that TiTok tends to keep the salient regions when latent space is limited."
+      }
+    ]
+  },
+  {
+    "arxiv_id": "2408.06072",
+    "html_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\metadata\\raw\\ar5iv_2408.06072.html",
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\text\\ar5iv_2408.06072.txt",
+    "html_bytes": 211513,
+    "converted": true,
+    "text_chars": 62190,
+    "figures": [
+      {
+        "src": "/html/2408.06072/assets/images/front2.jpg",
+        "caption": "Figure 1:\nCogVideoX can generate long-duration, high-resolution videos with coherent actions and rich semantics."
+      },
+      {
+        "src": "/html/2408.06072/assets/images/bench_eval9.png",
+        "caption": "Figure 2: The performance of openly-accessible text-to-video models in different aspects."
+      },
+      {
+        "src": "/html/2408.06072/assets/images/transformer.png",
+        "caption": "Figure 3: The overall architecture of CogVideoX."
+      },
+      {
+        "src": "/html/2408.06072/assets/images/3dvae_combined.jpg",
+        "caption": "Figure 4: (a) The structure of the 3D VAE in CogVideoX. It comprises an encoder, a decoder and a latent space regularizer, achieving a 8 × \\times 8 × \\times 4 compression from pixels to the latents. (b) The context parallel implementation on the temporally causal convolution."
+      },
+      {
+        "src": "/html/2408.06072/assets/images/attention.jpg",
+        "caption": "Figure 5: The separated spatial and temporal attention makes it challenging to handle the large motion between adjacent frames.\nIn the figure, the head of the person in frame i + 1 i+1 cannot directly attend to the head in frame i i .\nInstead, visual information can only be implicitly transmitted through other background patches.\nThis can lead to inconsistency issues in the generated videos."
+      },
+      {
+        "src": "/html/2408.06072/assets/images/CogVideoX-framepacking-2.jpg",
+        "caption": "Figure 6:\nThe diagram of mixed-duration training and Frame Pack. To fully utilize the data and enhance the model’s generalization capability, we train on videos of different duration within the same batch."
+      },
+      {
+        "src": "/html/2408.06072/assets/images/pipeline.jpg",
+        "caption": "Figure 7: The pipeline for dense video caption data generation. In this pipeline, we generate short video captions with the Panda70M model, extract frames to create dense image captions, and use GPT-4 to summarize these into final video captions. To accelerate this process, we fine-tuned a Llama 2 model with the GPT-4 summaries."
+      },
+      {
+        "src": "/html/2408.06072/assets/images/ab-fvd.png",
+        "caption": "Figure 8: Ablation studies on WebVid test dataset with 500 videos. MMDiT1 has the same number of parameters with the expert AdaLN. MMDiT2 has the same number of layers but twice number of parameters. a, b, c measure FVD, d measures CLIP4Clip score."
+      },
+      {
+        "src": "/html/2408.06072/assets/images/ive.jpg",
+        "caption": "Figure 9: The comparison between the initial generation states of extrapolation and interpolation when increasing the resolution with RoPE. Extrapolation tends to generate multiple small, clear, and repetitive images, while interpolation generates a blurry large image."
+      },
+      {
+        "src": "/html/2408.06072/assets/images/ab_sr.png",
+        "caption": "(a) RoPE vs. Sinusoidal"
+      },
+      {
+        "src": "/html/2408.06072/assets/images/ab_rl.png",
+        "caption": "(b) 3D vs. 2D+1D Attention"
+      },
+      {
+        "src": "/html/2408.06072/assets/images/ab_ex.png",
+        "caption": "(c) Different Architecture"
+      },
+      {
+        "src": "/html/2408.06072/assets/images/ab_us.png",
+        "caption": "(d) w/ vs. w/o Explicit Uniform"
+      },
+      {
+        "src": "/html/2408.06072/assets/images/goodcase3.jpg",
+        "caption": "Figure 11: Text to video showcases. The displayed prompt will be upsampled before being fed into the model. The generated videos contain large motion and various styles."
+      },
+      {
+        "src": "/html/2408.06072/assets/images/t2v/goodcase2.jpg",
+        "caption": "Figure 12: Text to video showcases."
+      },
+      {
+        "src": "/html/2408.06072/assets/images/t2v/i2vgood1.jpg",
+        "caption": "Figure 13: Image to video showcases. The displayed prompt will be upsampled before being fed into the model."
+      },
+      {
+        "src": "/html/2408.06072/assets/images/t2v/i2vgood2.jpg",
+        "caption": "Figure 14: Image to video showcases."
+      },
+      {
+        "src": "/html/2408.06072/assets/images/v2t/detail_example.png",
+        "caption": "Figure 15: An example from CogVLM2-Caption provides a detailed description of all specific objects and movements."
+      },
+      {
+        "src": "/html/2408.06072/assets/images/caption_example3.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2408.06072/assets/images/caption_example4.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2408.06072/assets/images/caption_example5.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2408.06072/assets/images/v2v/v2v_1.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2408.06072/assets/images/v2v/v2v_2.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2408.06072/assets/images/v2v/v2v_3.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2408.06072/assets/VideoFilter.png",
+        "caption": "Figure 16: Examples of negative labels for video filtering."
+      }
+    ]
+  },
+  {
+    "arxiv_id": "2410.10733",
+    "html_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\metadata\\raw\\ar5iv_2410.10733.html",
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\text\\ar5iv_2410.10733.txt",
+    "html_bytes": 419739,
+    "converted": true,
+    "text_chars": 53015,
+    "figures": [
+      {
+        "src": "/html/2410.10733/assets/figure1.png",
+        "caption": "Figure 1: DC-AE accelerates diffusion models by increasing autoencoder’s spatial compression ratio."
+      },
+      {
+        "src": "/html/2410.10733/assets/figure1_results.png",
+        "caption": "Figure 2: (a) Image Reconstruction Results on ImageNet 256 × \\times 256. f denotes the spatial compression ratio. When the spatial compression ratio increases, SD-VAE has a significant reconstruction accuracy drop (higher rFID) while DC-AE does not have this issue. (b) ImageNet 512 × \\times 512 Image Generation Results on UViT-S with Various Autoencoders. p denotes the patch size. Shifting the token compression task to the autoencoder enables the diffusion model to focus more on the denoising task, leading to better FID. (c) Comparison to SD-VAE-f8 on ImageNet 512 × \\times 512 with UViT Variants. DC-AE-f64p1 provides 19.1 × \\times higher inference throughput and 0.54 better ImageNet FID than SD-VAE-f8p2 on UViT-H."
+      },
+      {
+        "src": "/html/2410.10733/assets/method_arch.png",
+        "caption": "Figure 4: Illustration of Residual Autoencoding. It adds non-parametric shortcuts to let the neural network modules learn residuals based on the space-to-channel operation. ‘C’ denotes the number of channels. ‘R’ denotes the image size."
+      },
+      {
+        "src": "/html/2410.10733/assets/method_gan.png",
+        "caption": "Figure 5: Autoencoder already learns to reconstruct content and semantics without GAN loss, while GAN loss improves local details and removes local artifacts. We replace the GAN loss full training with lightweight local refinement training which achieves the same goal and has lower training cost."
+      },
+      {
+        "src": "/html/2410.10733/assets/method_training_pipeline.png",
+        "caption": "Figure 6: Illustration of Decoupled High-Resolution Adaptation."
+      },
+      {
+        "src": "/html/2410.10733/assets/ae_visualization.png",
+        "caption": "Figure 7: Autoencoder Image Reconstruction Samples."
+      },
+      {
+        "src": "/html/2410.10733/assets/diffusion_visualization.png",
+        "caption": "Figure 8: Images Generated by Diffusion Model using Our DC-AE."
+      },
+      {
+        "src": "/html/2410.10733/assets/diffusion_scaling_up.png",
+        "caption": "Figure 9: Model Scaling Results on ImageNet 512 × \\times 512 with UViT. DC-AE-f64 benefits more from scaling up than SD-VAE-f8."
+      },
+      {
+        "src": "/html/2410.10733/assets/dc_ae_detailed_arch.png",
+        "caption": "Figure 10: Detailed Architecture of SD-VAE, DC-AE, DC-AE Encoder, and DC-AE Decoder Stages."
+      },
+      {
+        "src": "/html/2410.10733/assets/ablation_phase2_phase3.png",
+        "caption": "Figure 11: Ablation Study on Training Different Numbers of Layers in Phase 2 (Left) and Phase 3 (Right)."
+      },
+      {
+        "src": "/html/2410.10733/assets/ae_visualization_1.png",
+        "caption": "Figure 13: Additional Autoencoder Image Reconstruction Samples."
+      },
+      {
+        "src": "/html/2410.10733/assets/ae_visualization_2.png",
+        "caption": "Figure 14: Additional Autoencoder Image Reconstruction Samples."
+      },
+      {
+        "src": "/html/2410.10733/assets/text_to_image_random_sample.png",
+        "caption": "Figure 15: Random 512 × \\times 512 Text-to-Image Samples. Prompts are randomly drawn from MJHQ-30K ( Li et al. 2024a ) ."
+      },
+      {
+        "src": "/html/2410.10733/assets/f32c32_usit_2b_demo_random.png",
+        "caption": "Figure 16: Random Generated Samples on ImageNet 512 × \\times 512."
+      }
+    ]
+  },
+  {
+    "arxiv_id": "2412.03603",
+    "html_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\metadata\\raw\\ar5iv_2412.03603.html",
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\text\\ar5iv_2412.03603.txt",
+    "html_bytes": 6020,
+    "converted": false,
+    "text_chars": 0,
+    "figures": []
+  },
+  {
+    "arxiv_id": "2412.13061",
+    "html_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\metadata\\raw\\ar5iv_2412.13061.html",
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\text\\ar5iv_2412.13061.txt",
+    "html_bytes": 214196,
+    "converted": true,
+    "text_chars": 51586,
+    "figures": [
+      {
+        "src": "/html/2412.13061/assets/imgs/radar.png",
+        "caption": "Figure 1: Illustration of the quantitative comparison of discrete and continuous tokenization performance across our VidTok model and state-of-the-art methods, evaluated using four metrics: PSNR, SSIM, LPIPS, and FVD. All performance metrics are obtained through experiments conducted under a consistent evaluation protocol to ensure fairness and comparability. Larger chart areas correspond to better performance across all metrics."
+      },
+      {
+        "src": "/html/2412.13061/assets/overview.png",
+        "caption": "Figure 2: An overview of video tokenizers."
+      },
+      {
+        "src": "/html/2412.13061/assets/fsq.png",
+        "caption": "Figure 4: Left: Vector Quantization (VQ) employed in Vector Quantised-Variational AutoEncoder (VQ-VAE)  ( Van Den Oord et al. 2017 ) . Right: Finite Scalar Quantization (FSQ)  ( Mentzer et al. 2024 ) utilized in our model."
+      },
+      {
+        "src": "/html/2412.13061/assets/imgs/results/full_comp.png",
+        "caption": "Figure 5: Qualitative comparison with the state-of-the-art video tokenizers."
+      },
+      {
+        "src": "/html/2412.13061/assets/imgs/results/fps8_fps3.png",
+        "caption": "Figure 6: The influence of different sample rates on model performance during training. The second row presents the test results obtained using training data with a sample rate of 8 FPS, while the third row shows the test results using training data with a sample rate of 3 FPS. The results demonstrate that employing training data with reduced frame rates enhances the model’s capacity to effectively capture motion dynamics."
+      }
+    ]
+  },
+  {
+    "arxiv_id": "2412.20404",
+    "html_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\metadata\\raw\\ar5iv_2412.20404.html",
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\text\\ar5iv_2412.20404.txt",
+    "html_bytes": 78849,
+    "converted": true,
+    "text_chars": 30384,
+    "figures": [
+      {
+        "src": "/html/2412.20404/assets/figs/header.png",
+        "caption": "Figure 1 : Open-Sora can generate high-fidelity videos. Images with arrows illustrate the motion."
+      },
+      {
+        "src": "/html/2412.20404/assets/open-sora-report-datapipeline.png",
+        "caption": "Figure 2 : Open-Sora Data Labeling and Processing Pipeline"
+      },
+      {
+        "src": "/html/2412.20404/assets/figs/caption.png",
+        "caption": "Figure 3 : Open-Sora Video Captioning"
+      },
+      {
+        "src": "/html/2412.20404/assets/figs/stat.png",
+        "caption": "Figure 4 : Distribution of data for last stage training."
+      },
+      {
+        "src": "/html/2412.20404/assets/figs/arch.png",
+        "caption": "Figure 6 : Open-Sora diffusion transformer architecture."
+      },
+      {
+        "src": "/html/2412.20404/assets/figs/report_vid_val_loss.png",
+        "caption": "Figure 8 : Validation loss for varying lengths and different resolutions."
+      },
+      {
+        "src": "/html/2412.20404/assets/figs/report_val_loss.png",
+        "caption": "Figure 9 : Validation loss and VBench score during training."
+      }
+    ]
+  },
+  {
+    "arxiv_id": "2501.00103",
+    "html_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\metadata\\raw\\ar5iv_2501.00103.html",
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\text\\ar5iv_2501.00103.txt",
+    "html_bytes": 203425,
+    "converted": true,
+    "text_chars": 56589,
+    "figures": [
+      {
+        "src": "/html/2501.00103/assets/assets/selected_frames/video_001/frame_0001.jpeg",
+        "caption": "Figure 1 : Text-to-video (first row) and image-to-video samples (last 2 rows, conditioned on the left frame) generated by LTX-Video , highlighting our model’s high level of prompt adherence, visual quality and motion fidelity. Each row shows evenly-spaced frames from a generated 5-second video."
+      },
+      {
+        "src": "/html/2501.00103/assets/assets/figures/denoising.png",
+        "caption": "Figure 2 : LTX-Video holistic denoising strategy – latent-to-latent diffusion denoising steps + final latent-to-pixels denoising step."
+      },
+      {
+        "src": "/html/2501.00103/assets/assets/figures/auto-correlation-init.png",
+        "caption": "(b) Correlation at 4%"
+      },
+      {
+        "src": "/html/2501.00103/assets/assets/figures/vae_encoder.png",
+        "caption": "(a) Causal Encoder"
+      },
+      {
+        "src": "/html/2501.00103/assets/assets/figures/vae_decoder.png",
+        "caption": "(b) Denoising Decoder"
+      },
+      {
+        "src": "/html/2501.00103/assets/assets/figures/default-gan.png",
+        "caption": "(a) Traditional GAN"
+      },
+      {
+        "src": "/html/2501.00103/assets/assets/figures/rel-gan.png",
+        "caption": "(b) Reconstruction GAN"
+      },
+      {
+        "src": "/html/2501.00103/assets/assets/figures/transformer_architecture.png",
+        "caption": "Figure 6 : The LTX-Video 3D transformer-block architecture. Our architecture builds upon 8   [ 8 ] , replacing LayerNorm with RMSNorm and incorporating QK-normalization and RoPE positional embeddings."
+      },
+      {
+        "src": "/html/2501.00103/assets/assets/figures/absolute_coordinates.jpeg",
+        "caption": "(a)"
+      },
+      {
+        "src": "/html/2501.00103/assets/assets/figures/fractional_coordinates.jpeg",
+        "caption": "(b)"
+      },
+      {
+        "src": "/html/2501.00103/assets/assets/figures/norm_fractional_coordinates.jpeg",
+        "caption": "(c)"
+      },
+      {
+        "src": "/html/2501.00103/assets/assets/figures/exp_vs_inv_exp_shared_y_axis_heatmap.png",
+        "caption": "Figure 8 : Different options for RoPE frequency spacing – exponential (left) and inverse-exponential (right). LTX-Video uses exponential spacing. See also section  4.3.2 ."
+      },
+      {
+        "src": "/html/2501.00103/assets/assets/figures/image-to-video.png",
+        "caption": "Figure 9 : LTX-Video image-to-video inference pipeline – first-frame conditioning. The diffusion timestep and corresponding noise level is defined per-token. For example, conditioning tokens can have diffusion timesteps of t c = 0 t_{c}=0 and contain un-noised encoded tokens."
+      },
+      {
+        "src": "/html/2501.00103/assets/assets/selected_frames/00-Chinese-New-Year-Dragon/frame_0001.jpeg",
+        "caption": "Figure 12 : Our video captioner – input video (generated by 1   [ 1 ] ) and our generated captions."
+      },
+      {
+        "src": "/html/2501.00103/assets/unified_wordcloud.png",
+        "caption": "Figure 13 : A word cloud of our captioned training data."
+      },
+      {
+        "src": "/html/2501.00103/assets/pairwise_performance_matrix_t2v.png",
+        "caption": "(a) Text-to-Video"
+      },
+      {
+        "src": "/html/2501.00103/assets/pairwise_performance_matrix_i2v.png",
+        "caption": "(b) Image-to-Video"
+      },
+      {
+        "src": "/html/2501.00103/assets/assets/figures/compare_gan_results.png",
+        "caption": "Figure 16 : VAE reconstruction example – input frame (left), reconstruction with standard GAN loss (center), improved reconstruction with our proposed Reconstruction GAN loss (right)"
+      },
+      {
+        "src": "/html/2501.00103/assets/assets/selected_frames/Validation_0_4fea01d57de1db61604b/frame_0001.jpeg",
+        "caption": "Figure 18 : Additional text-to-video samples generated by LTX-Video , highlighting our model’s high level of prompt adherence, visual quality and motion fidelity. Each row shows evenly-spaced frames from a generated 5-second video. Prompt adherence is indicated in green ."
+      },
+      {
+        "src": "/html/2501.00103/assets/assets/selected_frames/video_003/frame_0001.jpeg",
+        "caption": "Figure 19 : Additional image-to-video results. Video generation is conditioned on the first frame (left column) and on the text prompt (not shown)."
+      }
+    ]
+  },
+  {
+    "arxiv_id": "2501.03575",
+    "html_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\metadata\\raw\\ar5iv_2501.03575.html",
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\text\\ar5iv_2501.03575.txt",
+    "html_bytes": 984227,
+    "converted": true,
+    "text_chars": 248645,
+    "figures": [
+      {
+        "src": "/html/2501.03575/assets/images/0_teaser/diffusion/f_0.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/0_teaser/ar/f_0.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/0_teaser/camera_forward/f_0.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/0_teaser/camera_forward/f_1.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/0_teaser/camera_forward/f_2.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/0_teaser/camera_forward/f_3.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/0_teaser/camera_forward/f_4.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/0_teaser/camera_right/f_0.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/0_teaser/camera_right/f_1.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/0_teaser/camera_right/f_2.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/0_teaser/camera_right/f_3.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/0_teaser/camera_right/f_4.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/0_teaser/robot_0/f_0.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/0_teaser/av_0_top_left/f_0.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/intro_v2.png",
+        "caption": "Figure 2 : Pre-trained WFMs are world model generalists that are trained with large-scale, diverse video datasets capturing different aspects of real-world physics. These pre-trained world foundation models can be specialized to a target Physical AI setup through post-training. Usually, the datasets for post-training are “prompt”-video pairs collected from the target Physical AI setup. The prompt can be in the form of action commands, trajectory, instructions, \\etc . As the pre-trained WFM provides a great foundation, the dataset for post-training can be much smaller. This pre-training-and-post-training yields an efficient strategy for building a Physical AI system. In the figure, the dashed lines represent the data loop."
+      },
+      {
+        "src": "/html/2501.03575/assets/curator.png",
+        "caption": "Figure 5 : Cosmos Video Curator contains five major steps: 1) split, 2) filtering, 3) annotation, 4) dedup, and 5) sharding . The split step divides a long video into shots and transcribes them into clips. The filtering step removes clips that are of little value to world foundation model building. The annotation step adds a video description to each clip. The clips are then stored in a video clip database. To obtain the training dataset, one first performs semantic deduplication and then shards the video clips based on their resolutions and aspect ratios."
+      },
+      {
+        "src": "/html/2501.03575/assets/fig_continuous_tokens.png",
+        "caption": "(a) Continuous tokens"
+      },
+      {
+        "src": "/html/2501.03575/assets/fig_discrete_tokens.png",
+        "caption": "(b) Discrete tokens"
+      },
+      {
+        "src": "/html/2501.03575/assets/fig_temporal_causality_design.png",
+        "caption": "(a) Temporal Causality: Illustration of the temporal causality mechanism, where inputs x 0 , x 1 , … , x 12 x_{0},x_{1},\\dots,x_{12} are processed through grouped intermediate outputs g 0 , g 1 , … g_{0},g_{1},\\dots , and further refined by spatio-temporal convolution and attention operations."
+      },
+      {
+        "src": "/html/2501.03575/assets/fig_network_architecture.png",
+        "caption": "(b) Network Architecture: The encoder-decoder network structure includes a 3D Haar wavelet, causal residual, causal downsampling, and causal spatio-temporal attention blocks. The decoder mirrors the encoder’s structure, replacing downsampling with upsampling."
+      },
+      {
+        "src": "/html/2501.03575/assets/images/4_tokenizer/TokenBench_recon/fig_TokenBench_recon.jpg",
+        "caption": "Figure 10 : Example videos from TokenBench . This figure shows diverse examples, including egocentric, driving, robotic manipulation, and web videos."
+      },
+      {
+        "src": "/html/2501.03575/assets/cosmos_diffusion_architecture.png",
+        "caption": "Figure 11 : Overall architecture of Cosmos-Predict1 World Foundation Model . The model processes an input video through the encoder of the Cosmos-Tokenize1-CV8 × \\times 8 × \\times 8-720p to obtain latent representations, which are subsequently perturbed with Gaussian noise. These representations are then transformed using a 3D patchification process. In the latent space, the architecture applies repeated blocks of self-attention, cross-attention (integrating input text), and feed-forward MLP layers, modulated by adaptive layer normalization (scale, shift, gate) for a given time step t t . The decoder of Cosmos-Tokenize1-CV8 × \\times 8 × \\times 8-720p reconstructs the final video output from the refined latent representation."
+      },
+      {
+        "src": "/html/2501.03575/assets/images/5_1_diffusion_models/text2world/7b_0/7b_0_001.jpg",
+        "caption": "Figure 12 : Generated videos from Cosmos-Predict1-7B-Text2world and Cosmos-Predict1-14B-Text2world. Both the Text2World models produce videos of high visual quality, motion dynamics and text alignment. Notably, compared to the 7B model, the 14B model demonstrates an enhanced ability to capture finer visual details and more intricate motion patterns. To check full videos and more video examples, please visit our website ."
+      },
+      {
+        "src": "/html/2501.03575/assets/images/5_1_diffusion_models/video2world/video2world_7b_1/video2world_7b_1_001.jpg",
+        "caption": "Figure 13 : Generated videos from Cosmos-Predict1-7B-Video2world and Cosmos-Predict1-14B-Video2world. The top two rows show 5-second videos generated by the models, conditioned on the first 9 frames. The bottom two rows show long video generation results. We generate long videos in an autoregressive manner, where the first generated video is conditioned on a single input image, and the subsequent five videos are conditioned on their previous nine frames. Both of the 7B and 14B models produce photorealistic videos with high visual fidelity. The 14B model demonstrates the ability to generate more complex scenes and exhibits superior motion stability. To check full videos and more video examples, please visit our website ."
+      },
+      {
+        "src": "/html/2501.03575/assets/cosmos_ar_architecture_v5.png",
+        "caption": "Figure 14 : Architecture of Cosmos-Predict1-Video2World Model. The pipeline begins by encoding input video through the encoder of Cosmos-Tokenize1-DV8 × \\times 16 × \\times 16-720p to generate discrete tokens, which are transformed into learned embeddings. These embeddings are processed through repeated transformer blocks, each consisting of absolute positional embedding and 3D RoPE components that are flattened before entering the self-attention module. Each block also includes a cross-attention module that incorporates encoded text prompts (processed via a T5 text encoder), followed by a two-layer MLP. Finally, the decoder of Cosmos-Tokenize1-DV8 × \\times 16 × \\times 16-720p reconstructs the video from the output tokens."
+      },
+      {
+        "src": "/html/2501.03575/assets/diffusion_decoder_v2.png",
+        "caption": "Figure 15 : Cosmos diffusion decoder training . During training, each input video is tokenized twice: one through the target discrete tokenizer (DV8 × \\times 16 × \\times 16) and the other through a less-constrained continuous tokenizer (CV8 × \\times 8 × \\times 8). The discrete token video is used as the conditional input to the diffusion denoiser."
+      },
+      {
+        "src": "/html/2501.03575/assets/images/5_2_autoregressive/main_comparison/4B_2/frame_0000.jpg",
+        "caption": "Figure 17 : Generated videos from Cosmos Autoregressive World Foundation Models. The top two rows are the video generation results with 4B and 12B models, while the bottom two rows are the Video2World results with a text prompt. We observe that the 12B and 13B models shows sharper videos and better motion than 4B and 5B models in both prompted and unprompted settings. To check full videos and more video examples, please visit our website ."
+      },
+      {
+        "src": "/html/2501.03575/assets/images/5_2_autoregressive/diffusion_decoder_comparison/ar_output/frame_0000.jpg",
+        "caption": "Figure 18 : Diffusion decoder comparison . In the top panel, we show the video generation results with Cosmos-Predict1-13B-Video2World model. In the bottom panel, we show the enhanced video after the output from the autoregressive model is passed through the diffusion decoder. We observe that the autoregressive model alone produces blurry results, while the diffusion decoder can enhance the sharpness of videos while preserving the content."
+      },
+      {
+        "src": "/html/2501.03575/assets/images/5_2_autoregressive/failure_cases/sample1/frame_0000.jpg",
+        "caption": "Figure 19 : Failure cases of Cosmos Autogressive WFMs . We observe failure cases in generated videos in which some objects (shown in red) unexpectedly appear from below."
+      },
+      {
+        "src": "/html/2501.03575/assets/images/5_3_2_physics_alignment/gt_slope_v0_aseahorn_vSlope_2_vCarpet_2_dplaceholder_01placeholder_03_vSky_1.usda_Camera_01_1280_704_3_prop_general,vase_13_0.jpg",
+        "caption": "Figure 20 : Physics-scenario rollouts in simulation \\vs pre-trained WFM. We demonstrate three exemplar scenarios of increasing complexity as obtained from the reference (physically correct) simulation (first row in each group) and Cosmos-Predict1-7B-Video2World rollouts (second row in each group). We condition the WFM on 9 frames and a prompt focusing on the kinematic state of the simulated objects. We show one tracked object (blue bounding box and mask) per example used to compute our object-level metrics (average IOU)."
+      },
+      {
+        "src": "/html/2501.03575/assets/fig_camera_main.png",
+        "caption": "Figure 21 :\nQualitative comparison of camera control models . Given the input frame and camera trajectory (color-coded temporally from red to violet), we compare Cosmos-Predict1-7B-Video2World-Sample-CameraCond against CamCo ( Xu et al. 2024 ) on the generated future frames as well as the re-estimated camera poses. CamCo suffers from the data distribution shift and often generates inaccurate trajectories or even out-of-distribution image syntheses that lead to un-estimatable camera poses. In contrast, the Cosmos camera control model can successfully generate future frames aligned with the camera control input while also maintaining high video quality and 3D consistency."
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/3d_joystick_wasd/0002-0_0.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/3d_joystick_wasd/0002-0_forward_concat.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/3d_joystick_wasd/0002-0_0.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/3d_joystick_wasd/0002-0_backward_concat.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/3d_joystick_wasd/0002-0_0.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/3d_joystick_wasd/0002-0_left_concat.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/3d_joystick_wasd/0002-0_0.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/3d_joystick_wasd/0002-0_right_concat.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/3d_joystick_wasd/0014-0_0.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/3d_joystick_wasd/0014-0_forward_concat.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/3d_joystick_wasd/0014-0_0.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/3d_joystick_wasd/0014-0_backward_concat.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/3d_joystick_wasd/0014-0_0.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/3d_joystick_wasd/0014-0_left_concat.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/3d_joystick_wasd/0014-0_0.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/3d_joystick_wasd/0014-0_right_concat.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/3d_joystick_wasd/0001-0_0.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/3d_joystick_wasd/0001-0_forward_concat.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/3d_joystick_wasd/0001-0_0.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/3d_joystick_wasd/0001-0_backward_concat.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/3d_joystick_wasd/0001-0_0.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/3d_joystick_wasd/0001-1_left_concat.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/3d_joystick_wasd/0001-0_0.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/3d_joystick_wasd/0001-0_right_concat.jpg",
+        "caption": ""
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/3d_joystick_seeds/0013-0_0.jpg",
+        "caption": "Figure 23 :\nCosmos-Predict1-7B-Video2World-Sample-CameraCond results with different seeds. We show the capability of simulating diverse futures with our camera control model given the same input image and camera condition. For each group, we apply the same input frame and camera condition created with joystick. The first group shows moving backward and second group shows rotating right . Within each group, we show the generated videos with 3 different random seeds in each column. We visualize frames 19, 38, and 57 from the generated videos."
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/instruction_following/diffusion_1_input.jpg",
+        "caption": "Figure 25 : Instruction-based video prediction samples on the Cosmos-1X dataset . The left are the results of Cosmos-Predict1-7B-Video2World-Sample-Instruction model, and the right are the results of Cosmos-Predict1-5B-Video2World-Sample-Instruction model."
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/action_following/diffusion_pred_input.jpg",
+        "caption": "Figure 26 : Action-based next-frame prediction samples on the Bridge dataset . The left is the results of the Cosmos-Predict1-7B-Video2World-Sample-ActionCond model, and the right is the results of the Cosmos-Predict1-5B-Video2World-Sample-ActionCond model. As shown, the predicted video frames closely match the GT video frames for both models."
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/av_finetune/1/frame_0001.jpg",
+        "caption": "Figure 27 : Text-conditioned samples generated by Cosmos-Predict1-7B-Text2World-Sample-MultiView, extended to 8 seconds by Cosmos-Predict1-7B-Video2World-Sample-MultiView . This figure visualizes all six camera views in a group, with each row corresponding to a specific timestamp. The left example depicts a highway scene where a motorcycle is riding alongside a large truck. The right example shows the ego car following a sedan as it takes a right turn in a heavy snowy day."
+      },
+      {
+        "src": "/html/2501.03575/assets/images/6_post_training/av_finetune/4/frame_0001.jpg",
+        "caption": "Figure 28 : Text-conditioned samples generated by Cosmos-Predict1-7B-Text2World-Sample-MultiView are extended to 8 seconds by Cosmos-Predict1-7B-Video2World-Sample-MultiView . The post-trained world model effectively preserves its generalization ability. In the left example, the ego car is driving towards an ice castle, while in the right example, the ego car is shown driving on a river."
+      },
+      {
+        "src": "/html/2501.03575/assets/images/5_3_3_results/right_turn.jpg",
+        "caption": "Figure 29 : Trajectory-conditioned generated samples from Cosmos-Predict1-7B-Text2World-Sample-MultiView-TrajectoryCond . Given the trajectory inputs on the left-most column, we generate multiview videos that follow the given trajectory. We visualize the front camera view in this figure."
+      },
+      {
+        "src": "/html/2501.03575/assets/guardrail.png",
+        "caption": "Figure 30 : Cosmos Guardrail overview . Cosmos Guardrail contains pre-Guard and post-Guard, where pre-Guard blocks inputs based on Aegis ( Ghosh et al. 2024 ) and keywords, while post-Guard blocks outputs based on a video content safety classifier and blurs output faces."
+      }
+    ]
+  },
+  {
+    "arxiv_id": "2503.20314",
+    "html_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\metadata\\raw\\ar5iv_2503.20314.html",
+    "text_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\text\\ar5iv_2503.20314.txt",
+    "html_bytes": 401130,
+    "converted": true,
+    "text_chars": 164176,
+    "figures": [
+      {
+        "src": "/html/2503.20314/assets/fig01_results.png",
+        "caption": "Figure 1: Comparison of Wan with state-of-the-art open-source and closed-source models. Following both benchmark and human evaluations, Wan consistently demonstrated superior results. Note that HunyuanVideo Kong et al. 2024 is tested using the open-source model."
+      },
+      {
+        "src": "/html/2503.20314/assets/fig02_example.png",
+        "caption": "Figure 2: Samples generated by Wan . Wan can produce videos with large motions, high fidelity, and realistic details. It is also the first model to generate both Chinese and English text within videos. Additionally, Wan offers a range of features, including text-to-video, image-to-video, and video editing capabilities."
+      },
+      {
+        "src": "/html/2503.20314/assets/figures/data/fig_data_stage.png",
+        "caption": "Figure 3: Data provisioning across different training phases. For each stage, we dynamically adjust the proportions of data related to motion, quality, and category based on data throughput."
+      },
+      {
+        "src": "/html/2503.20314/assets/vae.png",
+        "caption": "Figure 5: Our Wan -VAE Framework. Wan -VAE can compress the spatio-temporal dimension of a video by 4 × 8 × 8 4\\times 8\\times 8 times. The orange rectangles represent 2 × 2\\times spatio-temporal compression, and the green rectangles represent 2 × 2\\times spatial compression."
+      },
+      {
+        "src": "/html/2503.20314/assets/vae_cache.png",
+        "caption": "Figure 6: Our feature cache mechanism. (a) and (b) show how we use this mechanism in regular causal convolution and temporal downsampling, respectively."
+      },
+      {
+        "src": "/html/2503.20314/assets/vae_psnr.png",
+        "caption": "Figure 7: Comparison of video reconstruction performance at 720 × 720 720\\times 720 resolution and 25 frames."
+      },
+      {
+        "src": "/html/2503.20314/assets/vae_visual.png",
+        "caption": "Figure 8: Visualization results of video reconstruction across different scenarios, including texture (first row), face (second row), text (third row), and high-motion (fourth row). The above videos have rich details but are not used in training."
+      },
+      {
+        "src": "/html/2503.20314/assets/dit_arch.png",
+        "caption": "Figure 9: Architecture of the Wan ."
+      },
+      {
+        "src": "/html/2503.20314/assets/dit_block.png",
+        "caption": "Figure 10: Transformer block of Wan ."
+      },
+      {
+        "src": "/html/2503.20314/assets/figures/infra/scaling.png",
+        "caption": "Figure 12: Scaling inference via multiple GPUs."
+      },
+      {
+        "src": "/html/2503.20314/assets/T2V_New.png",
+        "caption": "Figure 15: Results of the Wan -T2V. Our model excels at generating complex motions, creative transitions, cinematic-quality videos, and accurately produces both Chinese and English text."
+      },
+      {
+        "src": "/html/2503.20314/assets/figures/t2v/ablation_adaLN.png",
+        "caption": "Figure 16: Training loss curve with different configurations."
+      },
+      {
+        "src": "/html/2503.20314/assets/figures/t2v/ablation_text.png",
+        "caption": "Figure 17: Training loss curve with different text encoders."
+      },
+      {
+        "src": "/html/2503.20314/assets/i2v_framework.png",
+        "caption": "Figure 18: Wan -I2V model framework. The mask mechanism enables the model to selectively focus on input frames such that the proposed framework demonstrates compatibility with video continuation and first-last frame transformation tasks."
+      },
+      {
+        "src": "/html/2503.20314/assets/i2v_case_1.png",
+        "caption": "Figure 19: Videos generated by Wan -I2V model. The results demonstrate that our I2V model effectively captures and replicates the dynamics of real-world scenes."
+      },
+      {
+        "src": "/html/2503.20314/assets/i2v_case_2.png",
+        "caption": "Figure 20: Videos generated by Wan -I2V model. The results indicate that our I2V model can effectively animate diverse types of images into highly realistic and dynamic videos."
+      },
+      {
+        "src": "/html/2503.20314/assets/figures/editing/VideoEditing.png",
+        "caption": "Figure 21: Unified controllable generation and editing framework. Frames and masks are tokenized through Concept Decoupling, Context Latent Encode, and Context Embedder. We propose two training strategies for Wan : Fully Fine-tuning and Context Adapter Tuning."
+      },
+      {
+        "src": "/html/2503.20314/assets/video_editing_2_com.png",
+        "caption": "Figure 22: The visualization results of the proposed VACE."
+      },
+      {
+        "src": "/html/2503.20314/assets/video_editing_com.png",
+        "caption": "Figure 23: The visualization results of the proposed VACE."
+      },
+      {
+        "src": "/html/2503.20314/assets/wan_showcase.png",
+        "caption": "Figure 24: The visualization results of advanced video/image editing."
+      },
+      {
+        "src": "/html/2503.20314/assets/image_show.png",
+        "caption": "Figure 25: Image samples generated from Wan model."
+      },
+      {
+        "src": "/html/2503.20314/assets/video_personalization.png",
+        "caption": "Figure 26: The core design of the video personalization approach in the latent space of Wan -VAE."
+      },
+      {
+        "src": "/html/2503.20314/assets/ID_cases.png",
+        "caption": "Figure 27: Visualization of our video personalization approach."
+      },
+      {
+        "src": "/html/2503.20314/assets/framework.png",
+        "caption": "Figure 28: Framework of video generation guided by camera motion."
+      },
+      {
+        "src": "/html/2503.20314/assets/motion_showcase.png",
+        "caption": "Figure 29: Generated video results guided by camera motion."
+      },
+      {
+        "src": "/html/2503.20314/assets/stream1.png",
+        "caption": "Figure 30: Generated 15 minutes video with 8 A100 GPUs in real-time 8 FPS."
+      },
+      {
+        "src": "/html/2503.20314/assets/stream2.png",
+        "caption": "Figure 31: Generated videos with a single RTX 4090 GPU, int8 and TensorRT quantization in real-time 20 FPS."
+      },
+      {
+        "src": "/html/2503.20314/assets/v2av2-pipeline.png",
+        "caption": "Figure 32: Framework of video-to-audio generation. Our model processes both a video chunk and its associated textual description as dual inputs to synthesize high-quality, semantically coherent audio."
+      },
+      {
+        "src": "/html/2503.20314/assets/v2av2-goodcases-pickup.png",
+        "caption": "Figure 33: Audio generation samples of MMAudio and ours."
+      }
+    ]
+  }
+]

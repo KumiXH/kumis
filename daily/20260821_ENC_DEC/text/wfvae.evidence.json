@@ -1,0 +1,101 @@
+{
+  "key": "wfvae",
+  "pdf": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\papers\\03_video_vae\\wfvae_2411.17459.pdf",
+  "page_count": 11,
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\text\\wfvae.txt",
+  "first_page_excerpt": "WF-V AE: Enhancing Video V AE by Wavelet-Driven Energy Flow for Latent\nVideo Diffusion Model\nZongjian Li1,3,*, Bin Lin1,3,*\n, Yang Ye1,3, Liuhan Chen1,3, Xinhua Cheng1,3,\nShenghai Yuan1,3, Li Yuan1,2,†\n1Peking University, 2Peng Cheng Laboratory, 3Rabbitpre Intelligence\nAbstract\nVideo Variational Autoencoder (VAE) encodes videos into\na low-dimensional latent space, becoming a key compo-\nnent of most Latent Video Diffusion Models (LVDMs) to\nreduce model training costs. However, as the resolution\nand duration of generated videos increase, the encoding\ncost of Video VAEs becomes a limiting bottleneck in train-\ning LVDMs. Moreover, the block-wise inference method\nadopted by most LVDMs can lead to discontinuities of la-\ntent space when processing long-duration videos. The key\nto addressing the computational bottleneck lies in decom-\nposing videos into distinct components and efficiently en-\ncoding the critical information. Wavelet transform can\ndecompose videos into multiple frequency-domain compo-\nnents and improve the efficiency significantly, we thus pro-\npose Wavelet Flow VAE (WF-VAE) , an autoencoder that\nleverages multi-level wavelet transform to facilitate low-\nfrequency energy flow into latent representation. Further-\nmore, we introduce a method called Causal Cache, which\nmaintains the integrity of latent space during block-wise\ninference. Compared to state-of-the-art video VAEs, WF-\nVAE demonstrates superior performance in bothPSNR and\nLPIPS metrics, achieving 2× higher throughput and 4×\nlower memory consumption while maintaining competitive\nreconstruction quality. Our code and models are available\nat https://github.com/PKU-YuanGroup/WF-VAE.\n1. Introduction\nThe release of Sora [5], a video generation model devel-\noped by OpenAI, has pushed the boundaries of synthesiz-\ning photorealistic videos, drawing unprecedented attention\nto the field of video generation. Recent advancements in\nLatent Video Diffusion Models (LVDMs), such as Open-\nSora Plan [19], Open-Sora [49], CogVideoX [40], EasyAn-\nimate [39], Movie Gen [25], and ConsisID [44], have led\nto substantial improvements in video generation quality.\n*Equal contribution\n†Corresponding author.\n35.7\n35.8\nCogVideoX(Chn=16)\nWF-V AE-L(Chn=16)\n0 2 4 6 8 10 12\nThroughput (video/s)\n30\n31\n32\n33\nAllegro V AE\nCV-V AE\nOD-V AE\nOpen-Sora WF-V AE-S\nWF-V AE-L\nPSNR\nFigure 1. Performance comparison of video V AEs. Bubble\narea indicates the memory usage during inference. All mea-\nsurements are conducted on 33 frames with 256×256 resolution\nvideos. “Chn” represents the number of latent channels. Higher\nPSNR and throughput indicate better performance.\nThese methods establish a compressed latent space [27]\nusing a pre-trained video Variational Autoencoder (V AE),\nwhere the compression quality fundamentally determines\nthe generative performance.\nCurrent video V AEs remain constrained by fully convo-\nlutional architectures inherited from the image era. They\naddress video flickering and redundant information by in-\ncorporating spatio-temporal interaction and spatio-temporal\ncompression layers. Several recent works, including OD-\nV AE [6, 19], CogVideoX [40], CV-V AE [48], and Alle-\ngro [50] adopt dense 3D structure to achieve high-quality\nvideo compression. While these methods demonstrate\nimpressive reconstruction performance, they require pro-\nhibitively intensive computational resources. In contrast,\nalternative approaches such as Movie Gen [25] and Open-\nSora [49] utilize 2+1D architecture, resulting in reduced\ncomputational requirements at the cost of lower reconstruc-\nThis CVPR paper is the Open Access version, provided by the Computer Vision Foundation.\nExcept for this watermark, it is identical to the accepted version;\nthe final published version of the proceedings is available on IEEE Xplore.\n17778",
+  "figure_candidates": [
+    {
+      "page": 1,
+      "caption": "Figure 1. Performance comparison of video V AEs. Bubble"
+    },
+    {
+      "page": 3,
+      "caption": "Figure 2. Overview of WF-V AE.Our architecture consists of a backbone and a main energy flow pathway. The pathway functions as"
+    },
+    {
+      "page": 4,
+      "caption": "Figure 3. (a) Causal Cache with a temporal kernel size of 3 and"
+    },
+    {
+      "page": 5,
+      "caption": "Figure 4. Computational performance of encoding and decoding. We evaluate the encoding, decoding time, and memory consumption"
+    },
+    {
+      "page": 6,
+      "caption": "Figure 5. Qualitative comparison of reconstruction performance. We select two scenarios to comprehensively evaluate the visual"
+    },
+    {
+      "page": 7,
+      "caption": "Figure 6. Generated videos using WF-V AE with Latte-L. Top:"
+    },
+    {
+      "page": 7,
+      "caption": "Figure 7. Training dynamics under different settings."
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 5,
+      "caption": "Table 1. Quantitative metrics of reconstruction performance. Results demostrate that WF-V AE achieves state-of-the-art on reconstrcu-"
+    },
+    {
+      "page": 7,
+      "caption": "Table 2. Quantitative evaluation of different V AE models"
+    },
+    {
+      "page": 8,
+      "caption": "Table 3. Scalability of WF-V AE.We evaluated PSNR and LPIPS"
+    },
+    {
+      "page": 8,
+      "caption": "Table 4. Ablation studies on model architecture. We evaluate"
+    },
+    {
+      "page": 8,
+      "caption": "Table 5. Quantitative analysis of visual quality degradation"
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      7,
+      8,
+      9,
+      10
+    ],
+    "compression": [
+      1,
+      3,
+      4,
+      5,
+      7,
+      8
+    ],
+    "training": [
+      4,
+      7,
+      10
+    ],
+    "dataset": [
+      4,
+      5,
+      6,
+      7,
+      9,
+      10
+    ],
+    "ablation": [
+      7,
+      8
+    ],
+    "limitations": [
+      2,
+      8
+    ]
+  }
+}

@@ -1,0 +1,301 @@
+[
+  {
+    "name": "titok_framework",
+    "arxiv_id": "2406.07550",
+    "asset": "framework_vertical.png",
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\titok_framework.png",
+    "valid": true,
+    "size": 236140,
+    "error": ""
+  },
+  {
+    "name": "titok_reconstruction",
+    "arxiv_id": "2406.07550",
+    "asset": "recon_vis_ditstyle.png",
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\titok_reconstruction.png",
+    "valid": true,
+    "size": 2551015,
+    "error": ""
+  },
+  {
+    "name": "dcae_architecture",
+    "arxiv_id": "2410.10733",
+    "asset": "dc_ae_detailed_arch.png",
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\dcae_architecture.png",
+    "valid": true,
+    "size": 248578,
+    "error": ""
+  },
+  {
+    "name": "dcae_compression_results",
+    "arxiv_id": "2410.10733",
+    "asset": "figure1_results.png",
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\dcae_compression_results.png",
+    "valid": true,
+    "size": 68945,
+    "error": ""
+  },
+  {
+    "name": "magvit2_architecture",
+    "arxiv_id": "2310.05737",
+    "asset": "model_arch.png",
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\magvit2_architecture.png",
+    "valid": true,
+    "size": 313538,
+    "error": ""
+  },
+  {
+    "name": "magvit2_reconstruction",
+    "arxiv_id": "2310.05737",
+    "asset": "reconstruction.png",
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\magvit2_reconstruction.png",
+    "valid": true,
+    "size": 1697236,
+    "error": ""
+  },
+  {
+    "name": "cogvideox_3dvae",
+    "arxiv_id": "2408.06072",
+    "asset": "images/3dvae_combined.jpg",
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\cogvideox_3dvae.jpg",
+    "valid": true,
+    "size": 305862,
+    "error": ""
+  },
+  {
+    "name": "cogvideox_framepack",
+    "arxiv_id": "2408.06072",
+    "asset": "images/CogVideoX-framepacking-2.jpg",
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\cogvideox_framepack.jpg",
+    "valid": true,
+    "size": 583574,
+    "error": ""
+  },
+  {
+    "name": "cogvideox_caption_pipeline",
+    "arxiv_id": "2408.06072",
+    "asset": "images/pipeline.jpg",
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\cogvideox_caption_pipeline.jpg",
+    "valid": true,
+    "size": 433278,
+    "error": ""
+  },
+  {
+    "name": "vidtok_overview",
+    "arxiv_id": "2412.13061",
+    "asset": "overview.png",
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\vidtok_overview.png",
+    "valid": true,
+    "size": 84435,
+    "error": ""
+  },
+  {
+    "name": "vidtok_fps_ablation",
+    "arxiv_id": "2412.13061",
+    "asset": "imgs/results/fps8_fps3.png",
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\vidtok_fps_ablation.png",
+    "valid": false,
+    "size": 0,
+    "error": "Command '['C:\\\\Windows\\\\System32\\\\curl.exe', '-L', '--fail', '--silent', '--show-error', '--connect-timeout', '10', '--max-time', '35', '--retry', '1', '-A', 'ReadPaper-EncoderDecoder-Study/1.0 (academic research)', '-o', 'D:\\\\Repository\\\\ReadPaper\\\\daily\\\\20260821_ENC_DEC\\\\figures\\\\paper_figures\\\\vidtok_fps_ablation.png.part', 'https://ar5iv.labs.arxiv.org/html/2412.13061/assets/imgs/results/fps8_fps3.png']' timed out after 45 seconds"
+  },
+  {
+    "name": "opensora_3dvae",
+    "arxiv_id": "2412.20404",
+    "asset": "sora13-vae.svg",
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\opensora_3dvae.svg",
+    "valid": true,
+    "size": 74615,
+    "error": ""
+  },
+  {
+    "name": "opensora_data_pipeline",
+    "arxiv_id": "2412.20404",
+    "asset": "open-sora-report-datapipeline.png",
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\opensora_data_pipeline.png",
+    "valid": false,
+    "size": 0,
+    "error": "Command '['C:\\\\Windows\\\\System32\\\\curl.exe', '-L', '--fail', '--silent', '--show-error', '--connect-timeout', '10', '--max-time', '35', '--retry', '1', '-A', 'ReadPaper-EncoderDecoder-Study/1.0 (academic research)', '-o', 'D:\\\\Repository\\\\ReadPaper\\\\daily\\\\20260821_ENC_DEC\\\\figures\\\\paper_figures\\\\opensora_data_pipeline.png.part', 'https://ar5iv.labs.arxiv.org/html/2412.20404/assets/open-sora-report-datapipeline.png']' timed out after 45 seconds"
+  },
+  {
+    "name": "ltx_denoising",
+    "arxiv_id": "2501.00103",
+    "asset": "assets/figures/denoising.png",
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\ltx_denoising.png",
+    "valid": true,
+    "size": 527992,
+    "error": ""
+  },
+  {
+    "name": "ltx_vae_encoder",
+    "arxiv_id": "2501.00103",
+    "asset": "assets/figures/vae_encoder.png",
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\ltx_vae_encoder.png",
+    "valid": true,
+    "size": 514647,
+    "error": ""
+  },
+  {
+    "name": "ltx_vae_decoder",
+    "arxiv_id": "2501.00103",
+    "asset": "assets/figures/vae_decoder.png",
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\ltx_vae_decoder.png",
+    "valid": false,
+    "size": 0,
+    "error": "Command '['C:\\\\Windows\\\\System32\\\\curl.exe', '-L', '--fail', '--silent', '--show-error', '--connect-timeout', '10', '--max-time', '35', '--retry', '1', '-A', 'ReadPaper-EncoderDecoder-Study/1.0 (academic research)', '-o', 'D:\\\\Repository\\\\ReadPaper\\\\daily\\\\20260821_ENC_DEC\\\\figures\\\\paper_figures\\\\ltx_vae_decoder.png.part', 'https://ar5iv.labs.arxiv.org/html/2501.00103/assets/assets/figures/vae_decoder.png']' timed out after 45 seconds"
+  },
+  {
+    "name": "ltx_reconstruction_gan",
+    "arxiv_id": "2501.00103",
+    "asset": "assets/figures/compare_gan_results.png",
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\ltx_reconstruction_gan.png",
+    "valid": false,
+    "size": 0,
+    "error": "Command '['C:\\\\Windows\\\\System32\\\\curl.exe', '-L', '--fail', '--silent', '--show-error', '--connect-timeout', '10', '--max-time', '35', '--retry', '1', '-A', 'ReadPaper-EncoderDecoder-Study/1.0 (academic research)', '-o', 'D:\\\\Repository\\\\ReadPaper\\\\daily\\\\20260821_ENC_DEC\\\\figures\\\\paper_figures\\\\ltx_reconstruction_gan.png.part', 'https://ar5iv.labs.arxiv.org/html/2501.00103/assets/assets/figures/compare_gan_results.png']' timed out after 45 seconds"
+  },
+  {
+    "name": "cosmos_tokenizer_architecture",
+    "arxiv_id": "2501.03575",
+    "asset": "fig_network_architecture.png",
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\cosmos_tokenizer_architecture.png",
+    "valid": true,
+    "size": 44918,
+    "error": ""
+  },
+  {
+    "name": "cosmos_diffusion_decoder",
+    "arxiv_id": "2501.03575",
+    "asset": "diffusion_decoder_v2.png",
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\cosmos_diffusion_decoder.png",
+    "valid": true,
+    "size": 154803,
+    "error": ""
+  },
+  {
+    "name": "wan_vae_architecture",
+    "arxiv_id": "2503.20314",
+    "asset": "vae.png",
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\wan_vae_architecture.png",
+    "valid": true,
+    "size": 138783,
+    "error": ""
+  },
+  {
+    "name": "wan_vae_reconstruction",
+    "arxiv_id": "2503.20314",
+    "asset": "vae_visual.png",
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\wan_vae_reconstruction.png",
+    "valid": false,
+    "size": 0,
+    "error": "Command '['C:\\\\Windows\\\\System32\\\\curl.exe', '-L', '--fail', '--silent', '--show-error', '--connect-timeout', '10', '--max-time', '35', '--retry', '1', '-A', 'ReadPaper-EncoderDecoder-Study/1.0 (academic research)', '-o', 'D:\\\\Repository\\\\ReadPaper\\\\daily\\\\20260821_ENC_DEC\\\\figures\\\\paper_figures\\\\wan_vae_reconstruction.png.part', 'https://ar5iv.labs.arxiv.org/html/2503.20314/assets/vae_visual.png']' timed out after 45 seconds"
+  },
+  {
+    "name": "vqgan",
+    "paper": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\papers\\01_history_and_tokenizers\\vqgan_2012.09841.pdf",
+    "page": 3,
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\vqgan_page_3.png",
+    "valid": true,
+    "width": 1445,
+    "height": 1870,
+    "error": ""
+  },
+  {
+    "name": "ldm",
+    "paper": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\papers\\01_history_and_tokenizers\\ldm_2112.10752.pdf",
+    "page": 2,
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\ldm_page_2.png",
+    "valid": true,
+    "width": 1445,
+    "height": 1870,
+    "error": ""
+  },
+  {
+    "name": "dit",
+    "paper": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\papers\\04_dit_training\\dit_2212.09748.pdf",
+    "page": 3,
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\dit_page_3.png",
+    "valid": true,
+    "width": 1445,
+    "height": 1870,
+    "error": ""
+  },
+  {
+    "name": "sd3_architecture",
+    "paper": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\papers\\02_image_vae\\sd3_2403.03206.pdf",
+    "page": 5,
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\sd3_architecture_page_5.png",
+    "valid": true,
+    "width": 1445,
+    "height": 1870,
+    "error": ""
+  },
+  {
+    "name": "sd3_autoencoder",
+    "paper": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\papers\\02_image_vae\\sd3_2403.03206.pdf",
+    "page": 7,
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\sd3_autoencoder_page_7.png",
+    "valid": true,
+    "width": 1445,
+    "height": 1870,
+    "error": ""
+  },
+  {
+    "name": "magvit",
+    "paper": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\papers\\03_video_vae\\magvit_2212.05199.pdf",
+    "page": 3,
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\magvit_page_3.png",
+    "valid": true,
+    "width": 1445,
+    "height": 1870,
+    "error": ""
+  },
+  {
+    "name": "wfvae_architecture",
+    "paper": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\papers\\03_video_vae\\wfvae_2411.17459.pdf",
+    "page": 3,
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\wfvae_architecture_page_3.png",
+    "valid": true,
+    "width": 1445,
+    "height": 1870,
+    "error": ""
+  },
+  {
+    "name": "wfvae_results",
+    "paper": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\papers\\03_video_vae\\wfvae_2411.17459.pdf",
+    "page": 6,
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\wfvae_results_page_6.png",
+    "valid": true,
+    "width": 1445,
+    "height": 1870,
+    "error": ""
+  },
+  {
+    "name": "flashvsr_training",
+    "paper": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\papers\\05_flashvsr_case\\flashvsr_2510.12747.pdf",
+    "page": 4,
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\flashvsr_training_page_4.png",
+    "valid": true,
+    "width": 1445,
+    "height": 1870,
+    "error": ""
+  },
+  {
+    "name": "flashvsr_tcdecoder",
+    "paper": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\papers\\05_flashvsr_case\\flashvsr_2510.12747.pdf",
+    "page": 5,
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\flashvsr_tcdecoder_page_5.png",
+    "valid": true,
+    "width": 1445,
+    "height": 1870,
+    "error": ""
+  },
+  {
+    "name": "flashvsr_results",
+    "paper": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\papers\\05_flashvsr_case\\flashvsr_2510.12747.pdf",
+    "page": 7,
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\flashvsr_results_page_7.png",
+    "valid": true,
+    "width": 1445,
+    "height": 1870,
+    "error": ""
+  }
+]

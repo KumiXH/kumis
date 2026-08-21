@@ -1,0 +1,13 @@
+﻿term_en,term_zh,definition,pitfall
+Encoder,编码器,Maps pixels or video frames into a latent representation.,A condition projector may resemble an encoder but need not model a posterior.
+Decoder,解码器,Maps latent representations back to pixels or frames.,"A denoising decoder may also perform a diffusion step, as in LTX-Video."
+Tokenizer,视觉分词器,An encoder-bottleneck-decoder system defining the tokens consumed by a generative model.,Tokens may be continuous tensors or discrete indices.
+VAE,变分自编码器,A probabilistic autoencoder with a regularized latent distribution.,Modern 'VAE' implementations may use perceptual and adversarial objectives beyond the original ELBO.
+VQ,向量量化,Maps continuous encoder outputs to discrete codebook entries.,Codebook collapse and inactive entries can reduce effective capacity.
+Latent channel,潜变量通道,Feature dimension at each latent spatial-temporal position.,More channels improve reconstruction but make the DiT prediction problem harder.
+Spatial compression factor,空间压缩倍率,"Ratio from H,W pixels to latent H/f,W/f.",It is distinct from DiT patch size and from total token compression.
+Temporal causality,时间因果性,Output at time t does not depend on future frames.,A nominal causal convolution can still break streaming if normalization or padding uses future context.
+Perceptual loss,感知损失,"Feature-space distance, commonly LPIPS, used to preserve perceptual detail.",It can trade pixel fidelity for plausible texture and must be balanced with reconstruction losses.
+Adversarial loss,对抗损失,Discriminator-based objective encouraging realistic local statistics.,Starting too early or weighting too highly can destabilize reconstruction.
+Frozen latent training,冻结潜空间训练,Precompute or freeze tokenizer outputs while training the DiT.,No gradient improves decoder defects; tokenizer quality is a hard ceiling.
+Conditional decoder,条件解码器,Decoder that consumes latent plus an auxiliary observation such as LR frames.,It can recover details from the observation but may over-copy degradations without robust training pairs.

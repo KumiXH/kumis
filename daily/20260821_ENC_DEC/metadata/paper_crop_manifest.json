@@ -1,0 +1,158 @@
+[
+  {
+    "name": "vqgan_architecture",
+    "source": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\vqgan_page_3.png",
+    "crop_fraction": [
+      0.04,
+      0.02,
+      0.97,
+      0.55
+    ],
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\crops\\vqgan_architecture.png",
+    "width": 1344,
+    "height": 991
+  },
+  {
+    "name": "ldm_perceptual_compression",
+    "source": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\ldm_page_2.png",
+    "crop_fraction": [
+      0.04,
+      0.02,
+      0.98,
+      0.61
+    ],
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\crops\\ldm_perceptual_compression.png",
+    "width": 1359,
+    "height": 1103
+  },
+  {
+    "name": "dit_architecture",
+    "source": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\dit_page_3.png",
+    "crop_fraction": [
+      0.03,
+      0.02,
+      0.98,
+      0.66
+    ],
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\crops\\dit_architecture.png",
+    "width": 1373,
+    "height": 1197
+  },
+  {
+    "name": "sd3_mmdit_architecture",
+    "source": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\sd3_architecture_page_5.png",
+    "crop_fraction": [
+      0.03,
+      0.02,
+      0.98,
+      0.83
+    ],
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\crops\\sd3_mmdit_architecture.png",
+    "width": 1373,
+    "height": 1515
+  },
+  {
+    "name": "sd3_autoencoder_table",
+    "source": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\sd3_autoencoder_page_7.png",
+    "crop_fraction": [
+      0.03,
+      0.02,
+      0.98,
+      0.66
+    ],
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\crops\\sd3_autoencoder_table.png",
+    "width": 1373,
+    "height": 1197
+  },
+  {
+    "name": "magvit_pipeline",
+    "source": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\magvit_page_3.png",
+    "crop_fraction": [
+      0.03,
+      0.02,
+      0.98,
+      0.64
+    ],
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\crops\\magvit_pipeline.png",
+    "width": 1373,
+    "height": 1159
+  },
+  {
+    "name": "wfvae_architecture",
+    "source": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\wfvae_architecture_page_3.png",
+    "crop_fraction": [
+      0.03,
+      0.02,
+      0.98,
+      0.62
+    ],
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\crops\\wfvae_architecture.png",
+    "width": 1373,
+    "height": 1122
+  },
+  {
+    "name": "wfvae_reconstruction",
+    "source": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\wfvae_results_page_6.png",
+    "crop_fraction": [
+      0.03,
+      0.02,
+      0.98,
+      0.72
+    ],
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\crops\\wfvae_reconstruction.png",
+    "width": 1373,
+    "height": 1309
+  },
+  {
+    "name": "flashvsr_training_pipeline",
+    "source": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\flashvsr_training_page_4.png",
+    "crop_fraction": [
+      0.03,
+      0.01,
+      0.98,
+      0.48
+    ],
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\crops\\flashvsr_training_pipeline.png",
+    "width": 1373,
+    "height": 879
+  },
+  {
+    "name": "flashvsr_tcdecoder_pipeline",
+    "source": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\flashvsr_tcdecoder_page_5.png",
+    "crop_fraction": [
+      0.45,
+      0.31,
+      0.98,
+      0.65
+    ],
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\crops\\flashvsr_tcdecoder_pipeline.png",
+    "width": 766,
+    "height": 636
+  },
+  {
+    "name": "flashvsr_local_attention",
+    "source": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\flashvsr_tcdecoder_page_5.png",
+    "crop_fraction": [
+      0.03,
+      0.01,
+      0.98,
+      0.34
+    ],
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\crops\\flashvsr_local_attention.png",
+    "width": 1373,
+    "height": 617
+  },
+  {
+    "name": "flashvsr_qualitative_results",
+    "source": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\flashvsr_results_page_7.png",
+    "crop_fraction": [
+      0.02,
+      0.01,
+      0.99,
+      0.6
+    ],
+    "local_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\figures\\paper_figures\\crops\\flashvsr_qualitative_results.png",
+    "width": 1402,
+    "height": 1104
+  }
+]

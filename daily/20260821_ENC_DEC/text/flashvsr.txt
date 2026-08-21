@@ -1,0 +1,1036 @@
+=== PAGE 1 ===
+FlashVSR: Towards Real-time Diffusion-Based Streaming Video Super
+Resolution
+Junhao Zhuang1,2 Shi Guo2† Xin Cai3 Xiaohui Li4
+Yihao Liu2 Chun Yuan1† Tianfan Xue3,2,5
+1Tsinghua University 2Shanghai AI Lab
+3CUHK MMLab 4Shanghai Jiao Tong University 5CPII under InnoHK
+†Corresponding authors
+https://zhuang2002.github.io/FlashVSR/
+Figure 1. Efficiency and performance comparison in high-resolution video restoration. Compared to state-of-the-art VSR models (e.g.,
+DOVE and SeedVR2-3B), FlashVSR restores sharper textures and more detailed structures overall. It achieves near real-time performance
+at 17 FPS on768×1408videos using a single A100 GPU, corresponding to a measured 11.8×speedup over the fastest one-step diffusion
+VSR model.(Zoom in for best view).
+Abstract
+Diffusion models have recently advanced video restora-
+tion, but applying them to real-world and AIGC-generated
+video super-resolution (VSR) remains challenging due to
+high latency, prohibitive computation, and poor general-
+ization to ultra-high resolutions. Our goal in this work
+is to make diffusion-based VSR practical by achieving ef-
+ficiency, scalability, and near real-time performance. To
+this end, we proposeFlashVSR, the first diffusion-based
+one-step streaming framework for efficient video super-
+resolution. FlashVSR runs at∼17 FPS for768×1408
+This CVPR paper is the Open Access version, provided by the Computer Vision Foundation.
+Except for this watermark, it is identical to the accepted version;
+the final published version of the proceedings is available on IEEE Xplore.
+43482
+
+=== PAGE 2 ===
+videos on a single A100 GPU by combining three comple-
+mentary innovations: (i) a train-friendly three-stage dis-
+tillation pipeline that enables streaming super-resolution,
+(ii) locality-constrained sparse attention that reduces re-
+dundant computation while bridging the train–test resolu-
+tion gap, and (iii) a tiny conditional decoder that acceler-
+ates reconstruction without sacrificing quality. To support
+large-scale training, we also constructVSR-120K, a new
+dataset containing 120 K videos and 180 K images. Exten-
+sive experiments demonstrate that FlashVSR scales reliably
+to ultra-high resolutions and achieves state-of-the-art per-
+formance with up to∼12×speed-up over prior one-step
+diffusion-based VSR models. We will release the code, pre-
+trained models, and dataset to foster future research in effi-
+cient diffusion-based video super-resolution.
+1. Introduction
+Video super-resolution (VSR) aims to recover high-quality
+frames from degraded videos, and plays an essential role
+in mobile photography, live streaming, and AIGC content.
+Recent VSR methods [3–5, 20, 24, 42, 53, 57, 69] and
+diffusion-based restorers [10, 40, 41, 53] have improved
+quality remarkably, yet real-time, high-resolution, and in-
+finitely long video restoration remains unsolved.
+However, achieving high-resolution, high-quality, and
+real-time streamable video super-resolution remains highly
+challenging, particularly for diffusion-based VSR. We iden-
+tify three major obstacles:(1)High lookahead latency from
+chunk-wise processing. Due to memory constraints, most
+methods split long videos into overlapping segments and
+process them independently, leading to redundant computa-
+tion and substantial lookahead latency.(2)The high com-
+putational cost of dense 3D attention. Full spatiotempo-
+ral attention scales quadratically with resolution, making it
+prohibitively expensive for long or high-resolution videos.
+(3)A train–test resolution gap. Most attention-based VSR
+models trained on medium-resolution videos degrade no-
+tably at higher resolutions (e.g., 1440p). To compensate,
+prior methods rely on spatial tiling during inference, which
+again introduces redundant computation. Our analysis re-
+veals that this gap mainly arises from mismatched posi-
+tional encoding ranges between training and inference.
+In this work, we handle all three of these challenges
+and build FlashVSR, the first diffusion-based video super-
+resolution model towards real-time and streamable process-
+ing. As shown in Fig. 1, FlashVSR achieves near real-
+time inference at 17 FPS at a resolution of768×1408
+on a single A100 GPU. This is significantly faster than all
+other diffusion-based VSR methods, including STAR [53]
+(∼120×faster) and the strongest one-step diffusion-based
+baseline SeedVR2-3B [40] (∼12×faster). Additionally,
+benefiting from its streaming design we will soon intro-
+duce, FlashVSR only introduces 8 frames of lookahead la-
+tency, whereas previous chunk-based methods introduce la-
+tency equal to the segment length (∼80frames). FlashVSR
+further scales reliably up to 1440p, delivering detail-rich
+videos, as shown in the right example of Fig. 1; more visual
+results are provided in the appendix. FlashVSR achieves
+these advances through three key innovations.
+Training-friendly distillation for one-step streaming
+VSR.We propose a three-stage distillation pipeline that
+progressively transforms a full-attention teacher into a one-
+step student with block-sparse causal attention. This design
+enables fully parallel frame training. In contrast, previous
+autoregressive video diffusion models [16, 22] require se-
+quential frame generation during training, leading to strong
+serial dependencies, lower throughput, and much slower op-
+timization, thus limiting scalability.
+Sparse attention with locality constraints.To reduce
+the redundancy of dense 3D self-attention in VSR, we
+adopt block-sparse attention for more efficient spatiotem-
+poral modeling. We first compute a coarse region-level
+attention map by pooling key–value features and then ap-
+ply full attention only to the top-kmost relevant regions.
+For high-resolution inputs, we further impose spatial local
+windows to restrict each query’s attention range, aligning
+the effective positional encoding ranges between training
+and inference. These designs substantially improve high-
+resolution generalization and enable inferencewithout spa-
+tial tiling. To our knowledge, this is the first diffusion-based
+VSR model employing sparse attention.
+Tiny conditional decoder.After the accelerating diffu-
+sion transformer block (DiT), the causal 3D V AE decoder
+becomes the primary runtime bottleneck, consuming nearly
+70% of the inference time at768×1408resolution. To
+address this, we introduce a tiny conditional decoder that
+leverages LR frames as auxiliary inputs in addition to la-
+tents, thereby simplifying HR reconstruction and enabling a
+more compact design. With the same parameter budget, our
+ablation shows that it outperforms its unconditional variant,
+while preserving visual quality comparable to the original
+V AE decoder and reducing decoding time to roughly1/7.
+Additionally, we construct a new large-scale dataset,
+VSR-120K, comprising 120k videos (average length>350
+frames) and 180k high-quality images, filtered via auto-
+mated quality control. Existing VSR datasets are limited
+in scale and video quality,e.g., DOVE contains only 2K
+videos. Our dataset enables joint image-video training and
+will be publicly released to advance VSR research.
+Extensive quantitative and qualitative results show that
+FlashVSR achieves state-of-the-art performance with up to
+∼12×speedup, while locality-constrained attention miti-
+gates the resolution-induced train–test gap for robust gener-
+alization to ultra-high-resolution videos.
+43483
+
+=== PAGE 3 ===
+2. Related work
+2.1. Real-world video super-resolution
+Early research in video super-resolution (VSR) often re-
+lied on simple synthetic degradations (e.g., bicubic down-
+sampling) [3–5, 13, 19, 24, 42], but these methods per-
+form poorly on real-world data. To mitigate this gap, some
+works collected paired data from consumer devices [47, 56],
+but these datasets are small and sensor-biased. Later
+approaches introduced composite degradations combining
+blur, noise, and compression artifacts [6, 43, 53, 56, 57, 69].
+The recent success of diffusion models in image and
+video generation and restoration [1, 12, 31, 48, 62, 63, 66,
+70–72] has motivated their use in VSR [20, 53, 57, 67, 69].
+For instance, Upscale-A-Video [69] employs optical-flow-
+guided propagation, MGLD-VSR [57] introduces motion-
+aware objectives, and DiffVSR [20] adopts staged optimiza-
+tion. More recent frameworks leverage video diffusion pri-
+ors [2, 38, 58], such as SeedVR [40, 41], and DOVE [10].
+While effective in enforcing temporal consistency, these
+methods are hindered by the high cost of 3D attention and
+reliance on chunk-based inference, leading to large looka-
+head latency and inefficiency, even in one-step models.
+2.2. Streaming Video Diffusion Models
+Practical VSR must handle sequences lasting minutes or
+longer, making streaming capability essential for deploy-
+ment. Recent studies have extended diffusion models from
+short clips to long streaming video generation. Diffu-
+sion Forcing [7] reformulates denoising as block-wise se-
+quential processing, enabling causal decoding. Follow-up
+works [8, 14, 16, 22, 37, 61] combined causal attention, KV-
+cache, and distillation to compress multi-step diffusion into
+a few denoising steps, enabling efficient online generation.
+However, these works primarily focus on video synthesis
+rather than restoration tasks such as VSR. Moreover, recent
+autoregressive video diffusion models rely on “student forc-
+ing” training to mitigate error accumulation, which requires
+predicting the previous output. This leads to serial unfold-
+ing of the forward process, reducing training efficiency.
+2.3. Video Diffusion Acceleration
+Despite their strong performance, diffusion models remain
+computationally expensive, limiting real-time applications.
+Existing acceleration strategies mainly fall into three cate-
+gories:Feature caching.Works such as DeepCache [54],
+FasterDiffusion [18], and recent adaptations for video dif-
+fusion transformers(DiT) [9, 25, 30, 33] reduce redundancy
+by reusing intermediate activations.One-step distillation.
+Methods based on rectified flows [26, 27], score distilla-
+tion [21, 68], and adversarial training [46, 60] compress iter-
+ative denoising into a single step, with representative exam-
+ples including OSEDiff [51], SinSR [44], and TSD-SR [12].
+Extensions to VSR such as DOVE [10] and SeedVR2 [40]
+achieve competitive results.Sparse attention.FlashAt-
+tention [11] improves memory and computation efficiency
+while also supporting block-sparse mechanisms, thereby re-
+ducing memory usage and accelerating attention computa-
+tion. Techniques such as Sparse VideoGen [52], Sparse
+VideoGen2 [55], and others [34, 64] exploit spatiotempo-
+ral or semantic sparsity to reduce memory and computation
+while maintaining quality.
+Despite recent advances, most methods remain ineffi-
+cient, high-latency, and poorly generalized at high res-
+olutions. In contrast, we introduce FlashVSR, the first
+diffusion-based VSR unifying one-step distillation, a train-
+friendly streaming design, and locality-constrained sparse
+attention. With a tiny conditional decoder for video
+restoration, FlashVSR addresses the key challenges of ef-
+ficiency, temporal scalability, and high-resolution general-
+ization, achieving near real-time performance and moving
+diffusion-based VSR closer to practical deployment.
+3. Method
+We present FlashVSR, an efficient diffusion-based one-step
+streaming framework for video super-resolution (VSR),
+achieving near real-time inference (17 FPS at768×1408
+on a single A100 GPU). Furthermore, to train a high-quality
+VSR, we also construct a large-scale high-quality dataset,
+VSR-120K. As illustrated in Fig. 2, FlashVSR builds on a
+three-stage distillation framework, enhanced with locality-
+constrained sparse attention to mitigate the train–infer res-
+olution gap, and a tiny conditional decoder that reduces the
+cost of the 3D V AE decoder. Details are introduced below.
+3.1. VSR-120K Dataset
+To overcome the limited scale and quality of existing VSR
+datasets, we constructVSR-120K, a large-scale dataset for
+joint image–video super-resolution training. We collect
+raw data from open repositories such as Videvo, Pexels,
+and Pixabay1, containing 600k video clips and 220k high-
+resolution images. For quality control, we employ LAION-
+Aesthetic predictor [32] and MUSIQ [17] for visual quality,
+and RAFT [36] for motion filtering. The final dataset con-
+sists of 120k videos (average length>350 frames) and 180k
+high-quality images. We will release VSR-120K for public
+research use. See Appendix for details.
+3.2. Three-Stage Distillation Pipeline
+To build a high-quality and efficient VSR model, we design
+a three-stage distillation pipeline: (1) joint video–image
+training to establish a strong teacher, (2) causal sparse
+attention adaptation for streaming efficiency, and (3)
+distribution-matching distillation into a one-step student.
+1https : / / www . videvo . net/,https : / / www . pexels .
+com/,https://pixabay.com/
+43484
+
+=== PAGE 4 ===
+Stage 2
+Causal LR
+Proj-In
++
+Block-Sparse Causal Adaptation
+Flow Matching Loss
+Sparse-Causal DiT
+Block-Sparse
+Causal
+Attention
+Video-Image Joint SR Training
+LR
+Proj-In
++ Full-Attn DiT
+LR Videos/Images Stage 1
+Joint Image-
+Video
+Attention
+Stage 3
+Causal LR
+Proj-In
++
+ One-Step
+Sparse-Causal DiT
+Block-Sparse
+Causal
+Attention
+Copy-Init
+ -
+Add
+Noise
+Distribution Matching Loss 𝛻𝜃𝐷𝐾𝐿
+Causal
+Decoder
+MSE Loss + LPIPS Loss
+Flow Matching Loss
+No Grad
+DMD One-Step Distillation
+Full-Attn DiT
+Real Score
+Full-Attn DiT
+Fake Score
+Noise
+Latents
+Noise
+Latents
+Video
+Latents
+Noise
+Latents
+Noise
+Latents
+Image
+Latents
+Video
+Latents
+Video
+Latents
+GT Video
+Flow Matching Loss
+Figure 2. Overview of the three-stage training pipeline of FlashVSR, covering video–image joint SR training, adaptation with block-sparse
+causal attention for streaming inference, and distribution-matching one-step distillation combined with reconstruction supervision.
+Stage 1. Video–Image Joint SR Training.We adapt a pre-
+trained video diffusion model (W AN2.1 1.3B [38]) to super-
+resolution by jointly training on videos and images, treating
+images as single-frame videos (f=1) to enable a unified 3D
+attention formulation. As illustrated in Stage 1 of Fig. 2, we
+apply a block-diagonal segment mask that restricts attention
+within the same segment:
+αij =
+exp
+ qik⊤
+j√
+d
+
+1[seg(i) =seg(j) ]
+P
+l exp
+ qik⊤
+l√
+d
+
+1[seg(i) =seg(l) ]
+,(1)
+where seg(i)denotes the segment identity of tokeni(im-
+age or video clip) andαdenotes the normalized attention
+weight. Block-sparse constraints are omitted so the teacher
+retains full spatiotemporal priors. A fixed text prompt is
+used for conditioning, with cross-attention keys and values
+reused across samples. We further introduce a lightweight
+low-resolution(LR) Proj-In layer to project LR inputs into
+the feature space instead of using the V AE encoder. Train-
+ing employs the standard flow matching loss [23].
+Stage 2. Block-Sparse Causal Attention Adaptation.
+We adapt the Stage 1 full-attention DiT into a Sparse-
+Causal DiT by introducing causal masking and block-
+sparse attention, as illustrated in Fig. 2. The causal
+mask restricts each latent to its current and past posi-
+tions. Following [34, 64], queries and keys are partitioned
+into non-overlapping blocks of size(2,8,8)and reshaped
+into(B, block num,128, C)withblock num=L/128.
+Within each block, average pooling yields compact block-
+level features to compute a coarse block-to-block attention
+map. The top-kmost relevant block pairs are selected, and
+full128×128attention is applied only to these regions
+with the original(Q, K, V). This reduces attention cost
+to 10–20% of the dense baseline without performance loss.
+The LR Proj-In layer is converted to a causal variant for
+streaming inference, and training continues with the flow
+matching loss on video data only.
+Stage 3. Distribution-Matching One-Step Distillation.
+Recent studies on one-step streaming video diffusion focus
+on video generation, typically requiring clean past frames
+as input for motion plausibility. Teacher forcing (condition-
+ing on ground truth) [22] causes error accumulation during
+inference, while student forcing (conditioning on predicted
+latents) [16, 22] alleviates this but requires sequential un-
+folding, reducing efficiency.
+In Stage 3 (Fig. 2), we refine the Stage 2 sparse-causal
+DiT into a one-step modelG one and propose a parallel
+training paradigm for streaming VSR. The model takes LR
+frames and Gaussian noise as input, with all latents trained
+under a unified timestep using a block-sparse causal atten-
+tion mask. The Stage 1 full-attention DiT serves as the
+teacherG real, while its copyG fake learns the distribution of
+fake latents, following the DMD pipeline by Yin et al. [60].
+Here,z pred denotes the predicted latent, andx pred the recon-
+structed HR frame. Due to memory constraints, two latents
+are randomly selected per iteration for decoding, with pre-
+vious ones detached from gradients. The overall objective
+combines distribution-matching distillation, flow matching,
+43485
+
+=== PAGE 5 ===
+Blur
+Repeated Pattern
+Attention
+Window
+Attention
+Window
+Query
+A. Boundary-Preserved Local
+Attention Mask
+B. Boundary-Truncated Local
+Attention Mask
+Training Range Inference
+Range
+Visualization of
+Rotary Position Embedding
+Training Range
+Inference
+Range
+Visualization of
+Rotary Position Embedding
+Query
+Two Types of
+Local Attention Masks Final Attention Mask
+Sparsify
+Sparsify
+VSR Result (w/ Local Attention)VSR Result (w/o Local Attention)
+2688 × 15362688 × 1536
+Figure 3. Locality-Constrained Sparse Attention. Left: At ultra-high resolutions, performing inference beyond the trained positional
+encoding range produces artifacts (e.g., repetition or blur). Restricting each query to a local attention window keeps the positional encoding
+range consistent between training and inference, thereby preventing artifacts. Right: Two local window rules, namely boundary-preserved
+and boundary-truncated, are illustrated. The final sparse attention mask is computed within these local masks.
+and pixel-space reconstruction losses, withλ= 2:
+L=L DMD(zpred, Gone, Greal, Gfake)| {z }
+distribution-matching distillation
++L FM(zpred, Gfake)| {z }
+flow matching
++∥x pred −x gt∥2
+2 +λL lpips(xpred, xgt)| {z }
+decoder reconstruction
+.
+(2)
+Since training and inference rely only on LR frames
+and noise, the train–infer gap is eliminated. As a one-step
+model, the later layers ofG one already contain clean latent
+information propagated via the KV-cache for temporal con-
+tinuity.The core insight is that, unlike video generation,
+VSR is strongly conditioned on LR frames, so clean his-
+torical latents are unnecessary for motion plausibility. The
+model focuses on content reconstruction, while temporal
+consistency is refined in later layers via the KV-cache. This
+design enables efficient parallel training while preserving
+high fidelity and eliminating the train–infer gap. Further
+discussion is provided in Appendix.
+3.3. Locality-Constrained Sparse Attention
+We observed that for super-resolution, models trained on
+medium-resolution data may fail to generalize to ultra-high
+resolutions (e.g., 1440p), leading to repeated patterns and
+blurring, as illustrated in Fig. 3. Our analysis shows that this
+arises from the periodicity of positional encodings: when
+the positional range at inference time far exceeds that seen
+during training, certain RoPE dimensions repeat their pat-
+terns, degrading self-attention, as shown in the bottom of
+Fig. 3. Because of this effect, many existing VSR meth-
+ods resort tospatial tilingat high resolutions to limit the
+attention range and avoid positional overflow, at the cost of
+redundant computation and potential boundary artifacts.
+To address this, we introducelocality-constrained at-
+tention, which restricts each query at inference to alimited
+Tiny Conditional
+Decoder
+Wan DecoderWan Encoder
+Pixel Shuffle
+HR Video
+LR Video
+MSE Loss
++
+LPIPS Loss
+MSE Loss + LPIPS Loss
+Figure 4. Training pipeline of the TC Decoder.
+spatial neighborhood, thereby aligning the effective atten-
+tion range with that used during training. With the relative
+formulation of RoPE [35], this simple constraint eliminates
+the train–inference mismatch in positional range. As shown
+in the middle of Fig. 3, this approach closes the resolution
+gap and enables consistent performance even on ultra-high-
+resolution outputs,without requiring any spatial tiling. This
+design is further validated through quantitative results in
+Sec. 4.4 and qualitative visualizations in Appendix.
+3.4. Tiny Conditional Decoder
+We find that the V AE decoder dominates inference (∼70%
+runtime) and becomes the bottleneck. To address this, we
+design aTiny Conditional Decoder(TC Decoder, Fig. 4)
+that conditions reconstruction on both LR frames and la-
+tents, rather than simply shrinking the original V AE de-
+coder. This reduces decoding complexity and preserves fine
+details. The TC Decoder achieves nearly7×faster decod-
+ing than the original V AE decoder while maintaining com-
+parable quality, and under the same parameter budget it con-
+sistently outperforms unconditional tiny decoders.
+During training, we combine pixel-level supervision
+with distillation from the original Wan decoder. Letx pred
+denote the reconstructed HR frame,x gt the ground truth,
+andx wan the Wan decoder output. The training objective is:
+L=∥x pred −x gt∥2
+2 +λL LPIPS(xpred, xgt)
++∥x pred −x wan∥2
+2 +λL LPIPS(xpred, xwan).
+(3)
+43486
+
+=== PAGE 6 ===
+Table 1. Quantitative comparison on synthetic (YouHQ40, REDS, SPMCS), real-world (VideoLQ), and AIGC (AIGC30) datasets, covering
+diverse video domains. Best results are marked inredand second-best inblue.
+Dataset Metric Upscale-A-Video STAR RealViformer DOVE SeedVR2-3B Ours-Full Ours-Tiny
+YouHQ40
+PSNR↑ 23.19 23.19 23.67 24.3923.05 23.13 23.31
+SSIM↑ 0.6075 0.6388 0.61890.66510.6248 0.6004 0.6110
+LPIPS↓ 0.4585 0.4705 0.4476 0.4011 0.3876 0.3874 0.3866
+NIQE↓ 4.834 7.2753.3604.890 3.751 3.382 3.489
+MUSIQ↑ 43.07 35.05 62.73 61.60 62.31 69.1666.63
+CLIPIQA↑ 0.3380 0.2974 0.4451 0.4437 0.4909 0.58730.5221
+DOVER↑ 6.889 7.363 9.739 11.29 12.43 12.7112.66
+REDS
+PSNR↑ 24.84 24.0125.9625.60 24.83 23.92 24.11
+SSIM↑ 0.6437 0.6765 0.7092 0.72570.7042 0.6491 0.6511
+LPIPS↓ 0.4168 0.3710.29970.3077 0.3124 0.3439 0.3432
+NIQE↓ 3.104 4.776 2.722 3.564 3.066 2.4252.680
+MUSIQ↑ 53.00 46.25 63.23 65.51 61.83 68.9767.43
+CLIPIQA↑ 0.2998 0.2807 0.3583 0.4160 0.3695 0.46610.4215
+DOVER↑ 6.366 6.309 8.3389.3688.725 8.734 8.665
+SPMCS
+PSNR↑ 23.95 23.6825.6125.46 23.62 23.84 24.02
+SSIM↑ 0.6209 0.6700 0.7030 0.72010.6632 0.6346 0.6450
+LPIPS↓ 0.4277 0.3910 0.34370.32890.3417 0.3436 0.3451
+NIQE↓ 3.818 7.049 3.369 4.168 3.425 3.1513.302
+MUSIQ↑ 54.33 45.03 65.32 69.08 66.87 71.0569.77
+CLIPIQA↑ 0.4060 0.3779 0.4150 0.5125 0.5307 0.57920.5238
+DOVER↑ 5.850 4.589 8.0839.5258.856 9.456 9.426
+VideoLQ
+NIQE↓ 4.889 5.5343.4285.292 5.205 3.803 4.070
+MUSIQ↑ 44.19 40.1957.6045.05 43.39 55.48 52.27
+CLIPIQA↑ 0.2491 0.2786 0.3183 0.2906 0.2593 0.41840.3601
+DOVER↑ 5.912 5.889 6.591 6.786 6.040 8.1497.481
+AIGC30
+NIQE↓ 5.563 6.212 4.189 4.862 4.271 3.8714.039
+MUSIQ↑ 47.87 38.62 50.74 50.59 50.53 56.8955.80
+CLIPIQA↑ 0.4317 0.3593 0.4510 0.4665 0.4767 0.55430.5087
+DOVER↑ 10.24 11.00 11.24 12.34 12.48 12.6512.50
+Table 2. Efficiency comparison (peak memory, runtime, and parameters) on101×768×1408videos.
+Metric Upscale-A-Video STAR DOVE SeedVR2-3B Ours-Full Ours-Tiny
+Peak Mem. (GB) 18.39 24.86 25.44 52.88 18.33 11.13
+Runtime (s) / FPS 811.71 / 0.12 682.48 / 0.15 72.76 / 1.39 70.58 / 1.43 15.50 / 6.52 5.97 / 16.92
+Params (M) 1086.75 2492.90 10548.57 3391.48 1780.14 1752.18
+4. Experiments
+4.1. Implementation Details
+FlashVSR is built upon Wan 2.1–1.3B [38] and fine-tuned
+with LoRA [15] (rank 384). All stages are trained on the
+VSR-120K dataset, with paired LR–HR videos and images
+synthesized via the RealBasicVSR degradation pipeline [6].
+Training is conducted on 32 A100-80G GPUs, while all ex-
+periments are evaluated on a single A100 for consistency.
+All stages use a batch size of 32, taking about 2, 1, and 2
+days for Stages 1–3, respectively. Stage 1 uses 89-frame
+clips (768×1280) and paired images; Stage 2 continues
+training with videos only; Stage 3 adopts the same set-
+ting. The AdamW optimizer [28] is used with learning rate
+1×10 −5 and weight decay0.01. The TC Decoder is trained
+separately on 61-frame clips (384×384) for about 2 days.
+4.2. Datasets, Metrics, and Baselines
+We evaluate on three synthetic datasets (YouHQ40 [69],
+REDS [29], SPMCS [59]), one real-world dataset (Vide-
+oLQ [6]), and an AI-generated set (AIGC30). Syn-
+thetic LR frames are generated using the same degrada-
+43487
+
+=== PAGE 7 ===
+Ours + TinyVAEOursSeedVR2-3BDOVESTARUAVInput
+Ours + TinyVAEOursSeedVR2-3BDOVESTARRealViformerInput
+Ours + TinyVAEOursSeedVR2-3BDOVESTARUAVInput
+Figure 5. Visualization results of video super-resolution on real-world and AIGC videos.
+Table 3. 13.6% sparse attention achieves similar reconstruction quality to full attention with∼7.4×lower computation.
+Method PSNR↑SSIM↑LPIPS↓NIQE↓MUSIQ↑CLIPIQA↑DOVER↑
+13.6% Sparse 24.11 0.6511 0.3432 2.680 67.43 0.4215 8.665
+Full Attention 24.65 0.6630 0.3320 2.878 65.77 0.4110 8.750
+Table 4. Ablation of tiny conditional decoder.
+Metric Wan Decoder Ours Unconditional Variant
+PSNR↑32.58 31.08 29.96
+SSIM↑0.9417 0.9244 0.9079
+LPIPS↓0.0715 0.1014 0.1231
+tion pipeline as training. We evaluate with PSNR [49],
+SSIM [45], LPIPS [65], MUSIQ [17], CLIPIQA [39], and
+DOVER [50] on datasets with ground truth (YouHQ40,
+REDS, SPMCS), and only with the no-reference met-
+rics (MUSIQ, CLIPIQA, DOVER) on datasets without
+ground truth (VideoLQ, AIGC30). We compare FlashVSR
+against RealViFormer [67] (non-diffusion transformer),
+STAR [53] and Upscale-A-Video [69] (multi-step diffu-
+sion), and DOVE [10] and SeedVR2-3B [40] (one-step dif-
+fusion). We also report results using the Wan Decoder
+(Ours-Full) and the proposed TC Decoder (Ours-Tiny).
+4.3. Comparison with Existing Methods
+Quantitative Comparisons.We compare FlashVSR with
+state-of-the-art real-world VSR methods, using default sam-
+pling settings for multi-step diffusion models (15 steps for
+STAR and 30 for Upscale-A-Video). As shown in Tab. 1,
+FlashVSR outperforms all competitors across datasets, with
+notable gains on perceptual metrics such as MUSIQ, CLIP-
+IQA and DOVER. The proposed TC Decoder also im-
+proves reconstruction quality over the original Wan V AE
+decoder while remaining efficient. Although our recon-
+struction metrics are slightly lower, these metrics are known
+43488
+
+=== PAGE 8 ===
+Table 5. Ablation of Locality-constrained Attention. Both Boundary-Truncated and Boundary-Preserved outperform Global Attention
+across all metrics. Best inred, second-best in blue .
+Method PSNR↑SSIM↑LPIPS↓NIQE↓MUSIQ↑CLIPIQA↑DOVER↑
+Global Attention 24.21 0.6988 0.3423 3.152 65.57 0.5594 9.1259
+Boundary-Truncated 24.60 0.7155 0.3385 2.850 67.47 0.6278 9.5132
+Boundary-Preserved 24.87 0.7232 0.33042.968 67.16 0.6029 9.3259
+to favor smoother outputs; visual results clearly indicate that
+FlashVSR restores sharper and more faithful details. Over-
+all, the results demonstrate the effectiveness of FlashVSR
+in high-quality video super-resolution.
+Qualitative Comparisons.To provide a more intuitive
+comparison of visual quality in real-world scenarios, we
+present qualitative results on VideoLQ and AIGC30 in
+Fig. 5. For clarity, we also enlarge selected patches to better
+illustrate the differences among the LR frames and outputs
+of all methods. FlashVSR produces sharper and more de-
+tailed reconstructions compared to baselines, with textures
+and structures that appear more natural. For instance, in
+the last row of Fig. 5, FlashVSR restores clearer hand tex-
+tures and bookshelf details, yielding results that are visually
+more realistic. These qualitative observations are consistent
+with the quantitative improvements on perceptual metrics.
+Additional visualizations are provided in the Appendix.
+Efficiency Analysis.Tab. 2 reports the efficiency compar-
+ison on101-frame videos at768×1408resolution. With
+streaming inference, block-sparse attention, one-step dis-
+tillation, and a lightweight conditional decoder, FlashVSR
+achieves substantial efficiency gains over all baselines. It
+runs136×faster than Upscale-A-Video (30 steps),114×
+faster than STAR (15 steps), and still11.8×faster than
+the fastest one-step model SeedVR2-3B, while also using
+much less peak memory (11.1 GB vs. 52.9 GB). STAR
+uses chunk-wise inference (chunk size 32, overlap 0.5), and
+most methods process entire sequences in one pass. In
+contrast, FlashVSR adopts streaming inference, reducing
+lookahead latency to just 8 frames (vs. 32 for STAR and
+101 for others). These results demonstrate the practicality
+of FlashVSR for real-world deployment.
+4.4. Ablation Study
+Sparse Attention.We evaluate the impact of sparse atten-
+tion on REDS. As shown in Tab. 3, FlashVSR with13.6%
+sparsity achieves nearly identical reconstruction and per-
+ceptual quality compared to a full-attention baseline (KV-
+cache size 85 frames). At768×1408, it reduces inference
+time from1.105s to0.355s per 8 frames (3.1×speedup),
+thereby substantially improving efficiency without compro-
+mising visual quality. This indicates that sparse attention ef-
+fectively prunes redundant interactions, mitigating compu-
+tational overhead while preserving essential spatiotemporal
+dependencies for high-quality video super-resolution.
+Tiny Conditional Decoder.We evaluate the proposed TC
+Decoder on 200 unseen videos, where all inputs are encoded
+by the Wan V AE and reconstructed using three decoders:
+the original Wan decoder, our TC Decoder, and an uncon-
+ditional variant. As shown in Tab. 4 and Fig. 5, the TC De-
+coder delivers visual quality nearly indistinguishable from
+the Wan decoder, with similarly close quantitative results.
+For a 101-frame768×1408video, it decodes in 1.60s ver-
+sus 11.13s for the Wan decoder, achieving a∼7×speedup.
+It also consistently outperforms the unconditional variant
+across standard reconstruction metrics, confirming the clear
+benefit of conditioning on LR frames. Overall, the TC De-
+coder provides substantial acceleration with negligible fi-
+delity loss, making it highly practical for real-world video
+super-resolution deployment.
+Locality-constrained Attention.Fig. 3 illustrates that the
+proposed locality-constrained attention mask alleviates re-
+peated patterns and blurring at ultra-high resolutions by
+aligning positional encoding ranges between training and
+inference. To quantitatively validate its effectiveness, we
+evaluate on 15 high-resolution videos (1536×2688, av-
+erage 305 frames). We consider two variants depending
+on boundary handling (Fig. 3): Boundary-Preserved and
+Boundary-Truncated, both with a receptive field restricted
+to1152×1152and matched sparsity to global attention.
+Results are reported in Tab. 5. Compared to global atten-
+tion, both variants consistently improve across all metrics.
+Notably, Boundary-Truncated achieves slightly higher per-
+ceptual quality, while Boundary-Preserved maintains com-
+petitive performance with better fidelity. These results con-
+firm that locality-constrained attention effectively enhances
+VSR performance on ultra-high-resolution videos.
+5. Conclusion
+We presented FlashVSR, an efficient diffusion-based one-
+step framework for streaming video super-resolution.
+By combining streaming distillation, locality-constrained
+sparse attention, and a tiny conditional decoder, FlashVSR
+achieves state-of-the-art quality with near real-time effi-
+ciency and strong scalability to ultra-high resolutions. Our
+results demonstrate both its effectiveness and practicality,
+underscoring the significant potential of FlashVSR for real-
+world and AIGC-generated video applications.
+43489
+
+=== PAGE 9 ===
+Acknowledgements
+This work was supported by Shanghai Artificial In-
+telligence Laboratory. This work was also sup-
+ported by the National Key R&D Program of China
+(2022YFB4701400/4701402), the National Key R&D Pro-
+gram of China (No. 2025YFE0201300), SSTIC Grant
+(KJZD20230923115106012, KJZD20230923114916032,
+GJHZ20240218113604008), and Beijing Key Lab of Net-
+worked Multimedia. This study was also supported in part
+by the Centre for Perceptual and Interactive Intelligence
+(CPII) Ltd., a CUHK-led InnoCentre under the InnoHK ini-
+tiative of the Innovation and Technology Commission of the
+Hong Kong Special Administrative Region Government.
+References
+[1] Yuang Ai, Xiaoqiang Zhou, Huaibo Huang, Xiaotian Han,
+Zhengyu Chen, Quanzeng You, and Hongxia Yang. Dream-
+clear: High-capacity real-world image restoration with
+privacy-safe dataset curation.Advances in Neural Informa-
+tion Processing Systems, 37:55443–55469, 2024. 3
+[2] Andreas Blattmann, Tim Dockhorn, Sumith Kulal, Daniel
+Mendelevitch, Maciej Kilian, Dominik Lorenz, Yam Levi,
+Zion English, Vikram V oleti, Adam Letts, et al. Stable video
+diffusion: Scaling latent video diffusion models to large
+datasets.arXiv preprint arXiv:2311.15127, 2023. 3
+[3] Jiezhang Cao, Yawei Li, Kai Zhang, and Luc Van Gool.
+Video super-resolution transformer.arXiv preprint
+arXiv:2106.06847, 2021. 2, 3
+[4] Kelvin CK Chan, Xintao Wang, Ke Yu, Chao Dong, and
+Chen Change Loy. Basicvsr: The search for essential compo-
+nents in video super-resolution and beyond. InProceedings
+of the IEEE/CVF conference on computer vision and pattern
+recognition, pages 4947–4956, 2021.
+[5] Kelvin CK Chan, Shangchen Zhou, Xiangyu Xu, and
+Chen Change Loy. Basicvsr++: Improving video super-
+resolution with enhanced propagation and alignment. InPro-
+ceedings of the IEEE/CVF conference on computer vision
+and pattern recognition, pages 5972–5981, 2022. 2, 3
+[6] Kelvin CK Chan, Shangchen Zhou, Xiangyu Xu, and
+Chen Change Loy. Investigating tradeoffs in real-world
+video super-resolution. InProceedings of the IEEE/CVF
+conference on computer vision and pattern recognition,
+pages 5962–5971, 2022. 3, 6
+[7] Boyuan Chen, Diego Mart ´ı Mons´o, Yilun Du, Max Sim-
+chowitz, Russ Tedrake, and Vincent Sitzmann. Diffusion
+forcing: Next-token prediction meets full-sequence diffu-
+sion.Advances in Neural Information Processing Systems,
+37:24081–24125, 2024. 3
+[8] Guibin Chen, Dixuan Lin, Jiangping Yang, Chunze Lin,
+Junchen Zhu, Mingyuan Fan, Hao Zhang, Sheng Chen,
+Zheng Chen, Chengcheng Ma, et al. Skyreels-v2:
+Infinite-length film generative model.arXiv preprint
+arXiv:2504.13074, 2025. 3
+[9] Pengtao Chen, Mingzhu Shen, Peng Ye, Jianjian Cao,
+Chongjun Tu, Christos-Savvas Bouganis, Yiren Zhao,
+and Tao Chen. Delta-dit: A training-free acceleration
+method tailored for diffusion transformers.arXiv preprint
+arXiv:2406.01125, 2024. 3
+[10] Zheng Chen, Zichen Zou, Kewei Zhang, Xiongfei Su, Xin
+Yuan, Yong Guo, and Yulun Zhang. Dove: Efficient one-
+step diffusion model for real-world video super-resolution.
+arXiv preprint arXiv:2505.16239, 2025. 2, 3, 7
+[11] Tri Dao, Dan Fu, Stefano Ermon, Atri Rudra, and Christo-
+pher R ´e. Flashattention: Fast and memory-efficient exact
+attention with io-awareness.Advances in neural information
+processing systems, 35:16344–16359, 2022. 3
+[12] Linwei Dong, Qingnan Fan, Yihong Guo, Zhonghao Wang,
+Qi Zhang, Jinwei Chen, Yawei Luo, and Changqing Zou.
+Tsd-sr: One-step diffusion with target score distillation for
+real-world image super-resolution. InProceedings of the
+Computer Vision and Pattern Recognition Conference, pages
+23174–23184, 2025. 3
+[13] Dario Fuoli, Shuhang Gu, and Radu Timofte. Efficient video
+super-resolution through recurrent latent space propagation.
+In2019 IEEE/CVF International Conference on Computer
+Vision Workshop (ICCVW), pages 3476–3485. IEEE, 2019.
+3
+[14] Yuwei Guo, Ceyuan Yang, Ziyan Yang, Zhibei Ma, Zhi-
+jie Lin, Zhenheng Yang, Dahua Lin, and Lu Jiang. Long
+context tuning for video generation.arXiv preprint
+arXiv:2503.10589, 2025. 3
+[15] Edward J Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-
+Zhu, Yuanzhi Li, Shean Wang, Lu Wang, Weizhu Chen, et al.
+Lora: Low-rank adaptation of large language models.ICLR,
+1(2):3, 2022. 6
+[16] Xun Huang, Zhengqi Li, Guande He, Mingyuan Zhou,
+and Eli Shechtman. Self forcing: Bridging the train-
+test gap in autoregressive video diffusion.arXiv preprint
+arXiv:2506.08009, 2025. 2, 3, 4
+[17] Junjie Ke, Qifei Wang, Yilin Wang, Peyman Milanfar, and
+Feng Yang. Musiq: Multi-scale image quality transformer.
+InProceedings of the IEEE/CVF international conference on
+computer vision, pages 5148–5157, 2021. 3, 7
+[18] Senmao Li, Taihang Hu, Fahad Shahbaz Khan, Linxuan
+Li, Shiqi Yang, Yaxing Wang, Ming-Ming Cheng, and Jian
+Yang. Faster diffusion: Rethinking the role of unet encoder
+in diffusion models.CoRR, 2023. 3
+[19] Wenbo Li, Xin Tao, Taian Guo, Lu Qi, Jiangbo Lu, and Jiaya
+Jia. Mucan: Multi-correspondence aggregation network for
+video super-resolution. InEuropean conference on computer
+vision, pages 335–351. Springer, 2020. 3
+[20] Xiaohui Li, Yihao Liu, Shuo Cao, Ziyan Chen, Shaobin
+Zhuang, Xiangyu Chen, Yinan He, Yi Wang, and Yu Qiao.
+Diffvsr: Enhancing real-world video super-resolution with
+diffusion models for advanced visual quality and temporal
+consistency.arXiv e-prints, pages arXiv–2501, 2025. 2, 3
+[21] Shanchuan Lin, Xin Xia, Yuxi Ren, Ceyuan Yang, Xuefeng
+Xiao, and Lu Jiang. Diffusion adversarial post-training for
+one-step video generation.arXiv preprint arXiv:2501.08316,
+2025. 3
+[22] Shanchuan Lin, Ceyuan Yang, Hao He, Jianwen Jiang, Yuxi
+Ren, Xin Xia, Yang Zhao, Xuefeng Xiao, and Lu Jiang.
+43490
+
+=== PAGE 10 ===
+Autoregressive adversarial post-training for real-time inter-
+active video generation.arXiv preprint arXiv:2506.09350,
+2025. 2, 3, 4
+[23] Yaron Lipman, Ricky TQ Chen, Heli Ben-Hamu, Maximil-
+ian Nickel, and Matt Le. Flow matching for generative mod-
+eling.arXiv preprint arXiv:2210.02747, 2022. 4
+[24] Chengxu Liu, Huan Yang, Jianlong Fu, and Xueming
+Qian. Learning trajectory-aware transformer for video super-
+resolution. InProceedings of the IEEE/CVF conference on
+computer vision and pattern recognition, pages 5687–5696,
+2022. 2, 3
+[25] Feng Liu, Shiwei Zhang, Xiaofeng Wang, Yujie Wei, Haonan
+Qiu, Yuzhong Zhao, Yingya Zhang, Qixiang Ye, and Fang
+Wan. Timestep embedding tells: It’s time to cache for video
+diffusion model. InProceedings of the Computer Vision and
+Pattern Recognition Conference, pages 7353–7363, 2025. 3
+[26] Xingchao Liu, Chengyue Gong, and Qiang Liu. Flow
+straight and fast: Learning to generate and transfer data with
+rectified flow.arXiv preprint arXiv:2209.03003, 2022. 3
+[27] Xingchao Liu, Xiwen Zhang, Jianzhu Ma, Jian Peng, et al.
+Instaflow: One step is enough for high-quality diffusion-
+based text-to-image generation. InThe Twelfth International
+Conference on Learning Representations, 2023. 3
+[28] Ilya Loshchilov and Frank Hutter. Decoupled weight decay
+regularization.arXiv preprint arXiv:1711.05101, 2017. 6
+[29] Seungjun Nah, Sungyong Baik, Seokil Hong, Gyeongsik
+Moon, Sanghyun Son, Radu Timofte, and Kyoung Mu
+Lee. Ntire 2019 challenge on video deblurring and super-
+resolution: Dataset and study. InCVPR Workshops, 2019.
+6
+[30] William Peebles and Saining Xie. Scalable diffusion models
+with transformers. InProceedings of the IEEE/CVF inter-
+national conference on computer vision, pages 4195–4205,
+2023. 3
+[31] Yunpeng Qu, Kun Yuan, Kai Zhao, Qizhi Xie, Jinhua Hao,
+Ming Sun, and Chao Zhou. Xpsr: Cross-modal priors for
+diffusion-based image super-resolution. InEuropean Con-
+ference on Computer Vision, pages 285–303. Springer, 2024.
+3
+[32] Christoph Schuhmann, Romain Beaumont, Richard Vencu,
+Cade Gordon, Ross Wightman, Mehdi Cherti, Theo
+Coombes, Aarush Katta, Clayton Mullis, Mitchell Worts-
+man, et al. Laion-5b: An open large-scale dataset for training
+next generation image-text models.Advances in neural in-
+formation processing systems, 35:25278–25294, 2022. 3
+[33] Pratheba Selvaraju, Tianyu Ding, Tianyi Chen, Ilya Zharkov,
+and Luming Liang. Fora: Fast-forward caching in diffusion
+transformer acceleration.arXiv preprint arXiv:2407.01425,
+2024. 3
+[34] Xuan Shen, Chenxia Han, Yufa Zhou, Yanyue Xie, Yi-
+fan Gong, Quanyi Wang, Yiwei Wang, Yanzhi Wang, Pu
+Zhao, and Jiuxiang Gu. Draftattention: Fast video diffu-
+sion via low-resolution attention guidance.arXiv preprint
+arXiv:2505.14708, 2025. 3, 4
+[35] Jianlin Su, Murtadha Ahmed, Yu Lu, Shengfeng Pan, Wen
+Bo, and Yunfeng Liu. Roformer: Enhanced transformer with
+rotary position embedding.Neurocomputing, 568:127063,
+2024. 5
+[36] Zachary Teed and Jia Deng. Raft: Recurrent all-pairs field
+transforms for optical flow. InEuropean conference on com-
+puter vision, pages 402–419. Springer, 2020. 3
+[37] Hansi Teng, Hongyu Jia, Lei Sun, Lingzhi Li, Maolin Li,
+Mingqiu Tang, Shuai Han, Tianning Zhang, WQ Zhang,
+Weifeng Luo, et al. Magi-1: Autoregressive video genera-
+tion at scale.arXiv preprint arXiv:2505.13211, 2025. 3
+[38] Team Wan, Ang Wang, Baole Ai, Bin Wen, Chaojie Mao,
+Chen-Wei Xie, Di Chen, Feiwu Yu, Haiming Zhao, Jianxiao
+Yang, et al. Wan: Open and advanced large-scale video gen-
+erative models.arXiv preprint arXiv:2503.20314, 2025. 3,
+4, 6
+[39] Jianyi Wang, Kelvin CK Chan, and Chen Change Loy. Ex-
+ploring clip for assessing the look and feel of images. InPro-
+ceedings of the AAAI conference on artificial intelligence,
+pages 2555–2563, 2023. 7
+[40] Jianyi Wang, Shanchuan Lin, Zhijie Lin, Yuxi Ren, Meng
+Wei, Zongsheng Yue, Shangchen Zhou, Hao Chen, Yang
+Zhao, Ceyuan Yang, et al. Seedvr2: One-step video restora-
+tion via diffusion adversarial post-training.arXiv preprint
+arXiv:2506.05301, 2025. 2, 3, 7
+[41] Jianyi Wang, Zhijie Lin, Meng Wei, Yang Zhao, Ceyuan
+Yang, Chen Change Loy, and Lu Jiang. Seedvr: Seeding in-
+finity in diffusion transformer towards generic video restora-
+tion. InProceedings of the Computer Vision and Pattern
+Recognition Conference, pages 2161–2172, 2025. 2, 3
+[42] Xintao Wang, Kelvin CK Chan, Ke Yu, Chao Dong, and
+Chen Change Loy. Edvr: Video restoration with enhanced
+deformable convolutional networks. InProceedings of
+the IEEE/CVF conference on computer vision and pattern
+recognition workshops, pages 0–0, 2019. 2, 3
+[43] Xintao Wang, Liangbin Xie, Chao Dong, and Ying Shan.
+Real-esrgan: Training real-world blind super-resolution with
+pure synthetic data. InProceedings of the IEEE/CVF inter-
+national conference on computer vision, pages 1905–1914,
+2021. 3
+[44] Yufei Wang, Wenhan Yang, Xinyuan Chen, Yaohui Wang,
+Lanqing Guo, Lap-Pui Chau, Ziwei Liu, Yu Qiao, Alex C
+Kot, and Bihan Wen. Sinsr: diffusion-based image super-
+resolution in a single step. InProceedings of the IEEE/CVF
+conference on computer vision and pattern recognition,
+pages 25796–25805, 2024. 3
+[45] Zhou Wang, Alan C Bovik, Hamid R Sheikh, and Eero P Si-
+moncelli. Image quality assessment: from error visibility to
+structural similarity.IEEE transactions on image processing,
+13(4):600–612, 2004. 7
+[46] Zhengyi Wang, Cheng Lu, Yikai Wang, Fan Bao, Chongxuan
+Li, Hang Su, and Jun Zhu. Prolificdreamer: High-fidelity and
+diverse text-to-3d generation with variational score distilla-
+tion.Advances in neural information processing systems, 36:
+8406–8441, 2023. 3
+[47] Pengxu Wei, Yujing Sun, Xingbei Guo, Chang Liu, Guanbin
+Li, Jie Chen, Xiangyang Ji, and Liang Lin. Towards real-
+world burst image super-resolution: Benchmark and method.
+InProceedings of the IEEE/CVF International Conference
+on Computer Vision, pages 13233–13242, 2023. 3
+[48] Yongxian Wei, Zixuan Hu, Li Shen, Zhenyi Wang, Lei Li, Yu
+Li, and Chun Yuan. Meta-learning without data via uncondi-
+43491
+
+=== PAGE 11 ===
+tional diffusion models.IEEE Transactions on Circuits and
+Systems for Video Technology, 34(11):11874–11885, 2024.
+3
+[49] Wikipedia contributors. Peak signal-to-noise ratio —
+Wikipedia, the free encyclopedia, 2024. [Online; accessed
+4-March-2024]. 7
+[50] Haoning Wu, Erli Zhang, Liang Liao, Chaofeng Chen, Jing-
+wen Hou, Annan Wang, Wenxiu Sun, Qiong Yan, and Weisi
+Lin. Exploring video quality assessment on user gener-
+ated contents from aesthetic and technical perspectives. In
+Proceedings of the IEEE/CVF International Conference on
+Computer Vision, pages 20144–20154, 2023. 7
+[51] Rongyuan Wu, Lingchen Sun, Zhiyuan Ma, and Lei Zhang.
+One-step effective diffusion network for real-world image
+super-resolution.Advances in Neural Information Process-
+ing Systems, 37:92529–92553, 2024. 3
+[52] Haocheng Xi, Shuo Yang, Yilong Zhao, Chenfeng Xu,
+Muyang Li, Xiuyu Li, Yujun Lin, Han Cai, Jintao Zhang,
+Dacheng Li, et al. Sparse videogen: Accelerating video
+diffusion transformers with spatial-temporal sparsity.arXiv
+preprint arXiv:2502.01776, 2025. 3
+[53] Rui Xie, Yinhong Liu, Penghao Zhou, Chen Zhao, Jun Zhou,
+Kai Zhang, Zhenyu Zhang, Jian Yang, Zhenheng Yang, and
+Ying Tai. Star: Spatial-temporal augmentation with text-to-
+video models for real-world video super-resolution.arXiv
+preprint arXiv:2501.02976, 2025. 2, 3, 7
+[54] Mengwei Xu, Mengze Zhu, Yunxin Liu, Felix Xiaozhu Lin,
+and Xuanzhe Liu. Deepcache: Principled cache for mo-
+bile deep vision. InProceedings of the 24th annual inter-
+national conference on mobile computing and networking,
+pages 129–144, 2018. 3
+[55] Shuo Yang, Haocheng Xi, Yilong Zhao, Muyang Li, Jintao
+Zhang, Han Cai, Yujun Lin, Xiuyu Li, Chenfeng Xu, Kelly
+Peng, et al. Sparse videogen2: Accelerate video generation
+with sparse attention via semantic-aware permutation.arXiv
+preprint arXiv:2505.18875, 2025. 3
+[56] Xi Yang, Wangmeng Xiang, Hui Zeng, and Lei Zhang. Real-
+world video super-resolution: A benchmark dataset and a
+decomposition based learning scheme. InProceedings of
+the IEEE/CVF international conference on computer vision,
+pages 4781–4790, 2021. 3
+[57] Xi Yang, Chenhang He, Jianqi Ma, and Lei Zhang. Motion-
+guided latent diffusion for temporally consistent real-world
+video super-resolution. InEuropean conference on computer
+vision, pages 224–242. Springer, 2024. 2, 3
+[58] Zhuoyi Yang, Jiayan Teng, Wendi Zheng, Ming Ding, Shiyu
+Huang, Jiazheng Xu, Yuanming Yang, Wenyi Hong, Xiao-
+han Zhang, Guanyu Feng, et al. Cogvideox: Text-to-video
+diffusion models with an expert transformer.arXiv preprint
+arXiv:2408.06072, 2024. 3
+[59] Peng Yi, Zhongyuan Wang, Kui Jiang, Junjun Jiang, and
+Jiayi Ma. Progressive fusion video super-resolution net-
+work via exploiting non-local spatio-temporal correlations.
+In2019 IEEE/CVF International Conference on Computer
+Vision (ICCV), pages 3106–3115, 2019. 6
+[60] Tianwei Yin, Micha ¨el Gharbi, Richard Zhang, Eli Shecht-
+man, Fredo Durand, William T Freeman, and Taesung Park.
+One-step diffusion with distribution matching distillation. In
+Proceedings of the IEEE/CVF conference on computer vi-
+sion and pattern recognition, pages 6613–6623, 2024. 3, 4
+[61] Tianwei Yin, Qiang Zhang, Richard Zhang, William T Free-
+man, Fredo Durand, Eli Shechtman, and Xun Huang. From
+slow bidirectional to fast causal video generators.arXiv e-
+prints, pages arXiv–2412, 2024. 3
+[62] Fanghua Yu, Jinjin Gu, Zheyuan Li, Jinfan Hu, Xiangtao
+Kong, Xintao Wang, Jingwen He, Yu Qiao, and Chao Dong.
+Scaling up to excellence: Practicing model scaling for photo-
+realistic image restoration in the wild. InProceedings of
+the IEEE/CVF conference on computer vision and pattern
+recognition, pages 25669–25680, 2024. 3
+[63] Zongsheng Yue, Kang Liao, and Chen Change Loy.
+Arbitrary-steps image super-resolution via diffusion inver-
+sion. InProceedings of the Computer Vision and Pattern
+Recognition Conference, pages 23153–23163, 2025. 3
+[64] Peiyuan Zhang, Yongqi Chen, Haofeng Huang, Will Lin,
+Zhengzhong Liu, Ion Stoica, Eric Xing, and Hao Zhang.
+Vsa: Faster video diffusion with trainable sparse attention.
+arXiv preprint arXiv:2505.13389, 2025. 3, 4
+[65] Richard Zhang, Phillip Isola, Alexei A Efros, Eli Shecht-
+man, and Oliver Wang. The unreasonable effectiveness of
+deep features as a perceptual metric. InProceedings of the
+IEEE conference on computer vision and pattern recogni-
+tion, pages 586–595, 2018. 7
+[66] Shiyi Zhang, Junhao Zhuang, Zhaoyang Zhang, Ying Shan,
+and Yansong Tang. Flexiact: Towards flexible action control
+in heterogeneous scenarios. InProceedings of the Special
+Interest Group on Computer Graphics and Interactive Tech-
+niques Conference Conference Papers, pages 1–11, 2025. 3
+[67] Yuehan Zhang and Angela Yao. Realviformer: Investigating
+attention for real-world video super-resolution. InEuropean
+Conference on Computer Vision, pages 412–428. Springer,
+2024. 3, 7
+[68] Zhixing Zhang, Yanyu Li, Yushu Wu, Anil Kag, Ivan Sko-
+rokhodov, Willi Menapace, Aliaksandr Siarohin, Junli Cao,
+Dimitris Metaxas, Sergey Tulyakov, et al. Sf-v: Single for-
+ward video generation model.Advances in Neural Informa-
+tion Processing Systems, 37:103599–103618, 2024. 3
+[69] Shangchen Zhou, Peiqing Yang, Jianyi Wang, Yihang
+Luo, and Chen Change Loy. Upscale-a-video: Temporal-
+consistent diffusion model for real-world video super-
+resolution. InProceedings of the IEEE/CVF Conference
+on Computer Vision and Pattern Recognition, pages 2535–
+2545, 2024. 2, 3, 6, 7
+[70] Junhao Zhuang, Xuan Ju, Zhaoyang Zhang, Yong Liu, Shiyi
+Zhang, Chun Yuan, and Ying Shan. Colorflow: Retrieval-
+augmented image sequence colorization.arXiv preprint
+arXiv:2412.11815, 2024. 3
+[71] Junhao Zhuang, Yanhong Zeng, Wenran Liu, Chun Yuan,
+and Kai Chen. A task is worth one word: Learning with
+task prompts for high-quality versatile image inpainting. In
+European Conference on Computer Vision, pages 195–211.
+Springer, 2024.
+[72] Junhao Zhuang, Lingen Li, Xuan Ju, Zhaoyang Zhang, Chun
+Yuan, and Ying Shan. Cobra: Efficient line art colorization
+43492
+
+=== PAGE 12 ===
+with broader references. InProceedings of the Special Inter-
+est Group on Computer Graphics and Interactive Techniques
+Conference Conference Papers, pages 1–11, 2025. 3
+43493

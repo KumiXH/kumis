@@ -1,0 +1,124 @@
+{
+  "key": "ldm",
+  "pdf": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\papers\\01_history_and_tokenizers\\ldm_2112.10752.pdf",
+  "page_count": 12,
+  "text_path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\text\\ldm.txt",
+  "first_page_excerpt": "High-Resolution Image Synthesis with Latent Diffusion Models\nRobin Rombach1 ∗ Andreas Blattmann1 ∗ Dominik Lorenz1 Patrick Esser\n Bj¨orn Ommer1\n1Ludwig Maximilian University of Munich & IWR, Heidelberg University, Germany\n Runway ML\nhttps://github.com/CompVis/latent-diffusion\nAbstract\nBy decomposing the image formation process into a se-\nquential application of denoising autoencoders, diffusion\nmodels (DMs) achieve state-of-the-art synthesis results on\nimage data and beyond. Additionally, their formulation al-\nlows for a guiding mechanism to control the image gen-\neration process without retraining. However , since these\nmodels typically operate directly in pixel space, optimiza-\ntion of powerful DMs often consumes hundreds of GPU\ndays and inference is expensive due to sequential evalu-\nations. To enable DM training on limited computational\nresources while retaining their quality and ﬂexibility, we\napply them in the latent space of powerful pretrained au-\ntoencoders. In contrast to previous work, training diffusion\nmodels on such a representation allows for the ﬁrst time\nto reach a near-optimal point between complexity reduc-\ntion and detail preservation, greatly boosting visual ﬁdelity.\nBy introducing cross-attention layers into the model archi-\ntecture, we turn diffusion models into powerful and ﬂexi-\nble generators for general conditioning inputs such as text\nor bounding boxes and high-resolution synthesis becomes\npossible in a convolutional manner . Our latent diffusion\nmodels (LDMs) achieve new state of the art scores for im-\nage inpainting and class-conditional image synthesis and\nhighly competitive performance on various tasks, includ-\ning unconditional image generation, text-to-image synthe-\nsis, and super-resolution, while signiﬁcantly reducing com-\nputational requirements compared to pixel-based DMs.\n1. Introduction\nImage synthesis is one of the computer vision ﬁelds with\nthe most spectacular recent development, but also among\nthose with the greatest computational demands. Espe-\ncially high-resolution synthesis of complex, natural scenes\nis presently dominated by scaling up likelihood-based mod-\nels, potentially containing billions of parameters in autore-\ngressive (AR) transformers [\n64,65]. In contrast, the promis-\ning results of GANs [ 3, 26, 39] have been revealed to be\nmostly conﬁned to data with comparably limited variability\nas their adversarial learning procedure does not easily scale\nto modeling complex, multi-modal distributions. Recently,\ndiffusion models [\n79], which are built from a hierarchy of\ndenoising autoencoders, have shown to achieve impressive\n∗The ﬁrst two authors contributed equally to this work.\nInput\nours (f = 4)\nPSNR: 27.4 R-FID: 0.58\nDALL-E (f = 8)\nPSNR: 22.8 R-FID: 32.01\nVQGAN (f = 16)\nPSNR: 19.9 R-FID: 4.98\nFigure 1. Boosting the upper bound on achievable quality with\nless agressive downsampling. Since diffusion models offer excel-\nlent inductive biases for spatial data, we do not need the heavy spa-\ntial downsampling of related generative models in latent space, but\ncan still greatly reduce the dimensionality of the data via suitable\nautoencoding models, see Sec.\n3. Images are from the DIV2K [ 1]\nvalidation set, evaluated at 5122 px. We denote the spatial down-\nsampling factor by f . Reconstruction FIDs [ 28] and PSNR are\ncalculated on ImageNet-val. [ 12]; see also Tab. 8.\nresults in image synthesis [29,82] and beyond [7,44,47,56],\nand deﬁne the state-of-the-art in class-conditional image\nsynthesis [\n15,30] and super-resolution [70]. Moreover, even\nunconditional DMs can readily be applied to tasks such\nas inpainting and colorization [\n82] or stroke-based syn-\nthesis [ 52], in contrast to other types of generative mod-\nels [19, 45, 67]. Being likelihood-based models, they do not\nexhibit mode-collapse and training instabilities as GANs\nand, by heavily exploiting parameter sharing, they can\nmodel highly complex distributions of natural images with-\nout involving billions of parameters as in AR models [\n65].\nDemocratizing High-Resolution Image Synthesis DMs\nbelong to the class of likelihood-based models, whose\nmode-covering behavior makes them prone to spend ex-\ncessive amounts of capacity (and thus compute resources)\non modeling imperceptible details of the data [\n16, 71]. Al-\nthough the reweighted variational objective [29] aims to ad-\ndress this by undersampling the initial denoising steps, DMs\nare still computationally demanding, since training and\nevaluating such a model requires repeated function evalu-\nations (and gradient computations) in the high-dimensional\nspace of RGB images. As an example, training the most\npowerful DMs often takes hundreds of GPU days (e.g. 150 -\n1000 V100 days in [\n15]) and repeated evaluations on a noisy\nversion of the input space render also inference expensive,\n10684",
+  "figure_candidates": [
+    {
+      "page": 1,
+      "caption": "Figure 1. Boosting the upper bound on achievable quality with"
+    },
+    {
+      "page": 2,
+      "caption": "Figure 2. Illustrating perceptual and semantic compression: Most"
+    },
+    {
+      "page": 4,
+      "caption": "Figure 3. We condition LDMs either via concatenation or by a"
+    },
+    {
+      "page": 5,
+      "caption": "Figure 4. Samples from LDMs trained on CelebAHQ [38], FFHQ [40], LSUN-Churches [98], LSUN-Bedrooms [98] and class-conditional"
+    },
+    {
+      "page": 5,
+      "caption": "Figure 5. Analyzing the training of class-conditional LDMs with"
+    },
+    {
+      "page": 5,
+      "caption": "Figure 6. Inference speed vs sample quality: Comparing"
+    },
+    {
+      "page": 6,
+      "caption": "Figure 7. Top: Samples from our LDM for layout-to-image syn-"
+    },
+    {
+      "page": 7,
+      "caption": "Figure 8. A LDM trained on 2562 resolution can generalize to"
+    },
+    {
+      "page": 7,
+      "caption": "Figure 9. ImageNet 64 →256 super-resolution on ImageNet-V al."
+    },
+    {
+      "page": 8,
+      "caption": "Figure 10. Qualitative results on object removal with our big, w/"
+    }
+  ],
+  "table_candidates": [
+    {
+      "page": 6,
+      "caption": "Table 1. Evaluation metrics for unconditional image synthe-"
+    },
+    {
+      "page": 6,
+      "caption": "Table 2. Evaluation of text-conditional image synthesis on"
+    },
+    {
+      "page": 7,
+      "caption": "Table 3. Comparison of a class-conditional ImageNet LDM with"
+    },
+    {
+      "page": 7,
+      "caption": "Table 4. ×4 upscaling results on ImageNet-V al. ( 2562); †: FID"
+    },
+    {
+      "page": 8,
+      "caption": "Table 5. Task 1: Subjects were shown ground truth and generated"
+    },
+    {
+      "page": 8,
+      "caption": "Table 6. Assessing inpainting efﬁciency. †: Deviations from Fig. 6"
+    },
+    {
+      "page": 8,
+      "caption": "Table 7. Comparison of inpainting performance on 30k crops of"
+    }
+  ],
+  "keyword_pages": {
+    "architecture": [
+      1,
+      2,
+      3,
+      4,
+      6,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "compression": [
+      1,
+      4,
+      5,
+      7,
+      8
+    ],
+    "training": [
+      1,
+      2,
+      3,
+      6,
+      7,
+      9,
+      10,
+      11,
+      12
+    ],
+    "dataset": [
+      2,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "ablation": [],
+    "limitations": []
+  }
+}

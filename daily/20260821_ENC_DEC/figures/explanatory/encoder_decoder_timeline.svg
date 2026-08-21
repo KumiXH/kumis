@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="720" viewBox="0 0 1500 720">
+<rect width="100%" height="100%" fill="#FFFFFF"/>
+
+<style>
+  text { font-family: 'Microsoft YaHei', 'Noto Sans CJK SC', Arial, sans-serif; fill: #17212B; }
+  .title { font-size: 32px; font-weight: 700; }
+  .subtitle { font-size: 17px; fill: #4B5B66; }
+  .year { font-size: 19px; font-weight: 700; fill: #B31B34; }
+  .label { font-size: 16px; font-weight: 700; }
+  .body { font-size: 14px; }
+  .shape { font-size: 13px; fill: #394B56; }
+  .small { font-size: 12px; fill: #52636E; }
+  .node { rx: 7; ry: 7; stroke-width: 2; }
+  .conv { fill: #D8EBF7; stroke: #1479AD; }
+  .conditionBox { fill: #DFF3E9; stroke: #07845F; }
+  .latent { fill: #EEE6F7; stroke: #8052A5; }
+  .attention { fill: #FBE6C4; stroke: #DC8500; }
+  .operation { fill: #EDF0F2; stroke: #687984; }
+  .main { fill: none; stroke: #263238; stroke-width: 2.2; marker-end: url(#arrow); }
+  .condition { fill: none; stroke: #07845F; stroke-width: 2.2; marker-end: url(#arrowGreen); }
+  .residual { fill: none; stroke: #8052A5; stroke-width: 2; stroke-dasharray: 8 6; marker-end: url(#arrowPurple); }
+  .axis { stroke: #AAB5BC; stroke-width: 3; }
+</style>
+<defs>
+  <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#263238"/></marker>
+  <marker id="arrowGreen" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#07845F"/></marker>
+  <marker id="arrowPurple" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#8052A5"/></marker>
+</defs>
+
+<text x="80" y="66" class="title">DiT 编解码器技术演进 / Encoder-Decoder Evolution</text>
+<text x="80" y="100" class="subtitle">从概率潜空间到高压缩因果视频 tokenizer，再到面向复原的条件投影与 decoder-only 适配</text>
+<text x="80" y="126" class="shape">[pixels / frames] -> [continuous or discrete latent] -> [DiT tokens] -> [pixels / frames]</text>
+<g id="main-flow" data-flow="top-to-bottom">
+<line x1="105" y1="365" x2="1390" y2="365" class="axis"/>
+<circle cx="105.0" cy="365" r="8" fill="#B31B34"/>
+<line x1="105.0" y1="365" x2="105.0" y2="295" stroke="#B7C1C8" stroke-width="2"/>
+<rect x="27.0" y="145" width="156" height="150" class="node operation"/>
+<text x="105.0" y="175" class="year" text-anchor="middle">2014</text>
+<text x="105.0" y="202" class="label" text-anchor="middle"><tspan x="105.0" dy="0">VAE</tspan></text>
+<text x="105.0" y="237" class="small" text-anchor="middle"><tspan x="105.0" dy="0">连续概率潜空间</tspan><tspan x="105.0" dy="18">ELBO: 重建 + KL</tspan></text>
+<circle cx="288.57142857142856" cy="365" r="8" fill="#B31B34"/>
+<line x1="288.57142857142856" y1="365" x2="288.57142857142856" y2="425" stroke="#B7C1C8" stroke-width="2"/>
+<rect x="210.57142857142856" y="425" width="156" height="150" class="node operation"/>
+<text x="288.57142857142856" y="455" class="year" text-anchor="middle">2017</text>
+<text x="288.57142857142856" y="482" class="label" text-anchor="middle"><tspan x="288.57142857142856" dy="0">VQ-VAE</tspan></text>
+<text x="288.57142857142856" y="517" class="small" text-anchor="middle"><tspan x="288.57142857142856" dy="0">离散码本</tspan><tspan x="288.57142857142856" dy="18">重建 + codebook</tspan><tspan x="288.57142857142856" dy="18">+ commitment</tspan></text>
+<circle cx="472.14285714285717" cy="365" r="8" fill="#B31B34"/>
+<line x1="472.14285714285717" y1="365" x2="472.14285714285717" y2="295" stroke="#B7C1C8" stroke-width="2"/>
+<rect x="394.14285714285717" y="145" width="156" height="150" class="node operation"/>
+<text x="472.14285714285717" y="175" class="year" text-anchor="middle">2021</text>
+<text x="472.14285714285717" y="202" class="label" text-anchor="middle"><tspan x="472.14285714285717" dy="0">VQGAN</tspan></text>
+<text x="472.14285714285717" y="237" class="small" text-anchor="middle"><tspan x="472.14285714285717" dy="0">感知/对抗式 tokenizer</tspan><tspan x="472.14285714285717" dy="18">LPIPS + GAN 改善纹理</tspan></text>
+<circle cx="655.7142857142858" cy="365" r="8" fill="#B31B34"/>
+<line x1="655.7142857142858" y1="365" x2="655.7142857142858" y2="425" stroke="#B7C1C8" stroke-width="2"/>
+<rect x="577.7142857142858" y="425" width="156" height="150" class="node operation"/>
+<text x="655.7142857142858" y="455" class="year" text-anchor="middle">2022</text>
+<text x="655.7142857142858" y="482" class="label" text-anchor="middle"><tspan x="655.7142857142858" dy="0">LDM</tspan></text>
+<text x="655.7142857142858" y="517" class="small" text-anchor="middle"><tspan x="655.7142857142858" dy="0">冻结 f8 图像 VAE</tspan><tspan x="655.7142857142858" dy="18">扩散进入低维 latent</tspan></text>
+<circle cx="839.2857142857143" cy="365" r="8" fill="#B31B34"/>
+<line x1="839.2857142857143" y1="365" x2="839.2857142857143" y2="295" stroke="#B7C1C8" stroke-width="2"/>
+<rect x="761.2857142857143" y="145" width="156" height="150" class="node operation"/>
+<text x="839.2857142857143" y="175" class="year" text-anchor="middle">2023</text>
+<text x="839.2857142857143" y="202" class="label" text-anchor="middle"><tspan x="839.2857142857143" dy="0">DiT / MAGVIT</tspan></text>
+<text x="839.2857142857143" y="237" class="small" text-anchor="middle"><tspan x="839.2857142857143" dy="0">Transformer latent 建模</tspan><tspan x="839.2857142857143" dy="18">图像与视频路线分化</tspan></text>
+<circle cx="1022.8571428571429" cy="365" r="8" fill="#B31B34"/>
+<line x1="1022.8571428571429" y1="365" x2="1022.8571428571429" y2="425" stroke="#B7C1C8" stroke-width="2"/>
+<rect x="944.8571428571429" y="425" width="156" height="150" class="node operation"/>
+<text x="1022.8571428571429" y="455" class="year" text-anchor="middle">2024</text>
+<text x="1022.8571428571429" y="482" class="label" text-anchor="middle"><tspan x="1022.8571428571429" dy="0">SD3 / TiTok</tspan><tspan x="1022.8571428571429" dy="19">MAGVIT-v2</tspan></text>
+<text x="1022.8571428571429" y="530" class="small" text-anchor="middle"><tspan x="1022.8571428571429" dy="0">16ch、1D token、因果量化</tspan><tspan x="1022.8571428571429" dy="18">token 形状成为主变量</tspan></text>
+<circle cx="1206.4285714285716" cy="365" r="8" fill="#B31B34"/>
+<line x1="1206.4285714285716" y1="365" x2="1206.4285714285716" y2="295" stroke="#B7C1C8" stroke-width="2"/>
+<rect x="1128.4285714285716" y="145" width="156" height="150" class="node operation"/>
+<text x="1206.4285714285716" y="175" class="year" text-anchor="middle">2025</text>
+<text x="1206.4285714285716" y="202" class="label" text-anchor="middle"><tspan x="1206.4285714285716" dy="0">DC-AE / Video VAE</tspan></text>
+<text x="1206.4285714285716" y="237" class="small" text-anchor="middle"><tspan x="1206.4285714285716" dy="0">CogVideoX / LTX</tspan><tspan x="1206.4285714285716" dy="18">Cosmos / Wan；高压缩与缓存</tspan></text>
+<circle cx="1390.0" cy="365" r="8" fill="#B31B34"/>
+<line x1="1390.0" y1="365" x2="1390.0" y2="425" stroke="#B7C1C8" stroke-width="2"/>
+<rect x="1312.0" y="425" width="156" height="150" class="node operation"/>
+<text x="1390.0" y="455" class="year" text-anchor="middle">2026</text>
+<text x="1390.0" y="482" class="label" text-anchor="middle"><tspan x="1390.0" dy="0">FlashVSR</tspan></text>
+<text x="1390.0" y="517" class="small" text-anchor="middle"><tspan x="1390.0" dy="0">条件投影 + decoder-only</tspan><tspan x="1390.0" dy="18">LQ_proj_in / TCDecoder</tspan></text>
+</g>
+</svg>

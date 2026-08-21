@@ -1,0 +1,445 @@
+{
+  "pdf": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\report\\DiT编解码器发展架构训练与数据工程深度洞察_QA.pdf",
+  "page_count": 43,
+  "pages": [
+    {
+      "page": 1,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-01.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 248.511,
+      "std_luma": 30.376,
+      "ink_ratio": 0.1313,
+      "possible_blank": false
+    },
+    {
+      "page": 2,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-02.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 242.756,
+      "std_luma": 39.849,
+      "ink_ratio": 0.28467,
+      "possible_blank": false
+    },
+    {
+      "page": 3,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-03.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 246.779,
+      "std_luma": 31.973,
+      "ink_ratio": 0.18552,
+      "possible_blank": false
+    },
+    {
+      "page": 4,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-04.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 244.642,
+      "std_luma": 36.437,
+      "ink_ratio": 0.22666,
+      "possible_blank": false
+    },
+    {
+      "page": 5,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-05.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 244.018,
+      "std_luma": 36.26,
+      "ink_ratio": 0.24001,
+      "possible_blank": false
+    },
+    {
+      "page": 6,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-06.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 242.683,
+      "std_luma": 38.995,
+      "ink_ratio": 0.31512,
+      "possible_blank": false
+    },
+    {
+      "page": 7,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-07.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 249.945,
+      "std_luma": 19.068,
+      "ink_ratio": 0.1422,
+      "possible_blank": false
+    },
+    {
+      "page": 8,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-08.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 245.829,
+      "std_luma": 31.541,
+      "ink_ratio": 0.26619,
+      "possible_blank": false
+    },
+    {
+      "page": 9,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-09.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 249.983,
+      "std_luma": 25.351,
+      "ink_ratio": 0.11736,
+      "possible_blank": false
+    },
+    {
+      "page": 10,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-10.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 248.62,
+      "std_luma": 26.495,
+      "ink_ratio": 0.19444,
+      "possible_blank": false
+    },
+    {
+      "page": 11,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-11.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 245.292,
+      "std_luma": 35.571,
+      "ink_ratio": 0.25524,
+      "possible_blank": false
+    },
+    {
+      "page": 12,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-12.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 248.973,
+      "std_luma": 26.79,
+      "ink_ratio": 0.15192,
+      "possible_blank": false
+    },
+    {
+      "page": 13,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-13.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 246.644,
+      "std_luma": 33.695,
+      "ink_ratio": 0.16827,
+      "possible_blank": false
+    },
+    {
+      "page": 14,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-14.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 239.047,
+      "std_luma": 44.607,
+      "ink_ratio": 0.28323,
+      "possible_blank": false
+    },
+    {
+      "page": 15,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-15.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 247.632,
+      "std_luma": 30.643,
+      "ink_ratio": 0.17831,
+      "possible_blank": false
+    },
+    {
+      "page": 16,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-16.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 246.503,
+      "std_luma": 32.424,
+      "ink_ratio": 0.21127,
+      "possible_blank": false
+    },
+    {
+      "page": 17,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-17.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 245.502,
+      "std_luma": 36.569,
+      "ink_ratio": 0.25833,
+      "possible_blank": false
+    },
+    {
+      "page": 18,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-18.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 242.187,
+      "std_luma": 39.032,
+      "ink_ratio": 0.24396,
+      "possible_blank": false
+    },
+    {
+      "page": 19,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-19.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 241.737,
+      "std_luma": 34.622,
+      "ink_ratio": 0.29984,
+      "possible_blank": false
+    },
+    {
+      "page": 20,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-20.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 246.549,
+      "std_luma": 31.874,
+      "ink_ratio": 0.21282,
+      "possible_blank": false
+    },
+    {
+      "page": 21,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-21.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 225.531,
+      "std_luma": 62.375,
+      "ink_ratio": 0.31111,
+      "possible_blank": false
+    },
+    {
+      "page": 22,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-22.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 247.706,
+      "std_luma": 31.67,
+      "ink_ratio": 0.12682,
+      "possible_blank": false
+    },
+    {
+      "page": 23,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-23.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 245.29,
+      "std_luma": 33.356,
+      "ink_ratio": 0.18184,
+      "possible_blank": false
+    },
+    {
+      "page": 24,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-24.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 247.002,
+      "std_luma": 34.933,
+      "ink_ratio": 0.20005,
+      "possible_blank": false
+    },
+    {
+      "page": 25,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-25.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 244.903,
+      "std_luma": 36.686,
+      "ink_ratio": 0.19135,
+      "possible_blank": false
+    },
+    {
+      "page": 26,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-26.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 246.476,
+      "std_luma": 33.317,
+      "ink_ratio": 0.18873,
+      "possible_blank": false
+    },
+    {
+      "page": 27,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-27.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 246.36,
+      "std_luma": 31.572,
+      "ink_ratio": 0.20112,
+      "possible_blank": false
+    },
+    {
+      "page": 28,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-28.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 245.064,
+      "std_luma": 37.446,
+      "ink_ratio": 0.21421,
+      "possible_blank": false
+    },
+    {
+      "page": 29,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-29.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 245.796,
+      "std_luma": 32.565,
+      "ink_ratio": 0.21512,
+      "possible_blank": false
+    },
+    {
+      "page": 30,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-30.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 248.956,
+      "std_luma": 29.301,
+      "ink_ratio": 0.13841,
+      "possible_blank": false
+    },
+    {
+      "page": 31,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-31.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 246.302,
+      "std_luma": 30.255,
+      "ink_ratio": 0.2312,
+      "possible_blank": false
+    },
+    {
+      "page": 32,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-32.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 242.763,
+      "std_luma": 39.856,
+      "ink_ratio": 0.23638,
+      "possible_blank": false
+    },
+    {
+      "page": 33,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-33.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 245.386,
+      "std_luma": 35.27,
+      "ink_ratio": 0.23777,
+      "possible_blank": false
+    },
+    {
+      "page": 34,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-34.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 244.815,
+      "std_luma": 38.674,
+      "ink_ratio": 0.19541,
+      "possible_blank": false
+    },
+    {
+      "page": 35,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-35.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 223.524,
+      "std_luma": 64.613,
+      "ink_ratio": 0.33611,
+      "possible_blank": false
+    },
+    {
+      "page": 36,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-36.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 248.671,
+      "std_luma": 28.891,
+      "ink_ratio": 0.14428,
+      "possible_blank": false
+    },
+    {
+      "page": 37,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-37.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 243.246,
+      "std_luma": 35.645,
+      "ink_ratio": 0.30534,
+      "possible_blank": false
+    },
+    {
+      "page": 38,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-38.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 247.886,
+      "std_luma": 30.01,
+      "ink_ratio": 0.17169,
+      "possible_blank": false
+    },
+    {
+      "page": 39,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-39.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 247.264,
+      "std_luma": 28.863,
+      "ink_ratio": 0.20465,
+      "possible_blank": false
+    },
+    {
+      "page": 40,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-40.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 245.445,
+      "std_luma": 32.033,
+      "ink_ratio": 0.28152,
+      "possible_blank": false
+    },
+    {
+      "page": 41,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-41.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 246.117,
+      "std_luma": 32.506,
+      "ink_ratio": 0.23542,
+      "possible_blank": false
+    },
+    {
+      "page": 42,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-42.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 247.057,
+      "std_luma": 31.988,
+      "ink_ratio": 0.21848,
+      "possible_blank": false
+    },
+    {
+      "page": 43,
+      "path": "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\page-43.png",
+      "width": 935,
+      "height": 1210,
+      "mean_luma": 252.326,
+      "std_luma": 17.259,
+      "ink_ratio": 0.06741,
+      "possible_blank": false
+    }
+  ],
+  "possible_blank_pages": [],
+  "dimension_variants": [
+    "935x1210"
+  ],
+  "contacts": [
+    "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\contact-1.png",
+    "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\contact-2.png",
+    "D:\\Repository\\ReadPaper\\daily\\20260821_ENC_DEC\\rendered_report\\contact-3.png"
+  ]
+}
