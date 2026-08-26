@@ -14,7 +14,7 @@
 
 **Files:**
 - Read: `D:/Repository/ReadPaper/docs/superpowers/specs/2026-08-26-isp-video-innovation-design.md`
-- Create or modify only under: `D:/Repository/ReadPaper/daily/20260826_ISP_VIDEO_INNOVATION/`
+- Create or modify only under: `D:/Repository/ReadPaper/daily/20260826_后处理调研/`
 - Create tools only under: `D:/Repository/ReadPaper/tools/isp_video/`
 
 - [ ] Before each batch, run `git status --short --branch` and record the starting state in the batch log.
@@ -26,11 +26,11 @@
 ## 1. Create the Project Skeleton and Schemas
 
 **Files:**
-- Create: `D:/Repository/ReadPaper/daily/20260826_ISP_VIDEO_INNOVATION/README.md`
-- Create: `D:/Repository/ReadPaper/daily/20260826_ISP_VIDEO_INNOVATION/metadata/project_config.json`
-- Create: `D:/Repository/ReadPaper/daily/20260826_ISP_VIDEO_INNOVATION/metadata/opportunity_schema.json`
-- Create: `D:/Repository/ReadPaper/daily/20260826_ISP_VIDEO_INNOVATION/metadata/source_schema.json`
-- Create: `D:/Repository/ReadPaper/daily/20260826_ISP_VIDEO_INNOVATION/metadata/search_log.jsonl`
+- Create: `D:/Repository/ReadPaper/daily/20260826_后处理调研/README.md`
+- Create: `D:/Repository/ReadPaper/daily/20260826_后处理调研/metadata/project_config.json`
+- Create: `D:/Repository/ReadPaper/daily/20260826_后处理调研/metadata/opportunity_schema.json`
+- Create: `D:/Repository/ReadPaper/daily/20260826_后处理调研/metadata/source_schema.json`
+- Create: `D:/Repository/ReadPaper/daily/20260826_后处理调研/metadata/search_log.jsonl`
 - Create directories: `report`, `matrix`, `sources/official_products`, `sources/papers`, `sources/patents`, `sources/code`, `sources/datasets`, `figures`, `notes`
 
 - [ ] Create the directory tree with `New-Item -ItemType Directory -Force` and verify each directory with `Test-Path`.
@@ -45,8 +45,8 @@
 
 **Files:**
 - Create: `D:/Repository/ReadPaper/tools/isp_video/collect_official_sources.ps1`
-- Create: `D:/Repository/ReadPaper/daily/20260826_ISP_VIDEO_INNOVATION/sources/source_manifest.json`
-- Create: `D:/Repository/ReadPaper/daily/20260826_ISP_VIDEO_INNOVATION/notes/official_product_screening.md`
+- Create: `D:/Repository/ReadPaper/daily/20260826_后处理调研/sources/source_manifest.json`
+- Create: `D:/Repository/ReadPaper/daily/20260826_后处理调研/notes/official_product_screening.md`
 
 - [ ] Create a source list covering phone vendors: Apple, Samsung, Google, Huawei, Honor, vivo, OPPO, Xiaomi, Sony, and other vendors with official camera/video documentation.
 - [ ] Add camera and cinema sources for Sony Alpha/Cinema Line, Canon, Nikon, Panasonic/LUMIX, Fujifilm, Leica, ARRI, RED, and Blackmagic.
@@ -64,9 +64,9 @@
 **Files:**
 - Create: `D:/Repository/ReadPaper/tools/isp_video/search_literature.py`
 - Create: `D:/Repository/ReadPaper/tools/isp_video/collect_code_sources.ps1`
-- Create: `D:/Repository/ReadPaper/daily/20260826_ISP_VIDEO_INNOVATION/sources/papers/paper_records.jsonl`
-- Create: `D:/Repository/ReadPaper/daily/20260826_ISP_VIDEO_INNOVATION/sources/datasets/dataset_records.jsonl`
-- Create: `D:/Repository/ReadPaper/daily/20260826_ISP_VIDEO_INNOVATION/sources/code/code_records.jsonl`
+- Create: `D:/Repository/ReadPaper/daily/20260826_后处理调研/sources/papers/paper_records.jsonl`
+- Create: `D:/Repository/ReadPaper/daily/20260826_后处理调研/sources/datasets/dataset_records.jsonl`
+- Create: `D:/Repository/ReadPaper/daily/20260826_后处理调研/sources/code/code_records.jsonl`
 
 - [ ] Query OpenAlex, arXiv, Crossref, and Semantic Scholar only with a low request rate and cache raw responses before normalization.
 - [ ] Search separate query groups for video restoration, video super-resolution, video deblurring, rolling-shutter correction, video HDR, video relighting, neural rendering, depth-aware video effects, virtual camera, computational cinematography, video matting, face restoration, identity consistency, generative video editing, video diffusion, DiT video, and mobile/edge inference.
@@ -83,8 +83,8 @@
 
 **Files:**
 - Create: `D:/Repository/ReadPaper/tools/isp_video/collect_patent_sources.ps1`
-- Create: `D:/Repository/ReadPaper/daily/20260826_ISP_VIDEO_INNOVATION/sources/patents/patent_records.jsonl`
-- Create: `D:/Repository/ReadPaper/daily/20260826_ISP_VIDEO_INNOVATION/notes/patent_scope.md`
+- Create: `D:/Repository/ReadPaper/daily/20260826_后处理调研/sources/patents/patent_records.jsonl`
+- Create: `D:/Repository/ReadPaper/daily/20260826_后处理调研/notes/patent_scope.md`
 
 - [ ] Search public patent databases and official patent portals for combinations of video relighting, computational bokeh, camera effects, multi-camera fusion, stabilization, neural rendering, image signal processing, video enhancement, and mobile camera.
 - [ ] Search by assignee for major phone vendors, camera vendors, action-camera vendors, and SoC vendors, but do not infer product availability from the assignee alone.
@@ -99,9 +99,9 @@
 
 **Files:**
 - Create: `D:/Repository/ReadPaper/tools/isp_video/build_opportunity_pool.py`
-- Create: `D:/Repository/ReadPaper/daily/20260826_ISP_VIDEO_INNOVATION/metadata/opportunities.jsonl`
-- Create: `D:/Repository/ReadPaper/daily/20260826_ISP_VIDEO_INNOVATION/metadata/opportunity_evidence_matrix.json`
-- Create: `D:/Repository/ReadPaper/daily/20260826_ISP_VIDEO_INNOVATION/notes/opportunity_pool_screening.md`
+- Create: `D:/Repository/ReadPaper/daily/20260826_后处理调研/metadata/opportunities.jsonl`
+- Create: `D:/Repository/ReadPaper/daily/20260826_后处理调研/metadata/opportunity_evidence_matrix.json`
+- Create: `D:/Repository/ReadPaper/daily/20260826_后处理调研/notes/opportunity_pool_screening.md`
 
 - [ ] Convert verified product prototypes, paper capabilities, and patent concepts into normalized opportunity records; never copy a source description into `E5` without labeling the transformation as an extension.
 - [ ] Ensure all 14 capability families have candidates and that the pool contains at least 100 unique records.
@@ -118,8 +118,8 @@
 
 **Files:**
 - Create: `D:/Repository/ReadPaper/tools/isp_video/build_deep_dive_records.py`
-- Create: `D:/Repository/ReadPaper/daily/20260826_ISP_VIDEO_INNOVATION/metadata/deep_dive_30.jsonl`
-- Create: `D:/Repository/ReadPaper/daily/20260826_ISP_VIDEO_INNOVATION/notes/deep_dive_30.md`
+- Create: `D:/Repository/ReadPaper/daily/20260826_后处理调研/metadata/deep_dive_30.jsonl`
+- Create: `D:/Repository/ReadPaper/daily/20260826_后处理调研/notes/deep_dive_30.md`
 
 - [ ] Select 30 candidates across the capability families using a balanced rule: include high product value, high novelty, a range of evidence levels, and at least one low-risk, one medium-risk, and one frontier direction per major technical cluster.
 - [ ] For each deep dive, write the concrete dataflow from sensor/ISP output to encoded video, including tensor or feature resolution when the source provides it.
@@ -137,8 +137,8 @@
 
 **Files:**
 - Create: `D:/Repository/ReadPaper/tools/isp_video/build_priority_concepts.py`
-- Create: `D:/Repository/ReadPaper/daily/20260826_ISP_VIDEO_INNOVATION/metadata/priority_10.jsonl`
-- Create: `D:/Repository/ReadPaper/daily/20260826_ISP_VIDEO_INNOVATION/notes/priority_10.md`
+- Create: `D:/Repository/ReadPaper/daily/20260826_后处理调研/metadata/priority_10.jsonl`
+- Create: `D:/Repository/ReadPaper/daily/20260826_后处理调研/notes/priority_10.md`
 
 - [ ] Select 10 combinations that produce a distinct user-visible capability rather than a list of independent toggles.
 - [ ] For each concept, define one user story, a default interaction, real-time preview behavior, recording behavior, post-processing behavior, and a clear disable/rollback path.
@@ -154,8 +154,8 @@
 
 **Files:**
 - Create: `D:/Repository/ReadPaper/tools/isp_video/build_workbook.py`
-- Create: `D:/Repository/ReadPaper/daily/20260826_ISP_VIDEO_INNOVATION/matrix/手机录像创新功能机会库.xlsx`
-- Create: `D:/Repository/ReadPaper/daily/20260826_ISP_VIDEO_INNOVATION/matrix/手机录像创新功能机会库.xlsx.inspect.ndjson`
+- Create: `D:/Repository/ReadPaper/daily/20260826_后处理调研/matrix/手机录像创新功能机会库.xlsx`
+- Create: `D:/Repository/ReadPaper/daily/20260826_后处理调研/matrix/手机录像创新功能机会库.xlsx.inspect.ndjson`
 
 - [ ] Create the sheets specified in the design: `Opportunity_Map`, `Deep_Dive_30`, `Priority_10`, `Industry_Prototypes`, `Papers`, `Patents`, `Datasets`, and `Source_Manifest`.
 - [ ] Keep one row per normalized record and use stable IDs so future batches can append without duplicating existing entries.
@@ -170,9 +170,9 @@
 
 **Files:**
 - Create: `D:/Repository/ReadPaper/tools/isp_video/build_report.py`
-- Create: `D:/Repository/ReadPaper/daily/20260826_ISP_VIDEO_INNOVATION/report/手机录像创新功能与ISP技术机会洞察.md`
-- Create: `D:/Repository/ReadPaper/daily/20260826_ISP_VIDEO_INNOVATION/report/手机录像创新功能与ISP技术机会洞察.docx`
-- Create: `D:/Repository/ReadPaper/daily/20260826_ISP_VIDEO_INNOVATION/figures/` generated figures and source crops
+- Create: `D:/Repository/ReadPaper/daily/20260826_后处理调研/report/手机录像创新功能与ISP技术机会洞察.md`
+- Create: `D:/Repository/ReadPaper/daily/20260826_后处理调研/report/手机录像创新功能与ISP技术机会洞察.docx`
+- Create: `D:/Repository/ReadPaper/daily/20260826_后处理调研/figures/` generated figures and source crops
 
 - [ ] Write the report in Chinese with English terms in parentheses, defining specialized terms on first use.
 - [ ] Include the research method, evidence grades, technology evolution, 14 capability families, the 100+ opportunity map summary, 30 deep dives, and 10 combined concepts.
@@ -188,8 +188,8 @@
 ## 10. Final Cross-Artifact Verification
 
 **Files:**
-- Create: `D:/Repository/ReadPaper/daily/20260826_ISP_VIDEO_INNOVATION/metadata/validation_report.json`
-- Create: `D:/Repository/ReadPaper/daily/20260826_ISP_VIDEO_INNOVATION/notes/final_audit.md`
+- Create: `D:/Repository/ReadPaper/daily/20260826_后处理调研/metadata/validation_report.json`
+- Create: `D:/Repository/ReadPaper/daily/20260826_后处理调研/notes/final_audit.md`
 
 - [ ] Verify the candidate count is at least 100 and every capability family is represented.
 - [ ] Verify exactly 30 deep-dive IDs and exactly 10 priority-concept IDs exist, with all IDs present in the base opportunity pool.

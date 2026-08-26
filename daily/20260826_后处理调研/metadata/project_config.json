@@ -1,0 +1,30 @@
+{
+  "project_id": "isp-video-postprocessing-20260826",
+  "title": "手机录像创新功能与ISP后处理调研",
+  "date": "2026-08-26",
+  "root": "D:/Repository/ReadPaper/daily/20260826_后处理调研",
+  "language": "zh-CN",
+  "final_anchor": "mobile_video",
+  "candidate_target": 100,
+  "deep_dive_target": 30,
+  "priority_concept_target": 10,
+  "evidence_levels": ["E1", "E2", "E3", "E4", "E5"],
+  "truth_boundaries": ["faithful", "perceptual", "generative"],
+  "video_modes": ["preview", "online_recording", "offline_device", "cloud_render"],
+  "capability_families": [
+    "computational_optics",
+    "relighting",
+    "depth_focus",
+    "temporal_exposure",
+    "virtual_camera",
+    "multi_camera",
+    "motion_quality",
+    "night_hdr",
+    "portrait_identity",
+    "scene_editing",
+    "color_science",
+    "audio_visual",
+    "generative_video",
+    "capture_assistance"
+  ]
+}

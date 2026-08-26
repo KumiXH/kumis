@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ISP Video Source",
+  "type": "object",
+  "required": ["source_id", "source_type", "title", "url", "evidence_level", "verification_status"],
+  "properties": {
+    "source_id": {"type": "string"},
+    "source_type": {"enum": ["official_product", "manual", "release_note", "sdk", "paper", "dataset", "code", "patent", "whitepaper", "demo"]},
+    "title": {"type": "string"},
+    "publisher_or_authors": {"type": "string"},
+    "product_or_venue": {"type": "string"},
+    "date": {"type": "string"},
+    "url": {"type": "string"},
+    "local_path": {"type": "string"},
+    "evidence_level": {"enum": ["E1", "E2", "E3", "E4", "E5"]},
+    "access_status": {"type": "string"},
+    "verification_status": {"enum": ["verified", "partial", "pending", "unverified"]},
+    "evidence_quote": {"type": "string"},
+    "scope_limit": {"type": "string"},
+    "retrieved_at": {"type": "string"}
+  }
+}
