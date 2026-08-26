@@ -1,0 +1,69 @@
+{
+  "audited_at": "2026-08-26T11:25:38.230633+00:00",
+  "counts": {
+    "opportunities": 112,
+    "deep_dive": 30,
+    "priority": 10,
+    "sources": 45,
+    "papers": 381,
+    "core_papers": 11,
+    "datasets": 8,
+    "patents": 2
+  },
+  "thresholds": {
+    "opportunities_at_least_100": true,
+    "deep_dive_exactly_30": true,
+    "priority_exactly_10": true,
+    "families_exactly_14": true,
+    "core_papers_present": true,
+    "datasets_present": true
+  },
+  "uniqueness": {
+    "opportunity_ids_unique": true,
+    "deep_dive_ids_unique": true,
+    "priority_ids_unique": true,
+    "priority_components_exist": true
+  },
+  "source_integrity": {
+    "deep_dive_source_ids_exist": true,
+    "missing_local_paths": [],
+    "official_verified_count": 29,
+    "pending_or_failed_count": 16
+  },
+  "xlsx": {
+    "exists": true,
+    "nonempty": true,
+    "has_workbook_xml": true,
+    "entry_count": 36,
+    "expected_sheet_count": 10,
+    "representative_previews_present": 10,
+    "representative_preview_sheets": [
+      "Summary",
+      "Opportunity_Map",
+      "Deep_Dive_30",
+      "Priority_10",
+      "Industry_Prototypes",
+      "Papers",
+      "Paper_Discovery_381",
+      "Patents",
+      "Datasets",
+      "Source_Manifest"
+    ],
+    "visual_review_status": "completed for representative ranges on all workbook sheets"
+  },
+  "docx_structural_checks": {
+    "exists": true,
+    "nonempty": true,
+    "markdown_line_count": 725,
+    "markdown_h1_count": 1,
+    "markdown_h2_count": 13,
+    "markdown_h3_count": 52,
+    "placeholder_markers": false,
+    "visual_render_status": "blocked: soffice/libreoffice unavailable in current Windows environment"
+  },
+  "unmeasured_claims": [
+    "Target-device FPS, latency, memory, power and thermal curves were not measured in this Windows research pass.",
+    "E5 opportunity ideas are not proof of product implementation.",
+    "OpenAlex metadata is a discovery index; paper-body relevance and implementation details require paper-level verification."
+  ]
+}
