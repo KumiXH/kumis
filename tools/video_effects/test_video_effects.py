@@ -1085,6 +1085,75 @@ class IdeaCatalogTests(unittest.TestCase):
                 effect_id = f"{family_prefix}{motif_slug}-{behavior_slug}"
                 self.assertEqual(ideas_by_id[effect_id]["atom_ids"], expected)
 
+    def test_required_signals_are_exact_stable_atom_signal_unions(self) -> None:
+        atoms_by_id = {atom["atom_id"]: atom for atom in self.atoms}
+        consistent = 0
+        for idea in self.ideas:
+            with self.subTest(effect_id=idea["effect_id"]):
+                expected = list(
+                    dict.fromkeys(
+                        signal
+                        for atom_id in idea["atom_ids"]
+                        for signal in atoms_by_id[atom_id]["required_signals"]
+                    )
+                )
+                self.assertEqual(idea["required_signals"], expected)
+                consistent += 1
+        self.assertEqual(consistent, 300)
+
+    def test_every_final_atom_is_explained_in_the_pipeline(self) -> None:
+        atoms_by_id = {atom["atom_id"]: atom for atom in self.atoms}
+        for idea in self.ideas:
+            dependency_text = " ".join(
+                [
+                    idea["preview_pipeline"],
+                    idea["post_pipeline"],
+                    idea["interaction"],
+                    idea["visible_effect"],
+                    *idea["target_objects"],
+                    *idea["trigger_signals"],
+                ]
+            )
+            for atom_id in idea["atom_ids"]:
+                with self.subTest(effect_id=idea["effect_id"], atom_id=atom_id):
+                    self.assertIn(atoms_by_id[atom_id]["name_zh"], dependency_text)
+
+    def test_lyric_orbit_gaze_dependency_is_pairing_specific(self) -> None:
+        ideas = {idea["effect_id"]: idea for idea in self.ideas}
+        gaze_atom = "ATOM-INTERACTION-TRIGGERS-GAZE-FOCUS"
+        self.assertNotIn(
+            gaze_atom,
+            ideas["FX-AUDIO-LYRICS-ORBIT-ORBITTIME"]["atom_ids"],
+        )
+        self.assertIn(
+            gaze_atom,
+            ideas["FX-AUDIO-LYRICS-ORBIT-ORBITGAZE"]["atom_ids"],
+        )
+
+    def test_zoom_starburst_dependency_is_pairing_specific(self) -> None:
+        ideas = {idea["effect_id"]: idea for idea in self.ideas}
+        starburst_atom = "ATOM-LIGHT-OPTICS-DYNAMIC-STARBURST"
+        self.assertNotIn(
+            starburst_atom,
+            ideas["FX-EFFECT-CINEMATOGRAPHY-ZOOM-ZOOMGAZE"]["atom_ids"],
+        )
+        self.assertIn(
+            starburst_atom,
+            ideas["FX-EFFECT-CINEMATOGRAPHY-ZOOM-ZOOMSTAR"]["atom_ids"],
+        )
+
+    def test_wipe_body_mask_dependency_is_pairing_specific(self) -> None:
+        ideas = {idea["effect_id"]: idea for idea in self.ideas}
+        body_mask_atom = "ATOM-SEGMENTATION-MASKS-BODY-SILHOUETTE"
+        self.assertNotIn(
+            body_mask_atom,
+            ideas["FX-EFFECT-CINEMATOGRAPHY-WIPE-WIPEDOOR"]["atom_ids"],
+        )
+        self.assertIn(
+            body_mask_atom,
+            ideas["FX-EFFECT-CINEMATOGRAPHY-WIPE-WIPEBODY"]["atom_ids"],
+        )
+
     def test_known_incompatible_cross_pairings_are_not_generated(self) -> None:
         self.assertNotIn(
             ("FINGER", "MOTION"),
