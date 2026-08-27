@@ -1,0 +1,37 @@
+{
+  "total": 112,
+  "families": {
+    "computational_optics": 8,
+    "relighting": 8,
+    "depth_focus": 8,
+    "temporal_exposure": 8,
+    "virtual_camera": 8,
+    "multi_camera": 8,
+    "motion_quality": 8,
+    "night_hdr": 8,
+    "portrait_identity": 8,
+    "scene_editing": 8,
+    "color_science": 8,
+    "audio_visual": 8,
+    "generative_video": 8,
+    "capture_assistance": 8
+  },
+  "evidence_levels": {
+    "E1": 0,
+    "E2": 0,
+    "E3": 0,
+    "E4": 0,
+    "E5": 112
+  },
+  "truth_boundaries": {
+    "faithful": 49,
+    "perceptual": 33,
+    "generative": 30
+  },
+  "video_modes": {
+    "preview": 0,
+    "online_recording": 32,
+    "offline_device": 80,
+    "cloud_render": 0
+  }
+}
