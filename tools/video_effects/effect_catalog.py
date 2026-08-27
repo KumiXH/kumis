@@ -323,13 +323,6 @@ IDEA_FAMILY_SPECS = {
             ("WORLD", "世界空间锚定书写", "World-anchored Light Writing", "场景平面上的发光文字", "绕拍光字或空间签名", "对准场景平面书写并移动镜头", "锚点稳定度", ("LIGHT-PAINT-BRUSH", "WORLD-SPACE-ANCHOR"), "world_anchored_text", "camera_pose", "锚点丢失会让文字随镜头漂移"),
             ("BEAT", "节拍星芒变色光轨", "Beat-color Pulsing Trail", "随音乐变化的历史光轨", "卡点舞蹈或音乐录像", "检测音乐强拍并启用光轨", "色相范围", ("LIGHT-PAINT-BRUSH", "BEAT-PHASE-CLOCK"), "beat_driven_trail", "beat_timestamps", "变速音乐会让颜色相位偏移"),
         ),
-        "behaviors": (
-            ("DRAW", "屏幕拖绘", "Screen Drawing", "触摸路径逐点累积并按速度改变光轨密度", "用户在屏幕连续拖动形成笔画", "采样密度", "触摸路径被渲染为连续光轨，抬手后按设定时长衰减", "最近 64 个触摸采样点", "touch_samples", "采样稀疏会让曲线出现折角", "perceptual_effect", "光轨起止点必须与触摸事件完全对应"),
-            ("MOTION", "肢体动作累积", "Body Motion Accumulation", "关节轨迹按历史姿态顺序累积成全身光绘", "人体动作覆盖全身并持续超过半秒", "历史姿态数", "手腕、脚踝和躯干关节分别拉出光绘线，组合成完整动作轮廓", "最近 36 帧人体姿态", "skeleton_history", "低置信关节会生成断裂光线", "perceptual_effect", "不同关节的光线需保持人体拓扑关系"),
-            ("MOVE", "移动光源拖尾", "Moving-source Trail", "锁定光源后沿其真实运动路径生成亮度递减拖尾", "灯棒或移动光源位移超过跟踪阈值", "拖尾长度", "移动光源前端保持明亮核心，身后形成连续且逐渐变细的光轨拖尾", "最近 40 帧光源位置", "light_source_position", "高光过曝会令拖尾粘连", "perceptual_effect", "拖尾方向必须与光源运动方向一致"),
-            ("ANCHOR", "镜头移动固字", "Camera-stable Writing", "书写完成后将光字固定到世界锚点并更新透视", "完成书写后移动镜头绕看文字", "文字缩放", "发光文字固定在原场景位置，镜头平移旋转后仍保持透视和遮挡", "从书写开始到录制结束", "camera_pose", "快速转身会令空间锚点短暂丢失", "perceptual_effect", "文字必须固定于世界空间而不是屏幕坐标"),
-            ("PULSE", "强拍变色脉冲", "Strong-beat Color Pulse", "每个强拍推进光轨色相并产生一次宽度和亮度脉冲", "音乐节拍进入强拍区间时触发", "脉冲强度", "整条历史光轨在强拍瞬间变色并向外脉冲，拍间平滑回落", "最近 4 个节拍", "audio_onsets", "连续强拍会造成颜色过快跳变", "perceptual_effect", "色相变化与脉冲峰值必须同步到同一节拍"),
-        ),
     },
     "body_motion_clones": {
         "title_zh": "身体运动分身",
@@ -340,13 +333,6 @@ IDEA_FAMILY_SPECS = {
             ("POSE", "走位剪影队列", "Pose Silhouette Queue", "连续走位的身体剪影", "走廊或空旷舞台", "检测到连续跨步姿态", "slice_spacing", ("POSE-SLICES",), "motion_path", "skeleton_history", "小幅动作时剪影难分离"),
             ("GESTURE", "手势时间排队", "Queued Gesture Echo", "挥手与手臂的局部分身", "近景手势舞", "手掌完成指定挥动", "gesture_echo_count", ("GESTURE-ECHO",), "hand_region", "hand_pose_history", "手指交叉会产生重叠"),
             ("MIRROR", "双向镜像人格", "Bidirectional Mirror Persona", "人物左右两侧的镜像身体", "对称构图人像", "用户在屏幕上划出镜像轴", "mirror_axis", ("MIRROR-PERSONA",), "symmetry_plane", "person_mask", "越过中轴时副本会粘连"),
-        ),
-        "behaviors": (
-            ("DELAY", "延迟跟随", "Delayed Follow", "副本落后主身并按延迟逐步淡出", "人物速度超过设定阈值时触发", "延迟秒数", "主身前进时身后出现保持身份的完整动作分身", "最近 2.5 秒", "pose_keypoints", "跟踪丢失会中断队列", "perceptual_effect", "不同延迟副本要保持独立层级"),
-            ("REVERSE", "逆动作回卷", "Reverse Motion Rollback", "副本播放主身刚刚完成的动作反向片段", "用户向后挥手或双击屏幕", "反向窗口", "人物身旁的分身像倒带一样收回上一个姿态", "触发前后各 18 帧", "object_track_history", "离开画面后反向内容断裂", "perceptual_effect", "反向回放不能改写当前主身动作"),
-            ("STUTTER", "节奏停格", "Rhythmic Stutter", "副本在节拍间隔冻结成离散姿态", "音乐节拍连续出现两次以上", "停格间隔", "身体被切成一串按节奏跳变的动作雕塑", "最近 1.5 秒", "beat_timestamps", "切分节奏会造成姿态拥挤", "perceptual_effect", "停格姿态仍须保持人体轮廓完整"),
-            ("MERGE", "相遇合身", "Meeting Merge", "两个历史分身接近时融合回主身", "分身间距小于设定距离", "融合半径", "多个延迟身体在相遇点叠合成一次发光回收", "最近 3 秒", "person_tracks", "遮挡关系会改变融合顺序", "generative_rewrite", "融合只改变副本，不替换原始人物"),
-            ("SPIRAL", "螺旋走位", "Spiral Walkout", "副本沿螺旋路径排列并逐层缩小", "用户围绕人物旋转手机", "螺旋间距", "历史姿态从人物身后盘旋展开成可见运动螺旋", "最近 40 帧", "camera_trajectory", "镜头旋转与人物运动会相互污染", "perceptual_effect", "缩小副本仍需保留脸部和手势辨识度"),
         ),
     },
     "face_gaze_expression": {
@@ -359,13 +345,6 @@ IDEA_FAMILY_SPECS = {
             ("CATCHLIGHT", "眼神光跟随", "Following Catchlight", "双眼虹膜上的虚拟高光", "近景人像与自拍视频", "转头时保持视线可见并跟踪虹膜", "眼神光大小", ("GAZE-VECTOR", "IRIS-PUPIL-LANDMARKS", "CATCHLIGHT-RERENDER"), "iris_regions", "iris_landmarks", "眨眼闭合时高光锚点会暂时消失"),
             ("SELECT", "凝视选择特效", "Gaze Effect Selection", "画面中的候选物体与特效入口", "免手触控录像", "凝视候选目标并等待选中反馈", "选择停留时间", ("GAZE-VECTOR", "GAZE-FOCUS", "OBJECT-INSTANCE"), "gaze_ui_and_objects", "gaze_vector", "视线漂移会在候选目标间来回切换"),
         ),
-        "behaviors": (
-            ("CALIBRATE", "瞳孔镜头校准", "Pupil-to-camera Calibration", "校准后逐帧重定向眼球和瞳孔朝向摄像头", "完成三个校准点注视后直视屏幕内容", "瞳孔平滑度", "瞳孔与虹膜被轻量重定向到镜头方向，眼睑、头姿和人物身份保持不变", "最近 16 帧", "gaze_vector", "眨眼会短暂冻结重定向参数", "faithful_edit", "眼球重定向必须限制在自然转动范围"),
-            ("REDIRECT", "对话对象重定向", "Dialogue-target Redirection", "说话人变化时把双方眼球和虹膜平滑重定向到对方脸部", "当前说话者切换或对话对象转头", "对视目标", "双方眼球与虹膜朝向被重定向到对方眼睛，形成连续虚拟对视而不改变头部姿态", "最近 24 帧", "person_relation_graph", "快速抢话会让对视目标频繁切换", "faithful_edit", "多人对话中每双眼睛必须绑定正确目标身份"),
-            ("DWELL", "停留点亮", "Dwell-to-glow", "注视停留时间控制目标发光进入、保持和退出", "视线停留在同一目标超过设定时长", "停留时长", "被注视目标从边缘向中心发光，视线移开后按停留时长平滑熄灭", "注视前后各 20 帧", "dwell_duration", "凝视边界抖动会导致亮度闪烁", "perceptual_effect", "仅当前选中物体实例可以发光"),
-            ("FOLLOW", "虹膜高光跟随", "Iris Catchlight Follow", "眼神光依据虹膜位置、头姿和视线方向连续滑动", "人物转头或视线横向移动", "跟随惯性", "眼神光贴着虹膜表面跟随移动并保持可见反射形状，闭眼时自然消失", "最近 12 帧", "head_pose", "侧脸时高光可能靠近眼白边界", "perceptual_effect", "左右眼高光必须保持一致的虚拟光源方向"),
-            ("CONFIRM", "眨眼确认选择", "Blink-confirm Selection", "凝视完成预选后用一次眨眼确认特效对象", "候选目标出现选中环后完成一次眨眼", "确认反馈", "凝视对象先出现选中环，眨眼后该对象被明确选中并展开对应可见特效", "凝视 0.8 秒加一次眨眼", "eyelid_landmarks", "无意识眨眼可能提前确认", "perceptual_effect", "确认反馈必须与被选物体保持空间绑定"),
-        ),
     },
     "time_editing": {
         "title_zh": "时间编辑",
@@ -376,13 +355,6 @@ IDEA_FAMILY_SPECS = {
             ("REVERSE", "局部时间倒放", "Local Time Reverse", "飞起的纸片或挥动手臂", "动作短片或魔术", "向后拖动目标轨迹", "reverse_window", ("TIME-REVERSE",), "tracked_object", "object_track_history", "对象离开区域后内容会断裂"),
             ("SHUTTER", "动作快门切片", "Motion Shutter Slices", "快速转身的人体轮廓", "运动舞蹈或跑步", "手机快速旋转一次", "slice_count", ("FRAME-DELAY",), "motion_path", "frame_stream", "镜头本身移动会污染切片"),
             ("BORROW", "时间借位窗口", "Borrowed Time Window", "前景人物与背景事件", "街拍或多人即兴", "检测手势事件并按住快门", "borrow_offset", ("EVENT-WINDOW",), "foreground_background", "event_timestamp", "事件过近会造成窗口重叠"),
-        ),
-        "behaviors": (
-            ("HAND", "手势启动", "Gesture Start", "手势进入时渐入，保持时稳定，退出时还原", "手掌张开后握拳触发", "进入和退出阈值", "区域按动作边沿切换时间状态，周围画面保持连续播放", "进入前 8 帧至退出后 12 帧", "hand_pose", "手指遮挡会使边沿抖动", "faithful_edit", "时间边界要随区域边缘同步移动"),
-            ("BEAT", "节拍切换", "Beat Switching", "每个节拍选择冻结、循环或倒放中的一个时间状态", "连续节拍强度超过门限", "节拍映射模式", "局部动作在音乐节拍处冻结又恢复，形成可见时间编舞", "最近 4 个节拍", "beat_timestamps", "变速音乐会导致相位漂移", "perceptual_effect", "切换不能破坏局部区域的运动因果"),
-            ("TOUCH", "触摸擦除", "Touch Erase", "用户手指划过哪里，哪里就恢复实时帧", "触摸路径进入时间效果区域", "擦除笔刷半径", "冻结或倒放区域被手指擦出流动的当前时间窗口", "触摸前后 16 帧", "touch_samples", "快速划线会留下孔洞", "perceptual_effect", "擦除边界要有可见柔和过渡"),
-            ("VOICE", "喊声解冻", "Voice Unfreeze", "声音包络上升时区域从停格向实时加速回放", "人声音量跨过上升阈值", "解冻加速度", "人物喊声越强，冻结区域越快追上当前帧", "最近 1.2 秒", "audio_waveform", "环境噪声会误解冻", "perceptual_effect", "音量映射要避免一次跳到实时画面"),
-            ("SLIDER", "游标选帧", "Frame Scrub Select", "游标停留的历史帧成为局部稳定画面", "用户拖动时间游标并松手", "历史帧位置", "局部区域停在用户选中的精确姿态，背景继续移动", "可选最近 5 秒", "touch_samples", "游标跳跃会产生姿态跳变", "faithful_edit", "选帧结果必须可重复回看和微调"),
         ),
     },
     "spatial_portals": {
@@ -395,13 +367,6 @@ IDEA_FAMILY_SPECS = {
             ("TUNNEL", "景深隧道", "Depth Tunnel", "主体背后的空间纵深", "快速推进或拉远", "双指向内捏合", "tunnel_depth", ("TUNNEL-WARP",), "vanishing_axis", "crossing_depth", "消失点偏移会破坏透视"),
             ("PAGE", "房间翻页", "Room Page Turn", "墙面、门框和房间边界", "室内转身或探店", "沿门框横向划动", "page_curl", ("SPACE-FOLD",), "architectural_plane", "camera_pose", "建筑边缘会产生折断"),
         ),
-        "behaviors": (
-            ("STEP", "迈步触发", "Step Trigger", "主体跨过入口平面时先遮挡再完整进入另一视角", "脚步跨过设定空间线", "入口厚度", "人物穿过镜面或窗口后，前后景遮挡关系连续交换", "跨越前后 24 帧", "body_keypoints", "腿部遮挡会使穿越断裂", "perceptual_effect", "穿越过程要让入口成为真实可见边界"),
-            ("ROTATE", "旋转换景", "Rotation Scene Swap", "手机旋转超过角度时入口内世界随视角翻转", "手机绕竖轴旋转到指定角度", "旋转阈值", "入口内场景随手机转向完成连续换景，入口外保持原景", "最近 32 帧", "gyroscope", "滚动快门会造成入口边缘抖动", "generative_rewrite", "新旧空间的颜色与遮挡需要在轴线上对齐"),
-            ("TOUCH", "指尖拉开", "Fingertip Pull Open", "手指拖动入口边缘时空间像布帘一样拉开", "触摸入口边缘并向外拖", "开口宽度", "入口由窄缝被拉成有厚度的可见空间洞口", "触摸后 1.5 秒", "touch_samples", "拖动过快会导致纹理拉丝", "perceptual_effect", "拉开形变需保留手指遮挡关系"),
-            ("BEAT", "节拍折叠", "Beat Fold", "入口在节拍处折入、展开并短暂露出另一层画面", "音乐节拍命中入口动画", "折叠频率", "空间平面按节拍像纸片一样折叠，展开时露出后景", "最近 3 个节拍", "audio_onsets", "弱拍会令折叠不完整", "perceptual_effect", "折叠角度和入口透视要同时稳定"),
-            ("GAZE", "注视穿门", "Gaze Through Door", "人物注视入口时入口逐渐变透明，移开视线后恢复", "视线停留在入口中心", "透明度响应", "入口被注视时露出其后的空间，视线移开则闭合", "注视前后各 20 帧", "gaze_vector", "视线漂移会造成透明度闪烁", "perceptual_effect", "透明变化必须限制在入口区域内"),
-        ),
     },
     "virtual_light_shadow": {
         "title_zh": "虚拟光影",
@@ -412,13 +377,6 @@ IDEA_FAMILY_SPECS = {
             ("FOLLOW", "移动追光圈", "Moving Follow Spot", "移动人物脚下或脸部光区", "舞台走位或夜间街拍", "点按目标并开始移动", "spot_radius", ("VIRTUAL-SPOTLIGHT",), "tracked_subject", "target_track", "快速换向会让光区滞后"),
             ("LONG", "影子变长", "Lengthening Shadow", "主体侧后方投射的长影", "日常走路或舞蹈", "手机向侧面倾斜", "shadow_length", ("SHADOW-RERENDER",), "ground_plane", "ground_plane", "缺少地面几何时影子悬空"),
             ("SCREEN", "人物投影幕", "Subject Projection Screen", "墙面上放大的主体轮廓", "室内墙面或演出场景", "框选一面墙", "projection_scale", ("SHADOW-RERENDER",), "wall_plane", "depth_field", "墙面斜视会使投影变形"),
-        ),
-        "behaviors": (
-            ("CLOCK", "时钟延迟", "Clock Delay", "影子比主体慢半拍移动并在停止时追上", "主体开始移动或停下时触发", "shadow_delay", "影子分身沿旧姿态延迟跟随，最后回到主体脚下", "最近 2 秒", "pose_history", "停顿太短会看不出延迟", "perceptual_effect", "影子动作必须服从地面接触点"),
-            ("BEAT", "节拍闪切", "Beat Flash Cut", "光圈与影子在节拍瞬间互换明暗方向", "音频节拍强度跨过门限", "闪切宽度", "节拍处轮廓光爆亮，影子同步翻转成另一侧可见剪影", "最近 2 个节拍", "audio_onsets", "密集节拍会使画面频闪", "perceptual_effect", "明暗切换需限制峰值避免遮盖主体"),
-            ("TOUCH", "指尖改光位", "Touch Light Relocation", "用户拖动光源时轮廓光和影子同步绕主体移动", "触摸并拖动虚拟光源", "光源方位", "光从左侧拖到右侧，人物亮边和地面影子连续换位", "触摸路径最近 1 秒", "touch_samples", "拖动越界会让影子出画", "faithful_edit", "光影方向必须由同一光源状态驱动"),
-            ("ROTATE", "手机摆动光束", "Phone-sway Beam", "手机左右摆动时体积光束扫过人物与墙面", "手机横滚角速度超过门限", "光束锥角", "可见光束随手机摆动穿过空间，影子被光束边缘切开", "最近 18 帧", "gyroscope", "传感器漂移会令光束缓慢漂移", "perceptual_effect", "光束与主体深度遮挡不能互相穿透"),
-            ("BLINK", "眨眼熄灯", "Blink Blackout", "眨眼闭合时轮廓光熄灭，睁眼后从影子边缘重新点亮", "检测完整眨眼事件", "熄灯时长", "一次眨眼让人物短暂只剩可见影子，睁眼时亮边逐圈恢复", "事件前后 14 帧", "eyelid_landmarks", "闭眼关键点消失会延长熄灯", "perceptual_effect", "熄灯期间仍需保留人物可辨识轮廓"),
         ),
     },
     "material_morph": {
@@ -431,13 +389,6 @@ IDEA_FAMILY_SPECS = {
             ("PAPER", "纸片裂变", "Paper Fragmentation", "人物和背景中的海报", "街头或舞台转场", "双指向外拉开", "fragment_spread", ("PAPER",), "planar_region", "surface_uv", "碎片过多会遮挡脸部"),
             ("HOLO", "全息织物", "Holographic Fabric", "衣服与头发边缘", "音乐短片或舞蹈", "节拍命中服装区域", "hue_shift", ("FABRIC", "HOLOGRAPHIC"), "garment_region", "garment_normals", "视角估计抖动会造成色带跳闪"),
         ),
-        "behaviors": (
-            ("EDGE", "边缘推进", "Edge Advance", "材质变化从轮廓向内部逐层推进", "目标轮廓运动速度超过门限", "推进速度", "目标先出现新材质边缘，再完整覆盖内部并留下微小碎屑", "最近 1.2 秒", "edge_map", "快速运动会留下原材质缺口", "generative_rewrite", "材质边界必须随形变保持贴合"),
-            ("BEAT", "节拍脉冲", "Beat Pulse", "材质在节拍处完成一次亮度、粗糙度和颜色脉冲", "音乐节拍强度超过阈值", "脉冲幅度", "每个节拍让表面先鼓起高光再回落到新的材质状态", "最近 4 个节拍", "audio_onsets", "弱拍会造成不完整变形", "perceptual_effect", "连续脉冲不能产生随机纹理跳变"),
-            ("TOUCH", "触摸溶解", "Touch Dissolve", "手指扫过区域时材质沿触摸路径逐块溶解", "触摸路径进入目标遮罩", "笔刷大小", "指尖经过处变成可见像素尘并在后方露出新材质", "触摸前后 20 帧", "touch_samples", "采样稀疏会出现锯齿轨迹", "perceptual_effect", "触摸路径与碎片出生位置必须一致"),
-            ("VOICE", "声压融化", "Voice Melt", "人声越响，表面越快从硬质融成流体", "声音包络持续上升", "声压增益", "人物说话时材质随音量变软、流动并在停声后凝固", "最近 1 秒", "audio_waveform", "环境回声会延迟凝固", "perceptual_effect", "融化幅度要保持在目标遮罩内"),
-            ("GHOST", "反向凝结", "Reverse Condensation", "倒放时间游标时散开的材质碎片反向回到原物体", "录后向左拖动时间游标", "凝结速度", "碎片按出生顺序回收，表面高光最后重新闭合", "最近 3 秒", "touch_samples", "游标跳跃会留下漂浮碎片", "faithful_edit", "回收顺序要与溶解过程相反且可预测"),
-        ),
     },
     "particles_weather": {
         "title_zh": "粒子天气",
@@ -448,13 +399,6 @@ IDEA_FAMILY_SPECS = {
             ("PETAL", "花瓣旋涡", "Petal Vortex", "手掌或人物周围", "春日人像", "手掌画圆", "vortex_strength", ("PETALS",), "hand_centered_volume", "hand_2d_landmarks", "手掌出框会让发射点跳动"),
             ("SNOW", "雪夜呼吸", "Breathing Snow Night", "前景脸部与远景街道", "冬日自拍视频", "对镜头吹气", "snow_size", ("SNOW",), "layered_atmosphere", "mouth_shape_class", "雪片会遮住眼睛"),
             ("DUST", "尘埃聚焦", "Dust Focus", "一束光与被注视的物体", "室内窗边或展品", "注视目标两秒", "dust_density", ("DUST",), "light_volume", "gaze_vector", "压缩噪声会混淆尘埃"),
-        ),
-        "behaviors": (
-            ("ORBIT", "环绕旋转", "Orbit Rotation", "粒子沿目标圆周旋转并按距离衰减", "目标移动超过小幅位移门限", "旋转速度", "粒子围绕对象形成有深度的环并在背后被遮挡", "最近 48 帧", "target_track", "遮挡丢失会让环穿过对象", "perceptual_effect", "环的中心与目标锚点需要持续一致"),
-            ("BEAT", "节拍爆发", "Beat Burst", "节拍进入时粒子密度瞬间上升，随后散落消退", "检测到强拍或副歌起点", "爆发数量", "粒子在节拍瞬间从对象边缘喷出并留下短暂亮点", "最近 1.5 秒", "audio_onsets", "连续强拍会造成粒子堆积", "perceptual_effect", "爆发与衰减要让每一拍可分辨"),
-            ("GESTURE", "手势引流", "Gesture Stream", "手指方向改变粒子流向和弯曲程度", "手掌完成指定引导手势", "流向偏转", "粒子从手指尖流出，跟随手势弯折后形成可见彩带", "最近 36 帧", "hand_pose", "手势分类短暂跳变会扭流", "perceptual_effect", "发射方向与手指朝向保持可见对应"),
-            ("WEATHER", "天气渐变", "Weather Gradient", "粒子天气由稀到密经历进入、维持、消散", "用户上下滑动天气强度条", "天气密度", "晴空逐步变为雨、雪或尘雾，粒子深度层同步改变", "最近 3 秒", "touch_samples", "强度快速变化会造成密度跳变", "generative_rewrite", "天气只作用于选定空间，不覆盖主体五官"),
-            ("VOICE", "音量漂浮", "Volume Float", "声音包络控制粒子的上升速度和透明度", "人声或环境声超过音量阈值", "音量响应曲线", "声音越响，粒子越快上升并在顶端发亮破裂", "最近 2 秒", "audio_waveform", "噪声会造成持续漂浮", "perceptual_effect", "响应曲线要避免细小噪声持续触发"),
         ),
     },
     "world_style": {
@@ -467,13 +411,6 @@ IDEA_FAMILY_SPECS = {
             ("NEON", "霓虹世界", "Neon World", "街道灯牌和主体边缘", "夜间城市或音乐短片", "点亮一块霓虹招牌", "neon_palette", ("VISUAL-STYLE",), "scene_lighting", "scene_geometry", "新光照与真实阴影矛盾"),
             ("PAPER", "手绘舞台", "Hand-drawn Stage", "背景墙面与服装纹理", "室内表演或口播", "手指画出舞台边框", "brush_texture", ("VISUAL-STYLE",), "scene_and_clothing", "structure_guidance", "纹理会随镜头移动闪烁"),
         ),
-        "behaviors": (
-            ("WIPE", "横向擦换", "Horizontal Wipe", "风格世界沿用户划线方向逐步覆盖背景", "手指从画面边缘横向划过", "擦换宽度", "旧世界和新世界以一条跟随手指的可见边界交替出现", "触摸前后 1.8 秒", "touch_samples", "复杂前景边界会漏色", "generative_rewrite", "擦换边界要穿过场景但避开人物主体"),
-            ("BEAT", "节拍换景", "Beat World Switch", "每个强拍推进一个风格层级并保留主体结构", "副歌强拍连续命中", "风格层级", "街景在节拍处从真实转线稿、霓虹再转水下，主体动作不断", "最近 4 个节拍", "audio_onsets", "节拍密集时风格会来不及稳定", "generative_rewrite", "跨风格切换必须保留同一空间布局"),
-            ("ROTATE", "转身换季", "Turn-to-season", "相机转向不同角度时背景季节连续变化", "手机绕竖轴旋转超过阈值", "旋转换季角度", "镜头左侧仍是原季节，右侧随转身显露新季节并形成渐变边界", "最近 40 帧", "gyroscope", "滚动快门会产生季节接缝", "generative_rewrite", "接缝必须固定在世界空间而不是屏幕空间"),
-            ("GAZE", "注视聚焦风格", "Gaze Style Focus", "被注视区域进入高风格强度，余下场景保持较低强度", "视线在物体上停留超过 0.6 秒", "注视风格半径", "视线扫到哪里，哪里就变成高对比线稿或霓虹，移开后缓慢恢复", "最近 2 秒", "gaze_vector", "注视漂移会令风格光斑跳动", "generative_rewrite", "风格半径需与深度和遮挡一致"),
-            ("VOICE", "人声世界脉冲", "Voice World Pulse", "说话音节推动背景纹理和天空颜色脉冲", "人声包络出现连续音节", "脉冲强度", "每个音节让背景产生可见波纹、色调或云层移动，人物保持稳定", "最近 1.2 秒", "audio_waveform", "混响会令脉冲拖尾", "generative_rewrite", "背景变化要与人声节奏可感知对应"),
-        ),
     },
     "audio_lyrics": {
         "title_zh": "音频歌词",
@@ -484,13 +421,6 @@ IDEA_FAMILY_SPECS = {
             ("MASK", "人声光谱面罩", "Vocal Spectrum Mask", "人物脸部和嘴部周围", "唱歌或说唱", "长按人脸区域", "band_gain", ("MUSIC-SPECTRUM",), "face_region", "audio_spectrum", "低能量频段会持续抖动"),
             ("SUBTITLE", "低音地震字幕", "Bassquake Captions", "地面与悬浮字幕", "低音强的音乐片段", "选择低音频段", "quake_amount", ("TEXT",), "ground_and_text", "beat_timestamps", "低频噪声会误触发"),
             ("DUET", "多人接唱球", "Duet Sing-along Orbs", "两到三位演唱者之间", "合唱或接唱", "识别每位声源", "handoff_distance", ("MULTI-PERSON-GRAPH",), "between_people", "person_tracks", "声源重叠会交换颜色"),
-        ),
-        "behaviors": (
-            ("TIME", "歌词逐字", "Word Timing", "歌词字符按时间戳进入、保持、消散", "播放进度到达歌词字词时间戳", "字距与入场速度", "当前歌词沿目标轮廓逐字亮起，上一句化成淡色轨迹", "当前句前后 0.5 秒", "timed_lyrics", "音轨错位会令字词提前", "perceptual_effect", "文字入场必须与歌词内容和时间顺序一致"),
-            ("BEAT", "节拍弹跳", "Beat Bounce", "文字或音符在节拍处缩放弹跳并留下残影", "节拍强度跨过进入阈值", "弹跳高度", "歌词字符在每个强拍向外跳起，再回落到环绕路径", "最近 3 个节拍", "audio_onsets", "切分节奏会造成密集跳动", "perceptual_effect", "弹跳不能遮住当前演唱者的脸"),
-            ("DIRECTION", "声源换边", "Source-side Handoff", "彩带和歌词从当前说话者一侧移向下一声源", "声源方向跨入另一角区", "换边时长", "说话者切换时文字沿空间方向传递到另一人物周围", "相邻声源事件间", "direction_sector", "混响会造成颜色来回切换", "perceptual_effect", "传递路径要体现两个声源的空间关系"),
-            ("VOLUME", "音量成环", "Volume Ring", "音量包络控制环的厚度、亮度和半径", "声音持续超过音量门限", "音量响应曲线", "声音越响，歌词环越厚越亮，停声后按衰减曲线回落", "最近 2 秒", "audio_waveform", "环境噪声会抬高环底噪", "perceptual_effect", "环参数变化需与文字内容分离控制"),
-            ("TOUCH", "歌词拖拽", "Lyric Scrub", "拖动歌词时对应历史音节和粒子回到目标位置", "用户拖动屏幕上的歌词片段", "歌词时间偏移", "歌词被拖到人物另一侧，音节轨迹按新位置重新排列", "可预览最近 8 秒", "touch_samples", "拖动过快会跳过字词", "faithful_edit", "拖拽结果要保持原歌词时间戳可回看"),
         ),
     },
     "effect_cinematography": {
@@ -503,13 +433,6 @@ IDEA_FAMILY_SPECS = {
             ("SPLIT", "分屏追拍", "Split Chase", "同一人物的左右运动路径", "跑步或走廊追拍", "两指拉出分屏线", "split_gap", ("SPACE-FOLD",), "split_screen", "camera_trajectory", "分屏线会穿过主体关节"),
             ("FOCUS", "焦点穿刺", "Focus Pierce", "前景物体与远处人物", "前后景推拉", "点按前景和远景各一次", "focus_depth", ("DEPTH-PARALLAX",), "depth_layers", "depth_map", "深度层错误会造成焦点跳跃"),
         ),
-        "behaviors": (
-            ("PUNCH", "镜头冲击", "Camera Punch", "触发瞬间画面向焦点方向推进并带光学冲击环", "手掌击掌或快速点按屏幕", "冲击幅度", "焦点对象在 8 帧内快速放大，边缘出现一次可见冲击波", "事件前后 16 帧", "hand_pose", "快速动作会重复触发", "perceptual_effect", "冲击结束要回到连续运动而非硬切"),
-            ("BEAT", "节拍摇镜", "Beat Whip-pan", "每个节拍产生方向明确的短摇镜并保留主体", "音乐节拍命中并有相机运动", "摇镜方向", "节拍处画面沿运动方向甩出彩色边缘，下一拍回收清晰", "最近 2 个节拍", "audio_onsets", "弱拍可能没有足够运动", "perceptual_effect", "甩动方向要与相机轨迹一致"),
-            ("TOUCH", "手指拉焦", "Finger Rack Focus", "手指拖动焦点从前景转到远景", "用户依次点按两个深度目标", "焦点过渡速度", "前景逐渐虚化、远景清晰并出现被选目标的高光轮廓", "最近 1 秒", "touch_samples", "深度噪声会令焦平面跳变", "perceptual_effect", "焦点过渡必须保持主体边缘完整"),
-            ("ROTATE", "旋转快门", "Rotating Shutter", "手机旋转时画面按角度分片累积成扇形快门", "手机横滚角连续变化", "扇形数量", "每次旋转留下与角度对应的半透明画面扇片，停止时回收", "最近 36 帧", "gyroscope", "滚动快门和扇片会产生重影", "perceptual_effect", "扇片中心固定且不遮盖关键脸部"),
-            ("BLINK", "眨眼蒙太奇", "Blink Montage", "每次眨眼切换一个短历史镜头角度或构图", "检测完整眨眼事件", "镜头片段数", "闭眼时旧镜头收缩，睁眼时新镜头从同一视线方向展开", "事件前后 12 帧", "eyelid_landmarks", "眨眼漏检会破坏节奏", "perceptual_effect", "切换保持人物身份和动作连续"),
-        ),
     },
     "multi_person_interaction": {
         "title_zh": "多人互动",
@@ -520,13 +443,6 @@ IDEA_FAMILY_SPECS = {
             ("STATUE", "三人合成雕像", "Three-person Living Statue", "三个人体轮廓与接触边界", "朋友合照或舞台定格", "三人形成闭合队形", "merge_smoothness", ("MULTI-PERSON-GRAPH", "BODY-SKELETON"), "group_silhouette", "person_tracks", "肢体交叉会粘连轮廓"),
             ("SHOULDER", "碰肩爆裂", "Shoulder Contact Burst", "两人肩膀接触点", "街拍擦肩或舞蹈", "肩部距离进入接触范围", "burst_radius", ("MULTI-PERSON-GRAPH",), "contact_zone", "person_relation_graph", "透视重叠可能误判接触"),
             ("RING", "队形环形光", "Formation Light Ring", "多人围成的中心与身体外缘", "团体舞或聚会", "三人以上进入环形队形", "ring_thickness", ("MULTI-PERSON-GRAPH",), "group_center", "person_tracks", "人员出框会使环形中心漂移"),
-        ),
-        "behaviors": (
-            ("TOUCH", "接触启动", "Contact Start", "接触点亮起并沿关系图向下一位扩散", "两人的手或身体首次接触", "扩散速度", "能量从第一个接触点传到另一人的手臂，再回到两人之间", "接触前后 1.5 秒", "contact_distance", "遮挡会使扩散链断开", "perceptual_effect", "能量路径必须遵循真实接触关系"),
-            ("BEAT", "节拍接力", "Beat Relay", "每个节拍把高光和粒子从当前领舞者传给下一人", "领舞者节拍动作达到峰值", "接力顺序", "人物按节拍轮流亮起，光带沿多人关系边连接", "最近 4 个节拍", "audio_onsets", "多人同时峰值会产生竞争", "perceptual_effect", "接力顺序和画面中的空间位置要一致"),
-            ("GAZE", "视线连线", "Gaze Link", "两人的视线交点生成发光连接线", "双方互相注视超过停留时间", "连接线弯曲度", "视线交点被一条可弯曲的光线固定，转头时线条断开并消散", "最近 2 秒", "gaze_vector", "侧脸会令交点不稳定", "perceptual_effect", "连接线不能穿过第三个人的前景轮廓"),
-            ("FORMATION", "队形呼吸", "Formation Breath", "多人队形中心随同步动作缩放并向外呼吸粒子", "两人以上动作相位相近", "呼吸幅度", "队形越整齐，中心光环越明亮并在收势时聚回每个人", "最近 1.2 秒", "pose_keypoints", "不同身高会扰乱相位", "perceptual_effect", "中心计算应对出框和遮挡稳定"),
-            ("VOICE", "声源传球", "Voice Pass", "说话声形成发光球从一位人物飞向下一位", "声源方向从一人切换到另一人", "传球弧线", "每次轮到一人说话，光球沿两人空间路径飞行并停在新声源旁", "相邻发言事件间", "direction_sector", "混响会交换声源", "perceptual_effect", "光球路径需体现真实人物距离"),
         ),
     },
 }
@@ -1134,7 +1050,7 @@ def _idea_from_specs(
         "user_controls": [motif_parameter, behavior_control, "效果强度"],
         "preview_pipeline": f"低分辨率预览明确调用{atom_modules}，按其原子信号驱动{behavior_zh}并合成可见结果。",
         "post_pipeline": f"录制后沿用{atom_modules}重建{motif_zh}，细化{spatial_scope}边缘、遮挡和{behavior_control}曲线。",
-        "required_signals": atom_signals,
+        "required_signals": _stable_unique([*atom_signals, motif_signal]),
         "atom_ids": resolved_atom_ids,
         "temporal_window": "触发前 12 帧至可见结果稳定后 24 帧",
         "continuity_challenges": [motif_failure, f"{behavior_zh}期间对象身份、遮挡和参数响应必须连续"],

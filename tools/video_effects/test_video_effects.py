@@ -1085,21 +1085,43 @@ class IdeaCatalogTests(unittest.TestCase):
                 effect_id = f"{family_prefix}{motif_slug}-{behavior_slug}"
                 self.assertEqual(ideas_by_id[effect_id]["atom_ids"], expected)
 
-    def test_required_signals_are_exact_stable_atom_signal_unions(self) -> None:
+    def test_required_signals_are_exact_stable_canonical_unions(self) -> None:
         atoms_by_id = {atom["atom_id"]: atom for atom in self.atoms}
+        motif_signals_by_effect_id = {}
+        for family in IDEA_FAMILY_ORDER:
+            family_prefix = f"FX-{family.upper().replace('_', '-')}-"
+            for motif in effect_catalog.IDEA_FAMILY_SPECS[family]["motifs"]:
+                motif_slug, motif_signal = motif[0], motif[9]
+                for _, behavior_slug in effect_catalog.IDEA_PAIRINGS[family]:
+                    if _ == motif_slug:
+                        motif_signals_by_effect_id[
+                            f"{family_prefix}{motif_slug}-{behavior_slug}"
+                        ] = motif_signal
         consistent = 0
         for idea in self.ideas:
             with self.subTest(effect_id=idea["effect_id"]):
                 expected = list(
                     dict.fromkeys(
-                        signal
-                        for atom_id in idea["atom_ids"]
-                        for signal in atoms_by_id[atom_id]["required_signals"]
+                        [
+                            signal
+                            for atom_id in idea["atom_ids"]
+                            for signal in atoms_by_id[atom_id]["required_signals"]
+                        ]
+                        + [motif_signals_by_effect_id[idea["effect_id"]]]
                     )
                 )
                 self.assertEqual(idea["required_signals"], expected)
+                self.assertIn(
+                    motif_signals_by_effect_id[idea["effect_id"]],
+                    idea["required_signals"],
+                )
                 consistent += 1
         self.assertEqual(consistent, 300)
+
+    def test_idea_family_specs_have_no_legacy_behavior_tables(self) -> None:
+        for family in IDEA_FAMILY_ORDER:
+            with self.subTest(family=family):
+                self.assertNotIn("behaviors", effect_catalog.IDEA_FAMILY_SPECS[family])
 
     def test_every_final_atom_is_explained_in_the_pipeline(self) -> None:
         atoms_by_id = {atom["atom_id"]: atom for atom in self.atoms}
