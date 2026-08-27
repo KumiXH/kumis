@@ -734,6 +734,10 @@ class SchemaTests(unittest.TestCase):
             "runs in real time on a smartphone",
             "已在手机实时实现",
             "已在手机实时量产",
+            "not available on desktop, implemented realtime on mobile",
+            "cannot run on desktop, works in real time on smartphones",
+            "没有桌面版本，已在手机实时实现",
+            "并非桌面实时实现，而是在手机实时运行",
         )
         for boundary in ("film_postproduction", "visual_inspiration"):
             for claim in claims:

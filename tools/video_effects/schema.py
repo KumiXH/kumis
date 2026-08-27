@@ -175,7 +175,7 @@ _ENGINEERING_WRAPPER_PREFIXES = (
 _SHA256_PATTERN = re.compile(r"^[0-9a-fA-F]{64}$")
 _SENTENCE_SPLIT_PATTERN = re.compile(r"[。.!！？?；;\r\n]+")
 _CLAUSE_SPLIT_PATTERN = re.compile(
-    r"[。.!！？?；;\r\n]+|\bbut\b|但是|但",
+    r"[。.!！？?；;,，\r\n]+|\b(?:but|however|yet|whereas|and)\b|但是|而是|却|然而|同时|但",
     flags=re.IGNORECASE,
 )
 _ENGLISH_DEVICE_PATTERN = re.compile(
