@@ -155,17 +155,6 @@ _ENGINEERING_ONLY_PHRASES = (
     "conventional camera switching",
 )
 
-_MOBILE_REALTIME_CLAIMS = (
-    "手机实时量产",
-    "手机端实时量产",
-    "已在手机实时实现",
-    "已经在手机实时实现",
-    "implemented in real time on mobile",
-    "implemented realtime on mobile",
-    "mobile real-time production",
-    "mobile realtime production",
-)
-
 _SHA256_PATTERN = re.compile(r"^[0-9a-fA-F]{64}$")
 
 
@@ -218,15 +207,20 @@ def _validate_shape(
     return mapping
 
 
-def _require_prefix(value: str, field: str, prefix: str) -> None:
-    if not value.startswith(prefix):
-        raise ValueError(f"{field} must start with {prefix}")
+def _require_id(value: str, field: str, prefix: str) -> None:
+    pattern = rf"{re.escape(prefix)}[A-Z0-9][A-Z0-9_-]*"
+    if re.fullmatch(pattern, value) is None:
+        raise ValueError(f"{field} must match {prefix}[A-Z0-9][A-Z0-9_-]*")
 
 
-def _require_list_prefix(values: list[str], field: str, prefix: str) -> None:
+def _require_id_list(values: list[str], field: str, prefix: str) -> None:
     for value in values:
-        if not value.startswith(prefix):
-            raise ValueError(f"{field} entries must start with {prefix}")
+        _require_id(value, field, prefix)
+
+
+def _require_unique(values: list[str], field: str) -> None:
+    if len(values) != len(set(values)):
+        raise ValueError(f"{field} must not contain duplicate IDs")
 
 
 def _require_enum(value: str, field: str, choices: frozenset[str]) -> None:
@@ -250,27 +244,56 @@ def _require_known(values: list[str], valid_ids: object, field: str) -> None:
         raise ValueError(f"{field} contains unknown references: {', '.join(missing)}")
 
 
-def _record_text(
+def _normalize_text(value: str) -> str:
+    return " ".join(value.split()).casefold()
+
+
+def _iter_record_text(
     record: Mapping[str, object],
     *,
     excluded_fields: frozenset[str] = frozenset(),
-) -> str:
-    parts: list[str] = []
+):
     for field, value in record.items():
         if field in excluded_fields:
             continue
         if isinstance(value, str):
-            parts.append(value)
+            yield value
         elif isinstance(value, list):
-            parts.extend(item for item in value if isinstance(item, str))
-    return "\n".join(parts).casefold()
+            yield from (item for item in value if isinstance(item, str))
+
+
+def _claims_mobile_realtime_implementation(value: str) -> bool:
+    text = _normalize_text(value)
+    if (
+        re.search(r"\bnot\b", text)
+        or "no evidence" in text
+        or "未" in text
+        or "不" in text
+        or "并非" in text
+    ):
+        return False
+
+    chinese_claim = (
+        "手机" in text
+        and "实时" in text
+        and any(term in text for term in ("实现", "量产", "运行", "部署"))
+    )
+    english_claim = (
+        any(term in text for term in ("mobile", "phone", "smartphone"))
+        and any(term in text for term in ("real time", "real-time"))
+        and any(
+            term in text
+            for term in ("implemented", "production", "runs", "running", "deployed")
+        )
+    )
+    return chinese_claim or english_claim
 
 
 def validate_atom(record: Mapping[str, object]) -> None:
     """Validate a visible video-effect primitive."""
 
     mapping = _validate_shape(record, scalar_fields=_ATOM_SCALARS, list_fields=_ATOM_LISTS)
-    _require_prefix(mapping["atom_id"], "atom_id", "ATOM-")
+    _require_id(mapping["atom_id"], "atom_id", "ATOM-")
 
 
 def validate_idea(
@@ -285,10 +308,10 @@ def validate_idea(
         list_fields=_IDEA_LISTS,
         empty_list_fields=_IDEA_EMPTY_LISTS,
     )
-    _require_prefix(mapping["effect_id"], "effect_id", "FX-")
-    _require_list_prefix(mapping["atom_ids"], "atom_ids", "ATOM-")
-    _require_list_prefix(mapping["reference_ids"], "reference_ids", "REF-")
-    _require_list_prefix(mapping["combinable_effect_ids"], "combinable_effect_ids", "FX-")
+    _require_id(mapping["effect_id"], "effect_id", "FX-")
+    _require_id_list(mapping["atom_ids"], "atom_ids", "ATOM-")
+    _require_id_list(mapping["reference_ids"], "reference_ids", "REF-")
+    _require_id_list(mapping["combinable_effect_ids"], "combinable_effect_ids", "FX-")
     _require_enum(mapping["generation_level"], "generation_level", GENERATION_LEVELS)
     _require_enum(mapping["edge_difficulty"], "edge_difficulty", EDGE_DIFFICULTIES)
     _require_enum(mapping["status"], "status", IDEA_STATUSES)
@@ -298,13 +321,11 @@ def validate_idea(
     if atom_ids is not None:
         _require_known(mapping["atom_ids"], atom_ids, "atom_ids")
 
-    primary_text = "\n".join(
-        (mapping["name_zh"], mapping["name_en"], mapping["visible_effect"])
-    ).casefold()
-    for phrase in _ENGINEERING_ONLY_PHRASES:
-        if phrase.casefold() in primary_text:
+    engineering_phrases = {_normalize_text(phrase) for phrase in _ENGINEERING_ONLY_PHRASES}
+    for field in ("name_zh", "name_en", "visible_effect"):
+        if _normalize_text(mapping[field]) in engineering_phrases:
             raise ValueError(
-                f"engineering-only feature '{phrase}' cannot be the main effect 主玩法"
+                f"{field} is an engineering-only feature and cannot be the main effect 主玩法"
             )
 
 
@@ -320,9 +341,11 @@ def validate_recipe(
         scalar_fields=_RECIPE_SCALARS,
         list_fields=_RECIPE_LISTS,
     )
-    _require_prefix(mapping["recipe_id"], "recipe_id", "RECIPE-")
-    _require_list_prefix(mapping["component_atom_ids"], "component_atom_ids", "ATOM-")
-    _require_list_prefix(mapping["component_effect_ids"], "component_effect_ids", "FX-")
+    _require_id(mapping["recipe_id"], "recipe_id", "RECIPE-")
+    _require_id_list(mapping["component_atom_ids"], "component_atom_ids", "ATOM-")
+    _require_id_list(mapping["component_effect_ids"], "component_effect_ids", "FX-")
+    _require_unique(mapping["component_atom_ids"], "component_atom_ids")
+    _require_unique(mapping["component_effect_ids"], "component_effect_ids")
     _require_known(mapping["component_atom_ids"], atom_ids, "component_atom_ids")
     _require_known(mapping["component_effect_ids"], idea_ids, "component_effect_ids")
 
@@ -348,9 +371,9 @@ def validate_priority(record: Mapping[str, object], idea_ids: set[str]) -> None:
         list_fields=_PRIORITY_LISTS,
         empty_list_fields=frozenset({"references"}),
     )
-    _require_prefix(mapping["priority_id"], "priority_id", "PRIORITY-")
-    _require_prefix(mapping["effect_id"], "effect_id", "FX-")
-    _require_list_prefix(mapping["references"], "references", "REF-")
+    _require_id(mapping["priority_id"], "priority_id", "PRIORITY-")
+    _require_id(mapping["effect_id"], "effect_id", "FX-")
+    _require_id_list(mapping["references"], "references", "REF-")
     _require_known([mapping["effect_id"]], idea_ids, "effect_id")
 
 
@@ -363,8 +386,8 @@ def validate_reference(record: Mapping[str, object]) -> None:
         list_fields=_REFERENCE_LISTS,
         empty_list_fields=frozenset({"local_files"}),
     )
-    _require_prefix(mapping["reference_id"], "reference_id", "REF-")
-    _require_list_prefix(mapping["effect_ids"], "effect_ids", "FX-")
+    _require_id(mapping["reference_id"], "reference_id", "REF-")
+    _require_id_list(mapping["effect_ids"], "effect_ids", "FX-")
     _require_enum(mapping["source_type"], "source_type", SOURCE_TYPES)
     _require_enum(
         mapping["implementation_boundary"],
@@ -389,8 +412,11 @@ def validate_reference(record: Mapping[str, object]) -> None:
         raise ValueError("sha256 must be empty or exactly 64 hexadecimal characters")
 
     if mapping["implementation_boundary"] in {"film_postproduction", "visual_inspiration"}:
-        text = _record_text(mapping, excluded_fields=frozenset({"does_not_prove"}))
-        if any(phrase.casefold() in text for phrase in _MOBILE_REALTIME_CLAIMS):
+        text_fields = _iter_record_text(
+            mapping,
+            excluded_fields=frozenset({"does_not_prove"}),
+        )
+        if any(_claims_mobile_realtime_implementation(text) for text in text_fields):
             raise ValueError(
                 "implementation_boundary cannot claim mobile real-time production or implementation"
             )

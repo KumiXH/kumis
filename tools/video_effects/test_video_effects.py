@@ -246,14 +246,30 @@ class SchemaTests(unittest.TestCase):
             "常规多摄切换",
             "conventional camera switching",
         )
-        for phrase in rejected_phrases:
-            with self.subTest(phrase=phrase):
-                record = valid_idea()
-                record["name_en"] = phrase
-                with self.assertRaisesRegex(ValueError, "engineering|主玩法"):
-                    schema.validate_idea(record, {"ATOM-LIGHT-TRAIL"})
+        for field in ("name_zh", "name_en", "visible_effect"):
+            for phrase in rejected_phrases:
+                with self.subTest(field=field, phrase=phrase):
+                    record = valid_idea()
+                    record[field] = f"  {phrase.upper()}  " if phrase.isascii() else phrase
+                    with self.assertRaisesRegex(ValueError, "engineering|主玩法"):
+                        schema.validate_idea(record, {"ATOM-LIGHT-TRAIL"})
 
-        schema.validate_idea(valid_idea(), {"ATOM-LIGHT-TRAIL"})
+        spaced = valid_idea()
+        spaced["name_en"] = "  ordinary\t\n stabilization  "
+        with self.assertRaisesRegex(ValueError, "engineering|主玩法"):
+            schema.validate_idea(spaced, {"ATOM-LIGHT-TRAIL"})
+
+        allowed_values = (
+            "Extraordinary Stabilization Light Trails",
+            "Not ordinary stabilization: creates light trails",
+            "普通防抖基础上的光轨特效",
+        )
+        for field in ("name_zh", "name_en", "visible_effect"):
+            for value in allowed_values:
+                with self.subTest(field=field, value=value):
+                    record = valid_idea()
+                    record[field] = value
+                    schema.validate_idea(record, {"ATOM-LIGHT-TRAIL"})
 
     def test_recipe_requires_novel_combined_effect(self) -> None:
         for field, value in (("combined_effect", "简单拼接"), ("why_new", "两个效果放一起")):
@@ -473,6 +489,50 @@ class SchemaTests(unittest.TestCase):
                 record[field] = "WRONG-001"
                 self.assert_field_error(field, validator, record, *args)
 
+    def test_ids_require_complete_uppercase_format_without_surrounding_space(self) -> None:
+        scalar_cases = (
+            (valid_atom, schema.validate_atom, (), "atom_id", "ATOM-"),
+            (valid_idea, schema.validate_idea, (VALID_ATOM_IDS,), "effect_id", "FX-"),
+            (valid_recipe, schema.validate_recipe, (VALID_ATOM_IDS, VALID_IDEA_IDS), "recipe_id", "RECIPE-"),
+            (valid_priority, schema.validate_priority, (VALID_IDEA_IDS,), "priority_id", "PRIORITY-"),
+            (valid_priority, schema.validate_priority, (VALID_IDEA_IDS,), "effect_id", "FX-"),
+            (valid_reference, schema.validate_reference, (), "reference_id", "REF-"),
+        )
+        for factory, validator, args, field, bare_prefix in scalar_cases:
+            for bad_value in (
+                bare_prefix,
+                f"{bare_prefix} ",
+                f"{bare_prefix}BAD ",
+                f" {bare_prefix}BAD",
+                f"{bare_prefix.lower()}bad",
+            ):
+                with self.subTest(field=field, value=bad_value):
+                    record = factory()
+                    record[field] = bad_value
+                    self.assert_field_error(field, validator, record, *args)
+
+        list_cases = (
+            (valid_idea, schema.validate_idea, (VALID_ATOM_IDS,), "atom_ids", "ATOM-"),
+            (valid_idea, schema.validate_idea, (VALID_ATOM_IDS,), "reference_ids", "REF-"),
+            (valid_idea, schema.validate_idea, (VALID_ATOM_IDS,), "combinable_effect_ids", "FX-"),
+            (valid_recipe, schema.validate_recipe, (VALID_ATOM_IDS, VALID_IDEA_IDS), "component_atom_ids", "ATOM-"),
+            (valid_recipe, schema.validate_recipe, (VALID_ATOM_IDS, VALID_IDEA_IDS), "component_effect_ids", "FX-"),
+            (valid_priority, schema.validate_priority, (VALID_IDEA_IDS,), "references", "REF-"),
+            (valid_reference, schema.validate_reference, (), "effect_ids", "FX-"),
+        )
+        for factory, validator, args, field, bare_prefix in list_cases:
+            for bad_value in (bare_prefix, f"{bare_prefix} ", f"{bare_prefix}BAD "):
+                with self.subTest(field=field, value=bad_value):
+                    record = factory()
+                    record[field] = [bad_value]
+                    self.assert_field_error(field, validator, record, *args)
+
+        schema.validate_atom(valid_atom())
+        schema.validate_idea(valid_idea(), VALID_ATOM_IDS)
+        schema.validate_recipe(valid_recipe(), VALID_ATOM_IDS, VALID_IDEA_IDS)
+        schema.validate_priority(valid_priority(), VALID_IDEA_IDS)
+        schema.validate_reference(valid_reference())
+
     def test_enums_are_enforced(self) -> None:
         for field in ("generation_level", "edge_difficulty", "status"):
             with self.subTest(field=field):
@@ -534,6 +594,32 @@ class SchemaTests(unittest.TestCase):
                 record["component_effect_ids"] = effect_ids
                 with self.assertRaisesRegex(ValueError, "component"):
                     schema.validate_recipe(record, VALID_ATOM_IDS, VALID_IDEA_IDS)
+
+    def test_recipe_rejects_duplicate_ids_within_each_component_list(self) -> None:
+        cases = (
+            (
+                "component_atom_ids",
+                ["ATOM-LIGHT-TRAIL", "ATOM-LIGHT-TRAIL"],
+                ["FX-LIGHT-TRAIL"],
+            ),
+            (
+                "component_effect_ids",
+                ["ATOM-LIGHT-TRAIL"],
+                ["FX-LIGHT-TRAIL", "FX-LIGHT-TRAIL"],
+            ),
+        )
+        for field, atom_ids, effect_ids in cases:
+            with self.subTest(field=field):
+                record = valid_recipe()
+                record["component_atom_ids"] = atom_ids
+                record["component_effect_ids"] = effect_ids
+                self.assert_field_error(
+                    field,
+                    schema.validate_recipe,
+                    record,
+                    VALID_ATOM_IDS,
+                    VALID_IDEA_IDS,
+                )
 
     def test_only_documented_list_fields_may_be_empty(self) -> None:
         allowed_empty = (
@@ -599,7 +685,11 @@ class SchemaTests(unittest.TestCase):
         claims = (
             "该效果已在手机实时实现",
             "该方案已经手机实时量产",
+            "该效果可以在手机端实时运行",
+            "该方案已经部署到手机并实时运行",
             "implemented in real time on mobile",
+            "runs in real time on a smartphone",
+            "deployed for real-time production on phones",
         )
         for boundary in ("film_postproduction", "visual_inspiration"):
             for claim in claims:
@@ -616,10 +706,32 @@ class SchemaTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "implementation_boundary"):
             schema.validate_reference(other_field_claim)
 
-        disclaimer = valid_reference()
-        disclaimer["implementation_boundary"] = "film_postproduction"
-        disclaimer["does_not_prove"] = "该影视案例未证明已在手机实时实现"
-        schema.validate_reference(disclaimer)
+        list_field_claim = valid_reference()
+        list_field_claim["implementation_boundary"] = "film_postproduction"
+        list_field_claim["local_files"] = ["this runs in real time on a smartphone"]
+        with self.assertRaisesRegex(ValueError, "implementation_boundary"):
+            schema.validate_reference(list_field_claim)
+
+        negative_claims = (
+            "This was not implemented in real time on mobile",
+            "There is no evidence this runs in real time on a smartphone",
+            "This does not run in real-time on phones",
+            "未证明手机实时实现",
+            "不能在手机实时运行",
+            "并非已经部署到手机实时运行",
+            "不代表该方案已在手机实时量产",
+        )
+        for claim in negative_claims:
+            with self.subTest(claim=claim):
+                disclaimer = valid_reference()
+                disclaimer["implementation_boundary"] = "film_postproduction"
+                disclaimer["demonstrates"] = claim
+                schema.validate_reference(disclaimer)
+
+        excluded_disclaimer = valid_reference()
+        excluded_disclaimer["implementation_boundary"] = "film_postproduction"
+        excluded_disclaimer["does_not_prove"] = "手机实时实现并已经量产部署"
+        schema.validate_reference(excluded_disclaimer)
 
 
 if __name__ == "__main__":
