@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import re
 from collections import Counter
@@ -45,15 +46,269 @@ RECIPE_FAMILY_ORDER = (
     "effect_cinematography",
 )
 
+_DIMENSION_ORDER = (
+    "realtime_light_trail",
+    "world_anchor",
+    "sound",
+    "spatial_portal",
+    "body_pose",
+    "time",
+    "gaze",
+    "material",
+    "expression",
+    "multi_person",
+    "color_layer",
+    "touch_gesture",
+    "shadow",
+    "action_inverse",
+    "particle",
+    "generative_world",
+    "generative_style",
+    "light",
+)
+
+MULTIDIMENSION_AXES = frozenset({
+    "realtime_light_trail",
+    "gaze",
+    "expression",
+    "time",
+    "shadow",
+    "sound",
+    "multi_person",
+})
+
+
+def _load_source_ids(path: Path, field: str) -> tuple[str, ...]:
+    return tuple(
+        json.loads(line)[field]
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    )
+
+
+_SOURCE_ATOM_IDS = _load_source_ids(ATOM_INPUT, "atom_id")
+_SOURCE_EFFECT_IDS = _load_source_ids(IDEA_INPUT, "effect_id")
+
 
 def _v(label: str, trigger: str, outcome: str, novelty: str, risk: str) -> dict[str, str]:
     return {
         "label": label,
-        "trigger": trigger,
-        "outcome": outcome,
-        "novelty": novelty,
-        "risk": risk,
+        "trigger_logic": trigger,
+        "combined_effect": outcome,
+        "why_new": novelty,
+        "preview_behavior": (
+            f"{label}的实时入口是“{trigger}”。取景器先锁定与该动作相关的局部层，"
+            f"再直接显示“{outcome}”，让触发前后的差异可在手机屏幕上读出。"
+        ),
+        "post_behavior": (
+            f"成片回看{label}时，沿“{trigger}”的事件时间线重建“{outcome}”；"
+            f"以“{novelty}”为调参单位，保留动作终点并针对“{risk}”修补边界。"
+        ),
+        "risks": [risk],
+        "target_scenarios": [
+            f"用{label}组织一段手机短片：让拍摄者完成“{trigger}”，"
+            f"在{outcome}出现后改变镜头动作，并把效果结束时的空间或关系变化作为收尾。"
+        ],
     }
+
+
+VARIANT_ATOM_POOLS = {
+    "light_anchor_optics": (
+        "ATOM-TEMPORAL-STATE-BEAT-PHASE-CLOCK",
+        "ATOM-INTERACTION-TRIGGERS-TOUCH-DRAW",
+        "ATOM-LIGHT-OPTICS-DYNAMIC-STARBURST",
+        "ATOM-SEGMENTATION-MASKS-FOREGROUND",
+        "ATOM-GEOMETRY-TRACKING-MONOCULAR-DEPTH",
+    ),
+    "gaze_expression": (
+        "ATOM-INTERACTION-TRIGGERS-BLINK",
+        "ATOM-INTERACTION-TRIGGERS-EXPRESSION",
+        "ATOM-INTERACTION-TRIGGERS-MOUTH-SHAPE",
+        "ATOM-SEGMENTATION-MASKS-FACE-REGION",
+        "ATOM-INTERACTION-TRIGGERS-SOUND-VOLUME",
+    ),
+    "time_cloning": (
+        "ATOM-TEMPORAL-STATE-FRAME-DELAY",
+        "ATOM-TEMPORAL-STATE-TIME-REVERSE",
+        "ATOM-TEMPORAL-STATE-BEAT-PHASE-CLOCK",
+        "ATOM-TEMPORAL-STATE-EVENT-WINDOW",
+        "ATOM-CLONING-ECHOES-DELAYED-CLONE",
+    ),
+    "shadow_light": (
+        "ATOM-TEMPORAL-STATE-FRAME-DELAY",
+        "ATOM-TEMPORAL-STATE-TIME-REVERSE",
+        "ATOM-GEOMETRY-TRACKING-WORLD-SPACE-ANCHOR",
+        "ATOM-LIGHT-OPTICS-VIRTUAL-RIM-LIGHT",
+        "ATOM-GEOMETRY-TRACKING-MONOCULAR-DEPTH",
+    ),
+    "audio_lyrics": (
+        "ATOM-INTERACTION-TRIGGERS-AUDIO-BEAT",
+        "ATOM-INTERACTION-TRIGGERS-SOUND-VOLUME",
+        "ATOM-GEOMETRY-TRACKING-HEAD-POSE",
+        "ATOM-GEOMETRY-TRACKING-MULTI-PERSON-GRAPH",
+        "ATOM-INTERACTION-TRIGGERS-GAZE-FOCUS",
+    ),
+    "multi_person": (
+        "ATOM-INTERACTION-TRIGGERS-MULTI-PERSON-TOUCH",
+        "ATOM-GEOMETRY-TRACKING-BODY-SKELETON",
+        "ATOM-INTERACTION-TRIGGERS-AUDIO-BEAT",
+        "ATOM-PARTICLES-ATMOSPHERE-SPARKS",
+        "ATOM-TEMPORAL-STATE-IDENTITY-MEMORY",
+    ),
+    "particles_weather": (
+        "ATOM-PARTICLES-ATMOSPHERE-RAIN",
+        "ATOM-PARTICLES-ATMOSPHERE-DUST",
+        "ATOM-PARTICLES-ATMOSPHERE-SNOW",
+        "ATOM-PARTICLES-ATMOSPHERE-LYRIC-RING",
+        "ATOM-INTERACTION-TRIGGERS-TOUCH-DRAW",
+    ),
+    "spatial_world": (
+        "ATOM-GEOMETRY-TRACKING-MONOCULAR-DEPTH",
+        "ATOM-GEOMETRY-TRACKING-WORLD-SPACE-ANCHOR",
+        "ATOM-GEOMETRY-TRACKING-CAMERA-MOTION",
+        "ATOM-GEOMETRY-TRACKING-GAZE-VECTOR",
+        "ATOM-INTERACTION-TRIGGERS-PHONE-ROTATION",
+    ),
+    "material_generation": (
+        "ATOM-MATERIAL-APPEARANCE-GLASS",
+        "ATOM-MATERIAL-APPEARANCE-LIQUID",
+        "ATOM-MATERIAL-APPEARANCE-FRAGMENTATION",
+        "ATOM-MATERIAL-APPEARANCE-HOLOGRAPHIC",
+        "ATOM-GENERATIVE-TRANSFORMATION-VISUAL-STYLE",
+    ),
+    "effect_cinematography": (
+        "ATOM-GEOMETRY-TRACKING-CAMERA-MOTION",
+        "ATOM-TEMPORAL-STATE-BEAT-PHASE-CLOCK",
+        "ATOM-GEOMETRY-TRACKING-GAZE-VECTOR",
+        "ATOM-INTERACTION-TRIGGERS-TOUCH-DRAW",
+        "ATOM-GEOMETRY-TRACKING-OBJECT-POSE",
+    ),
+}
+
+VARIANT_EFFECT_POOLS = {
+    "light_anchor_optics": (
+        "FX-LIGHT-TRAILS-OPTICS-BEAT-COLOR",
+        "FX-LIGHT-TRAILS-OPTICS-BEAT-BURST",
+        "FX-EFFECT-CINEMATOGRAPHY-FOCUS-FOCUSPULSE",
+        "FX-PARTICLES-WEATHER-DUST-DUSTLIGHT",
+        "FX-VIRTUAL-LIGHT-SHADOW-SUNSET-SUNSETBEAT",
+    ),
+    "gaze_expression": (
+        "FX-FACE-GAZE-EXPRESSION-CATCHLIGHT-CATCHBLINK",
+        "FX-FACE-GAZE-EXPRESSION-GLOW-GLOWBLINK",
+        "FX-FACE-GAZE-EXPRESSION-SELECT-CONFIRM",
+        "FX-AUDIO-LYRICS-MASK-MASKMOUTH",
+        "FX-VIRTUAL-LIGHT-SHADOW-FOLLOW-SPOTSWAP",
+    ),
+    "time_cloning": (
+        "FX-TIME-EDITING-LOOP-LOOPBEAT",
+        "FX-TIME-EDITING-REVERSE-REVERSEBEAT",
+        "FX-TIME-EDITING-BORROW-BORROWOBJECT",
+        "FX-BODY-MOTION-CLONES-TIME-TIMESTUTTER",
+        "FX-LIGHT-TRAILS-OPTICS-BEAT-STUTTERTRAIL",
+    ),
+    "shadow_light": (
+        "FX-TIME-EDITING-REVERSE-REVERSEBEAT",
+        "FX-VIRTUAL-LIGHT-SHADOW-LONG-LONGBEAT",
+        "FX-VIRTUAL-LIGHT-SHADOW-SCREEN-SCREENDELAY",
+        "FX-VIRTUAL-LIGHT-SHADOW-SUNSET-SUNSETBEAT",
+        "FX-LIGHT-TRAILS-OPTICS-BEAT-PULSE",
+    ),
+    "audio_lyrics": (
+        "FX-AUDIO-LYRICS-ORBIT-ORBITBEAT",
+        "FX-AUDIO-LYRICS-RIBBON-RIBBONBEAT",
+        "FX-AUDIO-LYRICS-SUBTITLE-SUBTIME",
+        "FX-AUDIO-LYRICS-DUET-DUETTOUCH",
+        "FX-PARTICLES-WEATHER-LYRIC-LYRICVOICE",
+    ),
+    "multi_person": (
+        "FX-MULTI-PERSON-INTERACTION-ENERGY-ENERGYTHROW",
+        "FX-MULTI-PERSON-INTERACTION-ENERGY-ENERGYBEAT",
+        "FX-MULTI-PERSON-INTERACTION-MIRROR-MIRRORTOUCH",
+        "FX-MULTI-PERSON-INTERACTION-STATUE-STATUEPOSE",
+        "FX-AUDIO-LYRICS-DUET-DUETHANDOFF",
+    ),
+    "particles_weather": (
+        "FX-PARTICLES-WEATHER-RAIN-RAINVOICE",
+        "FX-PARTICLES-WEATHER-DUST-DUSTLIGHT",
+        "FX-PARTICLES-WEATHER-SNOW-SNOWTOUCH",
+        "FX-PARTICLES-WEATHER-LYRIC-LYRICORBIT",
+        "FX-PARTICLES-WEATHER-PETAL-PETALFOLLOW",
+    ),
+    "spatial_world": (
+        "FX-SPATIAL-PORTALS-TUNNEL-TUNNELORBIT",
+        "FX-SPATIAL-PORTALS-FLOOR-FLOORROTATE",
+        "FX-SPATIAL-PORTALS-MIRROR-MIRRORGAZE",
+        "FX-EFFECT-CINEMATOGRAPHY-SPLIT-SPLITDEPTH",
+        "FX-WORLD-STYLE-SEASON-SEASONROTATE",
+    ),
+    "material_generation": (
+        "FX-MATERIAL-MORPH-GLASS-GLASSBREAK",
+        "FX-MATERIAL-MORPH-METAL-METALFLOW",
+        "FX-MATERIAL-MORPH-PAPER-PAPERTEAR",
+        "FX-MATERIAL-MORPH-HOLO-HOLOROTATE",
+        "FX-WORLD-STYLE-NEON-NEONMOVE",
+    ),
+    "effect_cinematography": (
+        "FX-EFFECT-CINEMATOGRAPHY-ZOOM-ZOOMGAZE",
+        "FX-EFFECT-CINEMATOGRAPHY-WIPE-WIPETOUCH",
+        "FX-EFFECT-CINEMATOGRAPHY-EXPOSURE-EXPOSUREBEAT",
+        "FX-EFFECT-CINEMATOGRAPHY-SPLIT-SPLITCHASE",
+        "FX-EFFECT-CINEMATOGRAPHY-FOCUS-FOCUSPULSE",
+    ),
+}
+
+_VARIANT_ATOM_HINTS = {
+    "light_anchor_optics": ("HAND", "WORLD", "LIGHT", "CAMERA", "OBJECT", "BEAT"),
+    "gaze_expression": ("GAZE", "IRIS", "CATCHLIGHT", "FACE", "BLINK", "EXPRESSION", "MOUTH"),
+    "time_cloning": ("TIME", "FRAME", "POSE", "MOTION", "CLONING", "DELAY"),
+    "shadow_light": ("SHADOW", "FRAME", "REVERSE", "WORLD", "RIM", "DEPTH"),
+    "audio_lyrics": ("LYRIC", "MOUTH", "AUDIO", "SOUND", "HEAD", "GAZE", "MULTI-PERSON"),
+    "multi_person": ("MULTI-PERSON", "BODY", "TOUCH", "SPARK", "IDENTITY", "AUDIO"),
+    "particles_weather": ("PARTICLES", "RAIN", "DUST", "SNOW", "PETAL", "TOUCH", "AUDIO"),
+    "spatial_world": ("SPATIAL", "WORLD", "DEPTH", "CAMERA", "PORTAL", "PHONE"),
+    "material_generation": ("MATERIAL", "GENERATIVE", "GLASS", "LIQUID", "FRAGMENT", "HOLOGRAPH", "STYLE"),
+    "effect_cinematography": ("CAMERA", "TIME", "GAZE", "TOUCH", "OBJECT", "BODY", "MOTION"),
+}
+
+_VARIANT_EFFECT_HINTS = {
+    "light_anchor_optics": ("LIGHT-TRAILS", "LIGHT", "ZOOM", "FOCUS", "SPOT", "BEAT"),
+    "gaze_expression": ("FACE-GAZE", "CATCHLIGHT", "GLOW", "SELECT", "DIALOGUE", "SPOT"),
+    "time_cloning": ("TIME-EDITING", "BODY-MOTION", "SHUTTER", "BORROW", "STUTTER", "REVERSE"),
+    "shadow_light": ("VIRTUAL-LIGHT-SHADOW", "SHADOW", "REVERSE", "SCREEN", "SUNSET", "LONG"),
+    "audio_lyrics": ("AUDIO-LYRICS", "LYRIC", "DUET", "RIBBON", "SUBTITLE", "MASK"),
+    "multi_person": ("MULTI-PERSON", "ENERGY", "MIRROR", "STATUE", "DUET", "RING"),
+    "particles_weather": ("PARTICLES", "RAIN", "DUST", "SNOW", "PETAL", "LYRIC"),
+    "spatial_world": ("SPATIAL", "WORLD", "TUNNEL", "FLOOR", "MIRROR", "SPLIT"),
+    "material_generation": ("MATERIAL", "HOLO", "GLASS", "METAL", "PAPER", "NEON"),
+    "effect_cinematography": ("EFFECT-CINEMATOGRAPHY", "ZOOM", "WIPE", "EXPOSURE", "SPLIT", "FOCUS"),
+}
+
+
+def _variant_extra_ids(
+    base_ids: tuple[str, ...],
+    preferred_ids: tuple[str, ...],
+    all_ids: tuple[str, ...],
+    hints: tuple[str, ...],
+) -> tuple[str, ...]:
+    base = set(base_ids)
+    preferred = [value for value in preferred_ids if value not in base]
+    hinted = [
+        value
+        for value in all_ids
+        if value not in base
+        and value not in preferred
+        and any(hint in value for hint in hints)
+    ]
+    fallback = [
+        value
+        for value in all_ids
+        if value not in base and value not in preferred and value not in hinted
+    ]
+    candidates = tuple(dict.fromkeys((*preferred, *hinted, *fallback)))
+    if len(candidates) < 5:
+        raise ValueError("source catalog does not provide five variant components")
+    return candidates[:5]
 
 
 def _b(
@@ -62,29 +317,57 @@ def _b(
     title: str,
     atoms: tuple[str, ...],
     effects: tuple[str, ...],
-    dimensions: tuple[str, ...],
+    _dimensions: tuple[str, ...],
     binding: str,
     bridge: str,
     preview: str,
     post: str,
-    scenario: str,
+    _scenario: str,
     variants: tuple[dict[str, str], ...],
 ) -> dict[str, object]:
     if len(variants) != 5:
         raise ValueError(f"blueprint {slug} must have five variants")
+    atom_extras = _variant_extra_ids(
+        atoms,
+        VARIANT_ATOM_POOLS[family],
+        _SOURCE_ATOM_IDS,
+        _VARIANT_ATOM_HINTS[family],
+    )
+    effect_extras = _variant_extra_ids(
+        effects,
+        VARIANT_EFFECT_POOLS[family],
+        _SOURCE_EFFECT_IDS,
+        _VARIANT_EFFECT_HINTS[family],
+    )
+    complete_variants = []
+    for index, variant in enumerate(variants, start=1):
+        complete = {
+            "recipe_id": f"RECIPE-{slug}-V{index}",
+            "name_zh": f"{title}·{variant['label']}",
+            "component_atom_ids": [*atoms, atom_extras[index - 1]],
+            "component_effect_ids": [*effects, effect_extras[index - 1]],
+            "trigger_logic": variant["trigger_logic"],
+            "combined_effect": variant["combined_effect"],
+            "why_new": variant["why_new"],
+            "preview_behavior": variant["preview_behavior"],
+            "post_behavior": variant["post_behavior"],
+            "risks": variant["risks"],
+            "target_scenarios": variant["target_scenarios"],
+        }
+        if set(complete) != set(RECIPE_FIELDS):
+            raise ValueError(f"variant {slug}-V{index} is not a complete recipe")
+        complete_variants.append(complete)
     return {
         "slug": slug,
         "family": family,
         "title": title,
         "atoms": atoms,
         "effects": effects,
-        "dimensions": dimensions,
         "binding": binding,
         "bridge": bridge,
         "preview": preview,
         "post": post,
-        "scenario": scenario,
-        "variants": variants,
+        "variants": tuple(complete_variants),
     }
 
 
@@ -1188,16 +1471,6 @@ _RECIPE_PREFIXES = tuple(
 )
 _VARIANT_PATTERN = re.compile(r"-V([1-5])$")
 
-KEY_PATTERN_COUNTS = {
-    "hand_anchor_light": 5,
-    "gaze_catch_dialogue": 5,
-    "clone_pose_color": 5,
-    "shadow_delay_reverse": 5,
-    "lyric_mouth_ring": 5,
-    "graph_touch_energy": 5,
-}
-
-
 def _read_jsonl(path: Path) -> list[dict[str, object]]:
     return [
         json.loads(line)
@@ -1224,8 +1497,38 @@ def blueprint_slug(recipe: Mapping[str, object]) -> str:
 
 
 def recipe_dimensions(recipe: Mapping[str, object]) -> tuple[str, ...]:
-    slug = blueprint_slug(recipe)
-    return tuple(_BLUEPRINT_BY_SLUG[slug]["dimensions"])
+    component_ids = tuple(recipe["component_atom_ids"]) + tuple(recipe["component_effect_ids"])
+    dimensions = []
+    for dimension, markers in _DIMENSION_COMPONENT_MARKERS.items():
+        if any(
+            component_id == marker or marker in component_id
+            for component_id in component_ids
+            for marker in markers
+        ):
+            dimensions.append(dimension)
+    return tuple(dimension for dimension in _DIMENSION_ORDER if dimension in dimensions)
+
+
+_DIMENSION_COMPONENT_MARKERS = {
+    "realtime_light_trail": ("LIGHT-TRAILS", "LIGHT-PAINT-BRUSH", "EXPOSURE"),
+    "world_anchor": ("WORLD-SPACE-ANCHOR", "-WORLD-", "WORLD-ANCHOR"),
+    "sound": ("AUDIO-BEAT", "SOUND-VOLUME", "LYRIC-TIMESTAMP", "AUDIO-LYRICS", "-VOICE", "-BEAT"),
+    "spatial_portal": ("MIRROR-PORTAL", "FRAME-TRAVERSAL", "TUNNEL-WARP", "FX-SPATIAL-PORTALS", "-WIPE-"),
+    "body_pose": ("BODY-SKELETON", "BODY-SILHOUETTE", "POSE-SLICES", "BODY-MOTION", "BODY-"),
+    "time": ("ATOM-TEMPORAL-STATE", "ATOM-CLONING-ECHOES", "FX-TIME-EDITING", "FX-BODY-MOTION-CLONES", "-STUTTER"),
+    "gaze": ("GAZE-VECTOR", "GAZE-FOCUS", "IRIS-PUPIL", "FACE-GAZE", "FOCUSGAZE"),
+    "material": ("ATOM-MATERIAL-APPEARANCE", "FX-MATERIAL-MORPH"),
+    "expression": ("ATOM-INTERACTION-TRIGGERS-BLINK", "ATOM-INTERACTION-TRIGGERS-EXPRESSION", "ATOM-INTERACTION-TRIGGERS-MOUTH", "CATCHLIGHT", "GLOW-"),
+    "multi_person": ("MULTI-PERSON", "DUET", "STATUE", "ENERGY"),
+    "color_layer": ("CHROMATIC-ABERRATION", "POSECOLOR", "EXPOSURECOLOR", "CATCHCOLOR", "-COLOR"),
+    "touch_gesture": ("TOUCH-DRAW", "MULTI-PERSON-TOUCH", "-TOUCH", "-GESTURE", "HAND-GESTURE"),
+    "shadow": ("SHADOW", "SHADOW-"),
+    "action_inverse": ("TIME-REVERSE", "-REVERSE", "REVERSE-"),
+    "particle": ("PARTICLES-ATMOSPHERE", "FX-PARTICLES"),
+    "generative_world": ("BACKGROUND-WORLD", "FX-WORLD-STYLE"),
+    "generative_style": ("VISUAL-STYLE", "HOLO", "FX-WORLD-STYLE"),
+    "light": ("CATCHLIGHT", "RIM-LIGHT", "LUMINOUS-CORE", "VIRTUAL-SPOTLIGHT", "FX-VIRTUAL-LIGHT"),
+}
 
 
 def recipe_fingerprint(recipe: Mapping[str, object]) -> tuple[object, ...]:
@@ -1240,43 +1543,59 @@ def recipe_fingerprint(recipe: Mapping[str, object]) -> tuple[object, ...]:
 
 
 def build_recipes() -> list[dict[str, object]]:
-    recipes: list[dict[str, object]] = []
-    for blueprint in RECIPE_BLUEPRINTS:
-        for variant_index, variant in enumerate(blueprint["variants"], start=1):
-            recipe_id = f"RECIPE-{blueprint['slug']}-V{variant_index}"
-            recipes.append(
-                {
-                    "recipe_id": recipe_id,
-                    "name_zh": f"{blueprint['title']}·{variant['label']}",
-                    "component_atom_ids": list(blueprint["atoms"]),
-                    "component_effect_ids": list(blueprint["effects"]),
-                    "trigger_logic": (
-                        f"{variant['trigger']}；{blueprint['binding']}。"
-                    ),
-                    "combined_effect": (
-                        f"{variant['outcome']}；{blueprint['bridge']}。"
-                    ),
-                    "why_new": (
-                        f"{variant['novelty']}；{blueprint['binding']}，"
-                        "让触发条件、空间关系和时间状态共同改变可见结果，"
-                        "因此它不是把两个已有滤镜并排叠加。"
-                    ),
-                    "preview_behavior": (
-                        f"{blueprint['preview']}；{variant['label']}只在触发确认后展开完整结果，"
-                        "其余区域保持原始画面以控制预览开销。"
-                    ),
-                    "post_behavior": (
-                        f"{blueprint['post']}；{variant['label']}的触发时间线会被保存在元数据中，"
-                        "便于录后调整强度而不改写原始动作。"
-                    ),
-                    "risks": [
-                        variant["risk"],
-                        "多人遮挡、快速运动或信号置信度下降时，效果可能出现边缘断裂或时序跳变。",
-                    ],
-                    "target_scenarios": [blueprint["scenario"]],
-                }
-            )
-    return recipes
+    return [
+        copy.deepcopy(variant)
+        for blueprint in RECIPE_BLUEPRINTS
+        for variant in blueprint["variants"]
+    ]
+
+
+def _has_components(recipe: Mapping[str, object], *required: str) -> bool:
+    components = set(recipe["component_atom_ids"]) | set(recipe["component_effect_ids"])
+    return all(component_id in components for component_id in required)
+
+
+def count_key_patterns(recipes: Iterable[Mapping[str, object]]) -> dict[str, int]:
+    patterns = {
+        "hand_anchor_light": (
+            "ATOM-GEOMETRY-TRACKING-HAND-3D-TRAJECTORY",
+            "ATOM-GEOMETRY-TRACKING-WORLD-SPACE-ANCHOR",
+            "ATOM-LIGHT-OPTICS-LIGHT-PAINT-BRUSH",
+        ),
+        "gaze_catch_dialogue": (
+            "ATOM-GEOMETRY-TRACKING-GAZE-VECTOR",
+            "ATOM-LIGHT-OPTICS-CATCHLIGHT-RERENDER",
+            "FX-FACE-GAZE-EXPRESSION-DIALOGUE-REDIRECT",
+        ),
+        "clone_pose_color": (
+            "ATOM-CLONING-ECHOES-HUMAN-TIME-CLONE",
+            "ATOM-CLONING-ECHOES-POSE-SLICES",
+            "FX-BODY-MOTION-CLONES-POSE-POSECOLOR",
+        ),
+        "shadow_delay_reverse": (
+            "ATOM-SEGMENTATION-MASKS-SHADOW",
+            "ATOM-TEMPORAL-STATE-FRAME-DELAY",
+            "ATOM-TEMPORAL-STATE-TIME-REVERSE",
+            "FX-BODY-MOTION-CLONES-SHADOW-SHADOWREVERSE",
+        ),
+        "lyric_mouth_ring": (
+            "ATOM-INTERACTION-TRIGGERS-LYRIC-TIMESTAMP",
+            "ATOM-INTERACTION-TRIGGERS-MOUTH-SHAPE",
+            "ATOM-PARTICLES-ATMOSPHERE-LYRIC-RING",
+        ),
+        "graph_touch_energy": (
+            "ATOM-GEOMETRY-TRACKING-MULTI-PERSON-GRAPH",
+            "ATOM-INTERACTION-TRIGGERS-MULTI-PERSON-TOUCH",
+            "FX-MULTI-PERSON-INTERACTION-ENERGY-ENERGYTOUCH",
+        ),
+    }
+    return {
+        name: sum(_has_components(recipe, *required) for recipe in recipes)
+        for name, required in patterns.items()
+    }
+
+
+KEY_PATTERN_COUNTS = count_key_patterns(build_recipes())
 
 
 def validate_recipes(
@@ -1288,6 +1607,9 @@ def validate_recipes(
 
     if not isinstance(recipes, list):
         raise ValueError("recipes must be a list")
+    canonical = build_recipes()
+    if recipes != canonical:
+        raise ValueError("recipe variants must match canonical blueprint records")
     for index, recipe in enumerate(recipes):
         if not isinstance(recipe, Mapping):
             raise ValueError(f"recipe[{index}] must be a mapping")
@@ -1334,8 +1656,12 @@ def validate_recipes(
         "family_counts": dict(family_counts),
         "blueprint_counts": dict(blueprint_counts),
         "fingerprint_count": len(fingerprints),
-        "multidimensional_count": sum(len(recipe_dimensions(recipe)) >= 2 for recipe in recipes),
+        "multidimensional_count": sum(
+            len(set(recipe_dimensions(recipe)) & MULTIDIMENSION_AXES) >= 2
+            for recipe in recipes
+        ),
         "dimension_counts": dict(dimensions),
+        "key_pattern_counts": count_key_patterns(recipes),
     }
 
 

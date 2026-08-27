@@ -1508,6 +1508,50 @@ class RecipeCatalogTests(unittest.TestCase):
                 all_components = recipe["component_atom_ids"] + recipe["component_effect_ids"]
                 self.assertEqual(len(all_components), len(set(all_components)))
 
+    def test_blueprint_variants_are_complete_and_independently_curated(self) -> None:
+        independent_fields = (
+            "name_zh",
+            "component_atom_ids",
+            "component_effect_ids",
+            "trigger_logic",
+            "combined_effect",
+            "why_new",
+            "preview_behavior",
+            "post_behavior",
+            "risks",
+            "target_scenarios",
+        )
+        for blueprint in recipe_catalog.RECIPE_BLUEPRINTS:
+            with self.subTest(blueprint=blueprint["slug"]):
+                variants = blueprint["variants"]
+                self.assertEqual(len(variants), 5)
+                for variant in variants:
+                    self.assertEqual(set(variant), set(RECIPE_FIELDS))
+                for field in independent_fields:
+                    values = [
+                        json.dumps(variant[field], ensure_ascii=False, sort_keys=True)
+                        for variant in variants
+                    ]
+                    self.assertEqual(len(set(values)), 5, field)
+
+    def test_build_recipes_only_copies_complete_variant_records(self) -> None:
+        expected = [
+            variant
+            for blueprint in recipe_catalog.RECIPE_BLUEPRINTS
+            for variant in blueprint["variants"]
+        ]
+        self.assertEqual(self.recipes, expected)
+
+    def test_replacing_a_variant_record_with_another_variant_is_rejected(self) -> None:
+        tampered = copy.deepcopy(self.recipes)
+        original = tampered[0]
+        replacement = copy.deepcopy(tampered[1])
+        replacement["recipe_id"] = original["recipe_id"]
+        replacement["name_zh"] = original["name_zh"]
+        tampered[0] = replacement
+        with self.assertRaisesRegex(ValueError, "variant|canonical|blueprint"):
+            recipe_catalog.validate_recipes(tampered, self.atom_ids, self.idea_ids)
+
     def test_recipe_fingerprints_are_unique(self) -> None:
         fingerprints = [recipe_catalog.recipe_fingerprint(recipe) for recipe in self.recipes]
         self.assertEqual(len(fingerprints), len(set(fingerprints)))
@@ -1539,23 +1583,43 @@ class RecipeCatalogTests(unittest.TestCase):
 
     def test_required_key_combination_patterns_are_present(self) -> None:
         expected = {
-            "hand_anchor_light": ("HAND-ANCHOR-BEAT", 5),
-            "gaze_catch_dialogue": ("GAZE-CATCH-DIALOGUE", 5),
-            "clone_pose_color": ("TIME-POSE-COLOR", 5),
-            "shadow_delay_reverse": ("SHADOW-DELAY-REVERSE", 5),
-            "lyric_mouth_ring": ("LYRIC-MOUTH-RING", 5),
-            "graph_touch_energy": ("GRAPH-TOUCH-ENERGY", 5),
+            "hand_anchor_light": 5,
+            "gaze_catch_dialogue": 5,
+            "clone_pose_color": 5,
+            "shadow_delay_reverse": 5,
+            "lyric_mouth_ring": 5,
+            "graph_touch_energy": 5,
         }
-        for pattern, (slug, expected_count) in expected.items():
+        counts = recipe_catalog.count_key_patterns(self.recipes)
+        self.assertEqual(recipe_catalog.KEY_PATTERN_COUNTS, counts)
+        for pattern, expected_count in expected.items():
             with self.subTest(pattern=pattern):
-                self.assertEqual(
-                    recipe_catalog.KEY_PATTERN_COUNTS[pattern],
-                    expected_count,
-                )
-                self.assertEqual(
-                    sum(recipe_catalog.blueprint_slug(recipe) == slug for recipe in self.recipes),
-                    expected_count,
-                )
+                self.assertEqual(counts[pattern], expected_count)
+
+        changed = copy.deepcopy(self.recipes)
+        changed[0]["component_atom_ids"] = [
+            atom_id
+            for atom_id in changed[0]["component_atom_ids"]
+            if "HAND-" not in atom_id and "WORLD-SPACE-ANCHOR" not in atom_id
+        ]
+        self.assertEqual(recipe_catalog.count_key_patterns(changed)["hand_anchor_light"], 4)
+
+    def test_recipe_dimensions_are_derived_from_actual_component_ids(self) -> None:
+        recipe = self.recipes[0]
+        self.assertTrue(all("dimensions" not in blueprint for blueprint in recipe_catalog.RECIPE_BLUEPRINTS))
+        self.assertIn("world_anchor", recipe_catalog.recipe_dimensions(recipe))
+        changed = copy.deepcopy(recipe)
+        changed["component_atom_ids"] = [
+            atom_id
+            for atom_id in changed["component_atom_ids"]
+            if "WORLD-SPACE-ANCHOR" not in atom_id
+        ]
+        changed["component_effect_ids"] = [
+            effect_id
+            for effect_id in changed["component_effect_ids"]
+            if "WORLD-ANCHOR" not in effect_id and "-WORLD-" not in effect_id
+        ]
+        self.assertNotIn("world_anchor", recipe_catalog.recipe_dimensions(changed))
 
     def test_committed_recipe_output_matches_generated_catalog(self) -> None:
         self.assertTrue(recipe_catalog.RECIPE_OUTPUT.exists())
