@@ -255,14 +255,41 @@ class SchemaTests(unittest.TestCase):
                         schema.validate_idea(record, {"ATOM-LIGHT-TRAIL"})
 
         spaced = valid_idea()
-        spaced["name_en"] = "  ordinary\t\n stabilization  "
+        spaced["name_en"] = "  ordinary\t   stabilization  "
         with self.assertRaisesRegex(ValueError, "engineering|主玩法"):
             schema.validate_idea(spaced, {"ATOM-LIGHT-TRAIL"})
+
+        multiline = valid_idea()
+        multiline["visible_effect"] = "创意光轨\n普通防抖"
+        with self.assertRaisesRegex(ValueError, "engineering|主玩法"):
+            schema.validate_idea(multiline, {"ATOM-LIGHT-TRAIL"})
+
+        wrapped_values = (
+            "普通防抖。",
+            "主玩法是普通防抖",
+            "功能是普通视频去噪",
+            "效果是普通 HDR",
+            "This is ordinary stabilization",
+            "The main effect is ordinary denoising",
+            "Main effect is ordinary HDR",
+        )
+        for field in ("name_zh", "name_en", "visible_effect"):
+            for value in wrapped_values:
+                with self.subTest(field=field, wrapped=value):
+                    record = valid_idea()
+                    record[field] = value
+                    with self.assertRaisesRegex(ValueError, "engineering|主玩法"):
+                        schema.validate_idea(record, {"ATOM-LIGHT-TRAIL"})
 
         allowed_values = (
             "Extraordinary Stabilization Light Trails",
             "Not ordinary stabilization: creates light trails",
             "普通防抖基础上的光轨特效",
+            "Not ordinary stabilization",
+            "Not an ordinary stabilization",
+            "不是普通防抖",
+            "并非普通防抖",
+            "不属于普通防抖",
         )
         for field in ("name_zh", "name_en", "visible_effect"):
             for value in allowed_values:
@@ -587,7 +614,28 @@ class SchemaTests(unittest.TestCase):
                 self.assert_field_error(field, validator, record, *args)
 
     def test_recipe_requires_two_distinct_components(self) -> None:
-        for atom_ids, effect_ids in ((["ATOM-LIGHT-TRAIL"], []), ([], ["FX-LIGHT-TRAIL"])):
+        valid_cases = (
+            (["ATOM-LIGHT-TRAIL", "ATOM-DEPTH-ECHO"], []),
+            ([], ["FX-LIGHT-TRAIL", "FX-DEPTH-ECHO"]),
+            (["ATOM-LIGHT-TRAIL"], ["FX-LIGHT-TRAIL"]),
+        )
+        for atom_ids, effect_ids in valid_cases:
+            with self.subTest(atom_ids=atom_ids, effect_ids=effect_ids):
+                record = valid_recipe()
+                record["component_atom_ids"] = atom_ids
+                record["component_effect_ids"] = effect_ids
+                schema.validate_recipe(
+                    record,
+                    VALID_ATOM_IDS,
+                    {"FX-LIGHT-TRAIL", "FX-DEPTH-ECHO"},
+                )
+
+        invalid_cases = (
+            (["ATOM-LIGHT-TRAIL"], []),
+            ([], ["FX-LIGHT-TRAIL"]),
+            ([], []),
+        )
+        for atom_ids, effect_ids in invalid_cases:
             with self.subTest(atom_ids=atom_ids, effect_ids=effect_ids):
                 record = valid_recipe()
                 record["component_atom_ids"] = atom_ids
@@ -637,8 +685,6 @@ class SchemaTests(unittest.TestCase):
         rejected_empty = (
             (valid_atom, schema.validate_atom, (), "required_signals"),
             (valid_idea, schema.validate_idea, ({"ATOM-LIGHT-TRAIL"},), "scenarios"),
-            (valid_recipe, schema.validate_recipe, (VALID_ATOM_IDS, VALID_IDEA_IDS), "component_atom_ids"),
-            (valid_recipe, schema.validate_recipe, (VALID_ATOM_IDS, VALID_IDEA_IDS), "component_effect_ids"),
             (valid_priority, schema.validate_priority, ({"FX-LIGHT-TRAIL"},), "module_pipeline"),
             (valid_reference, schema.validate_reference, (), "effect_ids"),
         )
@@ -683,13 +729,11 @@ class SchemaTests(unittest.TestCase):
 
     def test_film_inspiration_cannot_claim_mobile_realtime_implementation(self) -> None:
         claims = (
-            "该效果已在手机实时实现",
-            "该方案已经手机实时量产",
-            "该效果可以在手机端实时运行",
-            "该方案已经部署到手机并实时运行",
-            "implemented in real time on mobile",
+            "implemented realtime on mobile",
+            "works in real time on smartphones",
             "runs in real time on a smartphone",
-            "deployed for real-time production on phones",
+            "已在手机实时实现",
+            "已在手机实时量产",
         )
         for boundary in ("film_postproduction", "visual_inspiration"):
             for claim in claims:
@@ -700,26 +744,25 @@ class SchemaTests(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError, "implementation_boundary"):
                         schema.validate_reference(record)
 
-        other_field_claim = valid_reference()
-        other_field_claim["implementation_boundary"] = "visual_inspiration"
-        other_field_claim["publisher"] = "该来源声明已经在手机实时实现"
-        with self.assertRaisesRegex(ValueError, "implementation_boundary"):
-            schema.validate_reference(other_field_claim)
-
         list_field_claim = valid_reference()
         list_field_claim["implementation_boundary"] = "film_postproduction"
         list_field_claim["local_files"] = ["this runs in real time on a smartphone"]
         with self.assertRaisesRegex(ValueError, "implementation_boundary"):
             schema.validate_reference(list_field_claim)
 
+        mixed_claim = valid_reference()
+        mixed_claim["implementation_boundary"] = "visual_inspiration"
+        mixed_claim["publisher"] = "not available on desktop, but implemented realtime on mobile"
+        with self.assertRaisesRegex(ValueError, "implementation_boundary"):
+            schema.validate_reference(mixed_claim)
+
         negative_claims = (
             "This was not implemented in real time on mobile",
-            "There is no evidence this runs in real time on a smartphone",
-            "This does not run in real-time on phones",
+            "cannot be deployed in real time on mobile",
+            "没有在手机实时实现",
             "未证明手机实时实现",
-            "不能在手机实时运行",
-            "并非已经部署到手机实时运行",
-            "不代表该方案已在手机实时量产",
+            "runs in real time on desktop, not mobile",
+            "automobile real-time rendering",
         )
         for claim in negative_claims:
             with self.subTest(claim=claim):

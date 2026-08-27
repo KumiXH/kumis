@@ -155,7 +155,55 @@ _ENGINEERING_ONLY_PHRASES = (
     "conventional camera switching",
 )
 
+_ENGINEERING_NEGATION_PREFIXES = (
+    "not an",
+    "not",
+    "不是",
+    "并非",
+    "不属于",
+)
+
+_ENGINEERING_WRAPPER_PREFIXES = (
+    "主玩法是",
+    "功能是",
+    "效果是",
+    "this is",
+    "the main effect is",
+    "main effect is",
+)
+
 _SHA256_PATTERN = re.compile(r"^[0-9a-fA-F]{64}$")
+_SENTENCE_SPLIT_PATTERN = re.compile(r"[。.!！？?；;\r\n]+")
+_CLAUSE_SPLIT_PATTERN = re.compile(
+    r"[。.!！？?；;\r\n]+|\bbut\b|但是|但",
+    flags=re.IGNORECASE,
+)
+_ENGLISH_DEVICE_PATTERN = re.compile(
+    r"\b(?:mobile|phone|phones|smartphone|smartphones)\b",
+    flags=re.IGNORECASE,
+)
+_ENGLISH_REALTIME_PATTERN = re.compile(
+    r"\b(?:real time|real-time|realtime)\b",
+    flags=re.IGNORECASE,
+)
+_ENGLISH_IMPLEMENTATION_PATTERN = re.compile(
+    r"\b(?:implemented|implementation|production|run|runs|running|work|works|working|deployed|deployment)\b",
+    flags=re.IGNORECASE,
+)
+_ENGLISH_NEGATION_PATTERN = re.compile(
+    r"\b(?:not|cannot|never|unverified)\b|\bno evidence\b|\bdoes not\b|\bwas not\b|\bcan['’]t\b",
+    flags=re.IGNORECASE,
+)
+_CHINESE_NEGATIONS = (
+    "未证明",
+    "并未",
+    "没有",
+    "不能",
+    "无法",
+    "并非",
+    "不代表",
+    "未",
+)
 
 
 def _require_mapping(record: object) -> Mapping[str, object]:
@@ -248,6 +296,30 @@ def _normalize_text(value: str) -> str:
     return " ".join(value.split()).casefold()
 
 
+def _split_segments(value: str, pattern: re.Pattern[str]) -> list[str]:
+    return [segment for part in pattern.split(value) if (segment := _normalize_text(part))]
+
+
+def _has_finite_prefix(value: str, prefix: str) -> bool:
+    if prefix.isascii():
+        return value == prefix or value.startswith(f"{prefix} ")
+    return value.startswith(prefix)
+
+
+def _is_engineering_only_text(value: str) -> bool:
+    engineering_phrases = {_normalize_text(phrase) for phrase in _ENGINEERING_ONLY_PHRASES}
+    for segment in _split_segments(value, _SENTENCE_SPLIT_PATTERN):
+        if any(_has_finite_prefix(segment, prefix) for prefix in _ENGINEERING_NEGATION_PREFIXES):
+            continue
+        for prefix in _ENGINEERING_WRAPPER_PREFIXES:
+            if _has_finite_prefix(segment, prefix):
+                segment = _normalize_text(segment[len(prefix):])
+                break
+        if segment in engineering_phrases:
+            return True
+    return False
+
+
 def _iter_record_text(
     record: Mapping[str, object],
     *,
@@ -263,30 +335,25 @@ def _iter_record_text(
 
 
 def _claims_mobile_realtime_implementation(value: str) -> bool:
-    text = _normalize_text(value)
-    if (
-        re.search(r"\bnot\b", text)
-        or "no evidence" in text
-        or "未" in text
-        or "不" in text
-        or "并非" in text
-    ):
-        return False
+    for segment in _split_segments(value, _CLAUSE_SPLIT_PATTERN):
+        if _ENGLISH_NEGATION_PATTERN.search(segment) or any(
+            term in segment for term in _CHINESE_NEGATIONS
+        ):
+            continue
 
-    chinese_claim = (
-        "手机" in text
-        and "实时" in text
-        and any(term in text for term in ("实现", "量产", "运行", "部署"))
-    )
-    english_claim = (
-        any(term in text for term in ("mobile", "phone", "smartphone"))
-        and any(term in text for term in ("real time", "real-time"))
-        and any(
-            term in text
-            for term in ("implemented", "production", "runs", "running", "deployed")
+        chinese_claim = (
+            "手机" in segment
+            and "实时" in segment
+            and any(term in segment for term in ("实现", "量产", "运行", "部署"))
         )
-    )
-    return chinese_claim or english_claim
+        english_claim = (
+            _ENGLISH_DEVICE_PATTERN.search(segment) is not None
+            and _ENGLISH_REALTIME_PATTERN.search(segment) is not None
+            and _ENGLISH_IMPLEMENTATION_PATTERN.search(segment) is not None
+        )
+        if chinese_claim or english_claim:
+            return True
+    return False
 
 
 def validate_atom(record: Mapping[str, object]) -> None:
@@ -321,9 +388,8 @@ def validate_idea(
     if atom_ids is not None:
         _require_known(mapping["atom_ids"], atom_ids, "atom_ids")
 
-    engineering_phrases = {_normalize_text(phrase) for phrase in _ENGINEERING_ONLY_PHRASES}
     for field in ("name_zh", "name_en", "visible_effect"):
-        if _normalize_text(mapping[field]) in engineering_phrases:
+        if _is_engineering_only_text(mapping[field]):
             raise ValueError(
                 f"{field} is an engineering-only feature and cannot be the main effect 主玩法"
             )
@@ -340,6 +406,7 @@ def validate_recipe(
         record,
         scalar_fields=_RECIPE_SCALARS,
         list_fields=_RECIPE_LISTS,
+        empty_list_fields=frozenset({"component_atom_ids", "component_effect_ids"}),
     )
     _require_id(mapping["recipe_id"], "recipe_id", "RECIPE-")
     _require_id_list(mapping["component_atom_ids"], "component_atom_ids", "ATOM-")
