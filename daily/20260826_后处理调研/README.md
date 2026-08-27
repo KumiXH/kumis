@@ -44,4 +44,18 @@
 - `matrix/rendered/`：Excel 每个工作表的代表性区域预览，用于布局复核。
 - `notes/final_audit.md` 与 `metadata/validation_report.json`：数量、引用完整性、本地路径和文档边界审计。
 
+## 全量 IDEA 宇宙
+
+`2026-08-27` 起，本目录同时维护一个不受论文数量和当前产品成熟度限制的手机录像创意池。它完整保留原有 112 条机会和此前重点讨论的动态星芒、虚拟打光、计算底片、对象级快门、多摄协同、声音驱动、可信生成等方向，并继续扩展录像链路、传感器、ISP、时序处理、交互和交付玩法。
+
+- `report/手机录像后处理_IDEA全量宇宙_20260827.md`：按能力族和创意簇连续阅读全部基础功能。
+- `report/手机录像后处理_IDEA变体全量_20260827.md`：把每个基础功能分别展开为处理阶段、真实性、输入信号、用户场景、时间规格、处理范围和交付形态变体。
+- `matrix/手机录像后处理_IDEA全量宇宙_20260827.xlsx`：可筛选的全量数据库，包含总览、基础 IDEA、变体、旧 112 条、新增方向、能力族、场景和变体字典。
+- `metadata/idea_universe/core_ideas.jsonl`：1,154 条基础 IDEA 的机器可读主数据。
+- `metadata/idea_universe/idea_variants.jsonl`：38,082 条单轴实现变体。
+- `metadata/idea_universe/idea_universe_stats.json`：统计与自动校验结果。
+- `notes/idea_universe_audit_20260827.md`：完整性、一致性和边界审计。
+
+基础 IDEA 与实现变体必须分开理解：基础 IDEA 改变用户效果、处理对象、输入信号、录像链路或交互；实时/录后、30/60 fps、全画面/ROI 等只属于实现变体。全量 IDEA 库中的记录统一标记为 `idea_only`，不能解读为论文结论、已量产功能或端侧性能承诺。
+
 `Paper_Discovery_381` 是 OpenAlex 宽关键词发现池，包含跨领域误匹配；只有 `Papers` 工作表中的 11 篇论文经过本阶段人工归入核心阅读路线。专利表当前仅保存两个待核验检索主题，不包含未经核实的专利号。
