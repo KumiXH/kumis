@@ -175,9 +175,10 @@ _ENGINEERING_WRAPPER_PREFIXES = (
 _SHA256_PATTERN = re.compile(r"^[0-9a-fA-F]{64}$")
 _SENTENCE_SPLIT_PATTERN = re.compile(r"[。.!！？?；;\r\n]+")
 _CLAUSE_SPLIT_PATTERN = re.compile(
-    r"[。.!！？?；;,，\r\n]+|\b(?:but|however|yet|whereas|and)\b|但是|而是|却|然而|同时|但",
+    r"[。.!！？?；;,，\r\n]+|\b(?:but|however|yet|whereas)\b|但是|而是|却|然而|同时|但",
     flags=re.IGNORECASE,
 )
+_ENGLISH_AND_PATTERN = re.compile(r"\band\b", flags=re.IGNORECASE)
 _ENGLISH_DEVICE_PATTERN = re.compile(
     r"\b(?:mobile|phone|phones|smartphone|smartphones)\b",
     flags=re.IGNORECASE,
@@ -334,8 +335,25 @@ def _iter_record_text(
             yield from (item for item in value if isinstance(item, str))
 
 
-def _claims_mobile_realtime_implementation(value: str) -> bool:
+def _has_english_realtime_elements(segment: str) -> bool:
+    return (
+        _ENGLISH_DEVICE_PATTERN.search(segment) is not None
+        and _ENGLISH_REALTIME_PATTERN.search(segment) is not None
+        and _ENGLISH_IMPLEMENTATION_PATTERN.search(segment) is not None
+    )
+
+
+def _realtime_claim_segments(value: str):
     for segment in _split_segments(value, _CLAUSE_SPLIT_PATTERN):
+        yield segment
+        for match in _ENGLISH_AND_PATTERN.finditer(segment):
+            right = _normalize_text(segment[match.end():])
+            if _has_english_realtime_elements(right):
+                yield right
+
+
+def _claims_mobile_realtime_implementation(value: str) -> bool:
+    for segment in _realtime_claim_segments(value):
         if _ENGLISH_NEGATION_PATTERN.search(segment) or any(
             term in segment for term in _CHINESE_NEGATIONS
         ):
@@ -346,11 +364,7 @@ def _claims_mobile_realtime_implementation(value: str) -> bool:
             and "实时" in segment
             and any(term in segment for term in ("实现", "量产", "运行", "部署"))
         )
-        english_claim = (
-            _ENGLISH_DEVICE_PATTERN.search(segment) is not None
-            and _ENGLISH_REALTIME_PATTERN.search(segment) is not None
-            and _ENGLISH_IMPLEMENTATION_PATTERN.search(segment) is not None
-        )
+        english_claim = _has_english_realtime_elements(segment)
         if chinese_claim or english_claim:
             return True
     return False
