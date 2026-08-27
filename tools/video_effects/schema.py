@@ -350,6 +350,7 @@ def validate_priority(record: Mapping[str, object], idea_ids: set[str]) -> None:
     )
     _require_prefix(mapping["priority_id"], "priority_id", "PRIORITY-")
     _require_prefix(mapping["effect_id"], "effect_id", "FX-")
+    _require_list_prefix(mapping["references"], "references", "REF-")
     _require_known([mapping["effect_id"]], idea_ids, "effect_id")
 
 

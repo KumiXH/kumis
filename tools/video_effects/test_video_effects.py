@@ -268,6 +268,28 @@ class SchemaTests(unittest.TestCase):
                     VALID_IDEA_IDS,
                 )
 
+    def test_recipe_novelty_lengths_ignore_whitespace_at_exact_boundaries(self) -> None:
+        cases = (
+            ("combined_effect", "12345 67890 abcde", False),
+            ("combined_effect", "12345 67890 abcdef", True),
+            ("why_new", "12345 67890 abcde fghi", False),
+            ("why_new", "12345 67890 abcde fghij", True),
+        )
+        for field, value, accepted in cases:
+            with self.subTest(field=field, value=value, accepted=accepted):
+                record = valid_recipe()
+                record[field] = value
+                if accepted:
+                    schema.validate_recipe(record, VALID_ATOM_IDS, VALID_IDEA_IDS)
+                else:
+                    self.assert_field_error(
+                        field,
+                        schema.validate_recipe,
+                        record,
+                        VALID_ATOM_IDS,
+                        VALID_IDEA_IDS,
+                    )
+
     def test_all_five_valid_records_pass(self) -> None:
         schema.validate_atom(valid_atom())
         schema.validate_idea(valid_idea(), {"ATOM-LIGHT-TRAIL"})
@@ -552,6 +574,19 @@ class SchemaTests(unittest.TestCase):
                 record = valid_priority()
                 record[field] = []
                 self.assert_field_error(field, schema.validate_priority, record, {"FX-LIGHT-TRAIL"})
+
+    def test_priority_references_require_ref_prefix_when_present(self) -> None:
+        record = valid_priority()
+        record["references"] = ["REF-LIGHT-TRAIL-PAPER"]
+        schema.validate_priority(record, {"FX-LIGHT-TRAIL"})
+
+        record["references"] = ["SOURCE-LIGHT-TRAIL"]
+        self.assert_field_error(
+            "references",
+            schema.validate_priority,
+            record,
+            {"FX-LIGHT-TRAIL"},
+        )
 
     def test_sha256_must_be_empty_or_64_hex_characters(self) -> None:
         for bad_value in ("abc", "g" * 64, "a" * 63, "a" * 65):
