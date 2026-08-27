@@ -10,6 +10,7 @@ import tempfile
 import unittest
 from collections import Counter
 from pathlib import Path
+from unittest import mock
 
 from tools.video_effects import effect_catalog, schema
 
@@ -1002,6 +1003,178 @@ class IdeaCatalogTests(unittest.TestCase):
         fingerprints = [self.fingerprint(idea) for idea in self.ideas]
         self.assertEqual(len(fingerprints), len(set(fingerprints)))
 
+    def assert_distinct_subplay(
+        self,
+        effect_id: str,
+        *,
+        name_tokens: tuple[str, ...],
+        visible_tokens: tuple[str, ...],
+        trigger_tokens: tuple[str, ...],
+        control_tokens: tuple[str, ...],
+        atom_ids: set[str],
+    ) -> None:
+        idea = next(
+            (row for row in self.ideas if row["effect_id"] == effect_id),
+            None,
+        )
+        self.assertIsNotNone(idea, effect_id)
+        searchable_name = f"{idea['name_zh']} {idea['name_en']}".casefold()
+        visible = idea["visible_effect"].casefold()
+        triggers = " ".join(idea["trigger_signals"]).casefold()
+        controls = " ".join(idea["user_controls"]).casefold()
+        for token in name_tokens:
+            self.assertIn(token.casefold(), searchable_name, effect_id)
+        for token in visible_tokens:
+            self.assertIn(token.casefold(), visible, effect_id)
+        for token in trigger_tokens:
+            self.assertIn(token.casefold(), triggers, effect_id)
+        for token in control_tokens:
+            self.assertIn(token.casefold(), controls, effect_id)
+        self.assertEqual(set(idea["atom_ids"]), atom_ids, effect_id)
+
+    def test_light_painting_subplays_are_materially_distinct(self) -> None:
+        cases = (
+            (
+                "FX-LIGHT-TRAILS-OPTICS-FINGER-DRAW",
+                ("指尖", "Finger"),
+                ("触摸路径", "光轨"),
+                ("屏幕", "拖动"),
+                ("笔刷宽度", "采样密度"),
+                {
+                    "ATOM-LIGHT-OPTICS-LIGHT-PAINT-BRUSH",
+                    "ATOM-INTERACTION-TRIGGERS-TOUCH-DRAW",
+                },
+            ),
+            (
+                "FX-LIGHT-TRAILS-OPTICS-BODY-MOTION",
+                ("肢体", "Body"),
+                ("关节", "光绘"),
+                ("动作", "全身"),
+                ("骨骼光线粗细", "历史姿态数"),
+                {
+                    "ATOM-LIGHT-OPTICS-LIGHT-PAINT-BRUSH",
+                    "ATOM-GEOMETRY-TRACKING-BODY-SKELETON",
+                },
+            ),
+            (
+                "FX-LIGHT-TRAILS-OPTICS-SOURCE-MOVE",
+                ("灯棒", "Moving Light"),
+                ("移动光源", "拖尾"),
+                ("锁定", "灯棒"),
+                ("光源阈值", "拖尾长度"),
+                {
+                    "ATOM-LIGHT-OPTICS-LIGHT-PAINT-BRUSH",
+                    "ATOM-LIGHT-OPTICS-LUMINOUS-CORE",
+                },
+            ),
+            (
+                "FX-LIGHT-TRAILS-OPTICS-WORLD-ANCHOR",
+                ("空间锚定", "World-anchored"),
+                ("文字", "固定"),
+                ("书写", "移动镜头"),
+                ("锚点稳定度", "文字缩放"),
+                {
+                    "ATOM-LIGHT-OPTICS-LIGHT-PAINT-BRUSH",
+                    "ATOM-GEOMETRY-TRACKING-WORLD-SPACE-ANCHOR",
+                },
+            ),
+            (
+                "FX-LIGHT-TRAILS-OPTICS-BEAT-PULSE",
+                ("节拍", "变色", "Beat-color"),
+                ("变色", "脉冲"),
+                ("节拍", "强拍"),
+                ("色相范围", "脉冲强度"),
+                {
+                    "ATOM-LIGHT-OPTICS-LIGHT-PAINT-BRUSH",
+                    "ATOM-TEMPORAL-STATE-BEAT-PHASE-CLOCK",
+                    "ATOM-LIGHT-OPTICS-DYNAMIC-STARBURST",
+                },
+            ),
+        )
+        for effect_id, names, visible, triggers, controls, atoms in cases:
+            with self.subTest(effect_id=effect_id):
+                self.assert_distinct_subplay(
+                    effect_id,
+                    name_tokens=names,
+                    visible_tokens=visible,
+                    trigger_tokens=triggers,
+                    control_tokens=controls,
+                    atom_ids=atoms,
+                )
+
+    def test_gaze_subplays_are_materially_distinct(self) -> None:
+        cases = (
+            (
+                "FX-FACE-GAZE-EXPRESSION-CAMERA-CALIBRATE",
+                ("摄像头对视矫正", "Camera Eye-contact"),
+                ("瞳孔", "重定向", "镜头"),
+                ("校准点", "注视"),
+                ("矫正强度", "瞳孔平滑度"),
+                {
+                    "ATOM-GEOMETRY-TRACKING-GAZE-VECTOR",
+                    "ATOM-GEOMETRY-TRACKING-IRIS-PUPIL-LANDMARKS",
+                },
+            ),
+            (
+                "FX-FACE-GAZE-EXPRESSION-DIALOGUE-REDIRECT",
+                ("多人对话对视重定向", "Dialogue Gaze Redirection"),
+                ("眼球", "虹膜", "对方"),
+                ("说话者", "对话"),
+                ("重定向幅度", "对视目标"),
+                {
+                    "ATOM-GEOMETRY-TRACKING-GAZE-VECTOR",
+                    "ATOM-GEOMETRY-TRACKING-IRIS-PUPIL-LANDMARKS",
+                    "ATOM-GEOMETRY-TRACKING-MULTI-PERSON-GRAPH",
+                },
+            ),
+            (
+                "FX-FACE-GAZE-EXPRESSION-GLOW-DWELL",
+                ("视线点亮目标", "Gaze-lit Object"),
+                ("注视", "发光"),
+                ("停留", "目标"),
+                ("发光半径", "停留时长"),
+                {
+                    "ATOM-GEOMETRY-TRACKING-GAZE-VECTOR",
+                    "ATOM-INTERACTION-TRIGGERS-GAZE-FOCUS",
+                    "ATOM-LIGHT-OPTICS-LUMINOUS-CORE",
+                },
+            ),
+            (
+                "FX-FACE-GAZE-EXPRESSION-CATCHLIGHT-FOLLOW",
+                ("眼神光跟随", "Following Catchlight"),
+                ("眼神光", "虹膜"),
+                ("转头", "视线"),
+                ("眼神光大小", "跟随惯性"),
+                {
+                    "ATOM-GEOMETRY-TRACKING-GAZE-VECTOR",
+                    "ATOM-GEOMETRY-TRACKING-IRIS-PUPIL-LANDMARKS",
+                    "ATOM-LIGHT-OPTICS-CATCHLIGHT-RERENDER",
+                },
+            ),
+            (
+                "FX-FACE-GAZE-EXPRESSION-SELECT-CONFIRM",
+                ("凝视选择特效", "Gaze Effect Selection"),
+                ("凝视", "选中"),
+                ("候选", "眨眼"),
+                ("选择停留时间", "确认反馈"),
+                {
+                    "ATOM-GEOMETRY-TRACKING-GAZE-VECTOR",
+                    "ATOM-INTERACTION-TRIGGERS-GAZE-FOCUS",
+                    "ATOM-SEGMENTATION-MASKS-OBJECT-INSTANCE",
+                },
+            ),
+        )
+        for effect_id, names, visible, triggers, controls, atoms in cases:
+            with self.subTest(effect_id=effect_id):
+                self.assert_distinct_subplay(
+                    effect_id,
+                    name_tokens=names,
+                    visible_tokens=visible,
+                    trigger_tokens=triggers,
+                    control_tokens=controls,
+                    atom_ids=atoms,
+                )
+
     def test_key_effect_concepts_have_multiple_independent_ideas(self) -> None:
         searchable = [
             f"{idea['name_zh']} {idea['name_en']} {idea['visible_effect']}"
@@ -1071,6 +1244,42 @@ class IdeaCatalogTests(unittest.TestCase):
             if line.strip()
         ]
         self.assertEqual(rows, self.ideas)
+
+    def test_default_cli_generates_atoms_and_ideas(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            atom_path = Path(temporary_directory) / "atoms.jsonl"
+            idea_path = Path(temporary_directory) / "ideas.jsonl"
+            with mock.patch("builtins.print"):
+                effect_catalog.main(
+                    [],
+                    atom_output=atom_path,
+                    idea_output=idea_path,
+                )
+            self.assertEqual(len(atom_path.read_bytes().splitlines()), 120)
+            self.assertEqual(len(idea_path.read_bytes().splitlines()), 300)
+
+    def test_atoms_only_cli_never_creates_or_rewrites_ideas(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            atom_path = Path(temporary_directory) / "atoms.jsonl"
+            idea_path = Path(temporary_directory) / "ideas.jsonl"
+            sentinel = b"existing ideas must remain unchanged\n"
+            idea_path.write_bytes(sentinel)
+            with mock.patch("builtins.print"):
+                effect_catalog.main(
+                    ["--atoms-only"],
+                    atom_output=atom_path,
+                    idea_output=idea_path,
+                )
+            self.assertEqual(idea_path.read_bytes(), sentinel)
+
+            idea_path.unlink()
+            with mock.patch("builtins.print"):
+                effect_catalog.main(
+                    ["--atoms-only"],
+                    atom_output=atom_path,
+                    idea_output=idea_path,
+                )
+            self.assertFalse(idea_path.exists())
 
 
 if __name__ == "__main__":

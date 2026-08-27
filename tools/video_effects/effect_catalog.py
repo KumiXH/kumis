@@ -318,18 +318,18 @@ IDEA_FAMILY_SPECS = {
         "title_zh": "光轨光学",
         "title_en": "Light Trails Optics",
         "motifs": (
-            ("TRAIL", "实时光绘轨迹", "Real-time Light-Paint Trail", "灯棒与指尖亮点", "夜间手持灯棒", "点选发光目标", "trail_width", ("LIGHT-PAINT-BRUSH", "LUMINOUS-CORE"), "foreground_subject", "rgb_video", "遮挡后光线身份可能跳变"),
-            ("HEADLIGHT", "车灯蛇形轨迹", "Headlight Serpent Trail", "驶过的车灯", "夜景街道", "锁定一枚移动车灯", "serpent_amplitude", ("LIGHT-PAINT-BRUSH", "DYNAMIC-STARBURST"), "midground_path", "highlight_points", "车灯交汇会粘连轨迹"),
-            ("CATCHLIGHT", "眼神光牵引线", "Catchlight Tether Lines", "人物瞳孔高光", "近景人像", "点按眼睛作为轨迹锚点", "tether_length", ("CATCHLIGHT-RERENDER", "LIGHT-PAINT-BRUSH"), "face_region", "iris_landmarks", "转头时牵引线易穿出眼眶"),
-            ("CAUSTIC", "水面焦散光绘", "Caustic Light Painting", "水面反射亮纹", "泳池或玻璃水杯", "对准反光区域开始绘制", "caustic_scale", ("CAUSTIC-PROJECTION", "LIGHT-PAINT-BRUSH"), "surface_region", "reflection_cues", "弱反射会令光纹断开"),
-            ("SIGN", "灯牌星芒轨迹", "Signboard Starburst Trail", "城市灯牌高光", "夜间城市招牌", "框选招牌高光点", "ray_count", ("DYNAMIC-STARBURST", "LENS-FLARE"), "background_highlight", "light_source_position", "密集灯牌会遮住主体"),
+            ("FINGER", "指尖实时光绘轨迹", "Finger Screen Light Painting", "屏幕触摸路径与指尖", "手绘签名或涂鸦录像", "用户在屏幕按下并拖动指尖", "笔刷宽度", ("LIGHT-PAINT-BRUSH", "TOUCH-DRAW"), "screen_touch_path", "touch_samples", "手指离开屏幕会中断连续笔画"),
+            ("BODY", "人体肢体光绘", "Body Limb Light Painting", "人体关节与四肢运动路径", "舞蹈、体操或运动录像", "全身进入画面并开始动作", "骨骼光线粗细", ("LIGHT-PAINT-BRUSH", "BODY-SKELETON"), "body_motion_path", "pose_keypoints", "肢体交叉会让关节轨迹错连"),
+            ("SOURCE", "手持灯棒移动光轨", "Handheld Moving Light Trail", "手持灯棒或移动点光源", "夜景灯棒与车灯录像", "锁定手持灯棒或移动光源", "光源阈值", ("LIGHT-PAINT-BRUSH", "LUMINOUS-CORE"), "moving_light_path", "highlight_points", "多个光源交汇会交换跟踪身份"),
+            ("WORLD", "世界空间锚定书写", "World-anchored Light Writing", "场景平面上的发光文字", "绕拍光字或空间签名", "对准场景平面书写并移动镜头", "锚点稳定度", ("LIGHT-PAINT-BRUSH", "WORLD-SPACE-ANCHOR"), "world_anchored_text", "camera_pose", "锚点丢失会让文字随镜头漂移"),
+            ("BEAT", "节拍星芒变色光轨", "Beat-color Pulsing Trail", "随音乐变化的历史光轨", "卡点舞蹈或音乐录像", "检测音乐强拍并启用光轨", "色相范围", ("LIGHT-PAINT-BRUSH", "BEAT-PHASE-CLOCK", "DYNAMIC-STARBURST"), "beat_driven_trail", "beat_timestamps", "变速音乐会让颜色相位偏移"),
         ),
         "behaviors": (
-            ("SWEEP", "扫动延迟", "Sweep Delay", "沿最近轨迹逐帧追随并衰减", "用户横向扫动手机时启动", "轨迹长度", "拖尾从目标后方连续展开并按距离变细", "最近 32 帧", "gyroscope", "快速转向会出现折角", "perceptual_effect", "轨迹要同时贴住目标并保留运动方向"),
-            ("BEAT", "节拍星芒", "Beat Starburst", "每个节拍进入、闪耀、回落三阶段", "音乐节拍跨过进入阈值时触发", "星芒射线数", "光点在节拍瞬间绽放成可见星芒并留下短轨迹", "最近 2 个节拍", "audio_onsets", "弱拍可能漏触发", "perceptual_effect", "星芒强度需与轨迹衰减错开"),
-            ("HOLD", "停顿锁线", "Pause Lock Line", "用户停顿时冻结当前线头，继续移动后再接续", "手机角速度低于门限并按住快门", "锁线时长", "已画光线保持静止而新线从冻结端点重新生长", "进入后 0.2 秒至 3 秒", "imu_samples", "静止误判会产生短断点", "faithful_edit", "冻结端点要在画面转动后仍有可见锚点"),
-            ("ORBIT", "环绕分层", "Orbit Layering", "按相机环绕方向把历史光迹分成前后景层", "检测到围绕主体的连续环绕运动", "深度分层", "光线绕过主体边缘形成有遮挡关系的立体光环", "最近 48 帧", "camera_pose", "深度排序错误会穿过人物", "perceptual_effect", "光轨必须随主体边界改变遮挡顺序"),
-            ("REWIND", "回放擦除", "Rewind Eraser", "反向拖动时间条时光迹按倒序逐段消退", "用户向左拖动录制后的时间游标", "擦除速度", "已生成的光线按历史顺序回收，当前目标保持清晰", "最近 4 秒", "touch_samples", "拖动过快会跳过中间线段", "faithful_edit", "擦除应保留用户可预览的因果顺序"),
+            ("DRAW", "屏幕拖绘", "Screen Drawing", "触摸路径逐点累积并按速度改变光轨密度", "用户在屏幕连续拖动形成笔画", "采样密度", "触摸路径被渲染为连续光轨，抬手后按设定时长衰减", "最近 64 个触摸采样点", "touch_samples", "采样稀疏会让曲线出现折角", "perceptual_effect", "光轨起止点必须与触摸事件完全对应"),
+            ("MOTION", "肢体动作累积", "Body Motion Accumulation", "关节轨迹按历史姿态顺序累积成全身光绘", "人体动作覆盖全身并持续超过半秒", "历史姿态数", "手腕、脚踝和躯干关节分别拉出光绘线，组合成完整动作轮廓", "最近 36 帧人体姿态", "skeleton_history", "低置信关节会生成断裂光线", "perceptual_effect", "不同关节的光线需保持人体拓扑关系"),
+            ("MOVE", "移动光源拖尾", "Moving-source Trail", "锁定光源后沿其真实运动路径生成亮度递减拖尾", "灯棒或移动光源位移超过跟踪阈值", "拖尾长度", "移动光源前端保持明亮核心，身后形成连续且逐渐变细的光轨拖尾", "最近 40 帧光源位置", "light_source_position", "高光过曝会令拖尾粘连", "perceptual_effect", "拖尾方向必须与光源运动方向一致"),
+            ("ANCHOR", "镜头移动固字", "Camera-stable Writing", "书写完成后将光字固定到世界锚点并更新透视", "完成书写后移动镜头绕看文字", "文字缩放", "发光文字固定在原场景位置，镜头平移旋转后仍保持透视和遮挡", "从书写开始到录制结束", "camera_pose", "快速转身会令空间锚点短暂丢失", "perceptual_effect", "文字必须固定于世界空间而不是屏幕坐标"),
+            ("PULSE", "强拍变色脉冲", "Strong-beat Color Pulse", "每个强拍推进光轨色相并产生一次宽度和亮度脉冲", "音乐节拍进入强拍区间时触发", "脉冲强度", "整条历史光轨在强拍瞬间变色并向外脉冲，拍间平滑回落", "最近 4 个节拍", "audio_onsets", "连续强拍会造成颜色过快跳变", "perceptual_effect", "色相变化与脉冲峰值必须同步到同一节拍"),
         ),
     },
     "body_motion_clones": {
@@ -354,18 +354,18 @@ IDEA_FAMILY_SPECS = {
         "title_zh": "面部视线表情",
         "title_en": "Face Gaze Expression",
         "motifs": (
-            ("CORRECT", "视线矫正", "Gaze Correction", "人物双眼与镜头方向", "自拍视频或访谈", "点按眼睛校准注视基准", "gaze_offset", ("GAZE-VECTOR", "IRIS-PUPIL-LANDMARKS"), "face_region", "eye_crops", "镜片反光会偏移注视方向"),
-            ("DUEL", "虚拟对视", "Virtual Eye Contact", "两个人物的视线交汇点", "双人对话或合拍", "框选另一人的眼睛", "eye_contact_distance", ("GAZE-VECTOR", "HEAD-POSE"), "two_face_regions", "person_tracks", "侧脸会使交汇点漂移"),
-            ("BLINK", "眨眼开门", "Blink Doorway", "眼睑闭合形成的瞬时窗口", "人像转场", "检测一次完整眨眼", "doorway_duration", ("IRIS-PUPIL-LANDMARKS", "HEAD-POSE"), "face_region", "eye_landmarks", "连续眨眼会重复开门"),
-            ("MICRO", "微表情回声", "Micro-expression Echo", "眉眼与嘴角的历史表情局部", "近景情绪表演", "表情强度超过阈值", "echo_opacity", ("IRIS-PUPIL-LANDMARKS", "HEAD-POSE"), "facial_regions", "face_landmarks", "说话动作会混入表情信号"),
-            ("MOUTH", "嘴型吐息字幕", "Mouth Breath Captions", "嘴型前方的可见气息字粒", "唱歌或口播", "检测指定嘴型持续出现", "breath_density", ("HEAD-POSE", "GAZE-VECTOR"), "mouth_region", "lip_landmarks", "遮挡嘴部会令字粒断裂"),
+            ("CAMERA", "摄像头对视矫正·视线矫正", "Camera Eye-contact Correction", "自拍者双眼、瞳孔与镜头方向", "自拍视频、口播或远程访谈", "依次注视屏幕校准点和摄像头", "矫正强度", ("GAZE-VECTOR", "IRIS-PUPIL-LANDMARKS"), "two_eye_regions", "eye_crops", "大角度侧脸会限制可自然矫正范围"),
+            ("DIALOGUE", "多人对话对视重定向", "Dialogue Gaze Redirection", "对话双方的眼球、虹膜和目标人物", "双人访谈或多人对话", "检测当前说话者并选择对视对象", "重定向幅度", ("GAZE-VECTOR", "IRIS-PUPIL-LANDMARKS", "MULTI-PERSON-GRAPH"), "multiple_face_regions", "person_tracks", "人员交叉会导致对视目标身份交换"),
+            ("GLOW", "视线点亮目标", "Gaze-lit Object", "被凝视的物体实例", "产品展示或空间互动", "视线在目标上停留达到门限", "发光半径", ("GAZE-VECTOR", "GAZE-FOCUS", "LUMINOUS-CORE"), "gaze_selected_object", "object_track", "相邻物体过近会造成注视目标跳转"),
+            ("CATCHLIGHT", "眼神光跟随", "Following Catchlight", "双眼虹膜上的虚拟高光", "近景人像与自拍视频", "转头时保持视线可见并跟踪虹膜", "眼神光大小", ("GAZE-VECTOR", "IRIS-PUPIL-LANDMARKS", "CATCHLIGHT-RERENDER"), "iris_regions", "iris_landmarks", "眨眼闭合时高光锚点会暂时消失"),
+            ("SELECT", "凝视选择特效", "Gaze Effect Selection", "画面中的候选物体与特效入口", "免手触控录像", "凝视候选目标并等待选中反馈", "选择停留时间", ("GAZE-VECTOR", "GAZE-FOCUS", "OBJECT-INSTANCE"), "gaze_ui_and_objects", "gaze_vector", "视线漂移会在候选目标间来回切换"),
         ),
         "behaviors": (
-            ("CALIBRATE", "跟随校准", "Follow Calibration", "视线偏差从校准点平滑收敛到镜头中心", "用户依次注视三个屏幕校准点", "校准平滑度", "眼睛高光和瞳孔方向逐渐对齐镜头，脸部动作保持自然", "最近 12 帧", "gaze_vector", "眨眼会暂时冻结校准", "faithful_edit", "矫正只改变视觉注视方向，不改变身份特征"),
-            ("MEET", "交汇锁定", "Meeting Lock", "两束细光线在双方真实视线交点相遇", "双方同时注视对方超过停留时间", "交点亮度", "虚拟对视点在两人移动时保持相交并闪烁一次", "最近 24 帧", "gaze_vector", "一方转头会使交点滑离眼睛", "perceptual_effect", "交点位置要与两张脸的深度顺序一致"),
-            ("WINK", "眨眼切片", "Wink Slice", "闭眼瞬间切换一层表情或背景切片", "左眼或右眼完成一次眨眼", "切片方向", "眨眼闭合时画面像翻页一样露出下一层脸部表情", "事件前后 10 帧", "eyelid_landmarks", "半眨眼可能触发半层切换", "perceptual_effect", "切片边缘要贴住眼睑而不覆盖鼻梁"),
-            ("RIPPLE", "表情涟漪", "Expression Ripple", "笑、惊讶或皱眉从五官中心向外扩散成透明涟漪", "表情强度跨过进入阈值", "涟漪幅度", "每次微表情都在脸部周围留下不同半径的可见波纹", "最近 0.8 秒", "facial_action_units", "相邻表情事件会重叠", "perceptual_effect", "五官区域和轮廓区域需要不同的扩散速度"),
-            ("BREATH", "嘴型呼吸", "Mouth-shaped Breath", "嘴型前方喷出随口型宽窄变化的彩色气息字粒", "用户张嘴、圆唇或吹气时触发", "气息长度", "气息粒子先聚成嘴型轮廓再向前散开并消隐", "最近 20 帧", "mouth_shape_class", "快速说话会让字粒互相覆盖", "generative_rewrite", "文字可读性与气息自然扩散需要平衡"),
+            ("CALIBRATE", "瞳孔镜头校准", "Pupil-to-camera Calibration", "校准后逐帧重定向眼球和瞳孔朝向摄像头", "完成三个校准点注视后直视屏幕内容", "瞳孔平滑度", "瞳孔与虹膜被轻量重定向到镜头方向，眼睑、头姿和人物身份保持不变", "最近 16 帧", "gaze_vector", "眨眼会短暂冻结重定向参数", "faithful_edit", "眼球重定向必须限制在自然转动范围"),
+            ("REDIRECT", "对话对象重定向", "Dialogue-target Redirection", "说话人变化时把双方眼球和虹膜平滑重定向到对方脸部", "当前说话者切换或对话对象转头", "对视目标", "双方眼球与虹膜朝向被重定向到对方眼睛，形成连续虚拟对视而不改变头部姿态", "最近 24 帧", "person_relation_graph", "快速抢话会让对视目标频繁切换", "faithful_edit", "多人对话中每双眼睛必须绑定正确目标身份"),
+            ("DWELL", "停留点亮", "Dwell-to-glow", "注视停留时间控制目标发光进入、保持和退出", "视线停留在同一目标超过设定时长", "停留时长", "被注视目标从边缘向中心发光，视线移开后按停留时长平滑熄灭", "注视前后各 20 帧", "dwell_duration", "凝视边界抖动会导致亮度闪烁", "perceptual_effect", "仅当前选中物体实例可以发光"),
+            ("FOLLOW", "虹膜高光跟随", "Iris Catchlight Follow", "眼神光依据虹膜位置、头姿和视线方向连续滑动", "人物转头或视线横向移动", "跟随惯性", "眼神光贴着虹膜表面跟随移动并保持可见反射形状，闭眼时自然消失", "最近 12 帧", "head_pose", "侧脸时高光可能靠近眼白边界", "perceptual_effect", "左右眼高光必须保持一致的虚拟光源方向"),
+            ("CONFIRM", "眨眼确认选择", "Blink-confirm Selection", "凝视完成预选后用一次眨眼确认特效对象", "候选目标出现选中环后完成一次眨眼", "确认反馈", "凝视对象先出现选中环，眨眼后该对象被明确选中并展开对应可见特效", "凝视 0.8 秒加一次眨眼", "eyelid_landmarks", "无意识眨眼可能提前确认", "perceptual_effect", "确认反馈必须与被选物体保持空间绑定"),
         ),
     },
     "time_editing": {
@@ -789,27 +789,32 @@ def write_ideas_jsonl(rows: list[dict], path: Path = IDEA_OUTPUT) -> None:
             output.write("\n")
 
 
-def main() -> None:
+def main(
+    argv: list[str] | None = None,
+    *,
+    atom_output: Path = ATOM_OUTPUT,
+    idea_output: Path = IDEA_OUTPUT,
+) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--atoms-only",
         action="store_true",
         help="Generate only effect atoms; the default also generates complete ideas.",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     atoms = build_atoms()
     atom_report = validate_atoms(atoms)
-    write_jsonl(atoms)
+    write_jsonl(atoms, atom_output)
     if args.atoms_only:
-        print(f"wrote {atom_report['count']} atoms to {ATOM_OUTPUT}")
+        print(f"wrote {atom_report['count']} atoms to {atom_output}")
         return
 
     ideas = build_ideas()
     idea_report = validate_ideas(ideas, {atom["atom_id"] for atom in atoms})
-    write_ideas_jsonl(ideas)
-    print(f"wrote {atom_report['count']} atoms to {ATOM_OUTPUT}")
-    print(f"wrote {idea_report['count']} ideas to {IDEA_OUTPUT}")
+    write_ideas_jsonl(ideas, idea_output)
+    print(f"wrote {atom_report['count']} atoms to {atom_output}")
+    print(f"wrote {idea_report['count']} ideas to {idea_output}")
 
 
 if __name__ == "__main__":
