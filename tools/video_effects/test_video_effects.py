@@ -2,9 +2,16 @@
 
 from __future__ import annotations
 
+import copy
+import hashlib
+import json
+import re
+import tempfile
 import unittest
+from collections import Counter
+from pathlib import Path
 
-from tools.video_effects import schema
+from tools.video_effects import effect_catalog, schema
 
 
 ATOM_FIELDS = (
@@ -783,6 +790,158 @@ class SchemaTests(unittest.TestCase):
         excluded_disclaimer["implementation_boundary"] = "film_postproduction"
         excluded_disclaimer["does_not_prove"] = "手机实时实现并已经量产部署"
         schema.validate_reference(excluded_disclaimer)
+
+
+class AtomCatalogTests(unittest.TestCase):
+    EXPECTED_FAMILIES = (
+        "segmentation_masks",
+        "geometry_tracking",
+        "temporal_state",
+        "light_optics",
+        "cloning_echoes",
+        "deformation_space",
+        "material_appearance",
+        "particles_atmosphere",
+        "generative_transformation",
+        "interaction_triggers",
+    )
+
+    def setUp(self) -> None:
+        self.atoms = effect_catalog.build_atoms()
+
+    def test_catalog_paths_are_rooted_in_project(self) -> None:
+        self.assertEqual(effect_catalog.PROJECT, effect_catalog.ROOT)
+        self.assertEqual(
+            effect_catalog.METADATA,
+            effect_catalog.PROJECT / "daily" / "20260827_录像特效调研" / "metadata",
+        )
+        self.assertEqual(
+            effect_catalog.ATOM_OUTPUT,
+            effect_catalog.METADATA / "effect_atoms.jsonl",
+        )
+
+    def test_atom_count_and_ids(self) -> None:
+        self.assertGreaterEqual(len(self.atoms), 110)
+        self.assertLessEqual(len(self.atoms), 140)
+        ids = [atom["atom_id"] for atom in self.atoms]
+        names_zh = [atom["name_zh"] for atom in self.atoms]
+        names_en = [atom["name_en"] for atom in self.atoms]
+        self.assertEqual(len(ids), len(set(ids)))
+        self.assertEqual(len(names_zh), len(set(names_zh)))
+        self.assertEqual(len(names_en), len(set(names_en)))
+        for atom in self.atoms:
+            family_slug = atom["family"].upper().replace("_", "-")
+            self.assertRegex(atom["atom_id"], rf"^ATOM-{re.escape(family_slug)}-[A-Z0-9-]+$")
+
+    def test_required_atom_families_exist(self) -> None:
+        counts = Counter(atom["family"] for atom in self.atoms)
+        self.assertEqual(tuple(counts), self.EXPECTED_FAMILIES)
+        self.assertEqual(set(counts), set(self.EXPECTED_FAMILIES))
+        for family in self.EXPECTED_FAMILIES:
+            self.assertGreaterEqual(counts[family], 10)
+
+    def test_required_atom_concepts_exist(self) -> None:
+        searchable = "\n".join(
+            f"{atom['name_zh']} {atom['name_en']} {atom['visible_primitive']}"
+            for atom in self.atoms
+        ).casefold()
+        for concept in (
+            "轨迹",
+            "视线",
+            "眨眼",
+            "残影",
+            "时间冻结",
+            "轮廓光",
+            "影子",
+            "材质",
+            "粒子",
+            "节拍",
+            "空间锚点",
+        ):
+            with self.subTest(concept=concept):
+                self.assertIn(concept.casefold(), searchable)
+
+    def test_every_atom_passes_schema(self) -> None:
+        for atom in self.atoms:
+            with self.subTest(atom_id=atom["atom_id"]):
+                self.assertEqual(set(atom), set(ATOM_FIELDS))
+                schema.validate_atom(atom)
+                self.assertIsInstance(atom["temporal_state"], list)
+                self.assertTrue(all(item.strip() for item in atom["temporal_state"]))
+
+    def test_atom_ids_are_deterministic(self) -> None:
+        first = [atom["atom_id"] for atom in effect_catalog.build_atoms()]
+        second = [atom["atom_id"] for atom in effect_catalog.build_atoms()]
+        self.assertEqual(first, second)
+
+    def test_atom_records_have_rich_lists(self) -> None:
+        for atom in self.atoms:
+            with self.subTest(atom_id=atom["atom_id"]):
+                for field in ("required_signals", "parameters", "failure_modes"):
+                    self.assertGreaterEqual(len(atom[field]), 2, field)
+                self.assertGreaterEqual(len(atom["mobile_notes"]), 1)
+
+    def test_atoms_are_primitives_not_complete_play_names(self) -> None:
+        forbidden_titles = {
+            "实时光绘轨迹",
+            "视线矫正与虚拟对视",
+            "多人能量传递",
+        }
+        for atom in self.atoms:
+            with self.subTest(atom_id=atom["atom_id"]):
+                self.assertNotIn(atom["name_zh"], forbidden_titles)
+                self.assertNotRegex(atom["name_zh"], r"系统|产品模式")
+
+    def test_visible_primitive_is_not_just_model_name(self) -> None:
+        model_only = re.compile(
+            r"^(?:segmentation|optical[ _-]?flow|transformer|diffusion|model|模型|分割模型)$",
+            flags=re.IGNORECASE,
+        )
+        for atom in self.atoms:
+            with self.subTest(atom_id=atom["atom_id"]):
+                visible = atom["visible_primitive"].strip()
+                chinese_chars = re.findall(r"[\u4e00-\u9fff]", visible)
+                self.assertTrue(len(chinese_chars) >= 12 or len(visible.encode("ascii", "ignore")) >= 24)
+                self.assertIsNone(model_only.fullmatch(visible))
+
+    def test_write_jsonl_is_byte_deterministic(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            first_path = Path(temporary_directory) / "first.jsonl"
+            second_path = Path(temporary_directory) / "second.jsonl"
+            effect_catalog.write_jsonl(self.atoms, first_path)
+            effect_catalog.write_jsonl(effect_catalog.build_atoms(), second_path)
+            first_bytes = first_path.read_bytes()
+            second_bytes = second_path.read_bytes()
+            self.assertEqual(first_bytes, second_bytes)
+            self.assertTrue(first_bytes.endswith(b"\n"))
+            self.assertEqual(len(first_bytes.splitlines()), len(self.atoms))
+            self.assertEqual(
+                hashlib.sha256(first_bytes).hexdigest(),
+                hashlib.sha256(second_bytes).hexdigest(),
+            )
+            for line in first_bytes.decode("utf-8").splitlines():
+                self.assertIsInstance(json.loads(line), dict)
+                self.assertNotIn(": ", line)
+
+    def test_validate_atoms_reports_counts_and_catches_duplicates(self) -> None:
+        report = effect_catalog.validate_atoms(self.atoms)
+        self.assertEqual(report["count"], len(self.atoms))
+        self.assertEqual(report["family_counts"], dict(Counter(atom["family"] for atom in self.atoms)))
+
+        duplicate_id = copy.deepcopy(self.atoms)
+        duplicate_id[1]["atom_id"] = duplicate_id[0]["atom_id"]
+        with self.assertRaisesRegex(ValueError, "duplicate atom_id"):
+            effect_catalog.validate_atoms(duplicate_id)
+
+        duplicate_name = copy.deepcopy(self.atoms)
+        duplicate_name[1]["name_en"] = duplicate_name[0]["name_en"]
+        with self.assertRaisesRegex(ValueError, "duplicate name_en"):
+            effect_catalog.validate_atoms(duplicate_name)
+
+        invalid = copy.deepcopy(self.atoms)
+        invalid[0]["required_signals"] = []
+        with self.assertRaisesRegex(ValueError, "schema validation failed"):
+            effect_catalog.validate_atoms(invalid)
 
 
 if __name__ == "__main__":
