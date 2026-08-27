@@ -12,7 +12,7 @@ from collections import Counter
 from pathlib import Path
 from unittest import mock
 
-from tools.video_effects import effect_catalog, schema
+from tools.video_effects import effect_catalog, recipe_catalog, schema
 
 
 ATOM_FIELDS = (
@@ -1468,6 +1468,119 @@ class IdeaCatalogTests(unittest.TestCase):
                     idea_output=idea_path,
                 )
             self.assertFalse(idea_path.exists())
+
+
+class RecipeCatalogTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.atoms = [
+            json.loads(line)
+            for line in recipe_catalog.ATOM_INPUT.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+        cls.ideas = [
+            json.loads(line)
+            for line in recipe_catalog.IDEA_INPUT.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+        cls.atom_ids = {atom["atom_id"] for atom in cls.atoms}
+        cls.idea_ids = {idea["effect_id"] for idea in cls.ideas}
+        cls.recipes = recipe_catalog.build_recipes()
+
+    def test_recipe_catalog_has_200_rows_and_40_explicit_blueprints(self) -> None:
+        self.assertEqual(len(self.recipes), 200)
+        self.assertEqual(len(recipe_catalog.RECIPE_BLUEPRINTS), 40)
+        report = recipe_catalog.validate_recipes(self.recipes, self.atom_ids, self.idea_ids)
+        self.assertEqual(report["count"], 200)
+        self.assertEqual(set(report["blueprint_counts"].values()), {5})
+        self.assertEqual(len(report["family_counts"]), 10)
+        self.assertEqual(set(report["family_counts"].values()), {20})
+
+    def test_recipes_have_exact_fields_unique_ids_names_and_components(self) -> None:
+        ids = [recipe["recipe_id"] for recipe in self.recipes]
+        names = [recipe["name_zh"] for recipe in self.recipes]
+        self.assertEqual(len(ids), len(set(ids)))
+        self.assertEqual(len(names), len(set(names)))
+        for recipe in self.recipes:
+            with self.subTest(recipe_id=recipe["recipe_id"]):
+                self.assertEqual(set(recipe), set(RECIPE_FIELDS))
+                schema.validate_recipe(recipe, self.atom_ids, self.idea_ids)
+                all_components = recipe["component_atom_ids"] + recipe["component_effect_ids"]
+                self.assertEqual(len(all_components), len(set(all_components)))
+
+    def test_recipe_fingerprints_are_unique(self) -> None:
+        fingerprints = [recipe_catalog.recipe_fingerprint(recipe) for recipe in self.recipes]
+        self.assertEqual(len(fingerprints), len(set(fingerprints)))
+
+    def test_every_blueprint_has_five_variants_that_change_result_or_interaction(self) -> None:
+        grouped = {}
+        for recipe in self.recipes:
+            grouped.setdefault(recipe_catalog.blueprint_slug(recipe), []).append(recipe)
+        self.assertEqual(set(grouped), {blueprint["slug"] for blueprint in recipe_catalog.RECIPE_BLUEPRINTS})
+        for slug, variants in grouped.items():
+            with self.subTest(blueprint=slug):
+                self.assertEqual(len(variants), 5)
+                self.assertEqual(
+                    len({recipe["combined_effect"] for recipe in variants}),
+                    5,
+                )
+                self.assertEqual(
+                    len({recipe["trigger_logic"] for recipe in variants}),
+                    5,
+                )
+
+    def test_at_least_forty_recipes_combine_multiple_named_dimensions(self) -> None:
+        multidimensional = [
+            recipe
+            for recipe in self.recipes
+            if len(recipe_catalog.recipe_dimensions(recipe)) >= 2
+        ]
+        self.assertGreaterEqual(len(multidimensional), 40)
+
+    def test_required_key_combination_patterns_are_present(self) -> None:
+        expected = {
+            "hand_anchor_light": ("HAND-ANCHOR-BEAT", 5),
+            "gaze_catch_dialogue": ("GAZE-CATCH-DIALOGUE", 5),
+            "clone_pose_color": ("TIME-POSE-COLOR", 5),
+            "shadow_delay_reverse": ("SHADOW-DELAY-REVERSE", 5),
+            "lyric_mouth_ring": ("LYRIC-MOUTH-RING", 5),
+            "graph_touch_energy": ("GRAPH-TOUCH-ENERGY", 5),
+        }
+        for pattern, (slug, expected_count) in expected.items():
+            with self.subTest(pattern=pattern):
+                self.assertEqual(
+                    recipe_catalog.KEY_PATTERN_COUNTS[pattern],
+                    expected_count,
+                )
+                self.assertEqual(
+                    sum(recipe_catalog.blueprint_slug(recipe) == slug for recipe in self.recipes),
+                    expected_count,
+                )
+
+    def test_committed_recipe_output_matches_generated_catalog(self) -> None:
+        self.assertTrue(recipe_catalog.RECIPE_OUTPUT.exists())
+        rows = [
+            json.loads(line)
+            for line in recipe_catalog.RECIPE_OUTPUT.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+        self.assertEqual(rows, self.recipes)
+
+    def test_write_recipes_jsonl_is_byte_deterministic(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            first_path = Path(temporary_directory) / "first.jsonl"
+            second_path = Path(temporary_directory) / "second.jsonl"
+            recipe_catalog.write_jsonl(self.recipes, first_path)
+            recipe_catalog.write_jsonl(recipe_catalog.build_recipes(), second_path)
+            first_bytes = first_path.read_bytes()
+            second_bytes = second_path.read_bytes()
+            self.assertEqual(first_bytes, second_bytes)
+            self.assertTrue(first_bytes.endswith(b"\n"))
+            self.assertEqual(len(first_bytes.splitlines()), 200)
+            self.assertEqual(hashlib.sha256(first_bytes).hexdigest(), hashlib.sha256(second_bytes).hexdigest())
+            for line in first_bytes.decode("utf-8").splitlines():
+                self.assertIsInstance(json.loads(line), dict)
+                self.assertNotIn(": ", line)
 
 
 if __name__ == "__main__":
