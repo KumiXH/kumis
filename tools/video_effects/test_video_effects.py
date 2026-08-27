@@ -58,6 +58,21 @@ IDEA_FIELDS = (
     "status",
 )
 
+IDEA_FAMILY_ORDER = (
+    "light_trails_optics",
+    "body_motion_clones",
+    "face_gaze_expression",
+    "time_editing",
+    "spatial_portals",
+    "virtual_light_shadow",
+    "material_morph",
+    "particles_weather",
+    "world_style",
+    "audio_lyrics",
+    "effect_cinematography",
+    "multi_person_interaction",
+)
+
 RECIPE_FIELDS = (
     "recipe_id",
     "name_zh",
@@ -942,6 +957,120 @@ class AtomCatalogTests(unittest.TestCase):
         invalid[0]["required_signals"] = []
         with self.assertRaisesRegex(ValueError, "schema validation failed"):
             effect_catalog.validate_atoms(invalid)
+
+
+class IdeaCatalogTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.atoms = effect_catalog.build_atoms()
+        self.atom_ids = {atom["atom_id"] for atom in self.atoms}
+        self.ideas = effect_catalog.build_ideas()
+
+    @staticmethod
+    def fingerprint(idea: dict[str, object]) -> tuple[object, ...]:
+        normalize = lambda value: " ".join(str(value).split()).casefold()
+        return (
+            normalize(idea["visible_effect"]),
+            tuple(sorted(idea["trigger_signals"])),
+            tuple(sorted(idea["user_controls"])),
+            tuple(sorted(idea["atom_ids"])),
+        )
+
+    def test_idea_catalog_has_target_count_and_exact_family_order(self) -> None:
+        self.assertGreaterEqual(len(self.ideas), 260)
+        self.assertLessEqual(len(self.ideas), 340)
+        self.assertEqual(len(self.ideas), 300)
+        counts = Counter(idea["family"] for idea in self.ideas)
+        self.assertEqual(tuple(counts), IDEA_FAMILY_ORDER)
+        self.assertEqual(set(counts), set(IDEA_FAMILY_ORDER))
+        for family in IDEA_FAMILY_ORDER:
+            self.assertGreaterEqual(counts[family], 12)
+
+    def test_idea_ids_and_names_are_unique(self) -> None:
+        for field in ("effect_id", "name_zh", "name_en"):
+            values = [idea[field] for idea in self.ideas]
+            self.assertEqual(len(values), len(set(values)), field)
+
+    def test_every_idea_has_exact_fields_and_passes_schema(self) -> None:
+        for idea in self.ideas:
+            with self.subTest(effect_id=idea["effect_id"]):
+                self.assertEqual(set(idea), set(IDEA_FIELDS))
+                self.assertTrue(idea["visible_effect"].strip())
+                self.assertTrue(idea["trigger_signals"] or idea["user_controls"])
+                schema.validate_idea(idea, self.atom_ids)
+
+    def test_idea_fingerprints_are_unique(self) -> None:
+        fingerprints = [self.fingerprint(idea) for idea in self.ideas]
+        self.assertEqual(len(fingerprints), len(set(fingerprints)))
+
+    def test_key_effect_concepts_have_multiple_independent_ideas(self) -> None:
+        searchable = [
+            f"{idea['name_zh']} {idea['name_en']} {idea['visible_effect']}"
+            for idea in self.ideas
+        ]
+        concepts = (
+            "实时光绘轨迹",
+            "视线矫正",
+            "虚拟对视",
+            "时间分身",
+            "局部时间冻结",
+            "节拍星芒",
+            "影子分身",
+            "镜面穿越",
+            "材质溶解",
+            "歌词环绕",
+            "多人能量传递",
+        )
+        for concept in concepts:
+            with self.subTest(concept=concept):
+                self.assertGreaterEqual(
+                    sum(concept.casefold() in text.casefold() for text in searchable),
+                    2,
+                )
+
+    def test_idea_catalog_rejects_engineering_only_main_effects(self) -> None:
+        blocked = (
+            "普通视频防抖",
+            "普通视频去噪",
+            "普通 HDR",
+            "普通超分",
+            "普通自动构图",
+            "常规多摄切换",
+        )
+        for idea in self.ideas:
+            searchable = " ".join(
+                [idea["name_zh"], idea["name_en"], idea["visible_effect"]]
+            ).casefold()
+            for phrase in blocked:
+                with self.subTest(effect_id=idea["effect_id"], phrase=phrase):
+                    self.assertNotIn(phrase.casefold(), searchable)
+
+    def test_write_ideas_jsonl_is_byte_deterministic(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            first_path = Path(temporary_directory) / "first.jsonl"
+            second_path = Path(temporary_directory) / "second.jsonl"
+            effect_catalog.write_ideas_jsonl(self.ideas, first_path)
+            effect_catalog.write_ideas_jsonl(effect_catalog.build_ideas(), second_path)
+            first_bytes = first_path.read_bytes()
+            second_bytes = second_path.read_bytes()
+            self.assertEqual(first_bytes, second_bytes)
+            self.assertTrue(first_bytes.endswith(b"\n"))
+            self.assertEqual(len(first_bytes.splitlines()), len(self.ideas))
+            self.assertEqual(
+                hashlib.sha256(first_bytes).hexdigest(),
+                hashlib.sha256(second_bytes).hexdigest(),
+            )
+            for line in first_bytes.decode("utf-8").splitlines():
+                self.assertIsInstance(json.loads(line), dict)
+                self.assertNotIn(": ", line)
+
+    def test_committed_idea_output_matches_generated_catalog(self) -> None:
+        self.assertTrue(effect_catalog.IDEA_OUTPUT.exists())
+        rows = [
+            json.loads(line)
+            for line in effect_catalog.IDEA_OUTPUT.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+        self.assertEqual(rows, self.ideas)
 
 
 if __name__ == "__main__":
