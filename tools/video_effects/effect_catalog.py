@@ -310,9 +310,8 @@ IDEA_FAMILY_ORDER = (
     "multi_person_interaction",
 )
 
-# A motif describes the object and its spatial meaning. A behavior describes
-# the temporal response and control surface. Their Cartesian product keeps all
-# 25 rows in each family materially different while remaining auditable.
+# A motif describes the object and its spatial meaning. The reviewed behavior
+# table below explicitly decides which temporal responses belong to each motif.
 IDEA_FAMILY_SPECS = {
     "light_trails_optics": {
         "title_zh": "光轨光学",
@@ -533,6 +532,480 @@ IDEA_FAMILY_SPECS = {
 }
 
 
+# Each motif owns five reviewed behaviors. A behavior row contains:
+# slug, Chinese name, English name, trigger, control, visible result, atom deps.
+# The generator traverses only these explicit rows; it never forms a Cartesian
+# product between unrelated motif and behavior pools.
+IDEA_COMPATIBLE_BEHAVIORS = {
+    "light_trails_optics": {
+        "FINGER": (
+            ("DRAW", "屏幕拖绘", "Screen Drawing", "用户在屏幕连续拖动形成笔画", "采样密度", "触摸路径被渲染为连续光轨，抬手后按设定时长衰减", ("TOUCH-DRAW",)),
+            ("FADE", "指尖渐隐", "Finger Trail Fade", "完成一段触摸笔画并抬手", "渐隐时长", "最后一个触摸点开始向笔画起点逐段熄灭光轨", ("TIME-DECAY",)),
+            ("REVERSE", "指尖倒擦", "Finger Reverse Erase", "向左拖动录后时间游标", "倒擦速度", "屏幕光轨按原触摸采样的相反顺序逐段回收", ("TIME-REVERSE",)),
+            ("PRESSURE", "速度变宽", "Speed-sensitive Width", "指尖拖动速度跨过快慢阈值", "笔刷宽度响应", "慢画段变粗而快速段变细，整条触摸光轨宽度连续变化", ("TRAJECTORY-ACCUMULATION",)),
+            ("SCREENBEAT", "指绘节拍闪色", "Finger Beat Flash", "触摸绘制期间检测到音乐强拍", "闪色幅度", "已画触摸光轨在强拍瞬间闪色，未触摸区域保持原画面", ("AUDIO-BEAT",)),
+        ),
+        "BODY": (
+            ("MOTION", "肢体动作累积", "Body Motion Accumulation", "人体动作覆盖全身并持续超过半秒", "历史姿态数", "手腕、脚踝和躯干关节分别拉出光绘线，组合成完整动作轮廓", ("BODY-SKELETON",)),
+            ("JOINT", "关节分色", "Joint Color Coding", "检测到手腕、脚踝和头部同时运动", "关节配色", "不同关节沿各自轨迹绘出不同颜色并保持人体拓扑", ("MOTION-HISTORY",)),
+            ("POSEFREEZE", "姿态定格光字", "Pose Freeze Glyph", "人体进入指定姿态并保持", "定格保持时间", "关节光轨在姿态峰值冻结成完整人体光字，恢复动作后逐渐消散", ("BODY-POSE", "LOCAL-TIME-FREEZE")),
+            ("BODYBEAT", "舞步节拍光绘", "Dance Beat Painting", "身体动作峰值与音乐强拍重合", "节拍增益", "每次强拍只累积当前肢体段，连续节拍拼成分段人体光绘", ("AUDIO-BEAT", "MOTION-PHASE")),
+            ("SILHOUETTE", "轮廓扫光", "Silhouette Sweep", "全身轮廓连续移动穿过画面", "轮廓光宽度", "身体外轮廓沿运动方向留下闭合光绘，内部关节保持可见", ("BODY-SILHOUETTE",)),
+        ),
+        "SOURCE": (
+            ("MOVE", "移动光源拖尾", "Moving-source Trail", "灯棒或移动光源位移超过跟踪阈值", "拖尾长度", "移动光源前端保持明亮核心，身后形成连续且逐渐变细的光轨拖尾", ("LUMINOUS-CORE",)),
+            ("STAR", "灯棒星芒节点", "Light-stick Star Nodes", "灯棒运动速度降到局部最低点", "星芒射线数", "拖尾转折点绽放星芒节点，移动段仍保持连续光线", ("DYNAMIC-STARBURST",)),
+            ("FLARE", "光源镜头鬼影", "Source Flare Ghosts", "移动光源靠近画面边缘或中心轴", "鬼影间距", "光轨前端沿光源到画面中心的轴线生成可见镜头鬼影", ("LENS-FLARE",)),
+            ("SOURCEREVERSE", "灯棒轨迹回卷", "Source Trail Rewind", "灯棒停止后向反方向挥动", "回卷窗口", "旧光轨沿真实运动路径倒序收回到灯棒亮点", ("TIME-REVERSE",)),
+            ("SOURCEORBIT", "环绕光源立体轨迹", "Orbiting Source Trail", "镜头围绕手持灯棒连续移动", "深度分层", "灯棒轨迹按主体前后关系分层，绕过身体形成立体光环", ("MONOCULAR-DEPTH", "CAMERA-MOTION")),
+        ),
+        "WORLD": (
+            ("ANCHOR", "镜头移动固字", "Camera-stable Writing", "完成书写后移动镜头绕看文字", "文字缩放", "发光文字固定在原场景位置，镜头平移旋转后仍保持透视和遮挡", ("WORLD-SPACE-ANCHOR",)),
+            ("OCCLUDE", "空间文字遮挡", "Anchored Text Occlusion", "人物从锚定光字前方经过", "遮挡羽化", "人物经过时遮住光字，离开后原位置文字完整显现", ("MONOCULAR-DEPTH", "FOREGROUND")),
+            ("PARALLAX", "空间字视差", "Writing Parallax", "手机横向移动观察锚定文字", "视差幅度", "光字各笔画按虚拟深度产生不同视差但仍固定于场景", ("DEPTH-PARALLAX",)),
+            ("ROTATEWORD", "绕字旋转", "Orbit Written Word", "手机围绕锚定文字旋转超过设定角度", "透视响应", "发光文字随观察角度更新厚度和透视，不跟随屏幕漂移", ("PHONE-ROTATION",)),
+            ("WORLDFADE", "远离渐隐光字", "Distance-faded Writing", "镜头远离空间锚点超过距离阈值", "距离衰减", "锚定文字随真实观察距离缩小并渐隐，靠近后在原位恢复", ("CAMERA-MOTION", "TIME-DECAY")),
+        ),
+        "BEAT": (
+            ("PULSE", "强拍变色脉冲", "Strong-beat Color Pulse", "音乐节拍进入强拍区间时触发", "脉冲强度", "整条历史光轨在强拍瞬间变色并向外脉冲，拍间平滑回落", ("BEAT-PHASE-CLOCK", "DYNAMIC-STARBURST")),
+            ("COLOR", "频段分色光轨", "Band-colored Trail", "低中高频段能量主导关系发生变化", "色相范围", "光轨按当前主导频段切换颜色并保持拍间连续过渡", ("MUSIC-SPECTRUM",)),
+            ("STUTTERTRAIL", "节拍停格轨迹", "Beat Stutter Trail", "连续两个强拍之间进入停格窗口", "停格间隔", "光轨在每拍冻结一段位置，下一拍跳到新段形成节奏切片", ("FRAME-STUTTER", "AUDIO-BEAT")),
+            ("DECAYBEAT", "拍间呼吸衰减", "Inter-beat Breathing Decay", "节拍相位从峰值进入回落阶段", "拍间衰减", "光轨在强拍扩张、拍间收窄并按相位渐暗", ("TIME-DECAY", "BEAT-PHASE-CLOCK")),
+            ("BURST", "强拍星芒喷发", "Beat Starburst Burst", "副歌首个强拍或重拍出现", "星芒长度", "光轨拐点同时爆发星芒射线，随后回落为原有轨迹", ("DYNAMIC-STARBURST", "AUDIO-BEAT")),
+        ),
+    },
+    "body_motion_clones": {
+        "TIME": (
+            ("DELAY", "延迟跟随", "Delayed Follow", "人物速度超过设定阈值", "延迟秒数", "完整时间分身沿主身旧路径延迟跟随并逐步淡出", ("DELAYED-CLONE",)),
+            ("REVERSE", "逆动作分身", "Reverse Clone", "主身完成一段动作后向后挥手", "反向窗口", "时间分身在主身旁倒序回放刚完成的动作", ("TIME-REVERSE",)),
+            ("TIMESTUTTER", "时间分身停格", "Time-clone Stutter", "音乐连续强拍到达", "停格间隔", "每拍采样一个完整人物分身并固定在对应历史位置", ("FRAME-STUTTER", "AUDIO-BEAT")),
+            ("TIMEMERGE", "分身回收", "Clone Rejoin", "主身回到最早分身附近", "回收半径", "历史时间分身按时间顺序融合回当前主身", ("IDENTITY-MEMORY",)),
+            ("TIMEPATH", "路径分身队列", "Path Clone Queue", "人物连续走过可见路径", "队列间距", "时间分身沿真实走位路径等距排列并保持动作时序", ("MOTION-HISTORY",)),
+        ),
+        "SHADOW": (
+            ("SHADOWDELAY", "影子延迟分身", "Delayed Shadow Double", "主体开始移动而真实影子可见", "影子延迟", "影子分身落后主体动作并在停下后追到脚下", ("SHADOW-DOUBLE",)),
+            ("SHADOWREVERSE", "影子逆动作", "Reverse Shadow", "主体完成动作并踏回原地", "反向时长", "影子分身倒序表演上一段动作，主体保持当前时间", ("TIME-REVERSE", "SHADOW")),
+            ("SHADOWSPLIT", "影子多重裂变", "Shadow Split", "主体姿态达到动作峰值", "影子数量", "一个真实影子裂成多层延迟剪影并向不同方向展开", ("SILHOUETTE-ECHO",)),
+            ("SHADOWTOUCH", "踩影回收", "Step-on Shadow Merge", "主体脚步进入影子分身区域", "接触阈值", "脚踩到影子分身时该分身从接触点收缩回主体", ("BODY-POSE", "STATE-HYSTERESIS")),
+            ("SHADOWBEAT", "节拍影子舞", "Beat Shadow Dance", "主体动作峰值命中强拍", "节拍延迟", "影子分身按下一拍重复主体上一拍动作", ("AUDIO-BEAT", "MOTION-PHASE")),
+        ),
+        "POSE": (
+            ("POSEQUEUE", "姿态切片队列", "Pose Slice Queue", "检测到连续跨步姿态", "切片间距", "连续全身姿态沿走位方向排成可见剪影队列", ("POSE-SLICES",)),
+            ("POSECOLOR", "姿态阶段分色", "Pose Phase Colors", "动作进入起势、峰值和收势阶段", "阶段配色", "不同动作阶段的姿态切片显示不同颜色并保持顺序", ("MOTION-PHASE",)),
+            ("POSEFREEZE", "峰值姿态雕塑", "Peak Pose Statue", "全身动作达到速度峰值后短暂停顿", "雕塑保持时长", "峰值姿态冻结成实体感分身，主身继续下一动作", ("LOCAL-TIME-FREEZE",)),
+            ("POSEDEPTH", "纵深姿态阶梯", "Depth Pose Steps", "人物朝镜头前后移动", "纵深间距", "姿态切片按真实深度缩放，形成向远处延伸的动作阶梯", ("PERSPECTIVE-CLONE", "MONOCULAR-DEPTH")),
+            ("POSEERASE", "动作擦除队列", "Pose Queue Erase", "主身沿原路径反向返回", "擦除距离", "主身经过哪个历史姿态，哪个姿态切片就被依次擦除", ("TRAJECTORY-ACCUMULATION",)),
+        ),
+        "GESTURE": (
+            ("GESTUREECHO", "手势回声", "Gesture Echo", "手掌完成指定挥动", "回声数量", "手部历史姿态沿挥动方向依次显现并衰减", ("GESTURE-ECHO",)),
+            ("GESTURELOOP", "手势循环分身", "Gesture Loop Clone", "用户画圈后保持手掌在画面内", "循环时长", "局部手势分身循环播放最近一段挥手动作", ("TIME-LOOP", "HAND-REGION")),
+            ("GESTUREBEAT", "手势节拍接力", "Beat Gesture Relay", "指定手势命中音乐强拍", "接力间隔", "每个强拍生成一个手势分身并沿手臂方向接力出现", ("AUDIO-BEAT", "HAND-GESTURE")),
+            ("GESTUREMIRROR", "手势镜像双生", "Mirrored Gesture Twin", "手掌越过屏幕中轴", "镜像轴", "手势分身在中轴另一侧同步出现并保留短延迟", ("MIRROR-PERSONA", "HAND-2D-TRAJECTORY")),
+            ("GESTUREBURST", "手势分身爆发", "Gesture Clone Burst", "握拳转为张掌", "爆发半径", "多个手势分身从掌心向外展开后逐个消散", ("HAND-GESTURE", "SPATIAL-DUPLICATE")),
+        ),
+        "MIRROR": (
+            ("MIRRORDELAY", "镜像人格延迟", "Delayed Mirror Persona", "人物越过镜像轴后继续动作", "镜像延迟", "镜像人格以固定时间差重复主身动作", ("MIRROR-PERSONA", "FRAME-DELAY")),
+            ("MIRRORBREAK", "镜像人格脱离", "Mirror Persona Breakaway", "主身触碰镜像轴", "脱离距离", "镜像副本从对称位置脱离并沿独立路径移动", ("SPATIAL-DUPLICATE",)),
+            ("MIRRORMERGE", "镜像合身", "Mirror Merge", "主身与镜像副本在中轴相遇", "融合宽度", "两个人格在中轴叠合后变回单一主体", ("STATE-HYSTERESIS", "IDENTITY-MEMORY")),
+            ("MIRRORBEAT", "镜像节拍对舞", "Mirror Beat Duet", "主身动作峰值命中强拍", "对舞相位", "镜像人格在下一拍回应主身上一拍动作", ("AUDIO-BEAT", "MOTION-PHASE")),
+            ("MIRRORDEPTH", "纵深镜像队列", "Depth Mirror Queue", "手机向镜像轴方向推进", "透视间距", "镜像人格沿虚拟纵深复制成递减大小的动作队列", ("PERSPECTIVE-CLONE", "CAMERA-MOTION")),
+        ),
+    },
+    "face_gaze_expression": {
+        "CAMERA": (
+            ("CALIBRATE", "瞳孔镜头校准", "Pupil-to-camera Calibration", "完成三个校准点注视后直视屏幕内容", "瞳孔平滑度", "瞳孔与虹膜被轻量重定向到镜头方向，眼睑、头姿和身份保持不变", ("IRIS-PUPIL-LANDMARKS",)),
+            ("CAMERAHOLD", "镜头对视保持", "Camera Contact Hold", "视线短暂移开后在容差时间内返回", "保持容差", "短时读稿时瞳孔朝向保持镜头附近，超过容差后恢复真实视线", ("IDENTITY-MEMORY", "GAZE-VECTOR")),
+            ("CAMERABLINK", "眨眼暂停矫正", "Blink-safe Correction", "检测到眼睑开始闭合", "暂停阈值", "眨眼期间冻结眼球重定向，睁眼后从真实虹膜位置平滑恢复", ("BLINK", "IRIS-PUPIL-LANDMARKS")),
+            ("CAMERALIMIT", "侧脸矫正限幅", "Profile Correction Limit", "头部偏航超过自然矫正角度", "最大矫正角", "侧脸时逐步减弱瞳孔重定向，避免眼球转向不自然", ("HEAD-POSE", "GAZE-VECTOR")),
+            ("CAMERAPREVIEW", "镜头对视预览", "Eye-contact Preview", "用户按住预览对比按钮", "预览混合度", "取景器并排显示真实视线与镜头对视矫正结果", ("GAZE-VECTOR", "IRIS-PUPIL-LANDMARKS")),
+        ),
+        "DIALOGUE": (
+            ("REDIRECT", "对话对象重定向", "Dialogue-target Redirection", "当前说话者切换或对话对象转头", "对视目标", "双方眼球与虹膜朝向被重定向到对方眼睛，形成连续虚拟对视", ("MULTI-PERSON-GRAPH", "IRIS-PUPIL-LANDMARKS")),
+            ("SPEAKERSWAP", "说话者视线交接", "Speaker Gaze Handoff", "声源从一位人物切换到另一位", "交接时长", "上一说话者移开视线，新说话者的眼球平滑转向对话对象", ("SOURCE-DIRECTION", "MULTI-PERSON-GRAPH")),
+            ("DIALOGUEHOLD", "对视短停保持", "Conversation Contact Hold", "一方短暂低头读稿后抬头", "保持窗口", "低头期间保存对视目标，抬头后虹膜回到同一人物而非镜头", ("IDENTITY-MEMORY", "HEAD-POSE")),
+            ("TRIAD", "三人轮转对视", "Three-person Gaze Rotation", "三位人物按发言顺序切换", "轮转顺序", "每位人物的眼球只重定向到当前说话者，发言切换时依次轮转", ("MULTI-PERSON-GRAPH", "SOURCE-DIRECTION")),
+            ("DIALOGUEBREAK", "对视自然断开", "Natural Gaze Break", "说话停顿超过设定时间", "断开延迟", "停顿时逐渐减弱虚拟对视并恢复真实瞳孔方向", ("SOUND-VOLUME", "TIME-DECAY")),
+        ),
+        "GLOW": (
+            ("DWELL", "停留点亮", "Dwell-to-glow", "视线停留在同一目标超过设定时长", "停留时长", "被注视目标从边缘向中心发光，移开视线后平滑熄灭", ("GAZE-FOCUS", "LUMINOUS-CORE")),
+            ("GLOWPULSE", "凝视脉冲发光", "Gaze Pulse Glow", "凝视目标达到第二级停留时长", "脉冲半径", "目标发光核心向外扩散一次光环并继续保持选中", ("GAZE-FOCUS", "BLOOM-GLOW")),
+            ("GLOWTRAIL", "视线扫光路径", "Gaze Sweep Trail", "视线连续扫过多个物体实例", "扫光衰减", "物体按被注视顺序依次点亮并留下短时可见路径", ("OBJECT-INSTANCE", "TRAJECTORY-ACCUMULATION")),
+            ("GLOWBLINK", "眨眼锁定发光", "Blink-lock Glow", "目标已发光后完成一次眨眼", "锁定时长", "眨眼把当前发光对象锁定，视线移开后仍保持亮度", ("BLINK", "STATE-HYSTERESIS")),
+            ("GLOWTRANSFER", "视线移交光核", "Gaze Glow Transfer", "视线从旧目标稳定移动到新目标", "移交速度", "发光核心沿两物体间的视线路径从旧目标移动到新目标", ("GAZE-VECTOR", "OBJECT-INSTANCE")),
+        ),
+        "CATCHLIGHT": (
+            ("FOLLOW", "虹膜高光跟随", "Iris Catchlight Follow", "人物转头或视线横向移动", "跟随惯性", "眼神光贴着虹膜表面连续滑动并保持反射形状", ("IRIS-PUPIL-LANDMARKS", "CATCHLIGHT-RERENDER")),
+            ("CATCHBLINK", "眨眼高光消隐", "Blink Catchlight Fade", "眼睑进入闭合阶段", "消隐速度", "眼神光随眼睑闭合缩小消失，睁眼后从虹膜位置恢复", ("BLINK", "IRIS-PUPIL-LANDMARKS")),
+            ("CATCHDOUBLE", "双眼同源高光", "Paired Catchlights", "左右眼同时可见且头姿稳定", "光源一致度", "双眼高光保持同一虚拟光源方向和形状比例", ("HEAD-POSE", "CATCHLIGHT-RERENDER")),
+            ("CATCHBEAT", "节拍眼神光", "Beat Catchlight", "音乐强拍到达且双眼可见", "闪耀强度", "眼神光在强拍瞬间扩大闪耀，拍间恢复原大小", ("AUDIO-BEAT", "CATCHLIGHT-RERENDER")),
+            ("CATCHCOLOR", "视线方向变色高光", "Direction-colored Catchlight", "视线从左侧目标移向右侧目标", "高光色相", "眼神光随视线方向连续变色并保持虹膜贴附", ("GAZE-VECTOR", "CATCHLIGHT-RERENDER")),
+        ),
+        "SELECT": (
+            ("CONFIRM", "眨眼确认选择", "Blink-confirm Selection", "候选目标出现选中环后完成一次眨眼", "确认反馈", "凝视对象先出现选中环，眨眼后明确选中并展开特效", ("GAZE-FOCUS", "OBJECT-INSTANCE")),
+            ("SELECTDWELL", "凝视倒计时选择", "Dwell Countdown Select", "视线在候选对象停留进入倒计时", "选择停留时间", "对象周围进度环随凝视填满，填满后自动选中", ("GAZE-FOCUS", "STATE-HYSTERESIS")),
+            ("SELECTCANCEL", "移开视线取消", "Look-away Cancel", "进度环未填满前视线移开", "取消衰减", "未完成的选中环反向消退且不会触发对象特效", ("GAZE-VECTOR", "TIME-DECAY")),
+            ("SELECTCYCLE", "扫视轮换候选", "Gaze Candidate Cycle", "视线依次进入多个候选区域", "候选间隔", "候选对象按凝视顺序高亮，旧候选自动降级为轮廓提示", ("OBJECT-INSTANCE", "GAZE-FOCUS")),
+            ("SELECTMENU", "凝视展开特效盘", "Gaze Effect Menu", "对象选中后继续凝视其上方入口", "菜单半径", "选中对象周围展开径向特效选项，视线停留即可预览", ("GAZE-VECTOR", "OBJECT-INSTANCE")),
+        ),
+    },
+    "time_editing": {
+        "FREEZE": (
+            ("FREEZEHAND", "手势冻结区域", "Gesture Region Freeze", "手掌张开后握拳指向区域", "冻结边缘", "指向区域停在当前帧，周围画面继续实时播放", ("HAND-GESTURE", "LOCAL-TIME-FREEZE")),
+            ("FREEZETOUCH", "触摸擦出冻结", "Touch-painted Freeze", "手指在目标区域涂抹", "冻结笔刷", "触摸覆盖区域逐步冻结成同一帧并保留柔和边缘", ("TOUCH-DRAW", "LOCAL-TIME-FREEZE")),
+            ("FREEZEVOICE", "喊声解冻", "Voice Unfreeze", "冻结后人声音量超过阈值", "解冻加速度", "声音越强冻结区域越快追上当前时间", ("SOUND-VOLUME", "LOCAL-TIME-FREEZE")),
+            ("FREEZESLIDER", "冻结选帧", "Freeze Frame Select", "拖动时间游标选择历史帧", "历史帧位置", "局部区域稳定显示用户选择的历史姿态", ("FRAME-DELAY", "LOCAL-TIME-FREEZE")),
+            ("FREEZEBEAT", "节拍冻结释放", "Beat Freeze Release", "音乐强拍到达冻结区域", "释放拍数", "区域在强拍冻结并在设定拍数后恢复实时", ("AUDIO-BEAT", "LOCAL-TIME-FREEZE")),
+        ),
+        "LOOP": (
+            ("LOOPSELECT", "圈选局部循环", "Selected Local Loop", "用户画圈框选发梢或水面", "循环时长", "选中区域在历史帧之间连续循环，外部保持当前时间", ("TIME-LOOP", "TOUCH-DRAW")),
+            ("LOOPPINGPONG", "局部往返循环", "Ping-pong Local Loop", "循环区域首尾姿态差异较大", "往返速度", "区域在历史帧中正放后倒放，避免首尾硬跳", ("TIME-LOOP", "TIME-REVERSE")),
+            ("LOOPBEAT", "节拍长度循环", "Beat-length Loop", "连续节拍建立稳定拍长", "循环拍数", "局部动作按一拍或两拍长度重复并对齐音乐", ("AUDIO-BEAT", "TIME-LOOP")),
+            ("LOOPFADE", "循环边缘呼吸", "Loop Edge Breathing", "循环播放进入首尾过渡区", "边缘混合", "循环区域边缘在首尾阶段渐隐渐现以隐藏跳变", ("TIME-DECAY", "TIME-LOOP")),
+            ("LOOPMOVE", "跟随对象循环", "Tracked Object Loop", "循环对象在画面中继续移动", "跟随范围", "循环内容跟随对象位置移动而不留在原屏幕区域", ("OBJECT-POSE", "TIME-LOOP")),
+        ),
+        "REVERSE": (
+            ("REVERSEDRAG", "拖动局部倒放", "Drag-to-reverse", "向后拖动目标轨迹", "倒放窗口", "目标沿刚才的运动轨迹倒序回到起点", ("TIME-REVERSE", "OBJECT-POSE")),
+            ("REVERSETHROW", "抛物回收", "Thrown-object Return", "抛出物体达到运动顶点", "回收速度", "飞出的物体倒放回手中而背景继续向前", ("MOTION-PHASE", "TIME-REVERSE")),
+            ("REVERSEBEAT", "强拍动作倒放", "Beat Action Reverse", "动作峰值命中强拍", "倒放拍数", "选中动作在下一拍倒序回放并于拍点结束", ("AUDIO-BEAT", "TIME-REVERSE")),
+            ("REVERSEMASK", "遮罩内倒放", "Masked Reverse", "用户点选一个物体实例", "遮罩羽化", "只有该物体区域倒放，周围对象保持当前运动", ("OBJECT-INSTANCE", "TIME-REVERSE")),
+            ("REVERSELOOP", "倒放循环", "Reverse Loop", "倒放片段回到起点", "循环次数", "目标在正放与倒放间循环形成往返动作", ("TIME-LOOP", "TIME-REVERSE")),
+        ),
+        "SHUTTER": (
+            ("SHUTTERROTATE", "旋转快门切片", "Rotating Shutter Slices", "手机快速旋转一次", "切片数量", "人体轮廓按手机角度分成扇形历史姿态", ("PHONE-ROTATION", "FRAME-DELAY")),
+            ("SHUTTERPOSE", "动作阶段快门", "Motion-phase Shutter", "人体进入动作峰值", "阶段间隔", "起势峰值收势分别冻结为可见姿态切片", ("MOTION-PHASE", "FRAME-DELAY")),
+            ("SHUTTERBEAT", "节拍快门队列", "Beat Shutter Queue", "音乐连续强拍到达", "拍点采样", "每个强拍采样一帧人体轮廓并沿运动方向排列", ("AUDIO-BEAT", "FRAME-DELAY")),
+            ("SHUTTERDEPTH", "纵深快门切片", "Depth Shutter Slices", "人物朝镜头前后移动", "深度间距", "历史姿态按真实深度缩放并保持前后遮挡", ("MONOCULAR-DEPTH", "FRAME-DELAY")),
+            ("SHUTTERERASE", "经过擦除切片", "Pass-through Slice Erase", "当前人物经过历史姿态位置", "擦除半径", "主身穿过哪个快门切片，哪个切片就被擦除", ("BODY-SKELETON", "STATE-HYSTERESIS")),
+        ),
+        "BORROW": (
+            ("BORROWHAND", "手势借位窗口", "Gesture Borrowed Time", "检测手势事件并按住快门", "借位偏移", "前景人物显示稍早动作，背景保持当前事件", ("HAND-GESTURE", "EVENT-WINDOW")),
+            ("BORROWBEAT", "节拍前后借位", "Beat Pre-post Offset", "强拍前后建立事件窗口", "前滚帧数", "人物动作提前进入强拍而环境仍按真实时间播放", ("AUDIO-BEAT", "EVENT-WINDOW")),
+            ("BORROWPERSON", "双人时间错位", "Two-person Time Offset", "两人进入同一事件区域", "人物时间差", "两个人物分别显示不同历史时刻并保持同场互动", ("MULTI-PERSON-GRAPH", "FRAME-DELAY")),
+            ("BORROWOBJECT", "物体时间借位", "Object Time Offset", "点选运动物体并选择历史偏移", "物体时间差", "物体显示历史位置而持有者保持当前动作", ("OBJECT-INSTANCE", "FRAME-DELAY")),
+            ("BORROWRESET", "接触同步时间", "Contact Time Sync", "错位对象与人物发生接触", "同步速度", "接触发生时历史时间层逐步追上当前画面", ("MULTI-PERSON-TOUCH", "STATE-HYSTERESIS")),
+        ),
+    },
+    "spatial_portals": {
+        "MIRROR": (
+            ("MIRRORSTEP", "迈步穿镜", "Step Through Mirror", "脚步跨过镜面入口平面", "入口厚度", "人物先被镜面边框遮挡再完整进入另一空间", ("BODY-SKELETON", "MIRROR-PORTAL")),
+            ("MIRRORHAND", "手掌探镜", "Hand Through Mirror", "手掌进入镜面边界", "穿入深度", "手先穿过镜面并在另一侧出现，身体仍留在原空间", ("HAND-3D-TRAJECTORY", "MIRROR-PORTAL")),
+            ("MIRRORROTATE", "转身换镜世界", "Rotate Mirror World", "手机绕镜面旋转到指定角度", "换景角度", "镜内世界随观察角度连续切换，镜外环境保持原样", ("PHONE-ROTATION", "MIRROR-PORTAL")),
+            ("MIRRORTOUCH", "拉开镜面入口", "Pull-open Mirror", "触摸镜面边缘并向外拖", "开口宽度", "镜面从窄缝拉成有厚度的入口并保留手指遮挡", ("TOUCH-DRAW", "MIRROR-PORTAL")),
+            ("MIRRORGAZE", "注视显露镜后", "Gaze-reveal Mirror", "视线停留在镜面中心", "显露速度", "镜面被注视时逐渐透明并显露另一空间", ("GAZE-FOCUS", "MIRROR-PORTAL")),
+        ),
+        "PALM": (
+            ("PALMOPEN", "双手开窗", "Two-hand Portal Open", "双手围出矩形并向外拉", "窗口大小", "掌间窗口随手距扩大并露出另一场景", ("HAND-2D-TRAJECTORY", "FRAME-TRAVERSAL")),
+            ("PALMMOVE", "掌窗跟随", "Palm Portal Follow", "双手保持框形并移动", "跟随平滑", "窗口固定在双手之间移动并正确遮挡手指", ("HAND-3D-TRAJECTORY", "FRAME-TRAVERSAL")),
+            ("PALMTHROW", "抛出空间窗", "Throw Palm Portal", "双手合拢后向前抛出", "抛出距离", "掌中窗口飞到场景平面并变成世界锚定入口", ("HAND-GESTURE", "WORLD-SPACE-ANCHOR")),
+            ("PALMBEAT", "节拍掌窗脉冲", "Beat Palm Portal", "双手框住窗口时音乐强拍到达", "脉冲尺度", "窗口边框在强拍扩张并短暂显露更大视野", ("AUDIO-BEAT", "FRAME-TRAVERSAL")),
+            ("PALMCLOSE", "合掌关窗", "Palm Portal Close", "双手从分开移动到接触", "关闭速度", "窗口随手距缩小并在合掌时完全闭合", ("MULTI-PERSON-TOUCH", "FRAME-TRAVERSAL")),
+        ),
+        "FLOOR": (
+            ("FLOORSTEP", "脚步开地门", "Step-open Floor Door", "脚尖指向地面并踏下", "折叠角度", "地面沿脚尖方向折开成通往另一空间的门", ("BODY-POSE", "SPACE-FOLD")),
+            ("FLOORDROP", "物体落入地门", "Drop Through Floor", "物体进入地门区域并向下运动", "落入深度", "物体被地门边缘遮挡后掉入另一空间", ("OBJECT-POSE", "FRAME-TRAVERSAL")),
+            ("FLOORWALK", "地门随步延伸", "Walking Floor Portal", "人物连续沿地面行走", "延伸长度", "折叠入口沿脚步方向向前延伸并在身后闭合", ("BODY-SKELETON", "WORLD-SPACE-ANCHOR")),
+            ("FLOORBEAT", "节拍地面折叠", "Beat Floor Fold", "强拍到达且地面入口可见", "折叠幅度", "地面门按节拍开合并短暂露出下层世界", ("AUDIO-BEAT", "SPACE-FOLD")),
+            ("FLOORROTATE", "旋转地门方向", "Rotate Floor Door", "手机绕竖轴旋转", "门朝向", "地门在世界空间内转向新的行走方向而不随屏幕漂移", ("PHONE-ROTATION", "WORLD-SPACE-ANCHOR")),
+        ),
+        "TUNNEL": (
+            ("TUNNELPINCH", "捏合景深隧道", "Pinch Depth Tunnel", "双指向内捏合", "隧道深度", "背景围绕消失点向内延伸成连续景深隧道", ("TOUCH-DRAW", "TUNNEL-WARP")),
+            ("TUNNELPUSH", "推进穿隧道", "Push Through Tunnel", "手机沿相机前向快速推进", "推进速度", "隧道层级向镜头两侧掠过并保持中心目标可见", ("CAMERA-MOTION", "TUNNEL-WARP")),
+            ("TUNNELBEAT", "节拍隧道缩放", "Beat Tunnel Pulse", "音乐强拍到达", "缩放幅度", "隧道在强拍向内冲刺，拍间回到基础深度", ("AUDIO-BEAT", "TUNNEL-WARP")),
+            ("TUNNELORBIT", "旋转隧道", "Rotating Tunnel", "手机横滚角持续变化", "扭转角", "隧道壁随手机旋转扭转，中心路径保持稳定", ("PHONE-ROTATION", "RADIAL-TWIST")),
+            ("TUNNELEND", "凝视隧道出口", "Gaze Tunnel Exit", "视线停留在隧道出口", "出口显露", "出口被注视时逐渐放大并露出目标世界", ("GAZE-FOCUS", "FRAME-TRAVERSAL")),
+        ),
+        "PAGE": (
+            ("PAGEWIPE", "门框翻页", "Doorframe Page Turn", "沿门框横向划动", "翻页弧度", "房间沿门框像纸页一样翻开露出另一室内场景", ("TOUCH-DRAW", "SPACE-FOLD")),
+            ("PAGEWALK", "穿过翻页房间", "Walk Through Page", "人物跨过已翻开的房间边界", "边界厚度", "人物保持连续遮挡穿入翻页后的空间", ("BODY-SKELETON", "FRAME-TRAVERSAL")),
+            ("PAGEROTATE", "转身翻房间", "Turn-to-page Room", "手机转身超过九十度", "触发角度", "新朝向的房间像下一页一样覆盖旧房间", ("PHONE-ROTATION", "SPACE-FOLD")),
+            ("PAGEBEAT", "节拍房间翻页", "Beat Room Page", "音乐强拍到达", "每拍页数", "每个强拍翻过一层房间风格且保持门框位置", ("AUDIO-BEAT", "SPACE-FOLD")),
+            ("PAGECLOSE", "回划合页", "Reverse Page Close", "沿原门框反向划动", "合页速度", "翻开的房间按原折叠路径闭合回当前空间", ("TIME-REVERSE", "SPACE-FOLD")),
+        ),
+    },
+    "virtual_light_shadow": {
+        "DOUBLE": (
+            ("SHADOWCLOCK", "影子延迟分身", "Delayed Shadow Double", "主体开始移动或停下", "影子延迟", "影子分身沿旧姿态延迟跟随并追回主体脚下", ("SHADOW-DOUBLE",)),
+            ("SHADOWBEAT", "节拍影子闪切", "Beat Shadow Flash", "主体动作峰值命中强拍", "闪切宽度", "影子分身在强拍翻到主体另一侧并爆亮轮廓", ("AUDIO-BEAT", "SHADOW-RERENDER")),
+            ("SHADOWTOUCH", "拖动影子分身", "Drag Shadow Double", "触摸影子并拖向新位置", "拖动距离", "影子分身脱离脚下沿触摸路径移动，主体保持原位", ("TOUCH-DRAW", "SHADOW-DOUBLE")),
+            ("SHADOWREVERSE", "影子动作倒放", "Reverse Shadow Motion", "主体停下后向后挥手", "倒放窗口", "影子分身倒序回放主体刚完成的动作", ("TIME-REVERSE", "SHADOW-DOUBLE")),
+            ("SHADOWMERGE", "踩影合身", "Step-on Shadow Merge", "主体脚部进入影子分身区域", "融合半径", "影子从接触点收缩并重新贴回主体脚下", ("BODY-POSE", "STATE-HYSTERESIS")),
+        ),
+        "SUNSET": (
+            ("SUNSETDRAG", "拖动日落光位", "Drag Sunset Light", "拖动虚拟太阳跨过人物", "光源方位", "头发与肩部轮廓光从一侧连续移动到另一侧", ("TOUCH-DRAW", "VIRTUAL-RIM-LIGHT")),
+            ("SUNSETTEMP", "日落色温过渡", "Sunset Temperature Shift", "滑动日落时间控制条", "轮廓光色温", "轮廓光从暖黄过渡到红紫并保持受光方向", ("SCENE-LIGHTING", "VIRTUAL-RIM-LIGHT")),
+            ("SUNSETMOVE", "行走日落边光", "Walking Sunset Rim", "人物在逆光方向行走", "边光宽度", "轮廓光跟随身体边缘移动且不覆盖正面皮肤", ("BODY-SILHOUETTE", "VIRTUAL-RIM-LIGHT")),
+            ("SUNSETBEAT", "节拍日落闪耀", "Beat Sunset Rim", "音乐强拍到达", "闪耀强度", "暖色轮廓光在强拍扩张并拍间回落", ("AUDIO-BEAT", "VIRTUAL-RIM-LIGHT")),
+            ("SUNSETFADE", "转身边光消隐", "Turn-away Rim Fade", "人物从背光转向正面光", "消隐角度", "轮廓光随头姿和身体朝向减弱直至消失", ("HEAD-POSE", "VIRTUAL-RIM-LIGHT")),
+        ),
+        "FOLLOW": (
+            ("SPOTFOLLOW", "人物移动追光", "Moving Follow Spot", "点按人物后开始移动", "追光半径", "椭圆追光稳定跟随人物脚下或脸部", ("VIRTUAL-SPOTLIGHT", "BODY-SKELETON")),
+            ("SPOTSWAP", "多人追光切换", "Multi-person Spotlight Swap", "新人物开始说话或动作", "切换时长", "追光从当前人物平滑移交到下一人物", ("MULTI-PERSON-GRAPH", "VIRTUAL-SPOTLIGHT")),
+            ("SPOTBEAT", "节拍追光脉冲", "Beat Spotlight Pulse", "音乐强拍到达", "光圈脉冲", "追光圈在强拍扩大并提高亮度，拍间回落", ("AUDIO-BEAT", "VIRTUAL-SPOTLIGHT")),
+            ("SPOTGESTURE", "手势移动追光", "Gesture-directed Spot", "人物手势指向新位置", "移动速度", "追光沿手指方向移动并在目标位置停留", ("HAND-GESTURE", "VIRTUAL-SPOTLIGHT")),
+            ("SPOTFREEZE", "停步锁定追光", "Stop-lock Spotlight", "人物停止移动超过阈值", "锁定时长", "追光锁在停止位置，人物再次移动后重新跟随", ("MOTION-PHASE", "VIRTUAL-SPOTLIGHT")),
+        ),
+        "LONG": (
+            ("LONGTILT", "倾斜拉长影子", "Tilt-lengthened Shadow", "手机向侧面倾斜", "影子长度", "主体影子沿地面方向连续拉长或缩短", ("PHONE-ROTATION", "SHADOW-RERENDER")),
+            ("LONGWALK", "步伐延展长影", "Walking Long Shadow", "人物连续向前行走", "延展增益", "每一步让长影产生一段波动并保持脚底接触", ("BODY-SKELETON", "SHADOW-RERENDER")),
+            ("LONGBEAT", "节拍影长脉冲", "Beat Shadow Length", "音乐强拍到达", "影长脉冲", "长影在强拍向外伸展并拍间收回", ("AUDIO-BEAT", "SHADOW-RERENDER")),
+            ("LONGROTATE", "旋转影子方向", "Rotating Shadow Direction", "手机绕主体旋转", "影子方位", "长影围绕脚底连续改变方向且贴合地面", ("CAMERA-MOTION", "MONOCULAR-DEPTH")),
+            ("LONGSPLIT", "长影分叉", "Forked Long Shadow", "人物张开双臂形成宽姿态", "分叉角度", "一个长影沿肢体方向分叉成多条可见剪影", ("BODY-POSE", "SHADOW-RERENDER")),
+        ),
+        "SCREEN": (
+            ("SCREENCAST", "墙面人物投影", "Wall Subject Projection", "框选墙面并点选人物", "投影大小", "人物轮廓按墙面透视投射并随动作更新", ("BODY-SILHOUETTE", "SHADOW-RERENDER")),
+            ("SCREENDELAY", "墙面延迟投影", "Delayed Wall Projection", "人物开始动作", "投影延迟", "墙面投影比真人慢固定时间重复动作", ("FRAME-DELAY", "SHADOW-RERENDER")),
+            ("SCREENBEAT", "节拍投影放大", "Beat Projection Scale", "音乐强拍到达", "放大比例", "墙面人物投影在强拍瞬间放大并拍间恢复", ("AUDIO-BEAT", "SHADOW-RERENDER")),
+            ("SCREENCOLOR", "彩色投影分层", "Layered Color Projection", "人物动作方向改变", "投影配色", "墙面出现多层不同颜色的短延迟轮廓投影", ("MOTION-AFTERIMAGE", "SHADOW-RERENDER")),
+            ("SCREENLIGHT", "光束投影幕", "Beam Projection Screen", "手机摆动虚拟光束扫过墙面", "光束锥角", "体积光束扫到墙面时显露人物投影，离开后熄灭", ("VOLUMETRIC-LIGHT", "PHONE-ROTATION")),
+        ),
+    },
+}
+
+IDEA_COMPATIBLE_BEHAVIORS.update({
+    "material_morph": {
+        "DISSOLVE": (
+            ("DISSOLVEEDGE", "边缘材质溶解", "Edge Material Dissolve", "目标轮廓运动速度超过阈值", "溶解推进速度", "材质从轮廓向内部逐块溶解并释放像素碎屑", ("PIXEL-DISSOLVE",)),
+            ("DISSOLVETOUCH", "触摸材质溶解", "Touch Material Dissolve", "手指扫过目标表面", "溶解笔刷", "触摸经过处沿路径变成像素尘并露出背后内容", ("TOUCH-DRAW", "PIXEL-DISSOLVE")),
+            ("DISSOLVEBEAT", "节拍材质溶解", "Beat Material Dissolve", "音乐强拍连续到达", "每拍溶解量", "目标材质在每个强拍推进一层溶解进度", ("AUDIO-BEAT", "PIXEL-DISSOLVE")),
+            ("DISSOLVEREVERSE", "碎片反向凝结", "Reverse Material Condense", "录后向左拖动时间游标", "凝结速度", "散开碎片按出生顺序回到目标并闭合表面", ("TIME-REVERSE", "FRAGMENTATION")),
+            ("DISSOLVEVOICE", "声压材质融解", "Voice-driven Dissolve", "人声音量持续超过阈值", "声压增益", "声音越响材质溶解越快，停声后冻结当前进度", ("SOUND-VOLUME", "PIXEL-DISSOLVE")),
+        ),
+        "GLASS": (
+            ("GLASSBREATH", "玻璃呼吸", "Breathing Glass", "目标表面完成一轮扩张收缩动作", "折射呼吸幅度", "玻璃折射随表面呼吸起伏并保持轮廓透明", ("GLASS", "ELASTIC-WARP")),
+            ("GLASSTOUCH", "指尖玻璃波纹", "Touch Glass Ripple", "触摸玻璃区域", "波纹幅度", "触点向外传播折射波纹并推移背后画面", ("RIPPLE-DISPLACEMENT", "GLASS")),
+            ("GLASSBREAK", "玻璃裂片展开", "Glass Fragment Spread", "握拳转为张掌", "裂片间距", "玻璃表面分裂成透明碎片向外展开但保留目标轮廓", ("HAND-GESTURE", "FRAGMENTATION")),
+            ("GLASSBEAT", "节拍玻璃闪光", "Beat Glass Flash", "音乐强拍到达", "边缘高光", "玻璃边缘在强拍闪亮并短暂增强折射", ("AUDIO-BEAT", "GLASS")),
+            ("GLASSROTATE", "旋转玻璃色散", "Rotating Glass Dispersion", "手机绕目标旋转", "色散距离", "玻璃边缘随观察角度产生连续彩色色散", ("PHONE-ROTATION", "CHROMATIC-ABERRATION")),
+        ),
+        "METAL": (
+            ("METALFLOW", "液态金属流动", "Liquid Metal Flow", "目标表面持续弯曲或移动", "金属流速", "金属高光沿表面运动方向流动并保持形状", ("METAL", "LIQUID")),
+            ("METALROTATE", "旋转金属高光", "Rotating Metal Highlight", "手机绕目标旋转", "金属反射强度", "方向性高光随观察角度绕目标表面移动", ("PHONE-ROTATION", "METAL")),
+            ("METALBEAT", "节拍金属脉冲", "Beat Metal Pulse", "音乐强拍到达", "粗糙度脉冲", "金属表面在强拍从粗糙变镜面再平滑回落", ("AUDIO-BEAT", "METAL")),
+            ("METALTOUCH", "触摸金属化", "Touch Metallize", "手指扫过目标区域", "金属化笔刷", "触摸路径将原表面逐段转为金属并留下移动高光", ("TOUCH-DRAW", "METAL")),
+            ("METALMELT", "声压金属融化", "Voice Metal Melt", "人声音量持续上升", "融化黏度", "硬质金属随音量变成流体并在停声后重新凝固", ("SOUND-VOLUME", "LIQUID")),
+        ),
+        "PAPER": (
+            ("PAPERTEAR", "纸片裂变", "Paper Tear", "双指向外拉开海报区域", "裂片大小", "纸面沿手势方向撕裂成带纤维边缘的碎片", ("TOUCH-DRAW", "FRAGMENTATION")),
+            ("PAPERFOLD", "纸面折叠", "Paper Fold", "沿纸面划出折线", "折叠角度", "海报沿划线折叠并显示纸张厚度和遮挡", ("SPACE-FOLD", "PAPER")),
+            ("PAPERBEAT", "节拍纸屑爆发", "Beat Paper Burst", "音乐强拍到达", "纸屑数量", "纸面在强拍喷出碎片，拍间碎片缓慢落下", ("AUDIO-BEAT", "FRAGMENTATION")),
+            ("PAPERREVERSE", "碎纸复原", "Reverse Paper Restore", "向左拖动时间游标", "复原速度", "散落纸片倒序飞回并重新拼成完整纸面", ("TIME-REVERSE", "FRAGMENTATION")),
+            ("PAPERWIND", "转动吹散纸片", "Rotation-blown Paper", "手机快速横向旋转", "吹散方向", "纸片沿手机旋转方向被吹开并逐渐离开画面", ("PHONE-ROTATION", "PAPER")),
+        ),
+        "HOLO": (
+            ("HOLOBEAT", "节拍全息织物", "Beat Holographic Fabric", "音乐强拍命中服装区域", "色相脉冲", "织物彩虹色带在强拍扩张并拍间回落", ("AUDIO-BEAT", "HOLOGRAPHIC")),
+            ("HOLOMOVE", "动作全息流光", "Motion Holographic Flow", "服装随身体快速形变", "流光速度", "全息色带沿织物拉伸方向流动且不滑离服装", ("BODY-SKELETON", "FABRIC")),
+            ("HOLOROTATE", "视角全息变色", "View Holographic Shift", "手机绕人物旋转", "色相范围", "织物随观察角度连续变色并保持经纬纹理", ("PHONE-ROTATION", "HOLOGRAPHIC")),
+            ("HOLOTOUCH", "触摸全息染色", "Touch Holographic Paint", "手指在服装区域绘制", "染色笔刷", "触摸路径留下全息彩带并贴合衣物褶皱", ("TOUCH-DRAW", "CLOTHING-REGION")),
+            ("HOLOFADE", "停步全息消隐", "Stillness Hologram Fade", "人物停止动作超过阈值", "消隐时长", "动作停止后全息色带逐步变透明，再次运动时恢复", ("MOTION-PHASE", "TIME-DECAY")),
+        ),
+    },
+    "particles_weather": {
+        "LYRIC": (
+            ("LYRICORBIT", "歌词环绕旋转", "Lyric Orbit Rotation", "歌词时间戳进入当前句", "环绕速度", "当前歌词沿人物头肩空间环绕并在背后被遮挡", ("LYRIC-TIMESTAMP", "LYRIC-RING")),
+            ("LYRICBEAT", "歌词节拍弹跳", "Lyric Beat Bounce", "当前歌词播放且强拍到达", "弹跳高度", "环绕歌词字符在强拍向外跳起再回到文字环", ("AUDIO-BEAT", "LYRIC-RING")),
+            ("LYRICVOICE", "音量歌词扩环", "Volume Lyric Ring", "演唱音量持续变化", "音量响应", "声音越响歌词环半径越大，停声后缓慢收缩", ("SOUND-VOLUME", "LYRIC-RING")),
+            ("LYRICGAZE", "注视歌词聚焦", "Gaze-focused Lyrics", "视线停留在某个歌词词组", "聚焦字号", "被注视词组放大高亮，其余字符继续环绕", ("GAZE-FOCUS", "TEXT")),
+            ("LYRICTOUCH", "拖拽歌词轨道", "Drag Lyric Orbit", "触摸并拖动歌词环", "歌词时间偏移", "歌词环移动到人物另一侧并保持当前时间顺序", ("TOUCH-DRAW", "LYRIC-RING")),
+        ),
+        "RAIN": (
+            ("RAINBEAT", "节拍雨幕", "Beat Rain Curtain", "音乐强拍到达", "雨量脉冲", "雨幕在强拍加密并在拍间恢复基础雨量", ("AUDIO-BEAT", "RAIN")),
+            ("RAINTILT", "倾斜风雨", "Tilted Wind Rain", "手机横滚角发生变化", "雨线方向", "雨线随手机倾斜改变方向并响应镜头运动", ("PHONE-ROTATION", "RAIN")),
+            ("RAINDEPTH", "前后景雨层", "Layered Depth Rain", "人物在画面中移动", "雨层数量", "雨滴分布在人物前后并保持正确遮挡", ("MONOCULAR-DEPTH", "RAIN")),
+            ("RAINTOUCH", "指尖避雨区", "Touch Rain Shelter", "在画面上圈选保护区域", "避雨半径", "雨滴绕开圈选区域形成清晰的无雨窗口", ("TOUCH-DRAW", "RAIN")),
+            ("RAINVOICE", "声音雨量", "Voice Rain Intensity", "环境声或人声音量超过阈值", "雨量响应", "声音越响雨线越密越长，停声后逐渐减弱", ("SOUND-VOLUME", "RAIN")),
+        ),
+        "PETAL": (
+            ("PETALGESTURE", "手势花瓣旋涡", "Gesture Petal Vortex", "手掌画圆", "旋涡强度", "花瓣从掌心发射并沿手势方向形成旋涡", ("HAND-GESTURE", "PETALS")),
+            ("PETALOPEN", "张掌花瓣爆发", "Open-palm Petal Burst", "握拳转为张掌", "爆发数量", "花瓣从掌心向外爆发后缓慢飘落", ("HAND-GESTURE", "PETALS")),
+            ("PETALFOLLOW", "花瓣跟手", "Hand-follow Petals", "手掌在画面中连续移动", "跟随惯性", "花瓣发射点跟随手掌并留下弯曲粒子流", ("HAND-2D-TRAJECTORY", "PETALS")),
+            ("PETALBEAT", "节拍花瓣环", "Beat Petal Ring", "手掌可见且强拍到达", "花瓣环半径", "花瓣在强拍围绕手掌扩成一圈并拍间散开", ("AUDIO-BEAT", "PETALS")),
+            ("PETALBLOW", "吹散花瓣", "Blown Petals", "人物对镜头吹气", "吹散速度", "花瓣沿嘴部朝向被吹散并逐渐离开前景", ("MOUTH-SHAPE", "PETALS")),
+        ),
+        "SNOW": (
+            ("SNOWBREATH", "呼吸雪夜", "Breath-driven Snow", "人物对镜头吹气", "雪片大小", "嘴前雪片随气息向外扩散并在远处缓慢下落", ("MOUTH-SHAPE", "SNOW")),
+            ("SNOWDEPTH", "景深雪层", "Depth Snow Layers", "人物前后移动", "雪层深度", "不同大小雪片分布在人物前后并保持遮挡", ("MONOCULAR-DEPTH", "SNOW")),
+            ("SNOWBEAT", "节拍雪闪", "Beat Snow Sparkle", "音乐强拍到达", "闪耀比例", "部分雪片在强拍闪亮并留下短暂光点", ("AUDIO-BEAT", "SNOW")),
+            ("SNOWTOUCH", "触摸融雪", "Touch Snow Melt", "手指划过雪层", "融雪笔刷", "触摸路径内雪片快速融化消失并逐渐重新落入", ("TOUCH-DRAW", "SNOW")),
+            ("SNOWTILT", "倾斜飘雪", "Tilted Snowfall", "手机左右倾斜", "飘雪方向", "雪片随手机倾斜改变横向漂移并保持重力下落", ("PHONE-ROTATION", "SNOW")),
+        ),
+        "DUST": (
+            ("DUSTGAZE", "凝视尘埃聚焦", "Gaze Dust Focus", "视线停留在光照目标", "尘埃密度", "被注视区域的光束中聚集可见尘埃，移开后散开", ("GAZE-FOCUS", "DUST")),
+            ("DUSTLIGHT", "光束尘埃", "Beam-lit Dust", "虚拟光束扫过空间", "光束尘量", "只有光束覆盖区域内的尘埃被照亮并显示景深", ("VOLUMETRIC-LIGHT", "DUST")),
+            ("DUSTTOUCH", "指尖聚尘", "Touch Dust Gather", "触摸并拖动画面中的尘埃", "吸附半径", "尘埃沿触摸路径聚集成可见流线", ("TOUCH-DRAW", "DUST")),
+            ("DUSTVOICE", "声波扬尘", "Voice Dust Wave", "声音音量突然上升", "扬尘幅度", "尘埃从目标表面被声波扬起并逐渐落回", ("SOUND-VOLUME", "DUST")),
+            ("DUSTBEAT", "节拍尘埃闪烁", "Beat Dust Flicker", "音乐强拍到达", "闪烁强度", "尘埃在强拍短暂发亮并按深度顺序消隐", ("AUDIO-BEAT", "DUST")),
+        ),
+    },
+    "world_style": {
+        "SEASON": (
+            ("SEASONWIPE", "擦换季节", "Season Wipe", "手指横向划过背景", "擦换宽度", "划线一侧逐步变为目标季节，人物保持原样", ("TOUCH-DRAW", "SEASON")),
+            ("SEASONROTATE", "转身换季", "Turn-to-season", "手机绕竖轴旋转", "换季角度", "新朝向逐渐显露另一季节且接缝固定在世界空间", ("PHONE-ROTATION", "SEASON")),
+            ("SEASONBEAT", "节拍季节推进", "Beat Season Step", "音乐连续强拍到达", "每拍季节步长", "背景在强拍依次从春夏秋冬推进并保持布局", ("AUDIO-BEAT", "SEASON")),
+            ("SEASONGAZE", "凝视局部换季", "Gaze Local Season", "视线停留在一片植物或地面", "换季半径", "被注视区域先变季节，移开后向外扩散到背景", ("GAZE-FOCUS", "SEASON")),
+            ("SEASONVOICE", "人声季节脉冲", "Voice Season Pulse", "人声音节连续出现", "色调脉冲", "每个音节推动背景植被与色调向目标季节变化", ("SOUND-VOLUME", "SEASON")),
+        ),
+        "COMIC": (
+            ("COMICWIPE", "漫画街景擦换", "Comic Street Wipe", "手指从街景边缘划过", "线稿密度", "划过区域变为漫画线稿，人物轮廓保持一致", ("TOUCH-DRAW", "VISUAL-STYLE")),
+            ("COMICBEAT", "节拍漫画分镜", "Beat Comic Panels", "音乐强拍到达", "分镜数量", "街景在强拍切成漫画分镜并保留连续人物动作", ("AUDIO-BEAT", "VISUAL-STYLE")),
+            ("COMICGAZE", "凝视漫画化", "Gaze Comic Focus", "视线停留在建筑或人物", "漫画化半径", "被注视对象先变成高对比线稿，背景保持真实", ("GAZE-FOCUS", "VISUAL-STYLE")),
+            ("COMICMOVE", "运动速度线世界", "Motion-line Comic World", "相机或人物快速移动", "速度线密度", "漫画街景沿运动方向出现汇聚速度线", ("CAMERA-MOTION", "COMIC-SPEED-LINES")),
+            ("COMICVOICE", "口播漫画气泡", "Voice Comic Bubbles", "人物说话音量超过阈值", "气泡大小", "漫画世界在说话者旁生成随音量变化的对话气泡", ("SOUND-VOLUME", "TEXT")),
+        ),
+        "UNDERWATER": (
+            ("WATERROTATE", "俯身进入水下城", "Tilt Into Underwater City", "手机向下倾斜", "水面高度", "背景从上到下变为水下城市并保留人物前景", ("PHONE-ROTATION", "BACKGROUND-WORLD")),
+            ("WATERCAUSTIC", "水下焦散世界", "Underwater Caustic World", "虚拟水面光进入场景", "焦散速度", "建筑和地面出现随深度变化的流动焦散", ("CAUSTIC-PROJECTION", "SCENE-LIGHTING")),
+            ("WATERBUBBLE", "水下气泡路径", "Underwater Bubble Path", "人物或镜头向前移动", "气泡密度", "气泡沿运动路径上升并在人物前后分层", ("BUBBLES", "MONOCULAR-DEPTH")),
+            ("WATERVOICE", "声音水波世界", "Voice Ripple World", "人声持续出现", "水波幅度", "声音在水下背景中生成可见传播波纹", ("SOUND-VOLUME", "RIPPLE-DISPLACEMENT")),
+            ("WATERBEAT", "节拍水下闪光", "Beat Underwater Flash", "音乐强拍到达", "水光脉冲", "水下城市焦散和气泡在强拍同步闪亮", ("AUDIO-BEAT", "SCENE-LIGHTING")),
+        ),
+        "NEON": (
+            ("NEONLIGHT", "点亮霓虹世界", "Light Neon World", "点选一块真实灯牌", "霓虹配色", "灯牌颜色沿建筑边缘扩散成整片霓虹世界", ("LUMINOUS-CORE", "SCENE-LIGHTING")),
+            ("NEONBEAT", "节拍霓虹脉冲", "Beat Neon Pulse", "音乐强拍到达", "霓虹脉冲", "街道霓虹线在强拍同步扩张发亮", ("AUDIO-BEAT", "VISUAL-STYLE")),
+            ("NEONGAZE", "凝视霓虹点亮", "Gaze Neon Activation", "视线停留在建筑边缘", "点亮半径", "被注视建筑先出现霓虹轮廓再扩散到邻近结构", ("GAZE-FOCUS", "VISUAL-STYLE")),
+            ("NEONMOVE", "移动霓虹拖影", "Moving Neon Echo", "镜头沿街道移动", "拖影长度", "霓虹灯牌沿相机运动方向留下彩色拖影", ("CAMERA-MOTION", "MOTION-AFTERIMAGE")),
+            ("NEONVOICE", "人声霓虹频谱", "Voice Neon Spectrum", "人声频段能量变化", "频段增益", "街景霓虹颜色和高度随声音频谱变化", ("MUSIC-SPECTRUM", "SCENE-LIGHTING")),
+        ),
+        "PAPER": (
+            ("PAPERDRAW", "手绘舞台展开", "Drawn Stage Reveal", "手指画出舞台边框", "笔触纹理", "边框内背景和服装逐步变成手绘纸张风格", ("TOUCH-DRAW", "VISUAL-STYLE")),
+            ("PAPERBEAT", "节拍手绘翻页", "Beat Drawn Page", "音乐强拍到达", "翻页幅度", "手绘舞台在强拍翻到下一套纸张纹理", ("AUDIO-BEAT", "SPACE-FOLD")),
+            ("PAPERPOSE", "姿态手绘定格", "Pose Drawn Freeze", "人物达到动作峰值", "定格描边", "人物峰值姿态变成纸上手绘剪影，背景继续运动", ("BODY-POSE", "VISUAL-STYLE")),
+            ("PAPERCLOTH", "手绘服装跟随", "Drawn Clothing Follow", "服装随人物动作形变", "纹理稳定度", "手绘纹理贴合服装褶皱并保持跨帧一致", ("CLOTHING-REGION", "CLOTHING")),
+            ("PAPERVOICE", "口播笔触脉冲", "Voice Brush Pulse", "人物说话音节出现", "笔触粗细", "每个音节让背景笔触变粗并产生短波纹", ("SOUND-VOLUME", "VISUAL-STYLE")),
+        ),
+    },
+    "audio_lyrics": {
+        "ORBIT": (
+            ("ORBITTIME", "歌词逐字环绕", "Timed Lyric Orbit", "播放到歌词字词时间戳", "字距", "当前字词沿人物周围依次亮起并形成完整歌词环", ("LYRIC-TIMESTAMP", "LYRIC-RING")),
+            ("ORBITBEAT", "节拍歌词环", "Beat Lyric Ring", "歌词播放期间强拍到达", "环弹跳", "歌词环在强拍扩大弹跳并拍间恢复", ("AUDIO-BEAT", "LYRIC-RING")),
+            ("ORBITVOLUME", "音量歌词环", "Volume Lyric Ring", "演唱音量变化", "音量响应", "声音越响歌词环越厚越亮", ("SOUND-VOLUME", "LYRIC-RING")),
+            ("ORBITGAZE", "凝视歌词词组", "Gaze Lyric Phrase", "视线停留在当前歌词词组", "词组放大", "被注视词组放大高亮，其余字符继续环绕", ("GAZE-FOCUS", "TEXT")),
+            ("ORBITTOUCH", "拖动歌词环", "Drag Lyric Ring", "触摸并拖动歌词环", "歌词偏移", "歌词环移动到人物另一侧并保持时间同步", ("TOUCH-DRAW", "LYRIC-RING")),
+        ),
+        "RIBBON": (
+            ("RIBBONDIRECTION", "声源方向彩带", "Directional Sound Ribbon", "声源进入指定方向角", "彩带宽度", "彩带从当前说话者方位生长并指向声音传播方向", ("SOURCE-DIRECTION",)),
+            ("RIBBONVOLUME", "音量彩带厚度", "Volume Ribbon Width", "说话音量持续变化", "音量增益", "彩带随音量变粗变亮，停声后逐渐收窄", ("SOUND-VOLUME",)),
+            ("RIBBONHANDOFF", "声源彩带移交", "Speaker Ribbon Handoff", "声源从一人切换到另一人", "移交时长", "彩带沿两人空间路径移动到新说话者", ("SOURCE-DIRECTION", "MULTI-PERSON-GRAPH")),
+            ("RIBBONBEAT", "节拍声带波纹", "Beat Sound Ribbon", "音乐强拍到达", "波纹幅度", "声源彩带在强拍产生沿路径传播的波纹", ("AUDIO-BEAT", "RIPPLE-DISPLACEMENT")),
+            ("RIBBONTOUCH", "拖拽声源彩带", "Drag Sound Ribbon", "触摸彩带并拖动控制点", "弯曲程度", "彩带路径随触摸弯曲但起点仍绑定说话者", ("TOUCH-DRAW", "SOURCE-DIRECTION")),
+        ),
+        "MASK": (
+            ("MASKVOLUME", "音量光谱面罩", "Volume Spectrum Mask", "人物发声超过音量阈值", "频段增益", "脸部周围的频谱条随声音频段和音量变化", ("SOUND-VOLUME", "MUSIC-SPECTRUM")),
+            ("MASKMOUTH", "嘴型频谱开合", "Mouth Spectrum Gate", "嘴型开合变化", "开合增益", "频谱面罩随嘴巴开合展开和收缩", ("MOUTH-SHAPE", "MUSIC-SPECTRUM")),
+            ("MASKBEAT", "节拍光谱闪色", "Beat Spectrum Flash", "音乐强拍到达", "闪色强度", "面罩频谱在强拍统一闪色并保持脸部可见", ("AUDIO-BEAT", "MUSIC-SPECTRUM")),
+            ("MASKGAZE", "视线选择频段", "Gaze Band Select", "视线停留在一个频段控件", "选中增益", "被凝视频段在面罩中放大突出", ("GAZE-FOCUS", "MUSIC-SPECTRUM")),
+            ("MASKFADE", "停声面罩消隐", "Silence Mask Fade", "音量降到静音门限", "消隐时长", "光谱面罩从高频到低频依次熄灭", ("SOUND-VOLUME", "TIME-DECAY")),
+        ),
+        "SUBTITLE": (
+            ("SUBBASS", "低音地震字幕", "Bassquake Captions", "低频强拍到达", "震动幅度", "地面字幕随低音上下震动并留下短残影", ("AUDIO-BEAT", "TEXT")),
+            ("SUBTIME", "歌词时间字幕", "Timed Lyric Captions", "播放到歌词句时间戳", "字幕偏移", "当前歌词字幕按时间进入并在句末消散", ("LYRIC-TIMESTAMP", "TEXT")),
+            ("SUBVOLUME", "音量字幕缩放", "Volume Caption Scale", "人声音量变化", "字号响应", "字幕随音量放大缩小并保持基线位置", ("SOUND-VOLUME", "TEXT")),
+            ("SUBDIRECTION", "声源侧字幕", "Source-side Captions", "声源方向切换", "侧边距离", "字幕移动到当前说话者一侧并保留阅读方向", ("SOURCE-DIRECTION", "TEXT")),
+            ("SUBTOUCH", "拖动字幕时间", "Caption Time Scrub", "拖动屏幕字幕片段", "时间偏移", "字幕移动到新位置并调整对应歌词时间", ("TOUCH-DRAW", "LYRIC-TIMESTAMP")),
+        ),
+        "DUET": (
+            ("DUETHANDOFF", "多人接唱球", "Duet Sing-along Orb", "声源从一位演唱者切换到另一位", "传球弧线", "发光球沿两人空间路径飞向新声源", ("SOURCE-DIRECTION", "MULTI-PERSON-GRAPH")),
+            ("DUETVOLUME", "合唱球大小", "Duet Orb Volume", "当前演唱者音量变化", "光球大小", "光球随当前声源音量缩放并保持人物绑定", ("SOUND-VOLUME", "MULTI-PERSON-GRAPH")),
+            ("DUETBEAT", "节拍接唱传球", "Beat Duet Pass", "换唱时强拍到达", "传球速度", "光球在强拍瞬间完成说唱者间的传递", ("AUDIO-BEAT", "MULTI-PERSON-GRAPH")),
+            ("DUETTOUCH", "触碰合唱连线", "Touch Duet Link", "两位演唱者手部接触", "连线亮度", "接触点生成连接双方的歌词光线", ("MULTI-PERSON-TOUCH", "TEXT")),
+            ("DUETLYRIC", "对唱歌词分边", "Split Duet Lyrics", "歌词时间戳切换演唱角色", "左右间距", "不同演唱者歌词分别环绕对应人物并在接唱时换边", ("LYRIC-TIMESTAMP", "MULTI-PERSON-GRAPH")),
+        ),
+    },
+    "effect_cinematography": {
+        "ZOOM": (
+            ("ZOOMBEAT", "节拍变焦", "Beat Zoom", "音乐强拍到达", "变焦比例", "画面向选中焦点快速推进并在拍间回弹", ("AUDIO-BEAT", "TUNNEL-WARP")),
+            ("ZOOMPUNCH", "手势冲击变焦", "Gesture Punch Zoom", "击掌或握拳动作完成", "冲击幅度", "焦点对象快速放大并产生一次光学冲击环", ("HAND-GESTURE", "TUNNEL-WARP")),
+            ("ZOOMGAZE", "凝视目标变焦", "Gaze Target Zoom", "视线停留在对象上", "凝视变焦速度", "取景器平滑向被注视对象推进", ("GAZE-FOCUS", "TUNNEL-WARP")),
+            ("ZOOMREVERSE", "倒放回弹变焦", "Reverse Zoom Return", "向左拖动时间游标", "回弹时长", "上一段推进变焦按原路径倒序退回", ("TIME-REVERSE", "TUNNEL-WARP")),
+            ("ZOOMSTAR", "星芒冲焦", "Starburst Punch-in", "焦点高光达到阈值", "星芒射线", "变焦推进时焦点同步绽放星芒并保持中心稳定", ("DYNAMIC-STARBURST", "TUNNEL-WARP")),
+        ),
+        "WIPE": (
+            ("WIPEHAND", "手掌遮罩擦镜", "Hand Mask Wipe", "手掌完整遮住镜头后移开", "擦镜羽化", "手掌边缘揭开下一画面并保持人物轮廓", ("HAND-REGION", "FRAME-TRAVERSAL")),
+            ("WIPEBODY", "人体经过擦镜", "Body Pass Wipe", "人物横向穿过画面", "过渡宽度", "人体轮廓后方逐步显露下一场景", ("BODY-SILHOUETTE", "FRAME-TRAVERSAL")),
+            ("WIPEDOOR", "门框空间擦镜", "Doorframe Wipe", "镜头穿过门框", "边框厚度", "门框边缘作为转场线揭开下一镜头", ("WORLD-SPACE-ANCHOR", "FRAME-TRAVERSAL")),
+            ("WIPETOUCH", "手指绘制擦镜", "Drawn Mask Wipe", "手指在屏幕画出擦镜路径", "笔刷大小", "触摸路径内显露下一画面并逐步扩张", ("TOUCH-DRAW", "FRAME-TRAVERSAL")),
+            ("WIPEBEAT", "节拍遮罩闪切", "Beat Mask Wipe", "遮罩覆盖时强拍到达", "闪切速度", "强拍瞬间完成遮罩内外画面交换", ("AUDIO-BEAT", "FRAME-TRAVERSAL")),
+        ),
+        "EXPOSURE": (
+            ("EXPOSUREROTATE", "长曝光旋转", "Long-exposure Spin", "手机旋转达到角速度阈值", "曝光长度", "夜景点光源围绕中心拉成旋转光轨", ("PHONE-ROTATION", "LIGHT-PAINT-BRUSH")),
+            ("EXPOSUREHOLD", "停顿锁定曝光", "Pause-locked Exposure", "旋转后手机短暂停稳", "锁定时长", "旋转光轨固定在停顿姿态并停止继续拉伸", ("STATE-HYSTERESIS", "TRAJECTORY-ACCUMULATION")),
+            ("EXPOSUREBEAT", "节拍曝光切片", "Beat Exposure Slices", "旋转期间强拍到达", "每拍采样", "每个强拍固定一层旋转光轨形成扇形切片", ("AUDIO-BEAT", "FRAME-DELAY")),
+            ("EXPOSURECOLOR", "旋转色散曝光", "Chromatic Spin Exposure", "旋转速度持续上升", "色散距离", "旋转光轨按角速度分离出彩色边缘", ("CHROMATIC-ABERRATION", "CAMERA-MOTION")),
+            ("EXPOSUREREVERSE", "曝光轨迹回卷", "Exposure Rewind", "手机反向旋转", "回卷窗口", "已有旋转光轨沿相反角度逐段收回", ("TIME-REVERSE", "PHONE-ROTATION")),
+        ),
+        "SPLIT": (
+            ("SPLITDRAW", "手指拉出分屏", "Draw Split Screen", "两指拉出分屏线", "分屏间距", "同一人物左右运动路径显示在两个同步分区", ("TOUCH-DRAW", "SPACE-FOLD")),
+            ("SPLITCHASE", "左右追拍分屏", "Split Chase", "人物横向跑过画面", "追拍延迟", "左右分屏分别显示当前与稍早的跑动位置", ("BODY-SKELETON", "FRAME-DELAY")),
+            ("SPLITBEAT", "节拍分屏交换", "Beat Split Swap", "音乐强拍到达", "交换方向", "左右分屏在强拍交换位置并保持动作连续", ("AUDIO-BEAT", "SPACE-FOLD")),
+            ("SPLITDEPTH", "前后景分屏", "Depth Split Screen", "点选前景和远景对象", "深度分界", "前后景分别进入两个分屏并保持遮挡", ("MONOCULAR-DEPTH", "OBJECT-INSTANCE")),
+            ("SPLITMERGE", "合拢分屏", "Merge Split Screen", "两指向内合拢", "融合羽化", "两个分屏沿边界合并回单一画面", ("TOUCH-DRAW", "STATE-HYSTERESIS")),
+        ),
+        "FOCUS": (
+            ("FOCUSTOUCH", "手指拉焦", "Finger Rack Focus", "依次点按前景和远景目标", "焦点过渡速度", "清晰区域从前景连续移动到远景目标", ("TOUCH-DRAW", "MONOCULAR-DEPTH")),
+            ("FOCUSGAZE", "凝视拉焦", "Gaze Rack Focus", "视线停留在不同深度对象", "凝视焦点延迟", "焦平面平滑移动到被注视对象", ("GAZE-FOCUS", "MONOCULAR-DEPTH")),
+            ("FOCUSBEAT", "节拍焦点跳转", "Beat Focus Jump", "多个目标已选择且强拍到达", "跳焦顺序", "焦点在每个强拍切换到下一个深度对象", ("AUDIO-BEAT", "OBJECT-INSTANCE")),
+            ("FOCUSMOVE", "跟随移动焦点", "Moving Focus Follow", "选中对象连续移动", "跟焦平滑", "焦平面跟随对象深度变化并保持边缘清晰", ("OBJECT-POSE", "MONOCULAR-DEPTH")),
+            ("FOCUSPULSE", "焦点穿刺光环", "Focus Pierce Ring", "焦点锁定完成", "穿刺光环", "目标清晰时出现一次沿深度扩散的光环", ("VIRTUAL-SPOTLIGHT", "MONOCULAR-DEPTH")),
+        ),
+    },
+    "multi_person_interaction": {
+        "ENERGY": (
+            ("ENERGYTOUCH", "接触能量传递", "Contact Energy Transfer", "两人手掌首次接触", "传递速度", "能量从接触点沿双方手臂传播", ("MULTI-PERSON-TOUCH", "HAND-3D-TRAJECTORY")),
+            ("ENERGYTHROW", "隔空能量抛接", "Thrown Energy Pass", "一人抛手势后另一人接手势", "飞行弧线", "能量球沿两人手掌之间的空间路径飞行", ("HAND-GESTURE", "MULTI-PERSON-GRAPH")),
+            ("ENERGYBEAT", "节拍能量接力", "Beat Energy Relay", "领舞动作峰值命中强拍", "接力顺序", "能量在每个强拍传给下一位人物", ("AUDIO-BEAT", "MULTI-PERSON-GRAPH")),
+            ("ENERGYVOICE", "声源能量传球", "Voice Energy Pass", "声源从一人切换到另一人", "传球速度", "发光能量球移动到新说话者身旁", ("SOURCE-DIRECTION", "MULTI-PERSON-GRAPH")),
+            ("ENERGYRETURN", "双向能量回流", "Bidirectional Energy Return", "接收者做出反向推掌", "回流速度", "能量沿原路径反向回到发起者", ("TIME-REVERSE", "HAND-3D-TRAJECTORY")),
+        ),
+        "MIRROR": (
+            ("MIRRORPOSE", "双人镜像接力", "Two-person Mirror Relay", "两人同时进入镜像姿态", "接力延迟", "一人动作沿对称轴传给另一人并延迟重复", ("BODY-SKELETON", "MULTI-PERSON-GRAPH")),
+            ("MIRRORBEAT", "节拍镜像对舞", "Beat Mirror Duet", "双方动作峰值轮流命中强拍", "对舞相位", "两人在相邻强拍交替复制对方姿态", ("AUDIO-BEAT", "MULTI-PERSON-GRAPH")),
+            ("MIRRORTOUCH", "触碰交换镜像", "Touch Swap Mirror", "双方手掌在中轴接触", "交换时长", "接触后两人的镜像角色和配色互换", ("MULTI-PERSON-TOUCH", "STATE-HYSTERESIS")),
+            ("MIRRORBREAK", "同步失败裂变", "Mirror Sync Break", "两人姿态相似度下降到阈值", "裂变距离", "镜像轮廓从同步状态分裂成各自动作轨迹", ("BODY-POSE", "MOTION-AFTERIMAGE")),
+            ("MIRRORMERGE", "同步合成双影", "Mirror Sync Merge", "两人恢复相同姿态并靠近中轴", "融合宽度", "两人轮廓在中轴融合成单一对称光影", ("BODY-POSE", "STATE-HYSTERESIS")),
+        ),
+        "STATUE": (
+            ("STATUEPOSE", "三人合成雕像", "Three-person Living Statue", "三人形成闭合队形并停住", "融合平滑", "三个人体轮廓合成一座连续活体雕像", ("BODY-POSE", "MULTI-PERSON-GRAPH")),
+            ("STATUEFREEZE", "队形时间冻结", "Formation Time Freeze", "闭合队形保持超过阈值", "冻结时长", "三人冻结成雕像，背景和其他人物继续运动", ("LOCAL-TIME-FREEZE", "MULTI-PERSON-GRAPH")),
+            ("STATUEBREAK", "雕像分体", "Statue Breakapart", "任一人物离开闭合队形", "分体速度", "合成雕像沿每个人轮廓分开并恢复独立动作", ("BODY-SILHOUETTE", "STATE-HYSTERESIS")),
+            ("STATUEBEAT", "节拍雕像换姿", "Beat Statue Pose", "音乐强拍到达", "换姿拍数", "雕像在每个强拍切换到新的群体姿态", ("AUDIO-BEAT", "BODY-POSE")),
+            ("STATUEROTATE", "绕拍活体雕像", "Orbit Living Statue", "手机围绕队形旋转", "视差强度", "合成雕像保持世界位置并随视角显示层次", ("CAMERA-MOTION", "MONOCULAR-DEPTH")),
+        ),
+        "SHOULDER": (
+            ("SHOULDERBURST", "碰肩爆裂", "Shoulder Contact Burst", "两人肩部进入接触范围", "爆裂半径", "接触点喷发光粒并沿双方轮廓扩散", ("MULTI-PERSON-TOUCH", "SPARKS")),
+            ("SHOULDERBEAT", "节拍碰肩闪光", "Beat Shoulder Flash", "碰肩瞬间命中强拍", "闪光强度", "接触点在强拍爆亮并产生一圈冲击波", ("AUDIO-BEAT", "LUMINOUS-CORE")),
+            ("SHOULDERSWAP", "擦肩颜色交换", "Shoulder Color Swap", "两人擦肩后分开", "交换时长", "双方轮廓光颜色在接触后互换", ("MULTI-PERSON-TOUCH", "VIRTUAL-RIM-LIGHT")),
+            ("SHOULDERTRAIL", "擦肩双向轨迹", "Shoulder Crossing Trails", "两人沿相反方向擦肩", "轨迹长度", "接触点向双方离开方向拉出两条能量轨迹", ("MULTI-PERSON-GRAPH", "TRAJECTORY-ACCUMULATION")),
+            ("SHOULDERFREEZE", "碰肩定格", "Shoulder Contact Freeze", "肩部接触保持超过阈值", "定格时间", "接触瞬间两人局部冻结并在分开后恢复", ("LOCAL-TIME-FREEZE", "MULTI-PERSON-TOUCH")),
+        ),
+        "RING": (
+            ("RINGFORMATION", "队形环形光", "Formation Light Ring", "三人以上进入环形队形", "光环厚度", "光环固定在队形中心并连接每个人外缘", ("MULTI-PERSON-GRAPH", "WORLD-SPACE-ANCHOR")),
+            ("RINGBREATH", "队形呼吸光环", "Formation Breathing Ring", "多人动作相位趋于一致", "呼吸幅度", "同步程度越高中心光环越亮并向外呼吸", ("BODY-POSE", "MULTI-PERSON-GRAPH")),
+            ("RINGBEAT", "节拍队形环", "Beat Formation Ring", "全员动作峰值命中强拍", "环脉冲", "光环在强拍扩张并沿人物顺序依次点亮", ("AUDIO-BEAT", "MULTI-PERSON-GRAPH")),
+            ("RINGROTATE", "旋转队形环", "Rotating Formation Ring", "人物沿环形队形移动", "旋转速度", "光环纹理跟随队形旋转而中心保持稳定", ("BODY-SKELETON", "WORLD-SPACE-ANCHOR")),
+            ("RINGBREAK", "离队断环", "Formation Ring Break", "任一人物离开环形队形", "断裂衰减", "光环在离队位置断开并向两侧逐渐熄灭", ("MULTI-PERSON-GRAPH", "TIME-DECAY")),
+        ),
+    },
+})
+
+
+IDEA_PAIRINGS = {
+    family: tuple(
+        (motif_slug, behavior[0])
+        for motif_slug, behaviors in motif_map.items()
+        for behavior in behaviors
+    )
+    for family, motif_map in IDEA_COMPATIBLE_BEHAVIORS.items()
+}
+
+BEHAVIOR_ATOM_DEPENDENCIES = {
+    family: {
+        behavior[0]: behavior[6]
+        for behaviors in motif_map.values()
+        for behavior in behaviors
+    }
+    for family, motif_map in IDEA_COMPATIBLE_BEHAVIORS.items()
+}
+
+
 def _resolve_atom_ids(atom_ids: set[str], slugs: tuple[str, ...]) -> list[str]:
     """Resolve reviewed atom suffixes without duplicating the full IDs in specs."""
 
@@ -549,11 +1022,59 @@ def _stable_unique(values: Iterable[str]) -> list[str]:
     return list(dict.fromkeys(values))
 
 
+def _validate_idea_pairing_specs(atom_ids: set[str]) -> None:
+    if tuple(IDEA_COMPATIBLE_BEHAVIORS) != IDEA_FAMILY_ORDER:
+        raise ValueError("compatible behavior families must follow IDEA_FAMILY_ORDER")
+    if tuple(IDEA_PAIRINGS) != IDEA_FAMILY_ORDER:
+        raise ValueError("idea pairing families must follow IDEA_FAMILY_ORDER")
+    if tuple(BEHAVIOR_ATOM_DEPENDENCIES) != IDEA_FAMILY_ORDER:
+        raise ValueError("behavior dependency families must follow IDEA_FAMILY_ORDER")
+
+    for family in IDEA_FAMILY_ORDER:
+        motif_rows = IDEA_FAMILY_SPECS[family]["motifs"]
+        motif_slugs = tuple(motif[0] for motif in motif_rows)
+        compatible = IDEA_COMPATIBLE_BEHAVIORS[family]
+        if tuple(compatible) != motif_slugs:
+            raise ValueError(f"{family} compatible motif order does not match motifs")
+
+        expected_pairings = []
+        behavior_slugs = []
+        expected_dependencies = {}
+        for motif in motif_rows:
+            motif_slug = motif[0]
+            _resolve_atom_ids(atom_ids, motif[7])
+            behaviors = compatible[motif_slug]
+            if len(behaviors) != 5:
+                raise ValueError(f"{family}/{motif_slug} must have five behaviors")
+            for behavior in behaviors:
+                if len(behavior) != 7:
+                    raise ValueError(
+                        f"{family}/{motif_slug} behavior rows must have seven fields"
+                    )
+                behavior_slug = behavior[0]
+                behavior_atom_slugs = behavior[6]
+                if not behavior_atom_slugs:
+                    raise ValueError(
+                        f"{family}/{behavior_slug} must declare behavior atom dependencies"
+                    )
+                _resolve_atom_ids(atom_ids, behavior_atom_slugs)
+                expected_pairings.append((motif_slug, behavior_slug))
+                behavior_slugs.append(behavior_slug)
+                expected_dependencies[behavior_slug] = behavior_atom_slugs
+
+        if len(behavior_slugs) != len(set(behavior_slugs)):
+            raise ValueError(f"{family} behavior slugs must be unique")
+        if tuple(expected_pairings) != IDEA_PAIRINGS[family]:
+            raise ValueError(f"{family} pairings must match compatible behavior rows")
+        if expected_dependencies != BEHAVIOR_ATOM_DEPENDENCIES[family]:
+            raise ValueError(f"{family} behavior atom dependencies are inconsistent")
+
+
 def _idea_from_specs(
     family: str,
     motif: tuple[str, ...],
     behavior: tuple[str, ...],
-    atom_ids: set[str],
+    atoms_by_id: Mapping[str, Mapping[str, object]],
     ordinal: int,
 ) -> dict[str, object]:
     (
@@ -564,7 +1085,7 @@ def _idea_from_specs(
         scenario,
         motif_trigger,
         motif_parameter,
-        atom_slugs,
+        motif_atom_slugs,
         spatial_scope,
         motif_signal,
         motif_failure,
@@ -573,19 +1094,25 @@ def _idea_from_specs(
         behavior_slug,
         behavior_zh,
         behavior_en,
-        temporal_behavior,
         behavior_trigger,
         behavior_control,
         visible_behavior,
-        temporal_window,
-        behavior_signal,
-        behavior_failure,
-        generation_level,
-        continuity_challenge,
+        behavior_atom_slugs,
     ) = behavior
+    resolved_atom_ids = _stable_unique(
+        _resolve_atom_ids(
+            set(atoms_by_id),
+            (*motif_atom_slugs, *behavior_atom_slugs),
+        )
+    )
+    atom_signals = _stable_unique(
+        signal
+        for atom_id in resolved_atom_ids
+        for signal in atoms_by_id[atom_id]["required_signals"]
+    )
     family_title_zh = IDEA_FAMILY_SPECS[family]["title_zh"]
     family_title_en = IDEA_FAMILY_SPECS[family]["title_en"]
-    visible_effect = f"{motif_zh}对象{temporal_behavior}时，{visible_behavior}；{target_object}始终可见且与画面空间保持对应"
+    visible_effect = f"{motif_zh}触发{behavior_zh}时，{visible_behavior}；{target_object}始终可见且与画面空间保持对应"
     effect_id = (
         f"FX-{family.upper().replace('_', '-')}-{motif_slug}-{behavior_slug}"
     )
@@ -601,16 +1128,16 @@ def _idea_from_specs(
         "trigger_signals": [motif_trigger, behavior_trigger],
         "interaction": f"{motif_trigger}后，{behavior_trigger}；用户通过{behavior_control}调整{motif_parameter}。",
         "user_controls": [motif_parameter, behavior_control, "效果强度"],
-        "preview_pipeline": f"低分辨率{motif_signal}与{behavior_signal}进入{temporal_behavior}预览，使用有界历史缓存和主体遮罩合成。",
+        "preview_pipeline": f"低分辨率{motif_signal}与行为依赖信号进入{behavior_zh}预览，使用有界历史缓存和主体遮罩合成。",
         "post_pipeline": f"录制后按时间戳重建{motif_zh}，细化{spatial_scope}边缘、遮挡和{behavior_control}曲线。",
-        "required_signals": _stable_unique([motif_signal, behavior_signal, "monotonic_event_timestamps"]),
-        "atom_ids": _resolve_atom_ids(atom_ids, atom_slugs),
-        "temporal_window": temporal_window,
-        "continuity_challenges": [motif_failure, continuity_challenge],
+        "required_signals": _stable_unique([motif_signal, *atom_signals, "monotonic_event_timestamps"]),
+        "atom_ids": resolved_atom_ids,
+        "temporal_window": "触发前 12 帧至可见结果稳定后 24 帧",
+        "continuity_challenges": [motif_failure, f"{behavior_zh}期间对象身份、遮挡和参数响应必须连续"],
         "edge_difficulty": "high" if ordinal % 3 else "research",
         "execution_targets": ["mobile_preview", "mobile_post"],
-        "generation_level": generation_level,
-        "risks": [motif_failure, behavior_failure],
+        "generation_level": "perceptual_effect",
+        "risks": [motif_failure, f"{behavior_trigger}不稳定时可能造成{visible_behavior}的时序跳变"],
         "novelty": f"把{motif_zh}的对象语义与{behavior_zh}的时序行为绑定，触发和参数共同改变可见结果，而不是只更换场景。",
         "shareability": f"短视频中能直接看见{visible_effect}，适合一键录制、回看和分享。",
         "product_value": f"作为手机录像中的{family_title_zh}创作玩法，提供{motif_parameter}与{behavior_control}两个可理解的调节入口。",
@@ -621,18 +1148,33 @@ def _idea_from_specs(
 
 
 def build_ideas() -> list[dict[str, object]]:
-    """Return 300 complete ideas in stable family, motif, and behavior order."""
+    """Return 300 ideas by traversing only reviewed motif-behavior pairings."""
 
     atoms = build_atoms()
-    atom_ids = {atom["atom_id"] for atom in atoms}
+    atoms_by_id = {atom["atom_id"]: atom for atom in atoms}
+    _validate_idea_pairing_specs(set(atoms_by_id))
     ideas = []
     ordinal = 0
     for family in IDEA_FAMILY_ORDER:
         family_spec = IDEA_FAMILY_SPECS[family]
-        for motif in family_spec["motifs"]:
-            for behavior in family_spec["behaviors"]:
-                ideas.append(_idea_from_specs(family, motif, behavior, atom_ids, ordinal))
-                ordinal += 1
+        motifs = {motif[0]: motif for motif in family_spec["motifs"]}
+        compatible_behaviors = IDEA_COMPATIBLE_BEHAVIORS[family]
+        for motif_slug, behavior_slug in IDEA_PAIRINGS[family]:
+            behavior = next(
+                behavior
+                for behavior in compatible_behaviors[motif_slug]
+                if behavior[0] == behavior_slug
+            )
+            ideas.append(
+                _idea_from_specs(
+                    family,
+                    motifs[motif_slug],
+                    behavior,
+                    atoms_by_id,
+                    ordinal,
+                )
+            )
+            ordinal += 1
     return ideas
 
 

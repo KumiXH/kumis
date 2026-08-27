@@ -1003,6 +1003,103 @@ class IdeaCatalogTests(unittest.TestCase):
         fingerprints = [self.fingerprint(idea) for idea in self.ideas]
         self.assertEqual(len(fingerprints), len(set(fingerprints)))
 
+    def test_every_family_uses_25_explicit_compatible_pairings(self) -> None:
+        self.assertEqual(
+            set(effect_catalog.IDEA_COMPATIBLE_BEHAVIORS),
+            set(IDEA_FAMILY_ORDER),
+        )
+        self.assertEqual(set(effect_catalog.IDEA_PAIRINGS), set(IDEA_FAMILY_ORDER))
+        for family in IDEA_FAMILY_ORDER:
+            with self.subTest(family=family):
+                family_spec = effect_catalog.IDEA_FAMILY_SPECS[family]
+                motif_slugs = {motif[0] for motif in family_spec["motifs"]}
+                compatible = effect_catalog.IDEA_COMPATIBLE_BEHAVIORS[family]
+                self.assertEqual(set(compatible), motif_slugs)
+                behavior_slugs = []
+                for motif_slug in motif_slugs:
+                    self.assertEqual(len(compatible[motif_slug]), 5)
+                    behavior_slugs.extend(
+                        behavior[0] for behavior in compatible[motif_slug]
+                    )
+                self.assertEqual(len(behavior_slugs), len(set(behavior_slugs)))
+                pairings = effect_catalog.IDEA_PAIRINGS[family]
+                self.assertEqual(len(pairings), 25)
+                self.assertEqual(len(pairings), len(set(pairings)))
+                for motif_slug, behavior_slug in pairings:
+                    self.assertIn(motif_slug, motif_slugs)
+                    self.assertIn(
+                        behavior_slug,
+                        {behavior[0] for behavior in compatible[motif_slug]},
+                    )
+
+                family_prefix = f"FX-{family.upper().replace('_', '-')}-"
+                generated_ids = {
+                    idea["effect_id"]
+                    for idea in self.ideas
+                    if idea["family"] == family
+                }
+                expected_ids = {
+                    f"{family_prefix}{motif_slug}-{behavior_slug}"
+                    for motif_slug, behavior_slug in pairings
+                }
+                self.assertEqual(generated_ids, expected_ids)
+
+    def test_behavior_atom_dependencies_are_declared_and_merged(self) -> None:
+        self.assertEqual(
+            set(effect_catalog.BEHAVIOR_ATOM_DEPENDENCIES),
+            set(IDEA_FAMILY_ORDER),
+        )
+        for family in IDEA_FAMILY_ORDER:
+            family_spec = effect_catalog.IDEA_FAMILY_SPECS[family]
+            motifs = {motif[0]: motif for motif in family_spec["motifs"]}
+            compatible = effect_catalog.IDEA_COMPATIBLE_BEHAVIORS[family]
+            behavior_slugs = {
+                behavior[0]
+                for motif_behaviors in compatible.values()
+                for behavior in motif_behaviors
+            }
+            dependencies = effect_catalog.BEHAVIOR_ATOM_DEPENDENCIES[family]
+            self.assertEqual(set(dependencies), behavior_slugs, family)
+            for behavior_slug, atom_slugs in dependencies.items():
+                with self.subTest(family=family, behavior=behavior_slug):
+                    self.assertTrue(atom_slugs)
+                    resolved = effect_catalog._resolve_atom_ids(
+                        self.atom_ids,
+                        atom_slugs,
+                    )
+                    self.assertEqual(len(resolved), len(atom_slugs))
+
+            ideas_by_id = {idea["effect_id"]: idea for idea in self.ideas}
+            family_prefix = f"FX-{family.upper().replace('_', '-')}-"
+            for motif_slug, behavior_slug in effect_catalog.IDEA_PAIRINGS[family]:
+                motif_atoms = motifs[motif_slug][7]
+                behavior_atoms = dependencies[behavior_slug]
+                expected = list(
+                    dict.fromkeys(
+                        effect_catalog._resolve_atom_ids(
+                            self.atom_ids,
+                            (*motif_atoms, *behavior_atoms),
+                        )
+                    )
+                )
+                effect_id = f"{family_prefix}{motif_slug}-{behavior_slug}"
+                self.assertEqual(ideas_by_id[effect_id]["atom_ids"], expected)
+
+    def test_known_incompatible_cross_pairings_are_not_generated(self) -> None:
+        self.assertNotIn(
+            ("FINGER", "MOTION"),
+            effect_catalog.IDEA_PAIRINGS["light_trails_optics"],
+        )
+        self.assertNotIn(
+            ("CAMERA", "REDIRECT"),
+            effect_catalog.IDEA_PAIRINGS["face_gaze_expression"],
+        )
+        idea_ids = {idea["effect_id"] for idea in self.ideas}
+        self.assertNotIn("FX-LIGHT-TRAILS-OPTICS-FINGER-MOTION", idea_ids)
+        self.assertNotIn("FX-FACE-GAZE-EXPRESSION-CAMERA-REDIRECT", idea_ids)
+        self.assertIn("FX-LIGHT-TRAILS-OPTICS-FINGER-DRAW", idea_ids)
+        self.assertIn("FX-FACE-GAZE-EXPRESSION-DIALOGUE-REDIRECT", idea_ids)
+
     def assert_distinct_subplay(
         self,
         effect_id: str,
