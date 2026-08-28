@@ -1,0 +1,38 @@
+{"kind":"workbook","id":"wb/76sqbd","sheets":10,"tables":10}
+{"kind":"sheet","id":"ws/y37plr","name":"总览","index":0,"range":"A1:E25","address":"A1:E25","tables":1}
+{"kind":"table","sheet":"总览","address":"A1:E25","rows":25,"cols":5,"values":[["手机录像特效玩法库 | 2026-08-27",null,null,null,null],[null,null,null,null,null],["统计项","数量",null,"质量边界","状态"],["特效原子",120,null,"概念分镜","50 张，全部显式标注"],["完整玩法",300,null,"真实性","保留原片、可回退、生成式风险单列"],["组合配方",200,null,"性能口径","未写入未经设备实测的毫秒、FPS、功耗或内存数字"],["重点案例",50,null,"参考口径","参考能力与本项目创意分离，不冒充产品实现"],["真实参考",14,null,null,null],[null,null,null,null,null],["阅读方法：先在“重点50”理解体验与实现链路，再通过“真实参考”核对能力边界；需要扩展创意时查看“完整玩法”和“组合配方”。所有概念分镜只用于建立视觉直觉。",null,null,null,null],[null,null,null,null,null],[null,null,null,null,null],["特效族","完整玩法数",null,null,null],["光轨与可编程光学",25,null,null,null],["身体运动与分身",25,null,null,null],["面部、视线与表情",25,null,null,null],["局部时间编辑",25,null,null,null],["空间入口与传送门",25,null,null,null],["虚拟光影",25,null,null,null],["材质变形",25,null,null,null],["粒子与天气",25,null,null,null],["世界风格化",25,null,null,null],["音频与歌词",25,null,null,null],["特效摄影",25,null,null,null],["多人互动",25,null,null,null]]}
+{"kind":"sheet","id":"ws/9zmk4o","name":"特效原子","index":1,"range":"A1:K121","address":"A1:K121","tables":1}
+{"kind":"table","sheet":"特效原子","address":"A1:K121","rows":121,"cols":11,"values":[["原子ID","中文名","English","能力族","原子类型","可见原语","所需信号"],["ATOM-SEGMENTATION-MASKS-FACE-REGION","人脸区域掩码","Face Region Mask","segmentation_masks","semantic_mask","画面中的人脸皮肤与五官区域形成可控制的连续遮罩边界","rgb_video_frames；face_landmarks"],["ATOM-SEGMENTATION-MASKS-BODY-SILHOUETTE","人体轮廓掩码","Body Silhouette Mask","segmentation_masks","semantic_mask","画面中的整个人体轮廓被分离为可独立合成的前景区域","rgb_video_frames；body_keypoints"]],"valuesTruncated":true,"valuesPreviewRows":3,"valuesPreviewCols":7,"valuesPreviewAddress":"A1:G3"}
+{"kind":"sheet","id":"ws/z17lo9","name":"完整玩法","index":2,"range":"A1:AD301","address":"A1:AD301","tables":1}
+{"kind":"table","sheet":"完整玩法","address":"A1:AD301","rows":301,"cols":30,"values":[["玩法ID","中文名","English","特效族","特效族中文","可见结果","场景"],["FX-LIGHT-TRAILS-OPTICS-FINGER-DRAW","指尖实时光绘轨迹屏幕拖绘·光轨光学","Finger Screen Light Painting Screen Drawing - Light Trails Optics","light_trails_optics","光轨与可编程光学","指尖实时光绘轨迹触发屏幕拖绘时，触摸路径被渲染为连续光轨，抬手后按设定时长衰减；屏幕触摸路径与指尖始终可见且与画面空间保持对应","手绘签名或涂鸦录像"],["FX-LIGHT-TRAILS-OPTICS-FINGER-FADE","指尖实时光绘轨迹指尖渐隐·光轨光学","Finger Screen Light Painting Finger Trail Fade - Light Trails Optics","light_trails_optics","光轨与可编程光学","指尖实时光绘轨迹触发指尖渐隐时，最后一个触摸点开始向笔画起点逐段熄灭光轨；屏幕触摸路径与指尖始终可见且与画面空间保持对应","手绘签名或涂鸦录像"]],"valuesTruncated":true,"valuesPreviewRows":3,"valuesPreviewCols":7,"valuesPreviewAddress":"A1:G3"}
+{"kind":"sheet","id":"ws/vojdu7","name":"组合配方","index":3,"range":"A1:K201","address":"A1:K201","tables":1}
+{"kind":"table","sheet":"组合配方","address":"A1:K201","rows":201,"cols":11,"values":[["配方ID","中文名","原子组件","玩法组件","触发逻辑","组合后可见结果","为什么是新玩法"],["RECIPE-HAND-ANCHOR-BEAT-V1","手迹锚点节拍光绘·霓虹签名","ATOM-GEOMETRY-TRACKING-HAND-3D-TRAJECTORY；ATOM-GEOMETRY-TRACKING-WORLD-SPACE-...","FX-LIGHT-TRAILS-OPTICS-WORLD-ANCHOR；FX-LIGHT-TRAILS-OPTICS-BEAT-PULSE；FX-LIGH...","用户在空中画出闭合手势且下一次强拍到来","手指划过的路径在墙面上闭合成霓虹签名，强拍时笔画接缝同时亮起","闭合手势把光绘终点变成世界锚点的回扣，形成可读的空间签名而非普通拖尾"],["RECIPE-HAND-ANCHOR-BEAT-V2","手迹锚点节拍光绘·地面节拍字","ATOM-GEOMETRY-TRACKING-HAND-3D-TRAJECTORY；ATOM-GEOMETRY-TRACKING-WORLD-SPACE-...","FX-LIGHT-TRAILS-OPTICS-WORLD-ANCHOR；FX-LIGHT-TRAILS-OPTICS-BEAT-PULSE；FX-LIGH...","手部轨迹与地面平面相交并检测到连续两次强拍","每拍新增一个落在地面的发光字，镜头前进时字仍留在原处并产生前后遮挡","轨迹方向、地面坐标和节拍编号共同决定字的落点，使光字参与空间叙事"]],"valuesTruncated":true,"valuesPreviewRows":3,"valuesPreviewCols":7,"valuesPreviewAddress":"A1:G3"}
+{"kind":"sheet","id":"ws/8pl0td","name":"重点50","index":4,"range":"A1:V51","address":"A1:V51","tables":1}
+{"kind":"table","sheet":"重点50","address":"A1:V51","rows":51,"cols":22,"values":[["重点ID","玩法ID","中文名","特效族","特效族中文","可见效果","触发分类"],["PRIORITY-REALTIME-LIGHT-TRAIL","FX-LIGHT-TRAILS-OPTICS-FINGER-DRAW","指尖实时光绘轨迹屏幕拖绘·光轨光学","light_trails_optics","光轨与可编程光学","指尖实时光绘轨迹触发屏幕拖绘时，触摸路径被渲染为连续光轨，抬手后按设定时长衰减；屏幕触摸路径与指尖始终可见且与画面空间保持对应","触摸/拖拽"],["PRIORITY-GAZE-EYE-CONTACT","FX-FACE-GAZE-EXPRESSION-CAMERA-CALIBRATE","摄像头对视矫正·视线矫正瞳孔镜头校准·面部视线表情","face_gaze_expression","面部、视线与表情","摄像头对视矫正·视线矫正触发瞳孔镜头校准时，瞳孔与虹膜被轻量重定向到镜头方向，眼睑、头姿和身份保持不变；自拍者双眼、瞳孔与镜头方向始终可见且与画面空间保持对应","视线/眨眼"]],"valuesTruncated":true,"valuesPreviewRows":3,"valuesPreviewCols":7,"valuesPreviewAddress":"A1:G3"}
+{"kind":"sheet","id":"ws/l1yse4","name":"真实参考","index":5,"range":"A1:N15","address":"A1:N15","tables":1}
+{"kind":"notice","message":"Truncated: omitted 9 lines. Increase maxChars, narrow range, or use tableMaxRows/tableMaxCols/tableMaxCellChars."}
+{"kind":"notice","message":"Cell search matched 0 entries."}
+{
+  "outputs": [
+    {
+      "sheetName": "总览",
+      "range": "A1:H30",
+      "target": "D:\\Repository\\ReadPaper\\.codex_worktrees\\video_effects_20260828\\daily\\20260827_录像特效调研\\matrix\\rendered\\总览.png"
+    },
+    {
+      "sheetName": "重点50",
+      "range": "A1:V7",
+      "target": "D:\\Repository\\ReadPaper\\.codex_worktrees\\video_effects_20260828\\daily\\20260827_录像特效调研\\matrix\\rendered\\重点50.png"
+    },
+    {
+      "sheetName": "真实参考",
+      "range": "A1:N7",
+      "target": "D:\\Repository\\ReadPaper\\.codex_worktrees\\video_effects_20260828\\daily\\20260827_录像特效调研\\matrix\\rendered\\真实参考.png"
+    },
+    {
+      "sheetName": "按特效族",
+      "range": "A1:G13",
+      "target": "D:\\Repository\\ReadPaper\\.codex_worktrees\\video_effects_20260828\\daily\\20260827_录像特效调研\\matrix\\rendered\\按特效族.png"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "docx": "daily/20260827_录像特效调研/report/手机录像特效重点玩法图文洞察_20260827.docx",
+  "status": "not_run_renderer_unavailable",
+  "reason": "LibreOffice/soffice is not installed or on PATH. Microsoft Word is also unavailable on this host.",
+  "storyboard_sources": 50,
+  "reference_card_sources": 14,
+  "contact_sheets": [
+    "daily/20260827_录像特效调研/report/qa/source_visual_contact_sheets/storyboards_01.png",
+    "daily/20260827_录像特效调研/report/qa/source_visual_contact_sheets/storyboards_02.png",
+    "daily/20260827_录像特效调研/report/qa/source_visual_contact_sheets/storyboards_03.png",
+    "daily/20260827_录像特效调研/report/qa/source_visual_contact_sheets/storyboards_04.png",
+    "daily/20260827_录像特效调研/report/qa/source_visual_contact_sheets/references_01.png"
+  ],
+  "rendered_pages": []
+}
