@@ -1,0 +1,73 @@
+{
+  "atom_family_counts": {
+    "cloning_echoes": 12,
+    "deformation_space": 12,
+    "generative_transformation": 11,
+    "geometry_tracking": 12,
+    "interaction_triggers": 13,
+    "light_optics": 12,
+    "material_appearance": 12,
+    "particles_atmosphere": 12,
+    "segmentation_masks": 12,
+    "temporal_state": 12
+  },
+  "counts": {
+    "atoms": 120,
+    "ideas": 300,
+    "priorities": 50,
+    "recipes": 200
+  },
+  "edge_difficulty_counts": {
+    "high": 200,
+    "research": 100
+  },
+  "generation_level_counts": {
+    "perceptual_effect": 300
+  },
+  "idea_family_counts": {
+    "audio_lyrics": 25,
+    "body_motion_clones": 25,
+    "effect_cinematography": 25,
+    "face_gaze_expression": 25,
+    "light_trails_optics": 25,
+    "material_morph": 25,
+    "multi_person_interaction": 25,
+    "particles_weather": 25,
+    "spatial_portals": 25,
+    "time_editing": 25,
+    "virtual_light_shadow": 25,
+    "world_style": 25
+  },
+  "priority_detail_counts": {
+    "adjustable_parameter_items": 352,
+    "fallback_items": 200,
+    "interaction_timeline_items": 250,
+    "module_pipeline_items": 250
+  },
+  "priority_family_counts": {
+    "audio_lyrics": 4,
+    "body_motion_clones": 4,
+    "effect_cinematography": 4,
+    "face_gaze_expression": 5,
+    "light_trails_optics": 5,
+    "material_morph": 4,
+    "multi_person_interaction": 3,
+    "particles_weather": 4,
+    "spatial_portals": 4,
+    "time_editing": 5,
+    "virtual_light_shadow": 4,
+    "world_style": 4
+  },
+  "recipe_family_counts": {
+    "audio_lyrics": 20,
+    "effect_cinematography": 20,
+    "gaze_expression": 20,
+    "light_anchor_optics": 20,
+    "material_generation": 20,
+    "multi_person": 20,
+    "particles_weather": 20,
+    "shadow_light": 20,
+    "spatial_world": 20,
+    "time_cloning": 20
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "status": "passed_with_rendering_limitation",
+  "counts": {
+    "atoms": 120,
+    "ideas": 300,
+    "recipes": 200,
+    "priorities": 50,
+    "references": 14,
+    "storyboards": 50
+  },
+  "reference_coverage": {
+    "priority_effects_covered": 50,
+    "missing": []
+  },
+  "storyboards": {
+    "checked": 50,
+    "unique_dimensions": [
+      "1800x760:RGB"
+    ]
+  },
+  "markdown": {
+    "priority_ids": 50,
+    "image_references": 64,
+    "missing_images": []
+  },
+  "docx": {
+    "zip_corrupt_member": null,
+    "media_files": 64,
+    "image_relationships": 64,
+    "page_breaks": 65,
+    "table_width_9360_occurrences": 480,
+    "table_indent_120_occurrences": 560,
+    "microsoft_yahei_occurrences": 9962,
+    "paragraphs": 2166,
+    "tables": 172,
+    "inline_shapes": 64,
+    "sections": 1,
+    "explicit_runs_below_10pt": 0
+  },
+  "xlsx": {
+    "zip_corrupt_member": null,
+    "sheet_names": [
+      "总览",
+      "特效原子",
+      "完整玩法",
+      "组合配方",
+      "重点50",
+      "真实参考",
+      "按特效族",
+      "按触发方式",
+      "按生成程度",
+      "字段字典"
+    ],
+    "sheet_rows": {
+      "总览": 35,
+      "特效原子": 121,
+      "完整玩法": 301,
+      "组合配方": 201,
+      "重点50": 51,
+      "真实参考": 15,
+      "按特效族": 13,
+      "按触发方式": 10,
+      "按生成程度": 4,
+      "字段字典": 13
+    },
+    "formula_cells": 89
+  },
+  "render_qa": {
+    "docx": "daily/20260827_录像特效调研/report/手机录像特效重点玩法图文洞察_20260827.docx",
+    "status": "not_run_renderer_unavailable",
+    "reason": "LibreOffice/soffice is not installed or on PATH. Microsoft Word is also unavailable on this host.",
+    "storyboard_sources": 50,
+    "reference_card_sources": 14,
+    "contact_sheets": [
+      "daily/20260827_录像特效调研/report/qa/source_visual_contact_sheets/storyboards_01.png",
+      "daily/20260827_录像特效调研/report/qa/source_visual_contact_sheets/storyboards_02.png",
+      "daily/20260827_录像特效调研/report/qa/source_visual_contact_sheets/storyboards_03.png",
+      "daily/20260827_录像特效调研/report/qa/source_visual_contact_sheets/storyboards_04.png",
+      "daily/20260827_录像特效调研/report/qa/source_visual_contact_sheets/references_01.png"
+    ],
+    "rendered_pages": []
+  }
+}
