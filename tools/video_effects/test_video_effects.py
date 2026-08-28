@@ -1630,6 +1630,44 @@ class RecipeCatalogTests(unittest.TestCase):
         ]
         self.assertEqual(rows, self.recipes)
 
+    def test_committed_recipe_output_has_independent_variant_content(self) -> None:
+        """Audit the deliverable JSONL without consulting blueprint declarations."""
+        rows = [
+            json.loads(line)
+            for line in recipe_catalog.RECIPE_OUTPUT.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+        grouped = {}
+        for row in rows:
+            recipe_id = row["recipe_id"]
+            self.assertRegex(recipe_id, r"^RECIPE-.+-V[1-5]$")
+            slug, variant = recipe_id.rsplit("-V", 1)
+            grouped.setdefault(slug, {})[variant] = row
+
+        independent_fields = (
+            "name_zh",
+            "component_atom_ids",
+            "component_effect_ids",
+            "trigger_logic",
+            "combined_effect",
+            "why_new",
+            "preview_behavior",
+            "post_behavior",
+            "risks",
+            "target_scenarios",
+        )
+        self.assertEqual(len(grouped), 40)
+        for slug, variants_by_number in grouped.items():
+            with self.subTest(blueprint=slug):
+                self.assertEqual(set(variants_by_number), {"1", "2", "3", "4", "5"})
+                variants = [variants_by_number[number] for number in ("1", "2", "3", "4", "5")]
+                for field in independent_fields:
+                    values = [
+                        json.dumps(variant[field], ensure_ascii=False, sort_keys=True)
+                        for variant in variants
+                    ]
+                    self.assertEqual(len(set(values)), 5, field)
+
     def test_write_recipes_jsonl_is_byte_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             first_path = Path(temporary_directory) / "first.jsonl"
